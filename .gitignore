@@ -1,0 +1,48 @@
+# Next.js Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+frontend/tsconfig.tsbuildinfo
+frontend/.next-env.d.ts
+
+# Python (Backend & Pipeline)
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.env
+.pytest_cache/
+.ipynb_checkpoints/
+*.db-journal
+*.sqlite3-journal
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# LaTeX (Tesis)
+tesis/*.aux
+tesis/*.log
+tesis/*.toc
+tesis/*.fls
+tesis/*.fdb_latexmk
+tesis/*.out
+tesis/*.synctex.gz
+tesis/*.pdf.lnk
+tesis/*.run.xml
+tesis/*.bcf
+tesis/*.blg
+tesis/*.bbl
+
+# IDEs and editors
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp

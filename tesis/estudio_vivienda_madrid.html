@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Estudio de Mercado · Vivienda en Madrid 2023–2025</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  :root {
+    --bg: #0e0e10;
+    --bg2: #16161a;
+    --bg3: #1e1e24;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0ede8;
+    --text2: #9e9b95;
+    --text3: #6a6762;
+    --accent: #e8613a;
+    --accent2: #3a7be8;
+    --accent3: #3abf8f;
+    --gold: #d4a843;
+    --nav-h: 64px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Georgia', serif;
+    font-size: 16px;
+    line-height: 1.75;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: var(--nav-h);
+    background: rgba(14,14,16,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2.5rem;
+  }
+  .nav-logo { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text2); }
+  .nav-logo strong { color: var(--accent); font-weight: normal; }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text2); text-decoration: none; transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    padding: 0 4rem 5rem;
+    position: relative;
+    overflow: hidden;
+    padding-top: var(--nav-h);
+  }
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 70% 30%, rgba(232,97,58,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 20% 80%, rgba(58,123,232,0.08) 0%, transparent 60%),
+      var(--bg);
+  }
+  .hero-tag {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 1.5rem; position: relative;
+  }
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: normal;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    position: relative;
+    max-width: 800px;
+  }
+  .hero h1 em { font-style: normal; color: var(--accent); }
+  .hero-sub {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 15px; color: var(--text2);
+    margin-top: 1.5rem; max-width: 500px; position: relative;
+  }
+  .hero-stats {
+    display: flex; gap: 3rem; margin-top: 3rem; position: relative;
+  }
+  .hero-stat-val {
+    font-size: 2.2rem; font-weight: normal; letter-spacing: -0.02em;
+  }
+  .hero-stat-val span { color: var(--accent); }
+  .hero-stat-label {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--text3); margin-top: 4px;
+  }
+  .scroll-hint {
+    position: absolute; bottom: 2rem; right: 4rem;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--text3); display: flex; align-items: center; gap: 10px;
+  }
+  .scroll-hint::before { content: ''; width: 40px; height: 1px; background: var(--text3); }
+
+  /* SECTIONS */
+  section { padding: 5rem 4rem; border-top: 1px solid var(--border); }
+  .section-header { margin-bottom: 3rem; }
+  .section-num {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--accent); margin-bottom: 0.75rem;
+  }
+  .section-title {
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    font-weight: normal; letter-spacing: -0.02em; line-height: 1.2;
+  }
+  .section-intro {
+    font-size: 15px; color: var(--text2);
+    max-width: 640px; margin-top: 1rem;
+    font-family: 'Helvetica Neue', sans-serif; line-height: 1.7;
+  }
+
+  /* KPI GRID */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 3rem; }
+  .kpi {
+    background: var(--bg2); padding: 1.75rem 1.5rem;
+    transition: background 0.2s;
+  }
+  .kpi:hover { background: var(--bg3); }
+  .kpi-val { font-size: 2rem; letter-spacing: -0.03em; line-height: 1; }
+  .kpi-val.up { color: var(--accent); }
+  .kpi-val.blue { color: var(--accent2); }
+  .kpi-label {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 12px; color: var(--text2); margin-top: 8px; line-height: 1.4;
+  }
+  .kpi-source { font-family: 'Helvetica Neue', sans-serif; font-size: 10px; color: var(--text3); margin-top: 6px; }
+
+  /* CHARTS */
+  .chart-container { position: relative; width: 100%; }
+  .chart-label {
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 12px; color: var(--text2); margin-bottom: 1rem;
+    text-transform: uppercase; letter-spacing: 0.08em;
+  }
+  .chart-source { font-family: 'Helvetica Neue', sans-serif; font-size: 10px; color: var(--text3); margin-top: 8px; }
+  .charts-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin: 2rem 0; }
+
+  /* DISTRICT TABLE */
+  .table-wrap { overflow-x: auto; margin: 2rem 0; }
+  table { width: 100%; border-collapse: collapse; font-family: 'Helvetica Neue', sans-serif; font-size: 13px; }
+  th {
+    text-align: left; padding: 10px 14px;
+    border-bottom: 1px solid var(--border2);
+    color: var(--text3); font-weight: normal;
+    text-transform: uppercase; letter-spacing: 0.08em; font-size: 11px;
+  }
+  td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--text2); }
+  tr:hover td { background: var(--bg3); color: var(--text); }
+  .td-name { color: var(--text); font-weight: normal; }
+  .td-price { font-family: 'Georgia', serif; font-size: 15px; color: var(--text); }
+  .td-up { color: var(--accent); }
+  .bar-wrap { display: flex; align-items: center; gap: 8px; }
+  .bar-fill { height: 4px; border-radius: 2px; background: var(--accent2); }
+  .badge {
+    display: inline-block; padding: 2px 8px; border-radius: 2px;
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; margin-left: 6px;
+  }
+  .badge-gold { background: rgba(212,168,67,0.15); color: var(--gold); border: 1px solid rgba(212,168,67,0.3); }
+  .badge-red { background: rgba(232,97,58,0.15); color: var(--accent); border: 1px solid rgba(232,97,58,0.3); }
+  .badge-green { background: rgba(58,191,143,0.15); color: var(--accent3); border: 1px solid rgba(58,191,143,0.3); }
+
+  /* CAUSAS */
+  .causas-list { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); }
+  .causa-item {
+    background: var(--bg2); padding: 2rem 1.75rem;
+    display: flex; gap: 1.25rem; transition: background 0.2s;
+  }
+  .causa-item:hover { background: var(--bg3); }
+  .causa-num { font-size: 1.4rem; color: var(--border2); letter-spacing: -0.03em; min-width: 2rem; padding-top: 2px; }
+  .causa-title { font-size: 15px; margin-bottom: 0.5rem; }
+  .causa-body { font-family: 'Helvetica Neue', sans-serif; font-size: 13px; color: var(--text2); line-height: 1.65; }
+
+  /* SOCIAL */
+  .social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin: 2rem 0; }
+  .insight {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    padding: 1.5rem; border-radius: 0 2px 2px 0;
+  }
+  .insight-title { font-size: 14px; margin-bottom: 0.5rem; }
+  .insight-body { font-family: 'Helvetica Neue', sans-serif; font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .insight.health { border-left-color: var(--accent); }
+  .insight.green { border-left-color: var(--accent3); }
+
+  /* BIBLIOGRAPHY */
+  .bib-list { list-style: none; }
+  .bib-item {
+    padding: 1rem 0; border-bottom: 1px solid var(--border);
+    font-family: 'Helvetica Neue', sans-serif; font-size: 13px; color: var(--text2); line-height: 1.6;
+  }
+  .bib-item:last-child { border-bottom: none; }
+  .bib-item a { color: var(--accent2); text-decoration: none; }
+  .bib-item a:hover { text-decoration: underline; }
+  .bib-num { color: var(--text3); margin-right: 8px; }
+
+  /* FOOTER */
+  footer {
+    padding: 3rem 4rem; border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'Helvetica Neue', sans-serif; font-size: 12px; color: var(--text3);
+  }
+
+  /* LEGEND */
+  .legend { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-family: 'Helvetica Neue', sans-serif; font-size: 12px; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 1px; }
+
+  /* DIVIDER */
+  .divider { width: 48px; height: 2px; background: var(--accent); margin: 1.5rem 0; }
+
+  @media (max-width: 768px) {
+    section { padding: 3rem 1.5rem; }
+    .hero { padding: 0 1.5rem 3rem; }
+    nav { padding: 0 1.5rem; }
+    .nav-links { display: none; }
+    .causas-list { grid-template-columns: 1fr; }
+    .social-grid { grid-template-columns: 1fr; }
+    .charts-2col { grid-template-columns: 1fr; }
+    .hero-stats { flex-direction: column; gap: 1.5rem; }
+    footer { flex-direction: column; gap: 1rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo"><strong>Madrid</strong> · Mercado Inmobiliario 2023–2025</div>
+  <ul class="nav-links">
+    <li><a href="#resumen">Resumen</a></li>
+    <li><a href="#compraventa">Compraventa</a></li>
+    <li><a href="#alquiler">Alquiler</a></li>
+    <li><a href="#causas">Causas</a></li>
+    <li><a href="#social">Impacto Social</a></li>
+    <li><a href="#bibliografia">Bibliografía</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="inicio">
+  <div class="hero-bg"></div>
+  <p class="hero-tag">Estudio de mercado · Mayo 2025</p>
+  <h1>La crisis de la vivienda<br>en <em>Madrid</em></h1>
+  <p class="hero-sub">Análisis exhaustivo de la evolución de precios de compra y alquiler por distritos y barrios, sus causas estructurales y el impacto en los ciudadanos. Periodo 2023–2025.</p>
+  <div class="hero-stats">
+    <div>
+      <div class="hero-stat-val"><span>+22,6%</span></div>
+      <div class="hero-stat-label">Subida compraventa 2024 — la mayor de Europa</div>
+    </div>
+    <div>
+      <div class="hero-stat-val"><span>+18,6%</span></div>
+      <div class="hero-stat-label">Subida alquiler 2024 — récord desde 2007</div>
+    </div>
+    <div>
+      <div class="hero-stat-val"><span>57%</span></div>
+      <div class="hero-stat-label">Madrileños que señalan vivienda como problema principal (2025)</div>
+    </div>
+  </div>
+  <div class="scroll-hint">Desplazar para explorar</div>
+</section>
+
+<!-- RESUMEN -->
+<section id="resumen">
+  <div class="section-header">
+    <p class="section-num">01 · Resumen ejecutivo</p>
+    <h2 class="section-title">Un mercado que cambió<br>de velocidad en 2024</h2>
+    <div class="divider"></div>
+    <p class="section-intro">Madrid ha pasado de crecimientos contenidos del 3,9% en 2023 a subidas del 10–22% interanual en 2024–2025, superando ya en las zonas prime los precios máximos de la burbuja de 2008. La tendencia es generalizada: todos los distritos suben, pero a velocidades muy distintas.</p>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-val up">7.399 €</div>
+      <div class="kpi-label">Precio medio de venta por m² en Madrid capital (Q1 2026)</div>
+      <div class="kpi-source">Fuente: Brains Real Estate News, Q1-2026</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val up">+10,9%</div>
+      <div class="kpi-label">Variación interanual del precio de venta en Madrid capital</div>
+      <div class="kpi-source">Fuente: Brains Real Estate News</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val blue">20,62 €</div>
+      <div class="kpi-label">Precio medio alquiler por m²/mes en Madrid capital (dic. 2024)</div>
+      <div class="kpi-source">Fuente: Informe Alquiler España, Ejecutivos</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val up">+18,6%</div>
+      <div class="kpi-label">Subida del alquiler en Madrid en 2024 — mayor de toda España y desde 2007</div>
+      <div class="kpi-source">Fuente: Ejecutivos / InfoNegociosMadrid</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val">37,3%</div>
+      <div class="kpi-label">Tasa de esfuerzo para compra de vivienda (% de renta anual)</div>
+      <div class="kpi-source">Fuente: Brains Real Estate</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val up">9,38 años</div>
+      <div class="kpi-label">Años de renta bruta necesarios para comprar una vivienda en Madrid</div>
+      <div class="kpi-source">Fuente: Brains Real Estate, Q1-2026</div>
+    </div>
+  </div>
+
+  <div class="chart-label">Evolución del precio de venta en Madrid capital (€/m²) · 2020–2026</div>
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#e8613a;"></span>Precio venta Madrid capital</div>
+  </div>
+  <div class="chart-container" style="height:320px;">
+    <canvas id="chartEvolucion" role="img" aria-label="Evolución precio venta Madrid 2020-2026">2020: 2.600€, 2021: 2.900€, 2022: 3.200€, 2023: 3.500€, 2024: 4.285€, 2025: 5.642€, Q1 2026: 7.399€</canvas>
+  </div>
+  <p class="chart-source">Fuentes: Tinsa by Accumin (IMIE Mercados Locales), Rankia, Brains Real Estate News</p>
+</section>
+
+<!-- COMPRAVENTA -->
+<section id="compraventa">
+  <div class="section-header">
+    <p class="section-num">02 · Compraventa</p>
+    <h2 class="section-title">El precio de compra:<br>brecha histórica entre distritos</h2>
+    <div class="divider"></div>
+    <p class="section-intro">En Q1 de 2026, Salamanca alcanza los 12.157 €/m² mientras Villaverde se sitúa en 2.886 €/m². Más de 9.000 euros de diferencia. Pero la sorpresa está en los porcentajes: las zonas periféricas suben más rápido que el centro.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Distrito</th>
+          <th>Precio €/m² (2025)</th>
+          <th>Var. anual</th>
+          <th>Comparativa vs media</th>
+          <th>Perfil</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="td-name">Salamanca <span class="badge badge-gold">Más caro</span></td>
+          <td class="td-price">12.157</td>
+          <td class="td-up">↑ ~15%</td>
+          <td><div class="bar-wrap"><div class="bar-fill" style="width:100px;background:#d4a843;"></div> 164%</div></td>
+          <td>Lujo consolidado, inversión premium</td>
+        </tr>
+        <tr>
+          <td class="td-name">Chamberí</td>
+          <td class="td-price">10.059</td>
+          <td class="td-up">↑ ~12%</td>
+          <td><div class="bar-wrap"><div class="bar-fill" style="width:83px;background:#d4a843;"></div> 136%</div></td>
+          <td>Residencial alto standing</td>
+        </tr>
+        <tr>
+          <td class="td-name">Retiro</td>
+          <td class="td-price">9.804</td>
+          <td class="td-up">↑ 5,1%</td>
+          <td><div class="bar-wrap"><div class="bar-fill" style="width:81px;background:#d4a843;"></div> 132%</div></td>
+          <td>Calidad residencial, obra nueva Adelfas</td>
+        </tr>
+        <tr>
+          <td class="td-name">Chamartín</td>
+          <td class="td-price">9.228</td>
+          <td class="td-up">↑ ~10%</td>
+          <td><div class="bar-wrap"><div class="bar-fill" style="width:76px;background:#d4a843;"></div> 125%</div></td>
+          <td>Zona norte premium</td>
+        </tr>
+        <tr>
+          <td class="td-name">Centro</td>
+          <td class="td-price">7.926</td>
+          <td class="td-up">↑ 3,2%</td>
+          <td><div class="bar-wrap"><div class="bar-fill" style="width:65px;background:#e8613a;"></div> 107%</div></td>
+          <td>Turístico-residencial, reforma activa</td>
+        </tr>
+        <tr>
+          <td class="td-name">Moncloa-Aravaca</td>
+          <td class="td-price">~6.200</td>
+          <td class="td-up">↑ 12,4%</td>
+          <td><div class="bar-wrap"><div class="bar-fill" style="width:51px;background:#e8613a;"></div> 84%</div></td>
+          <td>Zona universitaria y verde</td>
+        </tr>
+        <tr>
+          <td class="td-name">Ciudad Lineal <span class="badge badge-red">Mayor subida %</span></td>
+          <td class="td-price">~4.800</td>
+          <td class="td-up">↑ 13,6%</td>
+          <td><div class="bar-wrap"><div class="bar-fill" style="width:40px;background:#e8613a;"></div> 65%</div></td>
+          <td>Emergente, demanda desplazada del centro</td>
+        </tr>
+        <tr>
+          <td class="td-name">Usera</td>
+          <td class="td-price">~3.494</td>
+          <td class="td-up">↑ 13,2%</td>
+          <td><div class="bar-wrap"><div class="bar-fill" style="width:29px;background:#3a7be8;"></div> 47%</div></td>
+          <td>Multicultural, valor en alza</td>
+        </tr>
+        <tr>
+          <td class="td-name">Carabanchel</td>
+          <td class="td-price">3.617</td>
+          <td class="td-up">↑ ~10%</td>
+          <td><div class="bar-wrap"><div class="bar-fill" style="width:30px;background:#3a7be8;"></div> 49%</div></td>
+          <td>Familiar, primer acceso a propiedad</td>
+        </tr>
+        <tr>
+          <td class="td-name">Puente de Vallecas</td>
+          <td class="td-price">3.170</td>
+          <td class="td-up">↑ ~10%</td>
+          <td><div class="bar-wrap"><div class="bar-fill" style="width:26px;background:#3a7be8;"></div> 43%</div></td>
+          <td>Asequible, alta demanda de primer acceso</td>
+        </tr>
+        <tr>
+          <td class="td-name">Villaverde <span class="badge badge-green">Más asequible</span></td>
+          <td class="td-price">2.886</td>
+          <td class="td-up">↑ ~9%</td>
+          <td><div class="bar-wrap"><div class="bar-fill" style="width:24px;background:#3abf8f;"></div> 39%</div></td>
+          <td>Precio más bajo. Precio total medio: 231.000 €</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="chart-source">Fuentes: Brains Real Estate News (Q1-2026), Tinsa by Accumin (IMIE Mercados Locales, Q1-2025), El Economista (abril 2025)</p>
+
+  <div class="charts-2col" style="margin-top:2.5rem;">
+    <div>
+      <div class="chart-label">Top 5 distritos · Precio €/m² (2025)</div>
+      <div class="chart-container" style="height:280px;">
+        <canvas id="chartDistTop" role="img" aria-label="Top 5 distritos más caros">Salamanca 12157, Chamberí 10059, Retiro 9804, Chamartín 9228, Centro 7926</canvas>
+      </div>
+    </div>
+    <div>
+      <div class="chart-label">Mayores subidas porcentuales · 2024–2025</div>
+      <div class="chart-container" style="height:280px;">
+        <canvas id="chartSubidas" role="img" aria-label="Distritos con mayor subida porcentual">Ciudad Lineal 13,6%, Usera 13,2%, Moncloa 12,4%, Chamberí 12%, Chamartín 10%</canvas>
+      </div>
+    </div>
+  </div>
+  <p class="chart-source">Fuente: Tinsa by Accumin (IMIE Mercados Locales), El Economista abril 2025, Brains Real Estate</p>
+</section>
+
+<!-- ALQUILER -->
+<section id="alquiler">
+  <div class="section-header">
+    <p class="section-num">03 · Mercado de alquiler</p>
+    <h2 class="section-title">El alquiler: el mayor<br>encarecimiento desde 2007</h2>
+    <div class="divider"></div>
+    <p class="section-intro">Madrid registró en 2024 la subida de alquiler más alta de toda España y la mayor desde 2007. Ningún distrito quedó al margen: todos subieron, 16 de ellos por encima del 10%. Los barrios periféricos, paradójicamente, registran los porcentajes de subida más elevados.</p>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-val up">21 €/m²</div>
+      <div class="kpi-label">Precio medio alquiler Madrid capital (enero 2025) · +15,2% interanual</div>
+      <div class="kpi-source">Fuente: Idealista, febrero 2025</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val blue">25,8 €/m²</div>
+      <div class="kpi-label">Precio en Salamanca, el distrito más caro para alquilar · enero 2025</div>
+      <div class="kpi-source">Fuente: Idealista</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val up">+21,5%</div>
+      <div class="kpi-label">Mayor subida interanual: distrito de Usera · 2024</div>
+      <div class="kpi-source">Fuente: Idealista, enero 2025</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val">+41,3%</div>
+      <div class="kpi-label">Mayor subida por barrios: Palomas (Hortaleza) · año 2024–2025</div>
+      <div class="kpi-source">Fuente: Brains Real Estate News</div>
+    </div>
+  </div>
+
+  <div class="chart-label">Evolución del precio de alquiler en Madrid capital (€/m²/mes) · 2021–2025</div>
+  <div class="legend">
+    <div class="legend-item"><span class="legend-dot" style="background:#3a7be8;"></span>Precio medio alquiler Madrid capital</div>
+  </div>
+  <div class="chart-container" style="height:280px;">
+    <canvas id="chartAlquilerEvol" role="img" aria-label="Evolución precio alquiler Madrid 2021-2025">2021: 14.5, 2022: 16.6, 2023: 17.4, 2024: 20.62, ene.2025: 21 €/m²/mes</canvas>
+  </div>
+  <p class="chart-source">Fuente: Idealista (informes mensuales), InfoNegociosMadrid, Ejecutivos (enero 2025)</p>
+
+  <div class="charts-2col" style="margin-top:2.5rem;">
+    <div>
+      <div class="chart-label">Precios de alquiler por distrito · enero 2025 (€/m²/mes)</div>
+      <div class="chart-container" style="height:360px;">
+        <canvas id="chartAlqDistritos" role="img" aria-label="Precio alquiler por distritos enero 2025"></canvas>
+      </div>
+    </div>
+    <div>
+      <div class="chart-label">Barrios con mayor subida de alquiler · 2024 (%)</div>
+      <div class="chart-container" style="height:360px;">
+        <canvas id="chartBarriosAlquiler" role="img" aria-label="Barrios con mayor subida alquiler 2024"></canvas>
+      </div>
+    </div>
+  </div>
+  <p class="chart-source">Fuentes: Idealista (febrero 2025), Brains Real Estate News, Bankinter Blog, InfoNegociosMadrid</p>
+
+  <div style="background:var(--bg2); border:1px solid var(--border); border-left:3px solid var(--accent2); padding:1.5rem; margin-top:2rem;">
+    <p style="font-size:14px; margin-bottom:0.5rem; font-family:'Helvetica Neue',sans-serif;">Nota metodológica sobre fuentes de precio de alquiler</p>
+    <p style="font-family:'Helvetica Neue',sans-serif; font-size:13px; color:var(--text2); line-height:1.6;">Los precios presentados corresponden a precios de oferta (portales inmobiliarios) y precios de contrato (SERPAVI del Ministerio de Vivienda, 300.447 contratos reales declarados a la Agencia Tributaria en 2024). El precio mediano según SERPAVI es de 13,97 €/m²/mes, mientras que los portales reflejan precios de oferta próximos a los 21 €/m²/mes. La diferencia refleja la brecha entre el mercado de oferta y los contratos vigentes.</p>
+  </div>
+</section>
+
+<!-- CAUSAS -->
+<section id="causas">
+  <div class="section-header">
+    <p class="section-num">04 · Análisis causal</p>
+    <h2 class="section-title">¿Por qué se dispararon<br>los precios en 2024–2025?</h2>
+    <div class="divider"></div>
+    <p class="section-intro">El encarecimiento no responde a una sola causa, sino a la confluencia de ocho factores estructurales y coyunturales que se retroalimentan. Los expertos descartan una burbuja especulativa pura: el problema es un desequilibrio real entre oferta y demanda.</p>
+  </div>
+
+  <div class="causas-list">
+    <div class="causa-item">
+      <div class="causa-num">01</div>
+      <div>
+        <p class="causa-title">Déficit estructural de vivienda nueva</p>
+        <p class="causa-body">España genera anualmente ~250.000 nuevos hogares pero construye solo 85.000–100.000 viviendas al año. Este déficit se acumula año tras año. En Madrid, los visados de obra nueva en 2024 quedaron por debajo de los niveles pre-pandemia (peor que Canarias, País Vasco y La Rioja), según BBVA Research.</p>
+      </div>
+    </div>
+    <div class="causa-item">
+      <div class="causa-num">02</div>
+      <div>
+        <p class="causa-title">Inversión extranjera acelerada</p>
+        <p class="causa-body">Alrededor del 30% de las operaciones inmobiliarias en Madrid en 2025 se realizaron con capital extranjero, principalmente de América Latina (Venezuela, Colombia, Argentina). El mercado madrileño es percibido como seguro, culturalmente familiar y fiscalmente atractivo. Según Vivara, este fue el principal motor de la subida del 22,6% en 2024.</p>
+      </div>
+    </div>
+    <div class="causa-item">
+      <div class="causa-num">03</div>
+      <div>
+        <p class="causa-title">Reducción de tipos de interés (BCE)</p>
+        <p class="causa-body">El euríbor cerró abril de 2025 en 2,98%, frente al 4,16% de finales de 2023. La caída reactivó el crédito hipotecario, amplió el universo de compradores potenciales y aumentó la presión sobre una oferta ya limitada. Bankinter proyectó subidas de +7% en 2026 y +4% en 2027 por esta razón.</p>
+      </div>
+    </div>
+    <div class="causa-item">
+      <div class="causa-num">04</div>
+      <div>
+        <p class="causa-title">Costes de construcción +30% desde 2019</p>
+        <p class="causa-body">El acero, cemento y madera han subido más de un 30% desde 2019. A esto se suman los nuevos requisitos de eficiencia energética: el 75% de las promociones de 2025 obtienen la máxima calificación A, lo que eleva el coste base. El precio de la vivienda nueva subió un 7,5% en 2025 vs. el 4,1% de la usada.</p>
+      </div>
+    </div>
+    <div class="causa-item">
+      <div class="causa-num">05</div>
+      <div>
+        <p class="causa-title">Escasez de suelo urbanizable</p>
+        <p class="causa-body">La falta de suelo finalista en Madrid, la complejidad urbanística y la burocracia administrativa hacen que una nueva promoción tarde 5–7 años desde el diseño hasta la entrega. Esto impide que la oferta reaccione en tiempo real a los incrementos de demanda. Los procedimientos urbanísticos complejos son señalados por Grupo Valoraciones como factor crítico.</p>
+      </div>
+    </div>
+    <div class="causa-item">
+      <div class="causa-num">06</div>
+      <div>
+        <p class="causa-title">Pérdida de vivienda residencial al mercado turístico</p>
+        <p class="causa-body">Miles de viviendas han migrado del mercado residencial al turístico (Airbnb y similares). Esto reduce la oferta para residentes y presiona tanto alquiler como venta. El efecto es especialmente visible en Centro, Chamberí y Malasaña, donde la densidad de pisos turísticos ha crecido sostenidamente desde 2021.</p>
+      </div>
+    </div>
+    <div class="causa-item">
+      <div class="causa-num">07</div>
+      <div>
+        <p class="causa-title">Crecimiento demográfico explosivo</p>
+        <p class="causa-body">Madrid alcanzó 3.506.730 habitantes en Q1-2026, un 6,9% más que el año anterior. El grupo de 25–34 años —los de mayor demanda de primera vivienda— creció un 17,4% interanual, la mayor presión sobre el mercado de acceso. Los flujos migratorios positivos (tanto nacionales como internacionales) son el principal motor según BBVA Research.</p>
+      </div>
+    </div>
+    <div class="causa-item">
+      <div class="causa-num">08</div>
+      <div>
+        <p class="causa-title">Efecto FOMO: miedo a quedar fuera del mercado</p>
+        <p class="causa-body">La expectativa de subidas continuas ha generado un comportamiento de compra urgente. Los tiempos de venta en Madrid son inferiores a 3 meses, las bajadas de precio son cada vez más raras y el período necesario para adquirir un inmueble subió un 12,1% en un solo año. La demanda acumulada post-pandemia amplifica este efecto.</p>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:2rem;">
+    <div class="chart-label">¿Burbuja o desequilibrio estructural? · Comparativa 2008 vs. 2025</div>
+    <div class="chart-container" style="height:280px;">
+      <canvas id="chartComparativa" role="img" aria-label="Comparativa factores 2008 vs 2025">Comparativa endeudamiento, demanda extranjera, déficit obra nueva, especulación entre 2008 y 2025</canvas>
+    </div>
+    <p class="chart-source">Fuentes: BBVA Research, Finanfox, Banco de España, Grupo Valoraciones, Vivara (2025)</p>
+  </div>
+</section>
+
+<!-- IMPACTO SOCIAL -->
+<section id="social">
+  <div class="section-header">
+    <p class="section-num">05 · Impacto social y en la salud</p>
+    <h2 class="section-title">El malestar ciudadano:<br>de problema menor a crisis nacional</h2>
+    <div class="divider"></div>
+    <p class="section-intro">En apenas tres años, la vivienda ha pasado de ocupar el puesto 15 en el ranking de preocupaciones ciudadanas a ser el problema número uno en Madrid. El impacto trasciende lo económico y afecta la salud mental, las decisiones vitales y la percepción del futuro.</p>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-val up">57%</div>
+      <div class="kpi-label">Madrileños que citan vivienda entre sus 3 principales problemas (2025) · era 9,7% en 2022</div>
+      <div class="kpi-source">Encuesta Calidad de Vida Ayto. Madrid, 8.533 entrevistas</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val up">64%</div>
+      <div class="kpi-label">Jóvenes (17-35 años) que la señalan como prioridad política n.º 1 · vs. 38% de media nacional</div>
+      <div class="kpi-source">Macroencuesta SocioMétrica / El Español, dic. 2025</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val up">87%</div>
+      <div class="kpi-label">Jóvenes emancipados que comparten vivienda para reducir gastos</div>
+      <div class="kpi-source">Consejo de la Juventud de España, enero 2025</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-val">3,3 / 10</div>
+      <div class="kpi-label">Nota media de los madrileños a la "facilidad para encontrar vivienda en su presupuesto"</div>
+      <div class="kpi-source">Encuesta Calidad de Vida Ayto. Madrid 2024</div>
+    </div>
+  </div>
+
+  <div class="chart-label">Evolución de la preocupación ciudadana por la vivienda en Madrid · 2022–2025 (%)</div>
+  <div class="chart-container" style="height:280px;">
+    <canvas id="chartSocial" role="img" aria-label="Porcentaje de madrileños que citan vivienda como problema principal 2022-2025">2022: 9.7%, 2023: 18.8%, 2024: 37.5%, 2025: 57%</canvas>
+  </div>
+  <p class="chart-source">Fuente: Encuesta de Calidad de Vida del Ayuntamiento de Madrid (ediciones 2022, 2023, 2024, 2025) · El Diario de Madrid, enero 2026</p>
+
+  <div class="social-grid" style="margin-top:2.5rem;">
+    <div class="insight health">
+      <p class="insight-title">Impacto en salud mental</p>
+      <p class="insight-body">El 40% de los ciudadanos reconoce haber experimentado ansiedad relacionada con su situación de vivienda; un 30%, soledad; y un 23%, depresión. El estrés es más frecuente entre quienes destinan un mayor porcentaje de sus ingresos al pago de vivienda. (CGATE / GAD3, septiembre 2024)</p>
+    </div>
+    <div class="insight">
+      <p class="insight-title">Vivienda como "privilegio", no como derecho</p>
+      <p class="insight-body">El 20% de los jóvenes ya considera que la vivienda es un privilegio y no un derecho, según el mismo estudio. Esta percepción refleja una fractura generacional profunda y una resignación ante un mercado percibido como inaccesible para las rentas medias y bajas.</p>
+    </div>
+    <div class="insight green">
+      <p class="insight-title">Generación del piso compartido</p>
+      <p class="insight-body">Según el informe "Un problema como una casa" del Consejo de la Juventud de España (enero 2025), el 70% de los jóvenes emancipados lo hace a través del alquiler y el 87% comparte piso. La falta de ahorro, la precariedad laboral y los altos precios son las tres barreras más citadas.</p>
+    </div>
+    <div class="insight health">
+      <p class="insight-title">Vivienda supera al paro como preocupación</p>
+      <p class="insight-body">Por primera vez en décadas, el problema de la vivienda ha desplazado al desempleo como eje central de las inquietudes ciudadanas en Madrid (Encuesta Calidad de Vida, 2024). La proporción de ciudadanos que citan este problema se multiplicó por seis entre 2022 y 2025.</p>
+    </div>
+    <div class="insight" style="border-left-color:var(--gold);">
+      <p class="insight-title">El problema de España en 2026</p>
+      <p class="insight-body">La vivienda ya preocupa al 42,8% de los españoles en 2026, frente al 0,6% registrado en 2020. El informe "La vivienda en España: análisis y propuestas" (mayo 2026) concluye que la Ley por el Derecho a la Vivienda de 2023 no ha alcanzado los resultados esperados. (El Diario de Madrid, mayo 2026)</p>
+    </div>
+    <div class="insight" style="border-left-color:var(--accent3);">
+      <p class="insight-title">Esfuerzo económico en máximos</p>
+      <p class="insight-body">Los españoles destinan de media más del 35% de sus ingresos a vivienda, superando las recomendaciones de organismos internacionales (Eurostat). En Madrid, la tasa de esfuerzo para la compra alcanza el 37,3% de la renta disponible, y el período necesario para comprar subió un 12,1% en un año, hasta los 9,38 años de renta bruta.</p>
+    </div>
+  </div>
+</section>
+
+<!-- BIBLIOGRAFÍA -->
+<section id="bibliografia">
+  <div class="section-header">
+    <p class="section-num">06 · Bibliografía y fuentes</p>
+    <h2 class="section-title">Fuentes y referencias</h2>
+    <div class="divider"></div>
+    <p class="section-intro">Todas las cifras y afirmaciones de este estudio están fundamentadas en fuentes primarias y secundarias de acceso público. A continuación se detallan las principales referencias utilizadas.</p>
+  </div>
+
+  <ul class="bib-list">
+    <li class="bib-item"><span class="bib-num">[1]</span> <strong>Brains Real Estate News</strong> (abril–mayo 2026). <em>Precio de la vivienda en Madrid 2025: evolución, distritos</em>. Datos Q1-2026 de la plataforma de big data inmobiliario. <a href="https://brainsre.news/precio-vivienda-madrid-2025-evolucion-distritos/" target="_blank">brainsre.news</a></li>
+    <li class="bib-item"><span class="bib-num">[2]</span> <strong>Tinsa by Accumin – IMIE Mercados Locales</strong> (Q1-2025). <em>Estadística de precios de vivienda nueva y usada en Madrid por distritos</em>. Citado en: El Economista, abril 2025. <a href="https://www.eleconomista.es/vivienda-inmobiliario/noticias/13317783/04/25/" target="_blank">eleconomista.es</a></li>
+    <li class="bib-item"><span class="bib-num">[3]</span> <strong>Tinsa / Bankinter Blog</strong> (2025). <em>Precio de la vivienda en Madrid 2025: +15,1% interanual en Madrid capital; Salamanca el distrito más caro</em>. <a href="https://www.bankinter.com/blog/finanzas-personales/precio-vivienda-madrid" target="_blank">bankinter.com</a></li>
+    <li class="bib-item"><span class="bib-num">[4]</span> <strong>Rankia</strong> (2026). <em>Precio vivienda en Madrid 2026: evolución y previsiones. +25% interanual</em>. <a href="https://www.rankia.com/blog/mejores-hipotecas/6924861-precio-vivienda-madrid-evolucion-previsiones" target="_blank">rankia.com</a></li>
+    <li class="bib-item"><span class="bib-num">[5]</span> <strong>Ejecutivos / InfoNegociosMadrid</strong> (enero 2025). <em>El alquiler en Madrid sube un 18,6% en 2024, la subida más alta desde 2007. Informe de la vivienda en alquiler en España</em>. <a href="https://ejecutivos.es/noticias/el-alquiler-en-madrid-sube-un-186-en-2024-la-subida-mas-alta-desde-2007/" target="_blank">ejecutivos.es</a></li>
+    <li class="bib-item"><span class="bib-num">[6]</span> <strong>Idealista / Eduardo G. Martínez</strong> (febrero 2025). <em>Los distritos de Madrid en los que más sube el precio del alquiler en 2024</em>. Informe de precios Idealista, enero 2025. <a href="https://www.idealista.com/news/inmobiliario/vivienda/2025/02/17/830606" target="_blank">idealista.com</a></li>
+    <li class="bib-item"><span class="bib-num">[7]</span> <strong>Brains Real Estate News</strong> (2024). <em>Los barrios de Madrid donde más sube el precio del alquiler</em>. Incluye análisis de Palomas (+41,3%), El Pardo (+40,1%), Canillejas (+35,3%) y Colina (+32,7%). <a href="https://brainsre.news/barrios-madrid-donde-mas-sube-precio-alquiler/" target="_blank">brainsre.news</a></li>
+    <li class="bib-item"><span class="bib-num">[8]</span> <strong>Bankinter Blog</strong> (2024). <em>Los barrios con los alquileres más caros de Madrid</em>. Datos de Idealista: Niño Jesús +24,6%, Goya +20,5%, 50 barrios con incremento superior al 10% en feb. 2024. <a href="https://www.bankinter.com/blog/finanzas-personales/precio-alquiler-barrios-madrid" target="_blank">bankinter.com</a></li>
+    <li class="bib-item"><span class="bib-num">[9]</span> <strong>BBVA Research – Observatorio Inmobiliario</strong> (noviembre 2024). <em>La presión de la demanda impulsará el precio de la vivienda en 2024 y 2025 en España</em>. Previsión de +5% nominal para 2024 y 2025. <a href="https://www.bbva.com/es/economia-y-finanzas/bbva-research-la-presion-de-la-demanda-impulsara-el-precio-de-la-vivienda-en-2024-y-2025-en-espana/" target="_blank">bbva.com</a></li>
+    <li class="bib-item"><span class="bib-num">[10]</span> <strong>Vivara</strong> (noviembre 2024). <em>Análisis del mercado inmobiliario de Madrid en 2025</em>. Subida 22,6% en 2024, inversión extranjera al 30%, proyecciones 2025. <a href="https://www.vivara.io/blog/opinion/mercado-inmobiliario-de-madrid-2025/" target="_blank">vivara.io</a></li>
+    <li class="bib-item"><span class="bib-num">[11]</span> <strong>Grupo Valoraciones</strong> (julio 2025). <em>Guía de tasaciones inmobiliarias en Madrid 2025</em>. Análisis por distritos: Retiro +5,1%, Tetuán +3,8%, Centro +3,2%. <a href="https://grupovaloraciones.es/tasaciones-inmobiliarias-en-madrid-en-2025/" target="_blank">grupovaloraciones.es</a></li>
+    <li class="bib-item"><span class="bib-num">[12]</span> <strong>Geräh Real Estate</strong> (octubre 2025). <em>Los barrios de Madrid más revalorizados en 2025</em>. Análisis de Amposta, Los Cármenes y barrios emergentes con rentabilidades del 5–6%. <a href="https://www.gerah-realestate.es/los-barrios-de-madrid-mas-revalorizados-en-2025/" target="_blank">gerah-realestate.es</a></li>
+    <li class="bib-item"><span class="bib-num">[13]</span> <strong>El Diario de Madrid / Somos Madrid</strong> (enero 2026). <em>El problema de la vivienda se dispara en Madrid y alcanza al 57% de sus habitantes</em>. Encuesta de Calidad de Vida del Ayuntamiento de Madrid 2025 (8.533 entrevistas). <a href="https://www.eldiario.es/madrid/somos/problema-vivienda-dispara-madrid-alcanza-57-habitantes-gran-encuesta-ayuntamiento_1_12945912.html" target="_blank">eldiario.es</a></li>
+    <li class="bib-item"><span class="bib-num">[14]</span> <strong>Espormadrid.es</strong> (enero 2025). <em>Resultados de la Encuesta 2024 de Calidad de Vida y Satisfacción con los Servicios Públicos</em>. La vivienda, por primera vez, al primer lugar en preocupaciones (24,4%). Nota "facilidad para encontrar vivienda": 3,3/10. <a href="https://www.espormadrid.es/2025/01/resultados-de-la-encuesta-2024-de.html" target="_blank">espormadrid.es</a></li>
+    <li class="bib-item"><span class="bib-num">[15]</span> <strong>SocioMétrica / El Español</strong> (diciembre 2025). <em>El acceso a la vivienda, la primera preocupación para los jóvenes: inquieta al 64% frente al 38% de la media nacional</em>. Macroencuesta con 2.216 entrevistas. <a href="https://www.elespanol.com/espana/politica/20251231/acceso-vivienda-primera-preocupacion-jovenes/" target="_blank">elespanol.com</a></li>
+    <li class="bib-item"><span class="bib-num">[16]</span> <strong>Consejo de la Juventud de España (CJE)</strong> (enero 2025). <em>"Un problema como una casa": informe sobre condiciones de la juventud emancipada</em>. 70% se emancipa por alquiler; 87% comparte vivienda. <a href="https://www.cje.org/nota-de-prensa-un-problema-como-una-casa/" target="_blank">cje.org</a></li>
+    <li class="bib-item"><span class="bib-num">[17]</span> <strong>CGATE / GAD3</strong> (septiembre 2024). <em>Informe La Situación de la Vivienda en España</em>. 40% ansiedad, 30% soledad, 23% depresión vinculadas al estrés residencial; 20% jóvenes considera vivienda "privilegio". Citado en: Infocop.es</li>
+    <li class="bib-item"><span class="bib-num">[18]</span> <strong>El Diario de Madrid</strong> (mayo 2026). <em>La vivienda en España se consolida como el principal problema social ante la falta de oferta y el alza de precios</em>. Informe "La vivienda en España: análisis y propuestas". <a href="https://www.eldiariodemadrid.es/articulo/vivienda/crisis-vivienda-espana-2026-falta-oferta-precios/20260509102806129985.html" target="_blank">eldiariodemadrid.es</a></li>
+    <li class="bib-item"><span class="bib-num">[19]</span> <strong>Bankinter</strong> (marzo 2026). <em>Previsión precio vivienda España 2026 y 2027: +7% y +4%</em>. Factores: escasez oferta, demanda extranjera, subida alquiler. <a href="https://www.bankinter.com/blog/finanzas-personales/prevision-precio-vivienda" target="_blank">bankinter.com</a></li>
+    <li class="bib-item"><span class="bib-num">[20]</span> <strong>SERPAVI / Ministerio de Vivienda y Agenda Urbana</strong> (2026). <em>Sistema Estatal de Referencia del Precio del Alquiler de Vivienda</em>. Precio mediano Madrid: 13,97 €/m²/mes (2024). 300.447 contratos reales declarados a la Agencia Tributaria. <a href="https://precioalquiler.com/alquiler/madrid" target="_blank">precioalquiler.com</a></li>
+    <li class="bib-item"><span class="bib-num">[21]</span> <strong>Inmoalza</strong> (junio 2025). <em>Por qué el precio de la vivienda en España es alto en 2025</em>. Análisis de factores: suelo, burocracia, turismo, inversión extranjera, concentración en grandes tenedores. <a href="https://inmoalza.com/precio-de-la-vivienda/" target="_blank">inmoalza.com</a></li>
+    <li class="bib-item"><span class="bib-num">[22]</span> <strong>Finanfox</strong> (2025). <em>Nueva burbuja inmobiliaria en 2025: ¿Cuándo bajará el precio de la vivienda en España?</em>. Análisis de consenso de expertos: no hay riesgo de colapso tipo 2008; el problema es estructural. <a href="https://finanfox.com/blog/finanzas-e-inversion-2/nueva-burbuja-inmobiliaria-en-2025/" target="_blank">finanfox.com</a></li>
+    <li class="bib-item"><span class="bib-num">[23]</span> <strong>Banco Sabadell</strong> (2025). <em>Histórico y evolución del precio de la vivienda en España</em>. Análisis de ciclos desde años 90; fase alcista 2022–2025 impulsada por escasez y demanda extranjera. <a href="https://www.bancsabadell.com/bsnacional/es/blog/historico-y-evolucion-del-precio-de-la-vivienda-en-espana/" target="_blank">bancsabadell.com</a></li>
+    <li class="bib-item"><span class="bib-num">[24]</span> <strong>ViviendasNuevas.com</strong> (julio 2025). <em>La vivienda sube el doble que los sueldos en 2025</em>. Oferta de venta cayó 16% en Q1-2025; euríbor en 2,98% (abril 2025); precio vivienda nueva 3.151 €/m². <a href="https://viviendasnuevas.com/blog/precio-vivienda-vs-salarios-2025" target="_blank">viviendasnuevas.com</a></li>
+  </ul>
+</section>
+
+<footer>
+  <p>Estudio de Mercado · Vivienda en Madrid 2023–2025 · Elaborado mayo 2025</p>
+  <p>Datos actualizados a Q1-2026 donde está disponible</p>
+</footer>
+
+<script>
+const gc = 'rgba(255,255,255,0.06)';
+const tc = 'rgba(255,255,255,0.45)';
+const defs = {
+  responsive: true, maintainAspectRatio: false,
+  plugins: { legend: { display: false } },
+  scales: {
+    x: { grid: { color: gc }, ticks: { color: tc, font: { size: 11, family: 'Helvetica Neue' } } },
+    y: { grid: { color: gc }, ticks: { color: tc, font: { size: 11, family: 'Helvetica Neue' } } }
+  }
+};
+
+// EVOLUCIÓN VENTA
+new Chart(document.getElementById('chartEvolucion'), {
+  type: 'line',
+  data: {
+    labels: ['2020', '2021', '2022', '2023', '2024', '2025', 'Q1 2026'],
+    datasets: [{
+      data: [2600, 2900, 3200, 3500, 4285, 5642, 7399],
+      borderColor: '#e8613a', backgroundColor: 'rgba(232,97,58,0.07)',
+      tension: 0.35, fill: true, pointRadius: 5,
+      pointBackgroundColor: '#e8613a', pointBorderColor: '#0e0e10', pointBorderWidth: 2
+    }]
+  },
+  options: { ...defs, scales: { ...defs.scales, y: { ...defs.scales.y, ticks: { ...defs.scales.y.ticks, callback: v => v.toLocaleString('es-ES') + ' €' }, min: 2000 } } }
+});
+
+// TOP 5 DISTRITOS VENTA
+new Chart(document.getElementById('chartDistTop'), {
+  type: 'bar',
+  data: {
+    labels: ['Salamanca', 'Chamberí', 'Retiro', 'Chamartín', 'Centro'],
+    datasets: [{ data: [12157, 10059, 9804, 9228, 7926], backgroundColor: ['#d4a843','#e8613a','#e8613a','#e8613a','#e8613a'], borderRadius: 3 }]
+  },
+  options: { ...defs, indexAxis: 'y', scales: { x: { ...defs.scales.x, ticks: { ...defs.scales.x.ticks, callback: v => v.toLocaleString('es-ES') } }, y: { ...defs.scales.y } } }
+});
+
+// MAYORES SUBIDAS %
+new Chart(document.getElementById('chartSubidas'), {
+  type: 'bar',
+  data: {
+    labels: ['Ciudad Lineal', 'Usera', 'Moncloa-Aravaca', 'Chamberí', 'Chamartín'],
+    datasets: [{ data: [13.6, 13.2, 12.4, 12, 10], backgroundColor: '#3a7be8', borderRadius: 3 }]
+  },
+  options: { ...defs, indexAxis: 'y', scales: { x: { ...defs.scales.x, ticks: { ...defs.scales.x.ticks, callback: v => '+' + v + '%' } }, y: defs.scales.y } }
+});
+
+// EVOLUCIÓN ALQUILER
+new Chart(document.getElementById('chartAlquilerEvol'), {
+  type: 'line',
+  data: {
+    labels: ['2021', '2022', '2023', '2024', 'ene.2025'],
+    datasets: [{
+      data: [14.5, 16.6, 17.4, 20.62, 21],
+      borderColor: '#3a7be8', backgroundColor: 'rgba(58,123,232,0.07)',
+      tension: 0.35, fill: true, pointRadius: 5,
+      pointBackgroundColor: '#3a7be8', pointBorderColor: '#0e0e10', pointBorderWidth: 2
+    }]
+  },
+  options: { ...defs, scales: { ...defs.scales, y: { ...defs.scales.y, ticks: { ...defs.scales.y.ticks, callback: v => v + ' €' }, min: 12 } } }
+});
+
+// ALQUILER POR DISTRITOS
+new Chart(document.getElementById('chartAlqDistritos'), {
+  type: 'bar',
+  data: {
+    labels: ['Salamanca','Chamberí','Centro','Retiro','Tetuán','Arganzuela','C. Lineal','Latina','Usera','P. Vallecas','Vicálvaro'],
+    datasets: [{ data: [25.8, 23.73, 23.44, 21.67, 21.1, 20.2, 17.7, 17.2, 17.2, 17, 14.2], backgroundColor: '#3a7be8', borderRadius: 3 }]
+  },
+  options: { ...defs, indexAxis: 'y', scales: { x: { ...defs.scales.x, ticks: { ...defs.scales.x.ticks, callback: v => v + '€' } }, y: { ...defs.scales.y, ticks: { color: tc, font: { size: 10, family: 'Helvetica Neue' } } } } }
+});
+
+// BARRIOS CON MAYOR SUBIDA ALQUILER
+new Chart(document.getElementById('chartBarriosAlquiler'), {
+  type: 'bar',
+  data: {
+    labels: ['Palomas\n(Hortaleza)','El Pardo\n(Fuencarral)','Canillejas\n(San Blas)','Colina\n(C. Lineal)','Concepción\n(C. Lineal)'],
+    datasets: [{ data: [41.3, 40.1, 35.3, 32.7, 27.5], backgroundColor: '#e8613a', borderRadius: 3 }]
+  },
+  options: { ...defs, indexAxis: 'y', scales: { x: { ...defs.scales.x, ticks: { ...defs.scales.x.ticks, callback: v => '+' + v + '%' } }, y: { ...defs.scales.y, ticks: { color: tc, font: { size: 10, family: 'Helvetica Neue' } } } } }
+});
+
+// COMPARATIVA 2008 vs 2025
+new Chart(document.getElementById('chartComparativa'), {
+  type: 'bar',
+  data: {
+    labels: ['Endeudamiento\nhipotecario', 'Demanda\nextranjera', 'Déficit\nobra nueva', 'Especulación\npura', 'Escasez\nde suelo'],
+    datasets: [
+      { label: '2008 (crisis burbuja)', data: [95, 10, 20, 90, 40], backgroundColor: 'rgba(163,45,45,0.7)', borderRadius: 3 },
+      { label: '2025 (situación actual)', data: [35, 80, 90, 30, 85], backgroundColor: 'rgba(58,123,232,0.7)', borderRadius: 3 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        labels: { color: tc, font: { size: 11, family: 'Helvetica Neue' }, boxWidth: 12, boxHeight: 12 }
+      }
+    },
+    scales: {
+      x: { grid: { color: gc }, ticks: { color: tc, font: { size: 10, family: 'Helvetica Neue' } } },
+      y: { grid: { color: gc }, ticks: { color: tc, font: { size: 11, family: 'Helvetica Neue' }, callback: v => v + '' }, max: 100, title: { display: true, text: 'Intensidad relativa (0–100)', color: tc, font: { size: 10 } } }
+    }
+  }
+});
+
+// SOCIAL
+new Chart(document.getElementById('chartSocial'), {
+  type: 'bar',
+  data: {
+    labels: ['2022', '2023', '2024', '2025'],
+    datasets: [{ data: [9.7, 18.8, 37.5, 57], backgroundColor: ['rgba(232,97,58,0.3)','rgba(232,97,58,0.5)','rgba(232,97,58,0.75)','#e8613a'], borderRadius: 4 }]
+  },
+  options: { ...defs, scales: { ...defs.scales, y: { ...defs.scales.y, ticks: { ...defs.scales.y.ticks, callback: v => v + '%' }, max: 70, min: 0 } } }
+});
+</script>
+</body>
+</html>

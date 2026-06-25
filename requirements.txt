@@ -1,0 +1,11 @@
+# FastAPI & API Server
+fastapi
+uvicorn
+pandas
+
+# LangChain & Vector Search (RAG)
+langchain-community
+langchain-ollama
+chromadb
+sentence-transformers
+huggingface-hub
