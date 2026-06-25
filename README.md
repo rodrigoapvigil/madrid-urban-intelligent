@@ -1,5 +1,7 @@
 # Madrid Urban Intelligence
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20846198.svg)](https://doi.org/10.5281/zenodo.20846198)
+
 **Madrid Urban Intelligence** es una plataforma analítica y predictiva inteligente de última generación para el sector inmobiliario residencial en el municipio de Madrid. Este proyecto constituye el desarrollo práctico del Trabajo Fin de Máster (TFM).
 
 La plataforma integra un pipeline de datos automatizado, un almacén de datos dimensional (DataMart) en SQLite, modelos de aprendizaje automático avanzados para la predicción de precios (Venta y Alquiler) a nivel micro-local de barrio, y un frontend interactivo modular que incluye un asistente conversacional inteligente (chatbot RAG) de ejecución local.
@@ -118,3 +120,12 @@ madrid-urban-intelligent/
 
 ## 🎓 Tesis Académica
 El documento formal de la tesis, con toda la metodología científica, la justificación de los experimentos y la arquitectura detallada del sistema, se encuentra en la carpeta [tesis/](file:///C:/Users/FX517/OneDrive/Desktop/TFM/madrid-urban-intelligent/tesis/) en formato PDF y LaTeX.
+
+---
+
+## 📄 Cómo citar este trabajo / Citation
+
+Si deseas citar este proyecto en tu investigación o tesis, puedes utilizar el siguiente formato:
+
+> Peña Vigil, Rodrigo Alonzo. (2026). Madrid Urban Intelligence: Plataforma analítica y predictiva inteligente para el mercado de la vivienda en Madrid (v1.0.0). GitHub / Zenodo. DOI: 10.5281/zenodo.20846198
+
