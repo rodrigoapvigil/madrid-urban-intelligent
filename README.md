@@ -60,6 +60,8 @@ madrid-urban-intelligent/
 │   ├── tesis.tex                 # Código fuente principal de la tesis
 │   └── tesis.pdf                 # Copia en PDF lista para leer
 ├── run_backend.bat               # Script automatizado para arrancar la API
+├── LICENSE                       # Licencia oficial de código abierto Apache 2.0
+├── codemeta.json                 # Metadatos del software para indexación académica
 └── .gitignore                    # Archivos y carpetas excluidos en Git
 ```
 
@@ -127,5 +129,5 @@ El documento formal de la tesis, con toda la metodología científica, la justif
 
 Si deseas citar este proyecto en tu investigación o tesis, puedes utilizar el siguiente formato:
 
-> Peña Vigil, Rodrigo Alonzo. (2026). Madrid Urban Intelligence: Plataforma analítica y predictiva inteligente para el mercado de la vivienda en Madrid (v1.0.0). GitHub / Zenodo. DOI: 10.5281/zenodo.20846198
+> Peña Vigil, Rodrigo Alonzo. (2026). Madrid Urban Intelligence: Plataforma analítica y predictiva inteligente para el mercado de la vivienda en Madrid (v1.0.0). GitHub / Zenodo. DOI: [10.5281/zenodo.20846198](https://doi.org/10.5281/zenodo.20846198)
 
