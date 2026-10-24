@@ -135,7 +135,7 @@ const MadridLanding: React.FC = () => {
       <footer className="apple-footer">
         <div className="footer-content">
           <div className="footer-brand">Madrid Urban Intelligent</div>
-          <div className="footer-slogan">"Transformando datos urbanos en decisiones inteligentes para todos los ciudadanos."</div>
+          <div className="footer-slogan">&ldquo;Transformando datos urbanos en decisiones inteligentes para todos los ciudadanos.&rdquo;</div>
           <div className="footer-bottom">
             <span>© 2026 Madrid Urban Intelligent. Todos los derechos reservados.</span>
           </div>

@@ -34,6 +34,8 @@ type Message = {
   content: string;
 };
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
+
 const MadridChat: React.FC = () => {
   const router = useRouter();
   const [message, setMessage] = useState('');
@@ -70,9 +72,9 @@ const MadridChat: React.FC = () => {
         const zoneName = chatContext.barrio && chatContext.barrio !== 'Todos' ? chatContext.barrio : chatContext.district;
 
         const [kpiRes, seriesRes, mapRes] = await Promise.all([
-          fetch(`http://localhost:8001/api/kpis?year=${chatContext.year}&op=${chatContext.op}&district=${encodeURIComponent(chatContext.district)}${barrioParam}`),
-          fetch(`http://localhost:8001/api/series?year=${chatContext.year}&op=${chatContext.op}&zona=${encodeURIComponent(zoneName)}&tipo_zona=${zoneType}`),
-          fetch(`http://localhost:8001/api/map?year=${chatContext.year}&interest=${chatContext.op === 'alquiler' ? 'Alquiler' : chatContext.op === 'inversion' ? 'Inversión' : 'Venta'}`)
+          fetch(`${API_BASE}/kpis?year=${chatContext.year}&op=${chatContext.op}&district=${encodeURIComponent(chatContext.district)}${barrioParam}`),
+          fetch(`${API_BASE}/series?year=${chatContext.year}&op=${chatContext.op}&zona=${encodeURIComponent(zoneName)}&tipo_zona=${zoneType}`),
+          fetch(`${API_BASE}/map?year=${chatContext.year}&interest=${chatContext.op === 'alquiler' ? 'Alquiler' : chatContext.op === 'inversion' ? 'Inversión' : 'Venta'}`)
         ]);
 
         if (kpiRes.ok) setKpiData(await kpiRes.json());
@@ -97,7 +99,7 @@ const MadridChat: React.FC = () => {
     setChatHistory(newHistory);
 
     try {
-      const res = await fetch('http://localhost:8001/api/chat', {
+      const res = await fetch(`${API_BASE}/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage, session_id: sessionId })
@@ -115,11 +117,11 @@ const MadridChat: React.FC = () => {
           }));
         }
       } else {
-        setChatHistory([...newHistory, { role: 'assistant', content: 'Lo siento, hubo un error al conectar con mis sistemas. ¿Podemos intentarlo de nuevo?' }]);
+        setChatHistory([...newHistory, { role: 'assistant', content: 'El asistente AMBI se encuentra en calibración para la versión web pública. Puedes consultar todas las métricas y gráficos directamente en el Dashboard interactivo.' }]);
       }
     } catch (error) {
       console.error(error);
-      setChatHistory([...newHistory, { role: 'assistant', content: 'No he podido conectarme al servidor de datos. Asegúrate de que el backend de Madrid Urban Intelligence está corriendo.' }]);
+      setChatHistory([...newHistory, { role: 'assistant', content: 'El motor conversacional de AMBI está temporalmente en modo mantenimiento. Toda la analítica urbana está disponible y activa en el Dashboard interactivo.' }]);
     } finally {
       setIsLoading(false);
     }
@@ -196,10 +198,42 @@ const MadridChat: React.FC = () => {
         <section className="ambi-chat-section">
           <div className="chat-container">
             {!hasStarted && (
-              <div className="chat-welcome-hero" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <img src="/AMBI.png" alt="AMBI" style={{ width: '240px', height: '240px', objectFit: 'contain', marginBottom: '16px' }} />
-                <h1>Bienvenido, soy Ambi</h1>
-                <p>Tu asistente personal inmobiliario. Pregúntame sobre barrios, precios o tendencias en Madrid.</p>
+              <div className="chat-welcome-hero" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '20px 10px' }}>
+                <img src="/AMBI.png" alt="AMBI" style={{ width: '180px', height: '180px', objectFit: 'contain', marginBottom: '16px' }} />
+                <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#1d1d1f', marginBottom: '8px' }}>Bienvenido a AMBI</h1>
+                <p style={{ color: '#86868b', fontSize: '15px', maxWidth: '460px', marginBottom: '18px', lineHeight: '1.4' }}>
+                  El asistente conversacional de inteligencia inmobiliaria de Madrid.
+                </p>
+                <div style={{
+                  backgroundColor: '#f5f5f7',
+                  border: '1px solid #e5e5ea',
+                  borderRadius: '16px',
+                  padding: '16px 20px',
+                  maxWidth: '500px',
+                  marginBottom: '16px'
+                }}>
+                  <div style={{ display: 'inline-block', backgroundColor: '#e8f2ff', color: '#0071e3', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', padding: '4px 10px', borderRadius: '12px', marginBottom: '8px' }}>
+                    Fase Experimental
+                  </div>
+                  <p style={{ fontSize: '13px', color: '#48484a', lineHeight: '1.5', margin: '0 0 12px 0' }}>
+                    El motor de lenguaje de AMBI se encuentra en calibración para la versión web pública. Puedes explorar todas las métricas oficiales, mapas y series en tiempo real en el Dashboard.
+                  </p>
+                  <button
+                    onClick={() => router.push('/madrid')}
+                    style={{
+                      backgroundColor: '#0071e3',
+                      color: '#ffffff',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '8px 16px',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Abrir Dashboard Interactivo →
+                  </button>
+                </div>
               </div>
             )}
             

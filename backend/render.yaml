@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: madrid-urban-intelligence-api
+    runtime: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: ALLOWED_ORIGINS
+        value: "https://dmiyc.com,https://www.dmiyc.com,https://madrid-urban-intelligence.vercel.app"

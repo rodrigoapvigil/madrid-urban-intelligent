@@ -13,10 +13,26 @@ import data
 
 app = FastAPI(title="Madrid Urban Intelligence API")
 
-# Configurar CORS para permitir peticiones desde el frontend React
+# Configurar CORS para permitir peticiones desde dominios autorizados y entorno
+default_origins = [
+    "https://dmiyc.com",
+    "https://www.dmiyc.com",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+env_origins = [
+    origin.strip()
+    for origin in os.getenv("ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
+]
+
+allowed_origins = default_origins + env_origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En producción deberías especificar el dominio
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -159,10 +175,15 @@ def get_zone_liquidity(name: str, level: str = "distrito"):
 
 
 from pydantic import BaseModel
-from ambi_rag import get_llm, get_rag_context
-from langchain_classic.memory import ConversationBufferWindowMemory
-from langchain_core.prompts import PromptTemplate
-from ambi_prompts import SYSTEM_PROMPT
+
+try:
+    from ambi_rag import get_llm, get_rag_context
+    from langchain_classic.memory import ConversationBufferWindowMemory
+    from langchain_core.prompts import PromptTemplate
+    from ambi_prompts import SYSTEM_PROMPT
+    AMBI_AVAILABLE = True
+except Exception:
+    AMBI_AVAILABLE = False
 
 class ChatRequest(BaseModel):
     message: str
@@ -233,6 +254,13 @@ def chat_endpoint(request: ChatRequest):
     session_id = request.session_id
     user_message = request.message
     
+    if not AMBI_AVAILABLE:
+        return ChatResponse(
+            response="El asistente conversacional AMBI se encuentra actualmente en fase de calibración técnica. Puedes explorar todas las métricas, comparativas y gráficos directamente en el Dashboard interactivo.",
+            session_id=session_id,
+            context=None
+        )
+
     # Obtener o crear la memoria para esta sesión
     if session_id not in active_memories:
         active_memories[session_id] = ConversationBufferWindowMemory(k=5, return_messages=False)
