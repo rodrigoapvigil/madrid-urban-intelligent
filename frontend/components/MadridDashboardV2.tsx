@@ -1512,14 +1512,16 @@ const MadridDashboardV2: React.FC = () => {
                     return (
                       <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <label style={{ fontSize: '10px', fontWeight: 'bold', color: '#86868b', letterSpacing: '0.5px' }}>PODER ADQUISITIVO DEL BARRIO</label>
+                          <label style={{ fontSize: '10px', fontWeight: 'bold', color: '#86868b', letterSpacing: '0.5px' }}>
+                            PODER ADQUISITIVO {selectedBarrio !== 'Todos' ? 'DEL BARRIO' : (selectedDistrict !== 'Todos' ? 'DEL DISTRITO' : 'DE MADRID')}
+                          </label>
                           {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                         </div>
                         <div style={{ fontSize: '12px', color: '#1d1d1f' }}>
                           Precio medio vivienda: <strong style={{ display: 'block', fontSize: '14px', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(precioMedio)}€</strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#1d1d1f' }}>
-                          Renta media del barrio: <strong style={{ display: 'block', fontSize: '14px', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(rentaAnual)}€/año</strong>
+                          Renta media {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ display: 'block', fontSize: '14px', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(rentaAnual)}€/año</strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#1d1d1f' }}>
                           Años de renta media: <strong style={{ fontSize: '14px' }}>{aniosRenta > 0 ? aniosRenta.toFixed(1) : '-'} años</strong>
@@ -1615,13 +1617,13 @@ const MadridDashboardV2: React.FC = () => {
                           {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                         </div>
                         <div style={{ fontSize: '12px', color: '#1d1d1f' }}>
-                          Alquiler medio en el barrio: <strong style={{ display: 'block', fontSize: '14px', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(alquiler)}€/mes</strong>
+                          Alquiler medio {selectedBarrio !== 'Todos' ? 'en el barrio' : (selectedDistrict !== 'Todos' ? 'en el distrito' : 'en Madrid')}: <strong style={{ display: 'block', fontSize: '14px', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(alquiler)}€/mes</strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#1d1d1f' }}>
-                          Renta media del barrio: <strong style={{ display: 'block', fontSize: '14px', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(rentaMediaMensual)}€/mes <span style={{ fontSize: '10px', color: '#86868b', fontWeight: 'normal' }}>(dato INE)</span></strong>
+                          Renta media {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ display: 'block', fontSize: '14px', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(rentaMediaMensual)}€/mes <span style={{ fontSize: '10px', color: '#86868b', fontWeight: 'normal' }}>(dato INE)</span></strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#1d1d1f', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          Esfuerzo en este barrio: <strong style={{ fontSize: '14px' }}>{dedicar > 0 ? dedicar.toFixed(0) + '%' : '-'}</strong>
+                          Esfuerzo {selectedBarrio !== 'Todos' ? 'en este barrio' : (selectedDistrict !== 'Todos' ? 'en este distrito' : 'en Madrid')}: <strong style={{ fontSize: '14px' }}>{dedicar > 0 ? dedicar.toFixed(0) + '%' : '-'}</strong>
                           <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: statusColor }} />
                         </div>
                         
@@ -1644,7 +1646,7 @@ const MadridDashboardV2: React.FC = () => {
                               <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: userStatusColor }} />
                             </div>
                             <span style={{ color: '#86868b', fontSize: '10px' }}>
-                              ({userEffort < dedicar ? 'mucho mejor que la media' : 'peor que la media del barrio'})
+                              ({userEffort < dedicar ? 'mucho mejor que la media' : 'peor que la media local'})
                             </span>
                           </div>
                         )}
@@ -1698,7 +1700,7 @@ const MadridDashboardV2: React.FC = () => {
                           {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                         </div>
                         <div style={{ fontSize: '12px', color: '#1d1d1f' }}>
-                          GRM del barrio: <strong style={{ fontSize: '14px', display: 'block', marginTop: '2px' }}>{grm > 0 ? grm.toFixed(1) : '-'} años <span style={{ fontSize: '10px', fontWeight: 'normal', color: '#86868b' }}>(recuperación)</span></strong>
+                          GRM {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ fontSize: '14px', display: 'block', marginTop: '2px' }}>{grm > 0 ? grm.toFixed(1) : '-'} años <span style={{ fontSize: '10px', fontWeight: 'normal', color: '#86868b' }}>(recuperación)</span></strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#1d1d1f' }}>
                           ROI Neto esperado: <strong style={{ fontSize: '14px', display: 'block', color: '#009d71', marginTop: '2px' }}>{roiNeto > 0 ? roiNeto.toFixed(1) : '-'}%/año</strong>

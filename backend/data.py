@@ -124,6 +124,12 @@ def clean_string(s):
     return s.replace(" ", "_").replace("-", "_").replace(".", "")
 
 
+def _clean_op(op: str) -> str:
+    """Normaliza el tipo de operación: 'compra' -> 'venta'."""
+    s = str(op).strip().lower()
+    return 'venta' if s in ('compra', 'compra-venta') else s
+
+
 def _conn():
     """Abre una conexión SQLite (caller debe cerrarla)."""
     return sqlite3.connect(DB_PATH)
@@ -408,6 +414,7 @@ def get_map_data(anio: int, mes: str, interest: str = "Compra-venta"):
 
 
 def _get_price_for_period(year, month_id, op, district, barrio):
+    op = _clean_op(op)
     # check SQLite first
     conn = sqlite3.connect(DB_PATH)
     filter_clause = ""
@@ -476,7 +483,7 @@ def get_kpi_data(anio: int, mes: str, op: str, distrito: str = "Todos", barrio: 
     transactions = get_transaction_count(anio, distrito, barrio)
     conn = _conn()
     month_id = MONTH_IDS[mes]
-    op_l = op.lower()
+    op_l = _clean_op(op)
     
     # En Inversión, consultamos la operación 'alquiler' pero nos interesa la rentabilidad
     real_op = "alquiler" if op_l == "inversion" else op_l
@@ -556,9 +563,6 @@ def get_kpi_data(anio: int, mes: str, op: str, distrito: str = "Todos", barrio: 
                     filtered = pred_df[(pred_df['anio'] == anio) & (pred_df['mes'] == month_id) & (pred_df['tipo_operacion'] == real_op) & (pred_df['id_barrio'] == -1)]
                     if not filtered.empty:
                         avg_p_m2 = float(filtered['precio_m2_predicho'].mean())
-                        df_dist_info = pd.read_sql("SELECT AVG(superviciemedia_vivienda) as avg_sup, AVG(renta_media_hogar) as avg_renta FROM Dim_Distrito WHERE id_distrito != -1", conn)
-                        # Wait, the column name is superficie_media_vivienda! Let's check spelling.
-                        # Dim_Distrito sample has: superficie_media_vivienda. So let's write superficie_media_vivienda.
                         df_dist_info = pd.read_sql("SELECT AVG(superficie_media_vivienda) as avg_sup, AVG(renta_media_hogar) as avg_renta FROM Dim_Distrito WHERE id_distrito != -1", conn)
                         avg_sup = float(df_dist_info.iloc[0]['avg_sup']) if df_dist_info.iloc[0]['avg_sup'] is not None else 90.0
                         avg_renta = float(df_dist_info.iloc[0]['avg_renta']) if df_dist_info.iloc[0]['avg_renta'] is not None else 40000.0
@@ -716,7 +720,7 @@ def get_monthly_series(anio: int, op: str, zona_nombre: str,
         return pd.DataFrame()
     
     conn = _conn()
-    op_l = op.lower()
+    op_l = _clean_op(op)
     try:
         val_col = "rentabilidad_bruta" if op_l == "inversion" else "precio_m2"
         # En Inversión, usamos la operación 'alquiler' pero la columna 'rentabilidad_bruta'
@@ -811,7 +815,7 @@ def get_comparison_kpis(anio: int, mes: str, op: str,
         return 0, 0, 0
     conn = _conn()
     month_id = MONTH_IDS[mes]
-    op_l = op.lower()
+    op_l = _clean_op(op)
 
     try:
         if zona_tipo == "barrio":
@@ -890,7 +894,7 @@ def get_madrid_average_series(anio: int, op: str) -> pd.DataFrame:
     """Devuelve la serie mensual unificada del precio_m2 promedio de TODO Madrid."""
     if not os.path.exists(DB_PATH): return pd.DataFrame()
     conn = _conn()
-    op_l = op.lower()
+    op_l = _clean_op(op)
     try:
         val_col = "rentabilidad_bruta" if op_l == "inversion" else "precio_m2"
         real_op = "alquiler" if op_l == "inversion" else op_l
@@ -946,7 +950,7 @@ def get_rankings(anio: int, mes: str, op: str, level: str = "barrio", category: 
     if not os.path.exists(DB_PATH): return pd.DataFrame()
     conn = _conn()
     month_id = MONTH_IDS[mes]
-    op_l = op.lower()
+    op_l = _clean_op(op)
     
     # En Inversión, usamos la operación 'alquiler' para obtener la rentabilidad
     real_op = "alquiler" if op_l == "inversion" else op_l
@@ -1089,7 +1093,7 @@ def get_predictions(zona_nombre: str, zona_tipo: str = "barrio", op: str = "vent
         return pd.DataFrame()
     
     conn = _conn()
-    op_l = op.lower()
+    op_l = _clean_op(op)
     try:
         pred_df = _get_predictions_df()
         if pred_df.empty:
@@ -1199,10 +1203,6 @@ def get_heatmap_data(year: int, op: str, level: str = "distrito"):
                 if not df_pred.empty:
                     df = pd.concat([df, df_pred]).drop_duplicates(subset=['zona', 'mes'], keep='first')
         
-        # DEBUG LOG
-        with open(os.path.join(_ROOT_DIR, "scratch", "heatmap_debug.log"), "w") as f_log:
-            f_log.write(f"Query/Pred: {year} - {op_l}\nResults: {len(df)}\n")
-        
         if df.empty: return []
 
         # Crear diccionario { zona: { mes: val } }
@@ -1235,7 +1235,8 @@ def get_heatmap_data(year: int, op: str, level: str = "distrito"):
 def get_affordability_data(anio: int, mes: str, op: str) -> pd.DataFrame:
     conn = _conn()
     month_id = MONTH_IDS[mes]
-    real_op = "alquiler" if op.lower() == "inversion" else op.lower()
+    op_l = _clean_op(op)
+    real_op = "alquiler" if op_l == "inversion" else op_l
     
     q = f"""
         SELECT d.nombre as distrito,
@@ -1269,7 +1270,8 @@ def get_affordability_data(anio: int, mes: str, op: str) -> pd.DataFrame:
 
 def get_seasonal_averages(anio: int, op: str) -> list:
     conn = _conn()
-    real_op = "alquiler" if op.lower() == "inversion" else op.lower()
+    op_l = _clean_op(op)
+    real_op = "alquiler" if op_l == "inversion" else op_l
     
     q = f"""
         SELECT t.mes,
@@ -1311,7 +1313,8 @@ def get_seasonal_averages(anio: int, op: str) -> list:
 def get_scatter_opportunity_data(anio: int, mes: str, op: str, level: str = "distrito") -> pd.DataFrame:
     conn = _conn()
     month_id = MONTH_IDS[mes]
-    real_op = "alquiler" if op.lower() == "inversion" else op.lower()
+    op_l = _clean_op(op)
+    real_op = "alquiler" if op_l == "inversion" else op_l
     
     # Try querying from DB first
     q = f"""
