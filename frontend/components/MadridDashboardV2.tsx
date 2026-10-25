@@ -311,6 +311,8 @@ const MadridDashboardV2: React.FC = () => {
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showMapHelpModal, setShowMapHelpModal] = useState(false);
+  const [showHeatmapHelpModal, setShowHeatmapHelpModal] = useState(false);
+  const [showCompareHelpModal, setShowCompareHelpModal] = useState(false);
   const [mapData, setMapData] = useState<{districts: any[], neighborhoods: any[]}>({ districts: [], neighborhoods: [] });
   const [rankings, setRankings] = useState<{ topDist: any[], botDist: any[], topBarr: any[], botBarr: any[] }>({
     topDist: [], botDist: [], topBarr: [], botBarr: []
@@ -2699,8 +2701,44 @@ const MadridDashboardV2: React.FC = () => {
               {/* COL 3: HEATMAP */}
               <div className="v2-explorer-col v2-heatmap-area">
                 <div className="v2-heatmap-card">
-                  <div className="v2-heatmap-head">
-                    {activeProfile.id === 'inversion' ? 'Evolución Mensual de Rentabilidad (Heatmap)' : 'Evolución Mensual de Precios (Heatmap)'}
+                  <div className="v2-heatmap-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                    <span>{activeProfile.id === 'inversion' ? 'Evolución Mensual de Rentabilidad (Heatmap)' : 'Evolución Mensual de Precios (Heatmap)'}</span>
+                    <button
+                      onClick={() => setShowHeatmapHelpModal(true)}
+                      style={{
+                        background: '#f5f5f7',
+                        border: '0.5px solid #d2d2d7',
+                        borderRadius: '16px',
+                        padding: '4px 12px',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        color: '#1d1d1f',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        transition: 'all 0.2s',
+                        whiteSpace: 'nowrap'
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e5ea')}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f7')}
+                    >
+                      <span style={{ 
+                        display: 'inline-flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        width: '15px', 
+                        height: '15px', 
+                        borderRadius: '50%', 
+                        background: '#0071e3', 
+                        color: '#fff', 
+                        fontSize: '10px', 
+                        fontWeight: 'bold', 
+                        fontStyle: 'italic', 
+                        fontFamily: 'serif' 
+                      }}>i</span>
+                      <span>¿Cómo usar el mapa de calor?</span>
+                    </button>
                   </div>
                   {Number(selectedYear) === 2026 && (
                     <div style={{ fontSize: '11px', color: '#86868b', marginBottom: '12px', paddingLeft: '4px' }}>
@@ -2854,8 +2892,46 @@ const MadridDashboardV2: React.FC = () => {
 
              {/* COMPARATIVAS SECTION */}
             <section className="v2-compare-section">
-              <div className="v2-section-header">
-                <h2>Comparación de zonas</h2>
+              <div className="v2-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                  <h2 style={{ margin: 0 }}>Comparación de zonas</h2>
+                  <button
+                    onClick={() => setShowCompareHelpModal(true)}
+                    style={{
+                      background: '#f5f5f7',
+                      border: '0.5px solid #d2d2d7',
+                      borderRadius: '16px',
+                      padding: '4px 12px',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      color: '#1d1d1f',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      transition: 'all 0.2s',
+                      whiteSpace: 'nowrap'
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e5ea')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f7')}
+                  >
+                    <span style={{ 
+                      display: 'inline-flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      width: '15px', 
+                      height: '15px', 
+                      borderRadius: '50%', 
+                      background: '#0071e3', 
+                      color: '#fff', 
+                      fontSize: '10px', 
+                      fontWeight: 'bold', 
+                      fontStyle: 'italic', 
+                      fontFamily: 'serif' 
+                    }}>i</span>
+                    <span>¿Cómo usar la comparación?</span>
+                  </button>
+                </div>
                 <div className="v2-tabs-container" style={{ flex: 'none' }}>
                   <div className="v2-tabs-bg">
                     <span className="v2-indicator" style={{ transform: `translateX(${compareLevel === 'Distritos' ? '0' : '100%'})`, width: '110px' }} />
@@ -3481,6 +3557,380 @@ const MadridDashboardV2: React.FC = () => {
 
             <button
               onClick={() => setShowMapHelpModal(false)}
+              style={{
+                marginTop: '20px',
+                width: '100%',
+                padding: '12px',
+                backgroundColor: '#0071e3',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '14px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0077ed')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0071e3')}
+            >
+              ¡Entendido, gracias!
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ¿CÓMO USAR EL MAPA DE CALOR? */}
+      {showHeatmapHelpModal && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            backdropFilter: 'blur(10px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={() => setShowHeatmapHelpModal(false)}
+        >
+          <div 
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '24px',
+              maxWidth: '580px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              width: '100%',
+              padding: '32px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+              border: '0.5px solid rgba(0,0,0,0.08)',
+              position: 'relative',
+              animation: 'fadeIn 0.2s ease-out'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#1d1d1f' }}>
+                  ¿Cómo usar el mapa de calor?
+                </h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#86868b' }}>
+                  Guía para interpretar la estacionalidad y los precios mes a mes.
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowHeatmapHelpModal(false)}
+                style={{
+                  background: '#f5f5f7',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  color: '#86868b',
+                  transition: 'background 0.2s'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e5ea')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f7')}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {/* Paso 1: Estructura */}
+              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#0071e3', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+                  1
+                </div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '2px' }}>
+                    Filas y Columnas Mensuales
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.45 }}>
+                    Cada fila de la matriz corresponde a un distrito o barrio de Madrid (puedes alternar la vista entre Distritos y Barrios con los botones de la parte superior del explorador). Las columnas numeradas del <strong>1 al 12</strong> representan los doce meses del año seleccionado, desde enero hasta diciembre.
+                  </div>
+                </div>
+              </div>
+
+              {/* Paso 2: Escala de Color */}
+              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#0071e3', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+                  2
+                </div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '2px' }}>
+                    Intensidad del Color
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.45 }}>
+                    Cuanto más <strong>oscuro e intenso</strong> es el fondo de la casilla, mayor es el valor (precio por m² más alto o rentabilidad más elevada). Los <strong>tonos claros o suaves</strong> señalan los meses o zonas más asequibles o con menor presión de precios.
+                  </div>
+                </div>
+              </div>
+
+              {/* Paso 3: Datos Oficiales vs Previsiones */}
+              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#0071e3', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+                  3
+                </div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '2px' }}>
+                    Datos Reales y Estimaciones
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.45 }}>
+                    En el año <strong>2026</strong>, los meses del 1 al 6 muestran cifras reales oficiales registradas por el Ayuntamiento de Madrid. A partir del mes 7 y en años posteriores, se muestran <strong>proyecciones estimadas</strong> calculadas mediante modelos predictivos para anticipar el comportamiento del mercado.
+                  </div>
+                </div>
+              </div>
+
+              {/* Paso 4: Estacionalidad */}
+              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#0071e3', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+                  4
+                </div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '2px' }}>
+                    Detectar Estacionalidad
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.45 }}>
+                    Al observar una fila de izquierda a derecha puedes ver si una zona se encarece en primavera o después de verano (ej. inicio de curso universitario o mayor demanda de alquiler), lo que te ayuda a planificar compras o contrataciones en los meses más ventajosos.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowHeatmapHelpModal(false)}
+              style={{
+                marginTop: '20px',
+                width: '100%',
+                padding: '12px',
+                backgroundColor: '#0071e3',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '14px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0077ed')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0071e3')}
+            >
+              ¡Entendido, gracias!
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ¿CÓMO USAR LA COMPARACIÓN DE ZONAS? */}
+      {showCompareHelpModal && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            backdropFilter: 'blur(10px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={() => setShowCompareHelpModal(false)}
+        >
+          <div 
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '24px',
+              maxWidth: '640px',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              width: '100%',
+              padding: '32px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+              border: '0.5px solid rgba(0,0,0,0.08)',
+              position: 'relative',
+              animation: 'fadeIn 0.2s ease-out'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#1d1d1f' }}>
+                  ¿Cómo usar la comparación de zonas?
+                </h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#86868b' }}>
+                  Aprende a contrastar dos áreas y a interpretar todos sus indicadores.
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowCompareHelpModal(false)}
+                style={{
+                  background: '#f5f5f7',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  color: '#86868b',
+                  transition: 'background 0.2s'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e5ea')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f7')}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              
+              {/* Sección A: Modos de uso */}
+              <div style={{ borderBottom: '1px solid #e5e5ea', paddingBottom: '14px' }}>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#0071e3', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
+                  1. Modos de Uso y Navegación
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <div style={{ display: 'flex', gap: '12px', padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: '#0071e3', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
+                      A
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#1d1d1f' }}>
+                        Selección por Distritos o Barrios
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '2px' }}>
+                        Usa los botones superiores para elegir si deseas comparar a nivel de <strong>Distritos</strong> o de <strong>Barrios</strong>. En los desplegables de <strong>Zona A</strong> y <strong>Zona B</strong> puedes elegir libremente cualquier par de zonas de Madrid.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '12px', padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: '#0071e3', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
+                      B
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#1d1d1f' }}>
+                        Comparativa Individual (Lado a Lado)
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '2px' }}>
+                        Muestra la curva histórica independiente de cada zona junto con sus tarjetas de resumen. <strong>Pasa el cursor sobre cualquier punto</strong> de la gráfica para ver el precio exacto, la variación porcentual frente al mes anterior y la comparación directa con la media de todo Madrid.
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '12px', padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: '#0071e3', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
+                      C
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: '600', color: '#1d1d1f' }}>
+                        Comparativa Superpuesta (Gráfico Conjunto)
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '2px' }}>
+                        Al abrir la sección <em>&ldquo;Ver comparativa superpuesta&rdquo;</em>, ambas zonas se cruzan en un único gráfico bajo la misma escala junto a la media de Madrid. Te permite verificar inmediatamente cuál es más cara, cuál crece más deprisa y si hay cruces de tendencia a lo largo del año.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Sección B: Indicadores */}
+              <div>
+                <div style={{ fontSize: '13px', fontWeight: '700', color: '#0071e3', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
+                  2. Guía de Indicadores (¿Qué significa cada métrica?)
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {/* Precio m² */}
+                  <div style={{ padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1d1d1f' }}>Precio m² (Alquiler o Compra)</span>
+                      <span style={{ fontSize: '11px', color: '#86868b' }}>€/m²</span>
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '3px' }}>
+                      El valor medio por metro cuadrado útil o construido en la zona. Permite comparar objetivamente el coste entre barrios sin que influya el tamaño de los pisos.
+                    </div>
+                  </div>
+
+                  {/* ROI % */}
+                  <div style={{ padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1d1d1f' }}>ROI % (Rentabilidad Bruta Anual)</span>
+                      <span style={{ fontSize: '11px', color: '#86868b' }}>Retorno / Año</span>
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '3px' }}>
+                      Mide el porcentaje anual de los ingresos brutos de alquiler con respecto al valor total de compra del inmueble. Por ejemplo, un 4.5% significa que por cada 100.000€ invertidos se obtienen 4.500€ brutos de rentas anuales.
+                    </div>
+                  </div>
+
+                  {/* Esfuerzo % */}
+                  <div style={{ padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1d1d1f' }}>Esfuerzo % (Tasa de Esfuerzo Financiero)</span>
+                      <span style={{ fontSize: '11px', color: '#86868b' }}>% de Sueldo Neto</span>
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '3px' }}>
+                      Porcentaje de los ingresos mensuales netos del hogar que se destinan al pago del alquiler o cuota de vivienda. El Banco de España recomienda mantenerse por debajo del 30%-35%; superar el 40% indica sobreesfuerzo y tensión económica en esa zona.
+                    </div>
+                  </div>
+
+                  {/* Poder Adquisitivo */}
+                  <div style={{ padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1d1d1f' }}>Poder Adquisitivo (Años de Renta)</span>
+                      <span style={{ fontSize: '11px', color: '#86868b' }}>Salario Anual Integro</span>
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '3px' }}>
+                      Mide cuántos años completos de sueldo anual íntegro necesita una familia residente típica de ese distrito o barrio para comprar una vivienda media. Menos de 5 años es asequible; entre 5 y 8 es moderado; más de 8 años supone alta dificultad económica.
+                    </div>
+                  </div>
+
+                  {/* Velocidad de Venta */}
+                  <div style={{ padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1d1d1f' }}>Velocidad de Venta</span>
+                      <span style={{ fontSize: '11px', color: '#86868b' }}>Meses hasta Notaría</span>
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '3px' }}>
+                      Tiempo promedio estimado en meses que tarda en cerrarse y firmarse una vivienda en esa área según el volumen de transacciones notariales. Menos de 2 meses indica un mercado rápido con alta demanda; más de 3 meses refleja un mercado más pausado.
+                    </div>
+                  </div>
+
+                  {/* Variación Anual */}
+                  <div style={{ padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1d1d1f' }}>Variación Anual</span>
+                      <span style={{ fontSize: '11px', color: '#86868b' }}>Tendencia 12 Meses</span>
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '3px' }}>
+                      Porcentaje de crecimiento o corrección del precio respecto al mismo mes del año anterior. Es el indicador más estable para evaluar revalorización a medio y largo plazo.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <button
+              onClick={() => setShowCompareHelpModal(false)}
               style={{
                 marginTop: '20px',
                 width: '100%',
