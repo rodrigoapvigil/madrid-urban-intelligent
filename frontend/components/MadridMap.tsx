@@ -101,8 +101,8 @@ const MadridMap: React.FC<MapProps> = ({
   useEffect(() => {
     if (!mapRef.current) {
       mapRef.current = L.map(containerId, {
-        center: [40.420, -3.695],
-        zoom: 11.8,
+        center: [40.440, -3.680],
+        zoom: 11.0,
         zoomSnap: 0.1,
         zoomDelta: 0.5,
         zoomControl: false,
@@ -254,13 +254,13 @@ const MadridMap: React.FC<MapProps> = ({
         }
       } else {
         if (type === 'districts') {
-          // Ajuste estrecho al núcleo habitado de Madrid para que los 21 distritos se vean enormes y ocupen todo el contenedor
-          const urbanBounds = L.latLngBounds([40.330, -3.815], [40.515, -3.570]);
-          mapRef.current?.flyToBounds(urbanBounds, { padding: [0, 0], duration: 1 });
+          // Encuadre completo del municipio urbano (~30% más contenido para que no desborde los márgenes)
+          const urbanBounds = L.latLngBounds([40.310, -3.845], [40.575, -3.515]);
+          mapRef.current?.flyToBounds(urbanBounds, { padding: [10, 10], duration: 1 });
         } else {
           const bounds = geoJsonLayerRef.current.getBounds();
           if (bounds.isValid()) {
-            mapRef.current?.flyToBounds(bounds, { padding: [5, 5], duration: 1 });
+            mapRef.current?.flyToBounds(bounds, { padding: [10, 10], duration: 1 });
           }
         }
       }
