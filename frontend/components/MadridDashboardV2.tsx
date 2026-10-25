@@ -106,7 +106,7 @@ const getZoneReliability = (district: string, isPrediction: boolean) => {
       titleColor: '#0071e3',
       borderColor: 'rgba(0, 113, 227, 0.25)',
       bg: 'rgba(0, 113, 227, 0.06)',
-      icon: '🏛️',
+      icon: '',
       description: 'Precio oficial registrado y certificado por el Banco de Datos del Ayuntamiento de Madrid.'
     };
   }
@@ -115,48 +115,48 @@ const getZoneReliability = (district: string, isPrediction: boolean) => {
   if (d.includes('centro') || d.includes('moncloa')) {
     return {
       type: 'hot',
-      tag: '⚡ PRECIOS RÁPIDOS',
+      tag: 'PRECIOS RÁPIDOS',
       title: 'Zona de Alta Demanda (Precios Rápidos)',
       titleColor: '#b25e00',
       borderColor: 'rgba(255, 159, 10, 0.35)',
       bg: 'rgba(255, 159, 10, 0.08)',
-      icon: '🔥',
-      description: 'Mucha rotación turística y estudiantes. Los precios se mueven rápido y pueden fluctuar más de lo normal.'
+      icon: '',
+      description: 'Mucha rotación y estudiantes. Los precios se mueven rápido y pueden fluctuar más de lo habitual.'
     };
   }
   if (d.includes('usera') || d.includes('villaverde') || d.includes('carabanchel')) {
     return {
       type: 'growth',
-      tag: '📈 EN AUGE',
+      tag: 'EN AUGE',
       title: 'Zona en Auge (Fuerte Demanda)',
       titleColor: '#b25e00',
       borderColor: 'rgba(255, 159, 10, 0.35)',
       bg: 'rgba(255, 159, 10, 0.08)',
-      icon: '📈',
-      description: 'Mucha gente mudándose desde el centro en busca de precios accesibles, empujando los precios al alza con fuerza.'
+      icon: '',
+      description: 'Desplazamiento de demanda hacia zonas con precios más accesibles, empujando la tendencia al alza.'
     };
   }
   if (d.includes('salamanca') || d.includes('retiro') || d.includes('chamberí') || d.includes('chamartín') || d.includes('arganzuela')) {
     return {
       type: 'stable',
-      tag: '🟢 ALTA FIABILIDAD',
+      tag: 'ALTA FIABILIDAD',
       title: 'Zona Muy Estable (Previsión Fiable)',
       titleColor: '#007a55',
       borderColor: 'rgba(0, 157, 113, 0.35)',
       bg: 'rgba(0, 157, 113, 0.08)',
-      icon: '🛡️',
-      description: 'Barrio consolidado con precios firmes. La previsión de nuestra IA es altamente segura y predecible.'
+      icon: '',
+      description: 'Barrio consolidado con precios firmes. La previsión estimada es altamente segura y predecible.'
     };
   }
   return {
     type: 'ai',
-    tag: '🔮 ESTIMACIÓN IA',
-    title: 'Previsión Inteligente (IA)',
+    tag: 'ESTIMACIÓN',
+    title: 'Previsión Estimada',
     titleColor: '#6b21a8',
     borderColor: 'rgba(142, 45, 226, 0.25)',
     bg: 'rgba(142, 45, 226, 0.07)',
-    icon: '🤖',
-    description: 'Previsión calculada por IA analizando más de 10.000 operaciones y la tendencia histórica de la capital.'
+    icon: '',
+    description: 'Previsión calculada analizando más de 10.000 operaciones y tendencias del mercado.'
   };
 };
 
@@ -648,11 +648,11 @@ const MadridDashboardV2: React.FC = () => {
                   enabled: true,
                   backgroundColor: 'rgba(29, 29, 31, 0.95)',
                   titleColor: '#ffffff',
-                  titleFont: { size: 12, weight: 'bold' },
+                  titleFont: { size: 14, weight: 'bold' },
                   bodyColor: '#f5f5f7',
-                  bodyFont: { size: 11, weight: 'normal' },
-                  bodySpacing: 6,
-                  padding: 12,
+                  bodyFont: { size: 13, weight: 'normal' },
+                  bodySpacing: 8,
+                  padding: 14,
                   cornerRadius: 10,
                   borderWidth: 0.5,
                   borderColor: 'rgba(255, 255, 255, 0.2)',
@@ -669,9 +669,11 @@ const MadridDashboardV2: React.FC = () => {
                     label: (context: any) => {
                       const idx = context.dataIndex;
                       const val = context.parsed.y;
-                      if (val === null || val === undefined) return '';
-
                       const unit = activeProfile.id === 'inversion' ? '%' : '€/m²';
+
+                      if (val === null || val === undefined) {
+                        return 'Sin datos registrados por el Ayuntamiento de Madrid para este periodo';
+                      }
 
                       // Línea 2: Media Madrid
                       if (context.datasetIndex === 1) {
@@ -680,14 +682,15 @@ const MadridDashboardV2: React.FC = () => {
                           maximumFractionDigits: 2 
                         }).format(val);
                         return [
-                          `🏛️ Media Madrid: ${formatted} ${unit}`,
-                          `   (Promedio oficial ponderado de la capital)`
+                          `Media Madrid: ${formatted} ${unit}`,
+                          `Referencia oficial ponderada de la capital`
                         ];
                       }
 
                       // Línea principal de la zona
                       const found = rawData.find(d => d.mes === idx + 1);
                       const isPred = found ? Boolean(found.is_prediction) : false;
+                      const tipoDato = isPred ? 'Predicción' : 'Dato Real Oficial';
                       const valFormatted = new Intl.NumberFormat('es-ES', { 
                         minimumFractionDigits: activeProfile.id === 'alquiler' ? 2 : 1, 
                         maximumFractionDigits: 2 
@@ -695,21 +698,25 @@ const MadridDashboardV2: React.FC = () => {
 
                       const lines: string[] = [];
 
-                      // 1. Precio y tipo de dato
-                      lines.push(`💰 Precio: ${valFormatted} ${unit}  [${isPred ? '🔮 Estimación IA' : '✓ Real Oficial'}]`);
+                      // 1. Precio actual y tipo de dato
+                      lines.push(`Precio actual: ${valFormatted} ${unit} [${tipoDato}]`);
 
                       // 2. Variación vs mes anterior
                       if (idx > 0) {
                         const prevVal = context.dataset.data[idx - 1];
                         if (prevVal !== null && prevVal !== undefined && prevVal > 0) {
                           const diffPrev = ((val - prevVal) / prevVal) * 100;
-                          const sign = diffPrev > 0 ? '+' : '';
-                          const icon = diffPrev > 0.08 ? '📈' : diffPrev < -0.08 ? '📉' : '➡️';
-                          const tend = diffPrev > 0.08 ? 'Sube' : diffPrev < -0.08 ? 'Baja' : 'Estable';
-                          lines.push(`${icon} vs Mes anterior: ${sign}${diffPrev.toFixed(1)}% (${tend})`);
+                          const absDiff = Math.abs(diffPrev).toFixed(1);
+                          if (diffPrev > 0.08) {
+                            lines.push(`Variación mes anterior: Subida del ${absDiff}%`);
+                          } else if (diffPrev < -0.08) {
+                            lines.push(`Variación mes anterior: Bajada del ${absDiff}%`);
+                          } else {
+                            lines.push(`Variación mes anterior: Sin variación (0.0%)`);
+                          }
                         }
                       } else {
-                        lines.push(`📅 Inicio de año ${selectedYear}`);
+                        lines.push(`Inicio del ejercicio ${selectedYear}`);
                       }
 
                       // 3. Comparativa vs Media de Madrid
@@ -717,31 +724,31 @@ const MadridDashboardV2: React.FC = () => {
                       const madridVal = madridItem ? madridItem.precio_m2 * multiplier : null;
                       if (madridVal !== null && madridVal !== undefined && madridVal > 0) {
                         const diffMadrid = ((val - madridVal) / madridVal) * 100;
-                        const sign = diffMadrid > 0 ? '+' : '';
+                        const absDiffMadrid = Math.abs(diffMadrid).toFixed(1);
                         const madridFmt = new Intl.NumberFormat('es-ES', { 
                           minimumFractionDigits: activeProfile.id === 'alquiler' ? 2 : 1, 
                           maximumFractionDigits: 1 
                         }).format(madridVal);
 
                         if (Math.abs(diffMadrid) <= 2) {
-                          lines.push(`🏛️ vs Media Madrid (${madridFmt} ${unit}): En la media`);
+                          lines.push(`Comparativa Madrid: En la media de Madrid (${madridFmt} ${unit})`);
                         } else if (diffMadrid > 0) {
-                          lines.push(`🏛️ vs Media Madrid (${madridFmt} ${unit}): ${sign}${diffMadrid.toFixed(1)}% más alto`);
+                          lines.push(`Comparativa Madrid: Un ${absDiffMadrid}% más caro que la media (${madridFmt} ${unit})`);
                         } else {
-                          lines.push(`🏛️ vs Media Madrid (${madridFmt} ${unit}): ${diffMadrid.toFixed(1)}% más bajo`);
+                          lines.push(`Comparativa Madrid: Un ${absDiffMadrid}% más barato que la media (${madridFmt} ${unit})`);
                         }
 
-                        // 4. Veredicto rápido (¿Caro o Barato?)
+                        // 4. Diagnóstico
                         if (diffMadrid >= 20) {
-                          lines.push(`💡 Veredicto: Zona prémium (alta demanda)`);
+                          lines.push(`Diagnóstico: Zona prémium de alta cotización`);
                         } else if (diffMadrid > 5) {
-                          lines.push(`💡 Veredicto: Por encima del promedio`);
+                          lines.push(`Diagnóstico: Por encima del promedio`);
                         } else if (diffMadrid <= -20) {
-                          lines.push(`💡 Veredicto: Zona muy asequible (económica)`);
+                          lines.push(`Diagnóstico: Zona asequible y económica`);
                         } else if (diffMadrid < -5) {
-                          lines.push(`💡 Veredicto: Más asequible que la media`);
+                          lines.push(`Diagnóstico: Más accesible que el promedio`);
                         } else {
-                          lines.push(`💡 Veredicto: Precio estándar de Madrid`);
+                          lines.push(`Diagnóstico: Precio en la media de la capital`);
                         }
                       }
 
@@ -948,11 +955,11 @@ const MadridDashboardV2: React.FC = () => {
                   enabled: true,
                   backgroundColor: 'rgba(29, 29, 31, 0.95)',
                   titleColor: '#ffffff',
-                  titleFont: { size: 12, weight: 'bold' },
+                  titleFont: { size: 14, weight: 'bold' },
                   bodyColor: '#f5f5f7',
-                  bodyFont: { size: 11, weight: 'normal' },
-                  bodySpacing: 5,
-                  padding: 12,
+                  bodyFont: { size: 13, weight: 'normal' },
+                  bodySpacing: 8,
+                  padding: 14,
                   cornerRadius: 10,
                   borderWidth: 0.5,
                   borderColor: 'rgba(255, 255, 255, 0.2)',
@@ -969,9 +976,12 @@ const MadridDashboardV2: React.FC = () => {
                     label: (context: any) => {
                       const idx = context.dataIndex;
                       const val = context.parsed.y;
-                      if (val === null || val === undefined) return '';
-
                       const unit = activeProfile.id === 'inversion' ? '%' : '€/m²';
+
+                      if (val === null || val === undefined) {
+                        return 'Sin datos registrados por el Ayuntamiento de Madrid para este periodo';
+                      }
+
                       const valFormatted = new Intl.NumberFormat('es-ES', { 
                         minimumFractionDigits: activeProfile.id === 'alquiler' ? 2 : 1, 
                         maximumFractionDigits: 2 
@@ -979,7 +989,10 @@ const MadridDashboardV2: React.FC = () => {
 
                       // Si es la media de Madrid
                       if (context.datasetIndex === 2) {
-                        return `🏛️ Media Madrid: ${valFormatted} ${unit} (Referencia general)`;
+                        return [
+                          `Media Madrid: ${valFormatted} ${unit}`,
+                          `Referencia oficial de la capital`
+                        ];
                       }
 
                       const isZoneA = context.datasetIndex === 0;
@@ -990,18 +1003,56 @@ const MadridDashboardV2: React.FC = () => {
 
                       const found = currentDataset.find(d => d.mes === idx + 1);
                       const isPred = found ? Boolean(found.is_prediction) : false;
+                      const tipoDato = isPred ? 'Predicción' : 'Dato Real Oficial';
 
                       const lines: string[] = [
-                        `📍 ${currentZone}: ${valFormatted} ${unit} [${isPred ? '🔮 Estimación IA' : '✓ Real Oficial'}]`
+                        `${currentZone}: ${valFormatted} ${unit} [${tipoDato}]`
                       ];
+
+                      // Variación vs mes anterior en esta zona
+                      if (idx > 0) {
+                        const prevVal = context.dataset.data[idx - 1];
+                        if (prevVal !== null && prevVal !== undefined && prevVal > 0) {
+                          const diffPrev = ((val - prevVal) / prevVal) * 100;
+                          const absDiff = Math.abs(diffPrev).toFixed(1);
+                          if (diffPrev > 0.08) {
+                            lines.push(`Variación mes anterior: Subida del ${absDiff}%`);
+                          } else if (diffPrev < -0.08) {
+                            lines.push(`Variación mes anterior: Bajada del ${absDiff}%`);
+                          } else {
+                            lines.push(`Variación mes anterior: Sin variación (0.0%)`);
+                          }
+                        }
+                      }
 
                       // Comparar con la otra zona
                       const otherItem = otherDataset.find(d => d.mes === idx + 1);
                       const otherVal = otherItem ? otherItem.precio_m2 * (activeProfile.id === 'inversion' ? 100 : 1) : null;
                       if (otherVal !== null && otherVal > 0) {
                         const diffOther = ((val - otherVal) / otherVal) * 100;
-                        const sign = diffOther > 0 ? '+' : '';
-                        lines.push(`   vs ${otherZone}: ${sign}${diffOther.toFixed(1)}% (${diffOther > 0 ? 'Más caro' : 'Más barato'})`);
+                        const absDiffOther = Math.abs(diffOther).toFixed(1);
+                        if (diffOther > 0) {
+                          lines.push(`Comparativa con ${otherZone}: Un ${absDiffOther}% más caro`);
+                        } else if (diffOther < 0) {
+                          lines.push(`Comparativa con ${otherZone}: Un ${absDiffOther}% más barato`);
+                        } else {
+                          lines.push(`Comparativa con ${otherZone}: Mismo nivel de precio`);
+                        }
+                      }
+
+                      // Comparativa con la media de Madrid
+                      const madridItem = seriesMadrid.find(d => d.mes === idx + 1);
+                      const madridVal = madridItem ? madridItem.precio_m2 * (activeProfile.id === 'inversion' ? 100 : 1) : null;
+                      if (madridVal !== null && madridVal > 0) {
+                        const diffMadrid = ((val - madridVal) / madridVal) * 100;
+                        const absDiffMadrid = Math.abs(diffMadrid).toFixed(1);
+                        if (Math.abs(diffMadrid) <= 2) {
+                          lines.push(`Comparativa Madrid: En la media general`);
+                        } else if (diffMadrid > 0) {
+                          lines.push(`Comparativa Madrid: Un ${absDiffMadrid}% superior a la media`);
+                        } else {
+                          lines.push(`Comparativa Madrid: Un ${absDiffMadrid}% por debajo de la media`);
+                        }
                       }
 
                       return lines;
@@ -1518,12 +1569,9 @@ const MadridDashboardV2: React.FC = () => {
                         }}
                       >
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <span style={{ fontSize: '14px' }}>{info.icon}</span>
-                            <span style={{ fontSize: '11px', fontWeight: '700', color: info.titleColor, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                              {info.title}
-                            </span>
-                          </div>
+                          <span style={{ fontSize: '11px', fontWeight: '700', color: info.titleColor, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                            {info.title}
+                          </span>
                           <span 
                             style={{ 
                               fontSize: '9px', 
@@ -2175,6 +2223,33 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-map-header">
                     <div className="v2-pill">Mapas Interactivos</div>
                   </div>
+
+                  {/* GUÍA DEL MAPA */}
+                  <div 
+                    style={{
+                      margin: '2px 0 14px 0',
+                      padding: '8px 14px',
+                      backgroundColor: '#f5f5f7',
+                      borderRadius: '10px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      fontSize: '11px',
+                      color: '#424245',
+                      lineHeight: 1.4,
+                      flexWrap: 'wrap',
+                      gap: '8px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontWeight: '700', color: '#1d1d1f' }}>Guía del mapa:</span>
+                      <span>Colores oscuros = precios más altos · Colores claros = precios más accesibles</span>
+                    </div>
+                    <div style={{ color: '#86868b' }}>
+                      Haz clic en un distrito para ver sus barrios (clic de nuevo para volver)
+                    </div>
+                  </div>
+
                   <div className="v2-dual-maps">
                     <div className="v2-map-sub">
                       <span>Distritos</span>
@@ -2936,13 +3011,13 @@ const MadridDashboardV2: React.FC = () => {
 
               {/* Bloque 2: Futuro */}
               <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
-                <div style={{ fontSize: '24px', flexShrink: 0 }}>🔮</div>
+                <div style={{ fontSize: '24px', flexShrink: 0 }}>📊</div>
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '2px' }}>
-                    Previsiones Inteligentes (Julio 2026 a 2028)
+                    Previsiones Estimadas (Julio 2026 a 2028)
                   </div>
                   <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.45 }}>
-                    Nuestra Inteligencia Artificial analiza el historial de más de 10.000 viviendas, los tipos de interés y la demanda de cada barrio para proyectar qué precio cabe esperar en los próximos meses y años.
+                    Nuestros modelos estadísticos y predictivos analizan el histórico de más de 10.000 operaciones y viviendas, los tipos de interés y la demanda de cada barrio para proyectar qué precio cabe esperar en los próximos meses y años.
                   </div>
                 </div>
               </div>
@@ -2956,10 +3031,10 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: '#515154', lineHeight: 1.4 }}>
                     <div>
-                      <strong style={{ color: '#007a55' }}>🟢 Zonas Muy Estables</strong> (ej. Retiro, Salamanca, Chamberí): Precios firmes y continuos. La previsión de la IA es altamente fiable.
+                      <strong style={{ color: '#007a55' }}>🟢 Zonas Muy Estables</strong> (ej. Retiro, Salamanca, Chamberí): Precios firmes y continuos. La previsión estimada es altamente fiable.
                     </div>
                     <div>
-                      <strong style={{ color: '#b25e00' }}>🟡 Zonas Rápidas o en Auge</strong> (ej. Centro, Usera, Moncloa, Villaverde): Barrios con gran rotación turística o familias mudándose desde el centro. Los precios reales se mueven muy deprisa.
+                      <strong style={{ color: '#b25e00' }}>🟡 Zonas Rápidas o en Auge</strong> (ej. Centro, Usera, Moncloa, Villaverde): Barrios con gran rotación turística o familias mudándose desde el centro. Los precios reales se mueven con mayor dinamismo.
                     </div>
                   </div>
                 </div>
