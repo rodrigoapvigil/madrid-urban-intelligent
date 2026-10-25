@@ -645,17 +645,107 @@ const MadridDashboardV2: React.FC = () => {
                   }
                 },
                 tooltip: { 
-                  backgroundColor: '#ffffff',
-                  borderWidth: 1,
-                  borderColor: '#d2d2d7',
+                  enabled: true,
+                  backgroundColor: 'rgba(29, 29, 31, 0.95)',
+                  titleColor: '#ffffff',
+                  titleFont: { size: 12, weight: 'bold' },
+                  bodyColor: '#f5f5f7',
+                  bodyFont: { size: 11, weight: 'normal' },
+                  bodySpacing: 6,
                   padding: 12,
+                  cornerRadius: 10,
+                  borderWidth: 0.5,
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                  displayColors: false,
                   callbacks: {
+                    title: (items: any[]) => {
+                      const monthNames = [
+                        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+                      ];
+                      const idx = items[0]?.dataIndex ?? 0;
+                      return `${monthNames[idx]} ${selectedYear} · ${label}`;
+                    },
                     label: (context: any) => {
-                      const found = rawData.find(d => d.mes === context.dataIndex + 1);
-                      const isPred = found ? found.is_prediction : false;
-                      const unit = activeProfile.id === 'inversion' ? '%' : '€';
-                      const val = new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(context.parsed.y);
-                      return `${context.dataset.label}: ${val}${unit} ${isPred ? '(Predicción)' : ''}`;
+                      const idx = context.dataIndex;
+                      const val = context.parsed.y;
+                      if (val === null || val === undefined) return '';
+
+                      const unit = activeProfile.id === 'inversion' ? '%' : '€/m²';
+
+                      // Línea 2: Media Madrid
+                      if (context.datasetIndex === 1) {
+                        const formatted = new Intl.NumberFormat('es-ES', { 
+                          minimumFractionDigits: activeProfile.id === 'alquiler' ? 2 : 1, 
+                          maximumFractionDigits: 2 
+                        }).format(val);
+                        return [
+                          `🏛️ Media Madrid: ${formatted} ${unit}`,
+                          `   (Promedio oficial ponderado de la capital)`
+                        ];
+                      }
+
+                      // Línea principal de la zona
+                      const found = rawData.find(d => d.mes === idx + 1);
+                      const isPred = found ? Boolean(found.is_prediction) : false;
+                      const valFormatted = new Intl.NumberFormat('es-ES', { 
+                        minimumFractionDigits: activeProfile.id === 'alquiler' ? 2 : 1, 
+                        maximumFractionDigits: 2 
+                      }).format(val);
+
+                      const lines: string[] = [];
+
+                      // 1. Precio y tipo de dato
+                      lines.push(`💰 Precio: ${valFormatted} ${unit}  [${isPred ? '🔮 Estimación IA' : '✓ Real Oficial'}]`);
+
+                      // 2. Variación vs mes anterior
+                      if (idx > 0) {
+                        const prevVal = context.dataset.data[idx - 1];
+                        if (prevVal !== null && prevVal !== undefined && prevVal > 0) {
+                          const diffPrev = ((val - prevVal) / prevVal) * 100;
+                          const sign = diffPrev > 0 ? '+' : '';
+                          const icon = diffPrev > 0.08 ? '📈' : diffPrev < -0.08 ? '📉' : '➡️';
+                          const tend = diffPrev > 0.08 ? 'Sube' : diffPrev < -0.08 ? 'Baja' : 'Estable';
+                          lines.push(`${icon} vs Mes anterior: ${sign}${diffPrev.toFixed(1)}% (${tend})`);
+                        }
+                      } else {
+                        lines.push(`📅 Inicio de año ${selectedYear}`);
+                      }
+
+                      // 3. Comparativa vs Media de Madrid
+                      const madridItem = seriesMadrid.find(d => d.mes === idx + 1);
+                      const madridVal = madridItem ? madridItem.precio_m2 * multiplier : null;
+                      if (madridVal !== null && madridVal !== undefined && madridVal > 0) {
+                        const diffMadrid = ((val - madridVal) / madridVal) * 100;
+                        const sign = diffMadrid > 0 ? '+' : '';
+                        const madridFmt = new Intl.NumberFormat('es-ES', { 
+                          minimumFractionDigits: activeProfile.id === 'alquiler' ? 2 : 1, 
+                          maximumFractionDigits: 1 
+                        }).format(madridVal);
+
+                        if (Math.abs(diffMadrid) <= 2) {
+                          lines.push(`🏛️ vs Media Madrid (${madridFmt} ${unit}): En la media`);
+                        } else if (diffMadrid > 0) {
+                          lines.push(`🏛️ vs Media Madrid (${madridFmt} ${unit}): ${sign}${diffMadrid.toFixed(1)}% más alto`);
+                        } else {
+                          lines.push(`🏛️ vs Media Madrid (${madridFmt} ${unit}): ${diffMadrid.toFixed(1)}% más bajo`);
+                        }
+
+                        // 4. Veredicto rápido (¿Caro o Barato?)
+                        if (diffMadrid >= 20) {
+                          lines.push(`💡 Veredicto: Zona prémium (alta demanda)`);
+                        } else if (diffMadrid > 5) {
+                          lines.push(`💡 Veredicto: Por encima del promedio`);
+                        } else if (diffMadrid <= -20) {
+                          lines.push(`💡 Veredicto: Zona muy asequible (económica)`);
+                        } else if (diffMadrid < -5) {
+                          lines.push(`💡 Veredicto: Más asequible que la media`);
+                        } else {
+                          lines.push(`💡 Veredicto: Precio estándar de Madrid`);
+                        }
+                      }
+
+                      return lines;
                     }
                   }
                 } 
@@ -855,14 +945,66 @@ const MadridDashboardV2: React.FC = () => {
                   }
                 },
                 tooltip: {
+                  enabled: true,
+                  backgroundColor: 'rgba(29, 29, 31, 0.95)',
+                  titleColor: '#ffffff',
+                  titleFont: { size: 12, weight: 'bold' },
+                  bodyColor: '#f5f5f7',
+                  bodyFont: { size: 11, weight: 'normal' },
+                  bodySpacing: 5,
+                  padding: 12,
+                  cornerRadius: 10,
+                  borderWidth: 0.5,
+                  borderColor: 'rgba(255, 255, 255, 0.2)',
+                  displayColors: false,
                   callbacks: {
+                    title: (items: any[]) => {
+                      const monthNames = [
+                        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+                        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+                      ];
+                      const idx = items[0]?.dataIndex ?? 0;
+                      return `${monthNames[idx]} ${selectedYear} · Comparativa Superpuesta`;
+                    },
                     label: (context: any) => {
-                      const dataset = context.dataset.label === selectedZoneA ? seriesA : context.dataset.label === selectedZoneB ? seriesB : seriesMadrid;
-                      const found = dataset.find(d => d.mes === context.dataIndex + 1);
-                      const isPred = found ? found.is_prediction : false;
-                      const unit = activeProfile.id === 'inversion' ? '%' : '€';
-                      const val = new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(context.parsed.y);
-                      return `${context.dataset.label}: ${val}${unit} ${isPred ? '(Predicción)' : ''}`;
+                      const idx = context.dataIndex;
+                      const val = context.parsed.y;
+                      if (val === null || val === undefined) return '';
+
+                      const unit = activeProfile.id === 'inversion' ? '%' : '€/m²';
+                      const valFormatted = new Intl.NumberFormat('es-ES', { 
+                        minimumFractionDigits: activeProfile.id === 'alquiler' ? 2 : 1, 
+                        maximumFractionDigits: 2 
+                      }).format(val);
+
+                      // Si es la media de Madrid
+                      if (context.datasetIndex === 2) {
+                        return `🏛️ Media Madrid: ${valFormatted} ${unit} (Referencia general)`;
+                      }
+
+                      const isZoneA = context.datasetIndex === 0;
+                      const currentZone = isZoneA ? selectedZoneA : selectedZoneB;
+                      const otherZone = isZoneA ? selectedZoneB : selectedZoneA;
+                      const currentDataset = isZoneA ? seriesA : seriesB;
+                      const otherDataset = isZoneA ? seriesB : seriesA;
+
+                      const found = currentDataset.find(d => d.mes === idx + 1);
+                      const isPred = found ? Boolean(found.is_prediction) : false;
+
+                      const lines: string[] = [
+                        `📍 ${currentZone}: ${valFormatted} ${unit} [${isPred ? '🔮 Estimación IA' : '✓ Real Oficial'}]`
+                      ];
+
+                      // Comparar con la otra zona
+                      const otherItem = otherDataset.find(d => d.mes === idx + 1);
+                      const otherVal = otherItem ? otherItem.precio_m2 * (activeProfile.id === 'inversion' ? 100 : 1) : null;
+                      if (otherVal !== null && otherVal > 0) {
+                        const diffOther = ((val - otherVal) / otherVal) * 100;
+                        const sign = diffOther > 0 ? '+' : '';
+                        lines.push(`   vs ${otherZone}: ${sign}${diffOther.toFixed(1)}% (${diffOther > 0 ? 'Más caro' : 'Más barato'})`);
+                      }
+
+                      return lines;
                     }
                   }
                 }
