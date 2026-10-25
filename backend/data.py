@@ -140,11 +140,11 @@ def get_years() -> list:
         return [2024]
     try:
         conn = _conn()
-        df = pd.read_sql("SELECT DISTINCT anio FROM Dim_Tiempo WHERE anio <= 2026 ORDER BY anio", conn)
+        df = pd.read_sql("SELECT DISTINCT anio FROM Dim_Tiempo WHERE anio <= 2028 ORDER BY anio", conn)
         conn.close()
         return df['anio'].tolist()
     except:
-        return [2023, 2024, 2025, 2026]
+        return [2023, 2024, 2025, 2026, 2027, 2028]
 
 
 def get_months_for_year(anio: int) -> list:

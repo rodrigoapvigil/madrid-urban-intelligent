@@ -1,0 +1,58 @@
+[
+  {
+    "id": "TASK-001",
+    "title": "Implementar Scraper Automatizado Playwright para Banco de Datos Municipal",
+    "description": "Crear el script pipeline/scrape_ayto_bancodatos.py utilizando Playwright headless para navegar a las series oficiales de Alquiler (0504030000214) y Venta (0504030000153) en https://servpub.madrid.es/CSEBD_WBINTER/seleccionSerie.html. El script debe configurar exactamente el formulario: Año=2026, Distritos=Todos excepto 'Total Ciudad de Madrid' (21 seleccionados), Barrios=Todos (checkboxes 'Todos' y 'Totales' marcados, 152 elementos), Meses=Todos (checkbox 'Todos' marcado), y descargar los dos CSVs oficiales brutos en la carpeta data/raw_update/.",
+    "acceptance_criteria": "CUANDO se ejecute python pipeline/scrape_ayto_bancodatos.py EL SISTEMA DEBE descargar data/raw_update/alquiler_2026_raw.csv y data/raw_update/venta_2026_raw.csv conteniendo las observaciones de 2026 con al menos 150 filas por archivo.",
+    "verify_command": "python -c \"import os; assert os.path.exists('pipeline/scrape_ayto_bancodatos.py'), 'Script no encontrado'\""
+  },
+  {
+    "id": "TASK-002",
+    "title": "Construir Procesador ETL y Parser de CSVs Municipales 2026",
+    "description": "Desarrollar pipeline/clean_update_2026.py adaptando la lógica canónica de clean_ayto_2.py. Debe saltar las cabeceras descriptivas de 5 líneas, pivotar el formato ancho (columnas 1 a 12 de meses) a formato largo relacional (Ano, Mes, cod_distrito, cod_barrio, Precio_m2), normalizar nombres con unidecode, descartar 'Total Ciudad de Madrid', filtrar exclusivamente los meses nuevos que no estaban en la base (Abril, Mayo, Junio 2026) y exportar el dataset limpio a data/ground_truth_2026_q2.csv.",
+    "acceptance_criteria": "CUANDO se ejecute el parser ETL sobre los CSVs de 2026 EL SISTEMA DEBE generar data/ground_truth_2026_q2.csv con registros estrictamente correspondientes a meses 4, 5 y 6 de 2026, sin valores nulos ni caracteres especiales.",
+    "verify_command": "python -c \"import os; assert os.path.exists('pipeline/clean_update_2026.py'), 'Parser ETL no encontrado'\""
+  },
+  {
+    "id": "TASK-003",
+    "title": "Ingestar Datos Reales (Abril-Junio 2026) en SQLite Fact_Operacion",
+    "description": "Crear pipeline/ingest_ground_truth_db.py para insertar de forma atómica y transaccional los nuevos registros de Abril, Mayo y Junio de 2026 en Fact_Operacion de data/madrid_intelligence.db. Debe verificar la existencia de los IDs en Dim_Tiempo (crear 202604, 202605, 202606 si faltasen), cruzar superficies medias para calcular precio_promedio_vivienda, e imputar id_barrio = -1 cuando sea dato distrital, asegurando que CERO predicciones se guarden en la base de datos.",
+    "acceptance_criteria": "CUANDO finalice la ingesta en SQLite EL SISTEMA DEBE registrar exactamente datos reales para meses 4, 5 y 6 de 2026 en Fact_Operacion, verificable mediante SELECT COUNT(*) FROM Fact_Operacion f JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo WHERE t.anio = 2026 AND t.mes IN (4, 5, 6).",
+    "verify_command": "python -c \"import sqlite3; conn = sqlite3.connect('data/madrid_intelligence.db'); c = conn.cursor(); c.execute('SELECT COUNT(*) FROM Dim_Tiempo WHERE anio = 2026'); assert c.fetchone()[0] >= 3; conn.close()\""
+  },
+  {
+    "id": "TASK-004",
+    "title": "Generar Auditoría de Drift y Reporte Estadístico (Excel Multi-Pestaña + MD)",
+    "description": "Desarrollar pipeline/audit_prediction_drift.py que cruce el Ground Truth recién ingestada (Abril–Junio 2026) contra la predicción antigua almacenada en data/predictions.csv. El script debe calcular APE (Error Porcentual Absoluto), MAPE, dirección del sesgo (Sobreestimado/Subestimado) y evaluar el cumplimiento de umbrales (≤5.0% distritos, ≤8.5% barrios). Debe generar un Excel profesional con OpenPyXL en data/auditoria_drift_2026.xlsx con pestañas: 'Distritos', 'Barrios' y 'Resumen Ejecutivo', además de redactar el informe técnico AUDITORIA_DRIFT_2026.md.",
+    "acceptance_criteria": "CUANDO se ejecute la auditoría EL SISTEMA DEBE producir data/auditoria_drift_2026.xlsx con 3 pestañas formateadas con estilos de celda y el informe AUDITORIA_DRIFT_2026.md con tablas resumen de MAPE por mes.",
+    "verify_command": "python -c \"import os; assert os.path.exists('pipeline/audit_prediction_drift.py'), 'Script de auditoria no encontrado'\""
+  },
+  {
+    "id": "TASK-005",
+    "title": "Actualizar Dataset Maestro de Entrenamiento y Features Geoespaciales",
+    "description": "Ejecutar pipeline/generate_operational_dataset.py enriquecido con los datos reales hasta Junio 2026 para regenerar 02_fuente_operativa_modelo/df_master_full.csv y los splits de entrenamiento y validación (train_barrio.csv, val_barrio.csv, train_distrito.csv, val_distrito.csv). Debe recomputar las 27 features del modelo (lags temporales, precio_vecinos_m2, target encoding) asegurando que no haya fuga de datos hacia el futuro.",
+    "acceptance_criteria": "CUANDO se procese el dataset operativo EL SISTEMA DEBE generar df_master_full.csv conteniendo histórico completo de operaciones hasta Junio 2026 inclusive.",
+    "verify_command": "python -c \"import os; assert os.path.exists('pipeline/generate_operational_dataset.py'), 'Generador de dataset no encontrado'\""
+  },
+  {
+    "id": "TASK-006",
+    "title": "Reentrenar Modelos XGBoost (Alquiler y Venta v2)",
+    "description": "Construir y ejecutar el script pipeline/train_xgb_models.py para reentrenar los modelos XGBoost de Alquiler y Venta con el dataset histórico extendido (hasta 2026-06). El script debe ajustar hiperparámetros con Early Stopping sobre el set de validación, reajustar los scalers MinMaxScaler y StandardScaler, y exportar los modelos actualizados a models/model_xgb_alquiler_v2.json y models/model_xgb_venta_v2.json junto con sus metadatos de validación.",
+    "acceptance_criteria": "CUANDO finalice el entrenamiento EL SISTEMA DEBE guardar models/model_xgb_alquiler_v2.json y models/model_xgb_venta_v2.json con métricas R2 y RMSE calculadas y validadas.",
+    "verify_command": "python -c \"import os; assert os.path.exists('pipeline/train_xgb_models.py'), 'Script de entrenamiento no encontrado'\""
+  },
+  {
+    "id": "TASK-007",
+    "title": "Generar Predicciones 2026-2028 y Comparativa de Expectativas 2027",
+    "description": "Desarrollar pipeline/generate_predictions_2028.py para inferir precios mensuales para todos los distritos y barrios desde Julio 2026 hasta Diciembre 2028 (24 meses de proyección) para venta y alquiler. Debe generar data/predictions.csv canónico con intervalos de confianza inferior/superior. Asimismo, debe contrastar la nueva predicción de 2027 con la antigua predicción de 2027, generando el informe COMPARATIVA_PREDICCIONES_2027.md que detalle cómo los nuevos datos reales de 2026 corrigieron la senda esperada del mercado.",
+    "acceptance_criteria": "CUANDO se genere la inferencia EL SISTEMA DEBE producir un predictions.csv con registros hasta el año 2028 y el documento COMPARATIVA_PREDICCIONES_2027.md con el análisis delta entre predicciones.",
+    "verify_command": "python -c \"import os; assert os.path.exists('pipeline/generate_predictions_2028.py'), 'Script de inferencia no encontrado'\""
+  },
+  {
+    "id": "TASK-008",
+    "title": "Despliegue a Producción (Render & Vercel) y Verificación en Vivo",
+    "description": "Sincronizar la base de datos madrid_intelligence.db y el nuevo predictions.csv hacia backend/data/ y data/, verificar que los tests locales pasen, realizar commit y push a la rama main de GitHub. Tras el build de Render y Vercel, ejecutar una batería de pruebas de humo HTTP contra https://madrid-urban-api.onrender.com y https://dmiyc.com/madrid comprobando que el heatmap y los selectores muestren los datos de Junio 2026 y las proyecciones hasta 2028.",
+    "acceptance_criteria": "CUANDO se completen los despliegues en la nube EL SISTEMA DEBE responder HTTP 200 en https://madrid-urban-api.onrender.com/api/heatmap?year=2026&op=alquiler conteniendo meses 1 a 6 con datos reales y meses 7 a 12 con predicciones.",
+    "verify_command": "python -c \"import urllib.request; resp = urllib.request.urlopen('https://madrid-urban-api.onrender.com/api/filters'); assert resp.status == 200\""
+  }
+]

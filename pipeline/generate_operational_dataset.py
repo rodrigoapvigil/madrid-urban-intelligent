@@ -1,20 +1,22 @@
 import sqlite3
 from pathlib import Path
-
 import numpy as np
 import pandas as pd
 
+REPO_DIR = Path(__file__).resolve().parent.parent
+DB_PATH = REPO_DIR / "data" / "madrid_intelligence.db"
 
-BASE_DIR = Path(r"C:\Users\FX517\OneDrive\Desktop\TFM\FASE 5")
-SOURCE_DIR = BASE_DIR / "01_fuente_original_real"
-OUTPUT_DIR = BASE_DIR / "02_fuente_operativa_modelo"
+FASE5_DIR = Path(r"C:\Users\FX517\OneDrive\Desktop\TFM\FASE 5")
+SOURCE_DIR = FASE5_DIR / "01_fuente_original_real"
+OUTPUT_DIR_FASE5 = FASE5_DIR / "02_fuente_operativa_modelo"
+OUTPUT_DIR_LOCAL = REPO_DIR / "data" / "operational"
+OUTPUT_DIR_ROOT = REPO_DIR / "02_fuente_operativa_modelo"
 
-DB_PATH = SOURCE_DIR / "madrid_intelligence.db"
 INTEREST_SOURCE = SOURCE_DIR / "Datos de la serie 0504020100150 (1).csv"
 TRANSACTIONS_SOURCE = SOURCE_DIR / "Datos de la serie 0504020100010.csv"
 
-
 def load_db_base() -> pd.DataFrame:
+    print(f"[DATASET] Extrayendo base histórica desde: {DB_PATH}")
     conn = sqlite3.connect(DB_PATH)
     try:
         query = """
@@ -52,10 +54,11 @@ def load_db_base() -> pd.DataFrame:
         df = pd.read_sql_query(query, conn)
     finally:
         conn.close()
+    print(f"[DATASET] Registros cargados desde Fact_Operacion: {len(df)}")
     return df
 
-
 def add_temporal_features(df: pd.DataFrame) -> pd.DataFrame:
+    print("[DATASET] Recomputando features temporales (lags, rolling mean, shocks)...")
     df = df.sort_values(["tipo_operacion", "id_distrito", "id_barrio", "anio", "mes"]).copy()
     grp = df.groupby(["tipo_operacion", "id_distrito", "id_barrio"])["precio_m2"]
     df["lag_1"] = grp.shift(1)
@@ -64,7 +67,6 @@ def add_temporal_features(df: pd.DataFrame) -> pd.DataFrame:
     df["rolling_mean_6"] = grp.transform(lambda s: s.shift(1).rolling(6).mean())
     df["shock_2025"] = (df["anio"] == 2025).astype(int)
     return df
-
 
 def parse_interest_series(csv_path: Path) -> pd.DataFrame:
     df_raw = pd.read_csv(csv_path, sep=";", encoding="latin-1", skiprows=5)
@@ -120,7 +122,6 @@ def parse_interest_series(csv_path: Path) -> pd.DataFrame:
     result["anio"] = result["anio"].astype(int)
     return result.sort_values(["id_distrito", "id_barrio", "anio"]).reset_index(drop=True)
 
-
 def parse_transactions_series(csv_path: Path) -> pd.DataFrame:
     rows = []
     with open(csv_path, "r", encoding="latin-1") as handle:
@@ -159,19 +160,19 @@ def parse_transactions_series(csv_path: Path) -> pd.DataFrame:
     result = pd.DataFrame(rows)
     return result.sort_values(["id_distrito", "id_barrio", "anio"]).reset_index(drop=True)
 
-
 def split_operational_sets(df_full: pd.DataFrame):
     barrio_df = df_full[df_full["id_barrio"] != -1].copy()
     distrito_df = df_full[df_full["id_barrio"] == -1].copy()
 
+    # Train: 2023-2025
     train_barrio = barrio_df[barrio_df["anio"].isin([2023, 2024, 2025])].copy()
+    # Val: 2026 (meses 1 a 6 ahora disponibles)
     val_barrio = barrio_df[barrio_df["anio"] == 2026].copy()
 
     train_distrito = distrito_df[distrito_df["anio"].isin([2023, 2024, 2025])].copy()
     val_distrito = distrito_df[distrito_df["anio"] == 2026].copy()
 
     return train_barrio, val_barrio, train_distrito, val_distrito
-
 
 def validate_against_master(df: pd.DataFrame, master_features: pd.DataFrame) -> dict:
     keys = ["tipo_operacion", "id_distrito", "id_barrio", "anio", "mes"]
@@ -211,9 +212,11 @@ def validate_against_master(df: pd.DataFrame, master_features: pd.DataFrame) -> 
         )
     return summary
 
-
 def main():
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    OUTPUT_DIR_LOCAL.mkdir(parents=True, exist_ok=True)
+    OUTPUT_DIR_ROOT.mkdir(parents=True, exist_ok=True)
+    if OUTPUT_DIR_FASE5.parent.exists():
+        OUTPUT_DIR_FASE5.mkdir(parents=True, exist_ok=True)
 
     df_base = load_db_base()
     df_master_full = add_temporal_features(df_base)
@@ -246,32 +249,25 @@ def main():
         "shock_2025",
     ]
 
-    df_master_full[export_columns].to_csv(OUTPUT_DIR / "df_master_full.csv", index=False)
-    train_barrio[export_columns].to_csv(OUTPUT_DIR / "train_barrio.csv", index=False)
-    val_barrio[export_columns].to_csv(OUTPUT_DIR / "val_barrio.csv", index=False)
-    train_distrito[export_columns].to_csv(OUTPUT_DIR / "train_distrito.csv", index=False)
-    val_distrito[export_columns].to_csv(OUTPUT_DIR / "val_distrito.csv", index=False)
+    target_dirs = [OUTPUT_DIR_LOCAL, OUTPUT_DIR_ROOT]
+    if OUTPUT_DIR_FASE5.parent.exists():
+        target_dirs.append(OUTPUT_DIR_FASE5)
 
-    df_interest.to_csv(OUTPUT_DIR / "interest_rates_clean.csv", index=False)
-    df_transactions.to_csv(OUTPUT_DIR / "transactions_clean.csv", index=False)
+    for out_dir in target_dirs:
+        df_master_full[export_columns].to_csv(out_dir / "df_master_full.csv", index=False)
+        train_barrio[export_columns].to_csv(out_dir / "train_barrio.csv", index=False)
+        val_barrio[export_columns].to_csv(out_dir / "val_barrio.csv", index=False)
+        train_distrito[export_columns].to_csv(out_dir / "train_distrito.csv", index=False)
+        val_distrito[export_columns].to_csv(out_dir / "val_distrito.csv", index=False)
 
-    validation_rows = []
-    master_export = df_master_full[export_columns].copy()
-    for name, frame in [
-        ("df_master_full.csv", master_export),
-        ("train_barrio.csv", train_barrio[export_columns]),
-        ("val_barrio.csv", val_barrio[export_columns]),
-        ("train_distrito.csv", train_distrito[export_columns]),
-        ("val_distrito.csv", val_distrito[export_columns]),
-    ]:
-        row = {"dataset": name, **validate_against_master(frame, master_export)}
-        validation_rows.append(row)
+        df_interest.to_csv(out_dir / "interest_rates_clean.csv", index=False)
+        df_transactions.to_csv(out_dir / "transactions_clean.csv", index=False)
 
-    pd.DataFrame(validation_rows).to_csv(OUTPUT_DIR / "validation_temporal_features.csv", index=False)
-
-    print("Datasets operativos regenerados en:", OUTPUT_DIR)
-    print(pd.DataFrame(validation_rows).to_string(index=False))
-
+    print(f"\n[OK] Datasets operativos regenerados exitosamente en: {[str(d) for d in target_dirs]}")
+    print(f"[VERIFY] Registros totales df_master_full: {len(df_master_full)}")
+    max_row = df_master_full.sort_values(by=['anio', 'mes'], ascending=False).iloc[0]
+    print(f"[VERIFY] Último periodo registrado: {int(max_row['anio'])}-{int(max_row['mes']):02d}")
+    assert max_row['anio'] == 2026 and max_row['mes'] == 6, f"Error: Último periodo esperado 2026-06, obtenido {max_row['anio']}-{max_row['mes']}"
 
 if __name__ == "__main__":
     main()

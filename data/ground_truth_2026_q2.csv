@@ -1,0 +1,765 @@
+Ano,Mes,id_tiempo,cod_distrito,nombre_distrito,distrito_norm,cod_barrio,nombre_barrio,barrio_norm,nivel_geografico,operacion,precio_m2
+2026,4,202604,1,Centro,Centro,11,Palacio,Palacio,barrio,alquiler,25.89
+2026,4,202604,1,Centro,Centro,12,Embajadores,Embajadores,barrio,alquiler,26.01
+2026,4,202604,1,Centro,Centro,13,Cortes,Cortes,barrio,alquiler,26.67
+2026,4,202604,1,Centro,Centro,14,Justicia,Justicia,barrio,alquiler,29.52
+2026,4,202604,1,Centro,Centro,15,Universidad,Universidad,barrio,alquiler,27.69
+2026,4,202604,1,Centro,Centro,16,Sol,Sol,barrio,alquiler,25.83
+2026,4,202604,10,Latina,Latina,102,Puerta del Ãngel,Puerta del Angel,barrio,alquiler,20.71
+2026,4,202604,10,Latina,Latina,103,Lucero,Lucero,barrio,alquiler,18.57
+2026,4,202604,10,Latina,Latina,104,Aluche,Aluche,barrio,alquiler,16.68
+2026,4,202604,11,Carabanchel,Carabanchel,111,Comillas,Comillas,barrio,alquiler,18.8
+2026,4,202604,11,Carabanchel,Carabanchel,112,OpaÃ±el,OpaA+-el,barrio,alquiler,18.82
+2026,4,202604,11,Carabanchel,Carabanchel,113,San Isidro,San Isidro,barrio,alquiler,19.39
+2026,4,202604,11,Carabanchel,Carabanchel,114,Vista Alegre,Vista Alegre,barrio,alquiler,17.65
+2026,4,202604,11,Carabanchel,Carabanchel,115,Puerta Bonita,Puerta Bonita,barrio,alquiler,17.56
+2026,4,202604,11,Carabanchel,Carabanchel,116,Buenavista,Buenavista,barrio,alquiler,17.27
+2026,4,202604,12,Usera,Usera,124,Almendrales,Almendrales,barrio,alquiler,22.8
+2026,4,202604,12,Usera,Usera,125,MoscardÃ³,MoscardA3,barrio,alquiler,18.89
+2026,4,202604,13,Puente de Vallecas,Puente de Vallecas,132,San Diego,San Diego,barrio,alquiler,21.18
+2026,4,202604,13,Puente de Vallecas,Puente de Vallecas,134,Palomeras Sureste,Palomeras Sureste,barrio,alquiler,15.38
+2026,4,202604,13,Puente de Vallecas,Puente de Vallecas,136,Numancia,Numancia,barrio,alquiler,21.02
+2026,4,202604,14,Moratalaz,Moratalaz,143,Marroquina,Marroquina,barrio,alquiler,17.06
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,151,Ventas,Ventas,barrio,alquiler,19.88
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,152,Pueblo Nuevo,Pueblo Nuevo,barrio,alquiler,19.97
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,153,Quintana,Quintana,barrio,alquiler,18.81
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,154,La ConcepciÃ³n,La ConcepciA3n,barrio,alquiler,19.91
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,155,San Pascual,San Pascual,barrio,alquiler,19.56
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,156,San Juan Bautista,San Juan Bautista,barrio,alquiler,20.38
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,157,Colina,Colina,barrio,alquiler,21.32
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,159,Costillares,Costillares,barrio,alquiler,18.82
+2026,4,202604,16,Hortaleza,Hortaleza,162,Piovera,Piovera,barrio,alquiler,19.47
+2026,4,202604,16,Hortaleza,Hortaleza,163,Canillas,Canillas,barrio,alquiler,17.18
+2026,4,202604,16,Hortaleza,Hortaleza,164,Pinar del Rey,Pinar del Rey,barrio,alquiler,20.37
+2026,4,202604,16,Hortaleza,Hortaleza,166,Valdefuentes,Valdefuentes,barrio,alquiler,19.24
+2026,4,202604,17,Villaverde,Villaverde,171,"Villaverde Alto, Casco HistÃ³rico de Villaverde","Villaverde Alto, Casco HistA3rico de Villaverde",barrio,alquiler,18.18
+2026,4,202604,17,Villaverde,Villaverde,173,Butarque,Butarque,barrio,alquiler,15.79
+2026,4,202604,17,Villaverde,Villaverde,174,Los Rosales,Los Rosales,barrio,alquiler,17.77
+2026,4,202604,18,Villa de Vallecas,Villa de Vallecas,181,Casco HistÃ³rico de Vallecas,Casco HistA3rico de Vallecas,barrio,alquiler,17.48
+2026,4,202604,18,Villa de Vallecas,Villa de Vallecas,183,Ensanche de Vallecas,Ensanche de Vallecas,barrio,alquiler,18.37
+2026,4,202604,19,VicÃ¡lvaro,VicA!lvaro,194,El CaÃ±averal,El CaA+-averal,barrio,alquiler,16.8
+2026,4,202604,2,Arganzuela,Arganzuela,21,Imperial,Imperial,barrio,alquiler,22.08
+2026,4,202604,2,Arganzuela,Arganzuela,22,Acacias,Acacias,barrio,alquiler,21.54
+2026,4,202604,2,Arganzuela,Arganzuela,23,Chopera,Chopera,barrio,alquiler,22.32
+2026,4,202604,2,Arganzuela,Arganzuela,24,Legazpi,Legazpi,barrio,alquiler,20.33
+2026,4,202604,2,Arganzuela,Arganzuela,25,Delicias,Delicias,barrio,alquiler,22.86
+2026,4,202604,2,Arganzuela,Arganzuela,26,Palos de la Frontera,Palos de la Frontera,barrio,alquiler,22.44
+2026,4,202604,20,San Blas-Canillejas,San Blas-Canillejas,201,Simancas,Simancas,barrio,alquiler,17.77
+2026,4,202604,20,San Blas-Canillejas,San Blas-Canillejas,206,Rejas,Rejas,barrio,alquiler,14.96
+2026,4,202604,20,San Blas-Canillejas,San Blas-Canillejas,207,Canillejas,Canillejas,barrio,alquiler,19.87
+2026,4,202604,3,Retiro,Retiro,31,PacÃ­fico,PacAfico,barrio,alquiler,21.43
+2026,4,202604,3,Retiro,Retiro,32,Adelfas,Adelfas,barrio,alquiler,21.62
+2026,4,202604,3,Retiro,Retiro,33,Estrella,Estrella,barrio,alquiler,22.01
+2026,4,202604,3,Retiro,Retiro,34,Ibiza,Ibiza,barrio,alquiler,27.53
+2026,4,202604,3,Retiro,Retiro,35,Los JerÃ³nimos,Los JerA3nimos,barrio,alquiler,26.6
+2026,4,202604,3,Retiro,Retiro,36,NiÃ±o JesÃºs,NiA+-o JesAos,barrio,alquiler,23.9
+2026,4,202604,4,Salamanca,Salamanca,41,Recoletos,Recoletos,barrio,alquiler,32.66
+2026,4,202604,4,Salamanca,Salamanca,42,Goya,Goya,barrio,alquiler,28.36
+2026,4,202604,4,Salamanca,Salamanca,43,Fuente del Berro,Fuente del Berro,barrio,alquiler,23.06
+2026,4,202604,4,Salamanca,Salamanca,44,Guindalera,Guindalera,barrio,alquiler,24.17
+2026,4,202604,4,Salamanca,Salamanca,45,Lista,Lista,barrio,alquiler,27.78
+2026,4,202604,4,Salamanca,Salamanca,46,Castellana,Castellana,barrio,alquiler,29.5
+2026,4,202604,5,ChamartÃ­n,ChamartAn,51,El Viso,El Viso,barrio,alquiler,24.84
+2026,4,202604,5,ChamartÃ­n,ChamartAn,52,Prosperidad,Prosperidad,barrio,alquiler,23.02
+2026,4,202604,5,ChamartÃ­n,ChamartAn,53,Ciudad JardÃ­n,Ciudad JardAn,barrio,alquiler,24.99
+2026,4,202604,5,ChamartÃ­n,ChamartAn,54,HispanoamÃ©rica,HispanoamA(c)rica,barrio,alquiler,23.14
+2026,4,202604,5,ChamartÃ­n,ChamartAn,55,Nueva EspaÃ±a,Nueva EspaA+-a,barrio,alquiler,23.13
+2026,4,202604,5,ChamartÃ­n,ChamartAn,56,Castilla,Castilla,barrio,alquiler,20.7
+2026,4,202604,6,TetuÃ¡n,TetuA!n,61,Bellas Vistas,Bellas Vistas,barrio,alquiler,23.62
+2026,4,202604,6,TetuÃ¡n,TetuA!n,62,Cuatro Caminos,Cuatro Caminos,barrio,alquiler,24.99
+2026,4,202604,6,TetuÃ¡n,TetuA!n,63,Castillejos,Castillejos,barrio,alquiler,23.99
+2026,4,202604,6,TetuÃ¡n,TetuA!n,64,Almenara,Almenara,barrio,alquiler,23.53
+2026,4,202604,6,TetuÃ¡n,TetuA!n,65,Valdeacederas,Valdeacederas,barrio,alquiler,20.81
+2026,4,202604,6,TetuÃ¡n,TetuA!n,66,Berruguete,Berruguete,barrio,alquiler,21.7
+2026,4,202604,7,ChamberÃ­,ChamberA,71,Gaztambide,Gaztambide,barrio,alquiler,25.0
+2026,4,202604,7,ChamberÃ­,ChamberA,72,Arapiles,Arapiles,barrio,alquiler,24.93
+2026,4,202604,7,ChamberÃ­,ChamberA,73,Trafalgar,Trafalgar,barrio,alquiler,29.03
+2026,4,202604,7,ChamberÃ­,ChamberA,74,Almagro,Almagro,barrio,alquiler,28.04
+2026,4,202604,7,ChamberÃ­,ChamberA,75,RÃ­os Rosas,RAos Rosas,barrio,alquiler,25.87
+2026,4,202604,7,ChamberÃ­,ChamberA,76,Vallehermoso,Vallehermoso,barrio,alquiler,23.42
+2026,4,202604,8,Fuencarral-El Pardo,Fuencarral-El Pardo,83,PeÃ±agrande,PeA+-agrande,barrio,alquiler,18.56
+2026,4,202604,8,Fuencarral-El Pardo,Fuencarral-El Pardo,84,Pilar,Pilar,barrio,alquiler,21.19
+2026,4,202604,8,Fuencarral-El Pardo,Fuencarral-El Pardo,85,La Paz,La Paz,barrio,alquiler,18.15
+2026,4,202604,8,Fuencarral-El Pardo,Fuencarral-El Pardo,86,Valverde,Valverde,barrio,alquiler,17.79
+2026,4,202604,8,Fuencarral-El Pardo,Fuencarral-El Pardo,87,Mirasierra,Mirasierra,barrio,alquiler,18.39
+2026,4,202604,8,Fuencarral-El Pardo,Fuencarral-El Pardo,88,El Goloso,El Goloso,barrio,alquiler,17.43
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,91,Casa de Campo,Casa de Campo,barrio,alquiler,23.2
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,92,ArgÃ¼elles,ArgA 1/4elles,barrio,alquiler,26.42
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,93,Ciudad Universitaria,Ciudad Universitaria,barrio,alquiler,22.08
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,94,Valdezarza,Valdezarza,barrio,alquiler,19.92
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,95,ValdemarÃ­n,ValdemarAn,barrio,alquiler,19.57
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,97,Aravaca,Aravaca,barrio,alquiler,16.87
+2026,4,202604,1,Centro,Centro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,27.0
+2026,4,202604,10,Latina,Latina,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,18.43
+2026,4,202604,11,Carabanchel,Carabanchel,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,18.19
+2026,4,202604,12,Usera,Usera,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,19.96
+2026,4,202604,13,Puente de Vallecas,Puente de Vallecas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,19.56
+2026,4,202604,14,Moratalaz,Moratalaz,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,16.83
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,19.85
+2026,4,202604,16,Hortaleza,Hortaleza,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,19.01
+2026,4,202604,17,Villaverde,Villaverde,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,17.14
+2026,4,202604,18,Villa de Vallecas,Villa de Vallecas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,18.08
+2026,4,202604,19,VicÃ¡lvaro,VicA!lvaro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,17.1
+2026,4,202604,2,Arganzuela,Arganzuela,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,22.1
+2026,4,202604,20,San Blas-Canillejas,San Blas-Canillejas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,17.2
+2026,4,202604,21,Barajas,Barajas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,17.01
+2026,4,202604,3,Retiro,Retiro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,24.09
+2026,4,202604,4,Salamanca,Salamanca,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,28.05
+2026,4,202604,5,ChamartÃ­n,ChamartAn,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,23.31
+2026,4,202604,6,TetuÃ¡n,TetuA!n,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,23.16
+2026,4,202604,7,ChamberÃ­,ChamberA,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,26.36
+2026,4,202604,8,Fuencarral-El Pardo,Fuencarral-El Pardo,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,18.34
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,22.46
+2026,5,202605,1,Centro,Centro,11,Palacio,Palacio,barrio,alquiler,25.4
+2026,5,202605,1,Centro,Centro,12,Embajadores,Embajadores,barrio,alquiler,25.9
+2026,5,202605,1,Centro,Centro,13,Cortes,Cortes,barrio,alquiler,27.03
+2026,5,202605,1,Centro,Centro,14,Justicia,Justicia,barrio,alquiler,29.26
+2026,5,202605,1,Centro,Centro,15,Universidad,Universidad,barrio,alquiler,27.51
+2026,5,202605,1,Centro,Centro,16,Sol,Sol,barrio,alquiler,25.89
+2026,5,202605,10,Latina,Latina,102,Puerta del Ãngel,Puerta del Angel,barrio,alquiler,19.99
+2026,5,202605,10,Latina,Latina,103,Lucero,Lucero,barrio,alquiler,18.84
+2026,5,202605,10,Latina,Latina,104,Aluche,Aluche,barrio,alquiler,16.8
+2026,5,202605,10,Latina,Latina,107,Ãguilas,Aguilas,barrio,alquiler,15.42
+2026,5,202605,11,Carabanchel,Carabanchel,111,Comillas,Comillas,barrio,alquiler,18.8
+2026,5,202605,11,Carabanchel,Carabanchel,112,OpaÃ±el,OpaA+-el,barrio,alquiler,18.9
+2026,5,202605,11,Carabanchel,Carabanchel,113,San Isidro,San Isidro,barrio,alquiler,19.14
+2026,5,202605,11,Carabanchel,Carabanchel,114,Vista Alegre,Vista Alegre,barrio,alquiler,18.04
+2026,5,202605,11,Carabanchel,Carabanchel,115,Puerta Bonita,Puerta Bonita,barrio,alquiler,18.91
+2026,5,202605,11,Carabanchel,Carabanchel,116,Buenavista,Buenavista,barrio,alquiler,18.34
+2026,5,202605,12,Usera,Usera,124,Almendrales,Almendrales,barrio,alquiler,22.93
+2026,5,202605,12,Usera,Usera,125,MoscardÃ³,MoscardA3,barrio,alquiler,18.67
+2026,5,202605,12,Usera,Usera,127,Pradolongo,Pradolongo,barrio,alquiler,19.72
+2026,5,202605,13,Puente de Vallecas,Puente de Vallecas,132,San Diego,San Diego,barrio,alquiler,21.43
+2026,5,202605,13,Puente de Vallecas,Puente de Vallecas,134,Palomeras Sureste,Palomeras Sureste,barrio,alquiler,16.07
+2026,5,202605,13,Puente de Vallecas,Puente de Vallecas,136,Numancia,Numancia,barrio,alquiler,21.54
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,151,Ventas,Ventas,barrio,alquiler,19.59
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,152,Pueblo Nuevo,Pueblo Nuevo,barrio,alquiler,20.41
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,153,Quintana,Quintana,barrio,alquiler,20.0
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,154,La ConcepciÃ³n,La ConcepciA3n,barrio,alquiler,20.28
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,155,San Pascual,San Pascual,barrio,alquiler,19.44
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,156,San Juan Bautista,San Juan Bautista,barrio,alquiler,21.09
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,157,Colina,Colina,barrio,alquiler,21.37
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,159,Costillares,Costillares,barrio,alquiler,18.95
+2026,5,202605,16,Hortaleza,Hortaleza,161,Palomas,Palomas,barrio,alquiler,16.99
+2026,5,202605,16,Hortaleza,Hortaleza,162,Piovera,Piovera,barrio,alquiler,19.28
+2026,5,202605,16,Hortaleza,Hortaleza,163,Canillas,Canillas,barrio,alquiler,17.24
+2026,5,202605,16,Hortaleza,Hortaleza,164,Pinar del Rey,Pinar del Rey,barrio,alquiler,20.0
+2026,5,202605,16,Hortaleza,Hortaleza,166,Valdefuentes,Valdefuentes,barrio,alquiler,18.93
+2026,5,202605,17,Villaverde,Villaverde,171,"Villaverde Alto, Casco HistÃ³rico de Villaverde","Villaverde Alto, Casco HistA3rico de Villaverde",barrio,alquiler,18.35
+2026,5,202605,17,Villaverde,Villaverde,173,Butarque,Butarque,barrio,alquiler,16.88
+2026,5,202605,18,Villa de Vallecas,Villa de Vallecas,181,Casco HistÃ³rico de Vallecas,Casco HistA3rico de Vallecas,barrio,alquiler,17.95
+2026,5,202605,18,Villa de Vallecas,Villa de Vallecas,183,Ensanche de Vallecas,Ensanche de Vallecas,barrio,alquiler,18.0
+2026,5,202605,19,VicÃ¡lvaro,VicA!lvaro,194,El CaÃ±averal,El CaA+-averal,barrio,alquiler,16.81
+2026,5,202605,2,Arganzuela,Arganzuela,21,Imperial,Imperial,barrio,alquiler,21.85
+2026,5,202605,2,Arganzuela,Arganzuela,22,Acacias,Acacias,barrio,alquiler,22.5
+2026,5,202605,2,Arganzuela,Arganzuela,23,Chopera,Chopera,barrio,alquiler,22.0
+2026,5,202605,2,Arganzuela,Arganzuela,24,Legazpi,Legazpi,barrio,alquiler,20.0
+2026,5,202605,2,Arganzuela,Arganzuela,25,Delicias,Delicias,barrio,alquiler,23.08
+2026,5,202605,2,Arganzuela,Arganzuela,26,Palos de la Frontera,Palos de la Frontera,barrio,alquiler,22.73
+2026,5,202605,20,San Blas-Canillejas,San Blas-Canillejas,201,Simancas,Simancas,barrio,alquiler,17.42
+2026,5,202605,20,San Blas-Canillejas,San Blas-Canillejas,206,Rejas,Rejas,barrio,alquiler,14.67
+2026,5,202605,20,San Blas-Canillejas,San Blas-Canillejas,207,Canillejas,Canillejas,barrio,alquiler,19.03
+2026,5,202605,20,San Blas-Canillejas,San Blas-Canillejas,208,El Salvador,El Salvador,barrio,alquiler,19.76
+2026,5,202605,21,Barajas,Barajas,211,Alameda de Osuna,Alameda de Osuna,barrio,alquiler,16.53
+2026,5,202605,3,Retiro,Retiro,31,PacÃ­fico,PacAfico,barrio,alquiler,22.06
+2026,5,202605,3,Retiro,Retiro,32,Adelfas,Adelfas,barrio,alquiler,21.0
+2026,5,202605,3,Retiro,Retiro,33,Estrella,Estrella,barrio,alquiler,22.18
+2026,5,202605,3,Retiro,Retiro,34,Ibiza,Ibiza,barrio,alquiler,26.79
+2026,5,202605,3,Retiro,Retiro,35,Los JerÃ³nimos,Los JerA3nimos,barrio,alquiler,26.4
+2026,5,202605,3,Retiro,Retiro,36,NiÃ±o JesÃºs,NiA+-o JesAos,barrio,alquiler,23.53
+2026,5,202605,4,Salamanca,Salamanca,41,Recoletos,Recoletos,barrio,alquiler,32.56
+2026,5,202605,4,Salamanca,Salamanca,42,Goya,Goya,barrio,alquiler,28.7
+2026,5,202605,4,Salamanca,Salamanca,43,Fuente del Berro,Fuente del Berro,barrio,alquiler,23.96
+2026,5,202605,4,Salamanca,Salamanca,44,Guindalera,Guindalera,barrio,alquiler,24.38
+2026,5,202605,4,Salamanca,Salamanca,45,Lista,Lista,barrio,alquiler,27.54
+2026,5,202605,4,Salamanca,Salamanca,46,Castellana,Castellana,barrio,alquiler,30.0
+2026,5,202605,5,ChamartÃ­n,ChamartAn,51,El Viso,El Viso,barrio,alquiler,25.08
+2026,5,202605,5,ChamartÃ­n,ChamartAn,52,Prosperidad,Prosperidad,barrio,alquiler,23.03
+2026,5,202605,5,ChamartÃ­n,ChamartAn,53,Ciudad JardÃ­n,Ciudad JardAn,barrio,alquiler,24.88
+2026,5,202605,5,ChamartÃ­n,ChamartAn,54,HispanoamÃ©rica,HispanoamA(c)rica,barrio,alquiler,23.27
+2026,5,202605,5,ChamartÃ­n,ChamartAn,55,Nueva EspaÃ±a,Nueva EspaA+-a,barrio,alquiler,23.24
+2026,5,202605,5,ChamartÃ­n,ChamartAn,56,Castilla,Castilla,barrio,alquiler,20.56
+2026,5,202605,6,TetuÃ¡n,TetuA!n,61,Bellas Vistas,Bellas Vistas,barrio,alquiler,23.32
+2026,5,202605,6,TetuÃ¡n,TetuA!n,62,Cuatro Caminos,Cuatro Caminos,barrio,alquiler,24.99
+2026,5,202605,6,TetuÃ¡n,TetuA!n,63,Castillejos,Castillejos,barrio,alquiler,23.94
+2026,5,202605,6,TetuÃ¡n,TetuA!n,64,Almenara,Almenara,barrio,alquiler,23.54
+2026,5,202605,6,TetuÃ¡n,TetuA!n,65,Valdeacederas,Valdeacederas,barrio,alquiler,21.37
+2026,5,202605,6,TetuÃ¡n,TetuA!n,66,Berruguete,Berruguete,barrio,alquiler,21.42
+2026,5,202605,7,ChamberÃ­,ChamberA,71,Gaztambide,Gaztambide,barrio,alquiler,25.0
+2026,5,202605,7,ChamberÃ­,ChamberA,72,Arapiles,Arapiles,barrio,alquiler,24.76
+2026,5,202605,7,ChamberÃ­,ChamberA,73,Trafalgar,Trafalgar,barrio,alquiler,28.89
+2026,5,202605,7,ChamberÃ­,ChamberA,74,Almagro,Almagro,barrio,alquiler,28.89
+2026,5,202605,7,ChamberÃ­,ChamberA,75,RÃ­os Rosas,RAos Rosas,barrio,alquiler,25.79
+2026,5,202605,7,ChamberÃ­,ChamberA,76,Vallehermoso,Vallehermoso,barrio,alquiler,23.75
+2026,5,202605,8,Fuencarral-El Pardo,Fuencarral-El Pardo,83,PeÃ±agrande,PeA+-agrande,barrio,alquiler,19.03
+2026,5,202605,8,Fuencarral-El Pardo,Fuencarral-El Pardo,84,Pilar,Pilar,barrio,alquiler,20.98
+2026,5,202605,8,Fuencarral-El Pardo,Fuencarral-El Pardo,85,La Paz,La Paz,barrio,alquiler,17.5
+2026,5,202605,8,Fuencarral-El Pardo,Fuencarral-El Pardo,86,Valverde,Valverde,barrio,alquiler,17.78
+2026,5,202605,8,Fuencarral-El Pardo,Fuencarral-El Pardo,87,Mirasierra,Mirasierra,barrio,alquiler,18.61
+2026,5,202605,8,Fuencarral-El Pardo,Fuencarral-El Pardo,88,El Goloso,El Goloso,barrio,alquiler,17.1
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,91,Casa de Campo,Casa de Campo,barrio,alquiler,22.06
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,92,ArgÃ¼elles,ArgA 1/4elles,barrio,alquiler,26.39
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,93,Ciudad Universitaria,Ciudad Universitaria,barrio,alquiler,21.33
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,94,Valdezarza,Valdezarza,barrio,alquiler,19.92
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,95,ValdemarÃ­n,ValdemarAn,barrio,alquiler,18.83
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,97,Aravaca,Aravaca,barrio,alquiler,16.91
+2026,5,202605,1,Centro,Centro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,26.88
+2026,5,202605,10,Latina,Latina,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,18.66
+2026,5,202605,11,Carabanchel,Carabanchel,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,18.34
+2026,5,202605,12,Usera,Usera,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,19.38
+2026,5,202605,13,Puente de Vallecas,Puente de Vallecas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,19.77
+2026,5,202605,14,Moratalaz,Moratalaz,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,16.92
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,20.0
+2026,5,202605,16,Hortaleza,Hortaleza,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,18.92
+2026,5,202605,17,Villaverde,Villaverde,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,17.08
+2026,5,202605,18,Villa de Vallecas,Villa de Vallecas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,17.88
+2026,5,202605,19,VicÃ¡lvaro,VicA!lvaro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,16.63
+2026,5,202605,2,Arganzuela,Arganzuela,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,22.3
+2026,5,202605,20,San Blas-Canillejas,San Blas-Canillejas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,17.26
+2026,5,202605,21,Barajas,Barajas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,16.98
+2026,5,202605,3,Retiro,Retiro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,23.93
+2026,5,202605,4,Salamanca,Salamanca,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,28.31
+2026,5,202605,5,ChamartÃ­n,ChamartAn,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,23.24
+2026,5,202605,6,TetuÃ¡n,TetuA!n,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,23.27
+2026,5,202605,7,ChamberÃ­,ChamberA,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,26.28
+2026,5,202605,8,Fuencarral-El Pardo,Fuencarral-El Pardo,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,18.16
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,22.18
+2026,6,202606,1,Centro,Centro,11,Palacio,Palacio,barrio,alquiler,25.72
+2026,6,202606,1,Centro,Centro,12,Embajadores,Embajadores,barrio,alquiler,25.89
+2026,6,202606,1,Centro,Centro,13,Cortes,Cortes,barrio,alquiler,26.43
+2026,6,202606,1,Centro,Centro,14,Justicia,Justicia,barrio,alquiler,29.55
+2026,6,202606,1,Centro,Centro,15,Universidad,Universidad,barrio,alquiler,27.48
+2026,6,202606,1,Centro,Centro,16,Sol,Sol,barrio,alquiler,26.07
+2026,6,202606,10,Latina,Latina,102,Puerta del Ãngel,Puerta del Angel,barrio,alquiler,19.99
+2026,6,202606,10,Latina,Latina,103,Lucero,Lucero,barrio,alquiler,18.97
+2026,6,202606,10,Latina,Latina,104,Aluche,Aluche,barrio,alquiler,16.68
+2026,6,202606,10,Latina,Latina,107,Ãguilas,Aguilas,barrio,alquiler,15.87
+2026,6,202606,11,Carabanchel,Carabanchel,111,Comillas,Comillas,barrio,alquiler,18.88
+2026,6,202606,11,Carabanchel,Carabanchel,112,OpaÃ±el,OpaA+-el,barrio,alquiler,18.91
+2026,6,202606,11,Carabanchel,Carabanchel,113,San Isidro,San Isidro,barrio,alquiler,19.07
+2026,6,202606,11,Carabanchel,Carabanchel,114,Vista Alegre,Vista Alegre,barrio,alquiler,19.17
+2026,6,202606,11,Carabanchel,Carabanchel,115,Puerta Bonita,Puerta Bonita,barrio,alquiler,18.56
+2026,6,202606,11,Carabanchel,Carabanchel,116,Buenavista,Buenavista,barrio,alquiler,18.43
+2026,6,202606,12,Usera,Usera,124,Almendrales,Almendrales,barrio,alquiler,23.89
+2026,6,202606,12,Usera,Usera,125,MoscardÃ³,MoscardA3,barrio,alquiler,19.23
+2026,6,202606,12,Usera,Usera,127,Pradolongo,Pradolongo,barrio,alquiler,20.31
+2026,6,202606,13,Puente de Vallecas,Puente de Vallecas,132,San Diego,San Diego,barrio,alquiler,20.97
+2026,6,202606,13,Puente de Vallecas,Puente de Vallecas,134,Palomeras Sureste,Palomeras Sureste,barrio,alquiler,16.8
+2026,6,202606,13,Puente de Vallecas,Puente de Vallecas,136,Numancia,Numancia,barrio,alquiler,22.32
+2026,6,202606,14,Moratalaz,Moratalaz,143,Marroquina,Marroquina,barrio,alquiler,17.86
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,151,Ventas,Ventas,barrio,alquiler,19.26
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,152,Pueblo Nuevo,Pueblo Nuevo,barrio,alquiler,20.75
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,153,Quintana,Quintana,barrio,alquiler,19.98
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,154,La ConcepciÃ³n,La ConcepciA3n,barrio,alquiler,20.22
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,155,San Pascual,San Pascual,barrio,alquiler,19.77
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,156,San Juan Bautista,San Juan Bautista,barrio,alquiler,19.8
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,157,Colina,Colina,barrio,alquiler,21.34
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,159,Costillares,Costillares,barrio,alquiler,19.05
+2026,6,202606,16,Hortaleza,Hortaleza,161,Palomas,Palomas,barrio,alquiler,16.35
+2026,6,202606,16,Hortaleza,Hortaleza,162,Piovera,Piovera,barrio,alquiler,18.17
+2026,6,202606,16,Hortaleza,Hortaleza,163,Canillas,Canillas,barrio,alquiler,17.64
+2026,6,202606,16,Hortaleza,Hortaleza,164,Pinar del Rey,Pinar del Rey,barrio,alquiler,18.89
+2026,6,202606,16,Hortaleza,Hortaleza,166,Valdefuentes,Valdefuentes,barrio,alquiler,18.92
+2026,6,202606,17,Villaverde,Villaverde,171,"Villaverde Alto, Casco HistÃ³rico de Villaverde","Villaverde Alto, Casco HistA3rico de Villaverde",barrio,alquiler,19.6
+2026,6,202606,17,Villaverde,Villaverde,173,Butarque,Butarque,barrio,alquiler,19.29
+2026,6,202606,18,Villa de Vallecas,Villa de Vallecas,183,Ensanche de Vallecas,Ensanche de Vallecas,barrio,alquiler,18.0
+2026,6,202606,19,VicÃ¡lvaro,VicA!lvaro,194,El CaÃ±averal,El CaA+-averal,barrio,alquiler,16.37
+2026,6,202606,2,Arganzuela,Arganzuela,21,Imperial,Imperial,barrio,alquiler,22.08
+2026,6,202606,2,Arganzuela,Arganzuela,22,Acacias,Acacias,barrio,alquiler,22.64
+2026,6,202606,2,Arganzuela,Arganzuela,23,Chopera,Chopera,barrio,alquiler,22.45
+2026,6,202606,2,Arganzuela,Arganzuela,24,Legazpi,Legazpi,barrio,alquiler,20.4
+2026,6,202606,2,Arganzuela,Arganzuela,25,Delicias,Delicias,barrio,alquiler,23.79
+2026,6,202606,2,Arganzuela,Arganzuela,26,Palos de la Frontera,Palos de la Frontera,barrio,alquiler,23.26
+2026,6,202606,20,San Blas-Canillejas,San Blas-Canillejas,201,Simancas,Simancas,barrio,alquiler,18.7
+2026,6,202606,20,San Blas-Canillejas,San Blas-Canillejas,206,Rejas,Rejas,barrio,alquiler,15.13
+2026,6,202606,20,San Blas-Canillejas,San Blas-Canillejas,207,Canillejas,Canillejas,barrio,alquiler,19.37
+2026,6,202606,20,San Blas-Canillejas,San Blas-Canillejas,208,El Salvador,El Salvador,barrio,alquiler,19.45
+2026,6,202606,21,Barajas,Barajas,211,Alameda de Osuna,Alameda de Osuna,barrio,alquiler,16.3
+2026,6,202606,21,Barajas,Barajas,214,TimÃ³n,TimA3n,barrio,alquiler,18.01
+2026,6,202606,3,Retiro,Retiro,31,PacÃ­fico,PacAfico,barrio,alquiler,22.22
+2026,6,202606,3,Retiro,Retiro,32,Adelfas,Adelfas,barrio,alquiler,20.78
+2026,6,202606,3,Retiro,Retiro,33,Estrella,Estrella,barrio,alquiler,21.77
+2026,6,202606,3,Retiro,Retiro,34,Ibiza,Ibiza,barrio,alquiler,27.0
+2026,6,202606,3,Retiro,Retiro,35,Los JerÃ³nimos,Los JerA3nimos,barrio,alquiler,26.08
+2026,6,202606,3,Retiro,Retiro,36,NiÃ±o JesÃºs,NiA+-o JesAos,barrio,alquiler,23.64
+2026,6,202606,4,Salamanca,Salamanca,41,Recoletos,Recoletos,barrio,alquiler,32.26
+2026,6,202606,4,Salamanca,Salamanca,42,Goya,Goya,barrio,alquiler,29.33
+2026,6,202606,4,Salamanca,Salamanca,43,Fuente del Berro,Fuente del Berro,barrio,alquiler,23.76
+2026,6,202606,4,Salamanca,Salamanca,44,Guindalera,Guindalera,barrio,alquiler,24.68
+2026,6,202606,4,Salamanca,Salamanca,45,Lista,Lista,barrio,alquiler,27.93
+2026,6,202606,4,Salamanca,Salamanca,46,Castellana,Castellana,barrio,alquiler,30.0
+2026,6,202606,5,ChamartÃ­n,ChamartAn,51,El Viso,El Viso,barrio,alquiler,25.6
+2026,6,202606,5,ChamartÃ­n,ChamartAn,52,Prosperidad,Prosperidad,barrio,alquiler,22.99
+2026,6,202606,5,ChamartÃ­n,ChamartAn,53,Ciudad JardÃ­n,Ciudad JardAn,barrio,alquiler,24.0
+2026,6,202606,5,ChamartÃ­n,ChamartAn,54,HispanoamÃ©rica,HispanoamA(c)rica,barrio,alquiler,24.04
+2026,6,202606,5,ChamartÃ­n,ChamartAn,55,Nueva EspaÃ±a,Nueva EspaA+-a,barrio,alquiler,23.27
+2026,6,202606,5,ChamartÃ­n,ChamartAn,56,Castilla,Castilla,barrio,alquiler,20.55
+2026,6,202606,6,TetuÃ¡n,TetuA!n,61,Bellas Vistas,Bellas Vistas,barrio,alquiler,23.73
+2026,6,202606,6,TetuÃ¡n,TetuA!n,62,Cuatro Caminos,Cuatro Caminos,barrio,alquiler,24.36
+2026,6,202606,6,TetuÃ¡n,TetuA!n,63,Castillejos,Castillejos,barrio,alquiler,23.94
+2026,6,202606,6,TetuÃ¡n,TetuA!n,64,Almenara,Almenara,barrio,alquiler,23.5
+2026,6,202606,6,TetuÃ¡n,TetuA!n,65,Valdeacederas,Valdeacederas,barrio,alquiler,21.52
+2026,6,202606,6,TetuÃ¡n,TetuA!n,66,Berruguete,Berruguete,barrio,alquiler,21.67
+2026,6,202606,7,ChamberÃ­,ChamberA,71,Gaztambide,Gaztambide,barrio,alquiler,24.98
+2026,6,202606,7,ChamberÃ­,ChamberA,72,Arapiles,Arapiles,barrio,alquiler,25.0
+2026,6,202606,7,ChamberÃ­,ChamberA,73,Trafalgar,Trafalgar,barrio,alquiler,28.26
+2026,6,202606,7,ChamberÃ­,ChamberA,74,Almagro,Almagro,barrio,alquiler,28.89
+2026,6,202606,7,ChamberÃ­,ChamberA,75,RÃ­os Rosas,RAos Rosas,barrio,alquiler,26.0
+2026,6,202606,7,ChamberÃ­,ChamberA,76,Vallehermoso,Vallehermoso,barrio,alquiler,23.68
+2026,6,202606,8,Fuencarral-El Pardo,Fuencarral-El Pardo,83,PeÃ±agrande,PeA+-agrande,barrio,alquiler,19.25
+2026,6,202606,8,Fuencarral-El Pardo,Fuencarral-El Pardo,84,Pilar,Pilar,barrio,alquiler,20.83
+2026,6,202606,8,Fuencarral-El Pardo,Fuencarral-El Pardo,85,La Paz,La Paz,barrio,alquiler,18.65
+2026,6,202606,8,Fuencarral-El Pardo,Fuencarral-El Pardo,86,Valverde,Valverde,barrio,alquiler,18.13
+2026,6,202606,8,Fuencarral-El Pardo,Fuencarral-El Pardo,87,Mirasierra,Mirasierra,barrio,alquiler,18.44
+2026,6,202606,8,Fuencarral-El Pardo,Fuencarral-El Pardo,88,El Goloso,El Goloso,barrio,alquiler,16.13
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,91,Casa de Campo,Casa de Campo,barrio,alquiler,21.0
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,92,ArgÃ¼elles,ArgA 1/4elles,barrio,alquiler,25.94
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,93,Ciudad Universitaria,Ciudad Universitaria,barrio,alquiler,20.93
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,94,Valdezarza,Valdezarza,barrio,alquiler,19.38
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,95,ValdemarÃ­n,ValdemarAn,barrio,alquiler,18.3
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,97,Aravaca,Aravaca,barrio,alquiler,17.83
+2026,6,202606,1,Centro,Centro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,26.87
+2026,6,202606,10,Latina,Latina,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,18.46
+2026,6,202606,11,Carabanchel,Carabanchel,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,18.38
+2026,6,202606,12,Usera,Usera,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,19.67
+2026,6,202606,13,Puente de Vallecas,Puente de Vallecas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,19.92
+2026,6,202606,14,Moratalaz,Moratalaz,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,17.14
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,19.7
+2026,6,202606,16,Hortaleza,Hortaleza,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,18.51
+2026,6,202606,17,Villaverde,Villaverde,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,17.6
+2026,6,202606,18,Villa de Vallecas,Villa de Vallecas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,17.85
+2026,6,202606,19,VicÃ¡lvaro,VicA!lvaro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,16.79
+2026,6,202606,2,Arganzuela,Arganzuela,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,22.58
+2026,6,202606,20,San Blas-Canillejas,San Blas-Canillejas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,17.84
+2026,6,202606,21,Barajas,Barajas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,17.06
+2026,6,202606,3,Retiro,Retiro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,24.37
+2026,6,202606,4,Salamanca,Salamanca,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,28.77
+2026,6,202606,5,ChamartÃ­n,ChamartAn,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,23.37
+2026,6,202606,6,TetuÃ¡n,TetuA!n,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,23.31
+2026,6,202606,7,ChamberÃ­,ChamberA,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,26.37
+2026,6,202606,8,Fuencarral-El Pardo,Fuencarral-El Pardo,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,18.3
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,alquiler,22.18
+2026,4,202604,1,Centro,Centro,11,Palacio,Palacio,barrio,venta,7653.0
+2026,4,202604,1,Centro,Centro,12,Embajadores,Embajadores,barrio,venta,6176.0
+2026,4,202604,1,Centro,Centro,13,Cortes,Cortes,barrio,venta,8207.0
+2026,4,202604,1,Centro,Centro,14,Justicia,Justicia,barrio,venta,9150.0
+2026,4,202604,1,Centro,Centro,15,Universidad,Universidad,barrio,venta,7834.0
+2026,4,202604,1,Centro,Centro,16,Sol,Sol,barrio,venta,8015.0
+2026,4,202604,10,Latina,Latina,101,Los CÃ¡rmenes,Los CA!rmenes,barrio,venta,3994.0
+2026,4,202604,10,Latina,Latina,102,Puerta del Ãngel,Puerta del Angel,barrio,venta,4526.0
+2026,4,202604,10,Latina,Latina,103,Lucero,Lucero,barrio,venta,3981.0
+2026,4,202604,10,Latina,Latina,104,Aluche,Aluche,barrio,venta,3671.0
+2026,4,202604,10,Latina,Latina,105,Campamento,Campamento,barrio,venta,3685.0
+2026,4,202604,10,Latina,Latina,107,Ãguilas,Aguilas,barrio,venta,3677.0
+2026,4,202604,11,Carabanchel,Carabanchel,111,Comillas,Comillas,barrio,venta,4625.0
+2026,4,202604,11,Carabanchel,Carabanchel,112,OpaÃ±el,OpaA+-el,barrio,venta,4050.0
+2026,4,202604,11,Carabanchel,Carabanchel,113,San Isidro,San Isidro,barrio,venta,3827.0
+2026,4,202604,11,Carabanchel,Carabanchel,114,Vista Alegre,Vista Alegre,barrio,venta,3656.0
+2026,4,202604,11,Carabanchel,Carabanchel,115,Puerta Bonita,Puerta Bonita,barrio,venta,3504.0
+2026,4,202604,11,Carabanchel,Carabanchel,116,Buenavista,Buenavista,barrio,venta,3735.0
+2026,4,202604,11,Carabanchel,Carabanchel,117,Abrantes,Abrantes,barrio,venta,3347.0
+2026,4,202604,12,Usera,Usera,121,Orcasitas,Orcasitas,barrio,venta,2888.0
+2026,4,202604,12,Usera,Usera,122,Orcasur,Orcasur,barrio,venta,2618.0
+2026,4,202604,12,Usera,Usera,123,San FermÃ­n,San FermAn,barrio,venta,3461.0
+2026,4,202604,12,Usera,Usera,124,Almendrales,Almendrales,barrio,venta,3961.0
+2026,4,202604,12,Usera,Usera,125,MoscardÃ³,MoscardA3,barrio,venta,3922.0
+2026,4,202604,12,Usera,Usera,126,ZofÃ­o,ZofAo,barrio,venta,3734.0
+2026,4,202604,12,Usera,Usera,127,Pradolongo,Pradolongo,barrio,venta,3599.0
+2026,4,202604,13,Puente de Vallecas,Puente de Vallecas,131,EntrevÃ­as,EntrevAas,barrio,venta,2873.0
+2026,4,202604,13,Puente de Vallecas,Puente de Vallecas,132,San Diego,San Diego,barrio,venta,3389.0
+2026,4,202604,13,Puente de Vallecas,Puente de Vallecas,133,Palomeras Bajas,Palomeras Bajas,barrio,venta,3395.0
+2026,4,202604,13,Puente de Vallecas,Puente de Vallecas,134,Palomeras Sureste,Palomeras Sureste,barrio,venta,3360.0
+2026,4,202604,13,Puente de Vallecas,Puente de Vallecas,135,Portazgo,Portazgo,barrio,venta,3290.0
+2026,4,202604,13,Puente de Vallecas,Puente de Vallecas,136,Numancia,Numancia,barrio,venta,3540.0
+2026,4,202604,14,Moratalaz,Moratalaz,143,Marroquina,Marroquina,barrio,venta,5000.0
+2026,4,202604,14,Moratalaz,Moratalaz,144,Media Legua,Media Legua,barrio,venta,4720.0
+2026,4,202604,14,Moratalaz,Moratalaz,145,FontarrÃ³n,FontarrA3n,barrio,venta,4166.0
+2026,4,202604,14,Moratalaz,Moratalaz,146,Vinateros,Vinateros,barrio,venta,4528.0
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,151,Ventas,Ventas,barrio,venta,4711.0
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,152,Pueblo Nuevo,Pueblo Nuevo,barrio,venta,4440.0
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,153,Quintana,Quintana,barrio,venta,5124.0
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,154,La ConcepciÃ³n,La ConcepciA3n,barrio,venta,5501.0
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,155,San Pascual,San Pascual,barrio,venta,5999.0
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,156,San Juan Bautista,San Juan Bautista,barrio,venta,6764.0
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,157,Colina,Colina,barrio,venta,6934.0
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,159,Costillares,Costillares,barrio,venta,6037.0
+2026,4,202604,16,Hortaleza,Hortaleza,161,Palomas,Palomas,barrio,venta,5489.0
+2026,4,202604,16,Hortaleza,Hortaleza,162,Piovera,Piovera,barrio,venta,6364.0
+2026,4,202604,16,Hortaleza,Hortaleza,163,Canillas,Canillas,barrio,venta,5041.0
+2026,4,202604,16,Hortaleza,Hortaleza,164,Pinar del Rey,Pinar del Rey,barrio,venta,4881.0
+2026,4,202604,16,Hortaleza,Hortaleza,165,ApÃ³stol Santiago,ApA3stol Santiago,barrio,venta,4962.0
+2026,4,202604,16,Hortaleza,Hortaleza,166,Valdefuentes,Valdefuentes,barrio,venta,5831.0
+2026,4,202604,17,Villaverde,Villaverde,171,"Villaverde Alto, Casco HistÃ³rico de Villaverde","Villaverde Alto, Casco HistA3rico de Villaverde",barrio,venta,2917.0
+2026,4,202604,17,Villaverde,Villaverde,172,San CristÃ³bal,San CristA3bal,barrio,venta,2308.0
+2026,4,202604,17,Villaverde,Villaverde,173,Butarque,Butarque,barrio,venta,3461.0
+2026,4,202604,17,Villaverde,Villaverde,174,Los Rosales,Los Rosales,barrio,venta,3195.0
+2026,4,202604,17,Villaverde,Villaverde,175,Ãngeles,Angeles,barrio,venta,3266.0
+2026,4,202604,18,Villa de Vallecas,Villa de Vallecas,181,Casco HistÃ³rico de Vallecas,Casco HistA3rico de Vallecas,barrio,venta,3281.0
+2026,4,202604,18,Villa de Vallecas,Villa de Vallecas,182,Santa Eugenia,Santa Eugenia,barrio,venta,3839.0
+2026,4,202604,18,Villa de Vallecas,Villa de Vallecas,183,Ensanche de Vallecas,Ensanche de Vallecas,barrio,venta,4225.0
+2026,4,202604,19,VicÃ¡lvaro,VicA!lvaro,191,Casco HistÃ³rico de VicÃ¡lvaro,Casco HistA3rico de VicA!lvaro,barrio,venta,3741.0
+2026,4,202604,19,VicÃ¡lvaro,VicA!lvaro,192,Valdebernardo,Valdebernardo,barrio,venta,3699.0
+2026,4,202604,19,VicÃ¡lvaro,VicA!lvaro,193,Valderribas,Valderribas,barrio,venta,4353.0
+2026,4,202604,19,VicÃ¡lvaro,VicA!lvaro,194,El CaÃ±averal,El CaA+-averal,barrio,venta,4306.0
+2026,4,202604,2,Arganzuela,Arganzuela,21,Imperial,Imperial,barrio,venta,6560.0
+2026,4,202604,2,Arganzuela,Arganzuela,22,Acacias,Acacias,barrio,venta,6488.0
+2026,4,202604,2,Arganzuela,Arganzuela,23,Chopera,Chopera,barrio,venta,5882.0
+2026,4,202604,2,Arganzuela,Arganzuela,24,Legazpi,Legazpi,barrio,venta,6639.0
+2026,4,202604,2,Arganzuela,Arganzuela,25,Delicias,Delicias,barrio,venta,6246.0
+2026,4,202604,2,Arganzuela,Arganzuela,26,Palos de la Frontera,Palos de la Frontera,barrio,venta,6373.0
+2026,4,202604,20,San Blas-Canillejas,San Blas-Canillejas,201,Simancas,Simancas,barrio,venta,4093.0
+2026,4,202604,20,San Blas-Canillejas,San Blas-Canillejas,202,HellÃ­n,HellAn,barrio,venta,3590.0
+2026,4,202604,20,San Blas-Canillejas,San Blas-Canillejas,203,Amposta,Amposta,barrio,venta,3378.0
+2026,4,202604,20,San Blas-Canillejas,San Blas-Canillejas,204,Arcos,Arcos,barrio,venta,3683.0
+2026,4,202604,20,San Blas-Canillejas,San Blas-Canillejas,205,Rosas,Rosas,barrio,venta,5089.0
+2026,4,202604,20,San Blas-Canillejas,San Blas-Canillejas,206,Rejas,Rejas,barrio,venta,4330.0
+2026,4,202604,20,San Blas-Canillejas,San Blas-Canillejas,207,Canillejas,Canillejas,barrio,venta,3903.0
+2026,4,202604,20,San Blas-Canillejas,San Blas-Canillejas,208,El Salvador,El Salvador,barrio,venta,5598.0
+2026,4,202604,21,Barajas,Barajas,211,Alameda de Osuna,Alameda de Osuna,barrio,venta,5368.0
+2026,4,202604,3,Retiro,Retiro,31,PacÃ­fico,PacAfico,barrio,venta,6786.0
+2026,4,202604,3,Retiro,Retiro,32,Adelfas,Adelfas,barrio,venta,6154.0
+2026,4,202604,3,Retiro,Retiro,33,Estrella,Estrella,barrio,venta,6786.0
+2026,4,202604,3,Retiro,Retiro,34,Ibiza,Ibiza,barrio,venta,9488.0
+2026,4,202604,3,Retiro,Retiro,35,Los JerÃ³nimos,Los JerA3nimos,barrio,venta,7905.0
+2026,4,202604,3,Retiro,Retiro,36,NiÃ±o JesÃºs,NiA+-o JesAos,barrio,venta,7570.0
+2026,4,202604,4,Salamanca,Salamanca,41,Recoletos,Recoletos,barrio,venta,11276.0
+2026,4,202604,4,Salamanca,Salamanca,42,Goya,Goya,barrio,venta,10440.0
+2026,4,202604,4,Salamanca,Salamanca,43,Fuente del Berro,Fuente del Berro,barrio,venta,8006.0
+2026,4,202604,4,Salamanca,Salamanca,44,Guindalera,Guindalera,barrio,venta,7524.0
+2026,4,202604,4,Salamanca,Salamanca,45,Lista,Lista,barrio,venta,10640.0
+2026,4,202604,4,Salamanca,Salamanca,46,Castellana,Castellana,barrio,venta,11387.0
+2026,4,202604,5,ChamartÃ­n,ChamartAn,51,El Viso,El Viso,barrio,venta,9585.0
+2026,4,202604,5,ChamartÃ­n,ChamartAn,52,Prosperidad,Prosperidad,barrio,venta,7570.0
+2026,4,202604,5,ChamartÃ­n,ChamartAn,53,Ciudad JardÃ­n,Ciudad JardAn,barrio,venta,7346.0
+2026,4,202604,5,ChamartÃ­n,ChamartAn,54,HispanoamÃ©rica,HispanoamA(c)rica,barrio,venta,8587.0
+2026,4,202604,5,ChamartÃ­n,ChamartAn,55,Nueva EspaÃ±a,Nueva EspaA+-a,barrio,venta,8369.0
+2026,4,202604,5,ChamartÃ­n,ChamartAn,56,Castilla,Castilla,barrio,venta,7249.0
+2026,4,202604,6,TetuÃ¡n,TetuA!n,61,Bellas Vistas,Bellas Vistas,barrio,venta,5559.0
+2026,4,202604,6,TetuÃ¡n,TetuA!n,62,Cuatro Caminos,Cuatro Caminos,barrio,venta,7394.0
+2026,4,202604,6,TetuÃ¡n,TetuA!n,63,Castillejos,Castillejos,barrio,venta,7333.0
+2026,4,202604,6,TetuÃ¡n,TetuA!n,64,Almenara,Almenara,barrio,venta,5214.0
+2026,4,202604,6,TetuÃ¡n,TetuA!n,65,Valdeacederas,Valdeacederas,barrio,venta,5282.0
+2026,4,202604,6,TetuÃ¡n,TetuA!n,66,Berruguete,Berruguete,barrio,venta,5378.0
+2026,4,202604,7,ChamberÃ­,ChamberA,71,Gaztambide,Gaztambide,barrio,venta,8118.0
+2026,4,202604,7,ChamberÃ­,ChamberA,72,Arapiles,Arapiles,barrio,venta,8537.0
+2026,4,202604,7,ChamberÃ­,ChamberA,73,Trafalgar,Trafalgar,barrio,venta,9365.0
+2026,4,202604,7,ChamberÃ­,ChamberA,74,Almagro,Almagro,barrio,venta,10503.0
+2026,4,202604,7,ChamberÃ­,ChamberA,75,RÃ­os Rosas,RAos Rosas,barrio,venta,8810.0
+2026,4,202604,7,ChamberÃ­,ChamberA,76,Vallehermoso,Vallehermoso,barrio,venta,7921.0
+2026,4,202604,8,Fuencarral-El Pardo,Fuencarral-El Pardo,83,PeÃ±agrande,PeA+-agrande,barrio,venta,5154.0
+2026,4,202604,8,Fuencarral-El Pardo,Fuencarral-El Pardo,84,Pilar,Pilar,barrio,venta,5543.0
+2026,4,202604,8,Fuencarral-El Pardo,Fuencarral-El Pardo,85,La Paz,La Paz,barrio,venta,5754.0
+2026,4,202604,8,Fuencarral-El Pardo,Fuencarral-El Pardo,86,Valverde,Valverde,barrio,venta,4826.0
+2026,4,202604,8,Fuencarral-El Pardo,Fuencarral-El Pardo,87,Mirasierra,Mirasierra,barrio,venta,6345.0
+2026,4,202604,8,Fuencarral-El Pardo,Fuencarral-El Pardo,88,El Goloso,El Goloso,barrio,venta,6553.0
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,91,Casa de Campo,Casa de Campo,barrio,venta,6514.0
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,92,ArgÃ¼elles,ArgA 1/4elles,barrio,venta,7955.0
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,93,Ciudad Universitaria,Ciudad Universitaria,barrio,venta,6132.0
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,94,Valdezarza,Valdezarza,barrio,venta,5137.0
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,95,ValdemarÃ­n,ValdemarAn,barrio,venta,6026.0
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,96,El PlantÃ­o,El PlantAo,barrio,venta,4023.0
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,97,Aravaca,Aravaca,barrio,venta,5619.0
+2026,4,202604,1,Centro,Centro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,7566.0
+2026,4,202604,10,Latina,Latina,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3916.0
+2026,4,202604,11,Carabanchel,Carabanchel,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3718.0
+2026,4,202604,12,Usera,Usera,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3609.0
+2026,4,202604,13,Puente de Vallecas,Puente de Vallecas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3325.0
+2026,4,202604,14,Moratalaz,Moratalaz,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,4533.0
+2026,4,202604,15,Ciudad Lineal,Ciudad Lineal,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,5096.0
+2026,4,202604,16,Hortaleza,Hortaleza,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,5411.0
+2026,4,202604,17,Villaverde,Villaverde,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3002.0
+2026,4,202604,18,Villa de Vallecas,Villa de Vallecas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3717.0
+2026,4,202604,19,VicÃ¡lvaro,VicA!lvaro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3903.0
+2026,4,202604,2,Arganzuela,Arganzuela,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,6333.0
+2026,4,202604,20,San Blas-Canillejas,San Blas-Canillejas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,4051.0
+2026,4,202604,21,Barajas,Barajas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,4901.0
+2026,4,202604,3,Retiro,Retiro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,7758.0
+2026,4,202604,4,Salamanca,Salamanca,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,10189.0
+2026,4,202604,5,ChamartÃ­n,ChamartAn,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,8187.0
+2026,4,202604,6,TetuÃ¡n,TetuA!n,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,6034.0
+2026,4,202604,7,ChamberÃ­,ChamberA,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,8992.0
+2026,4,202604,8,Fuencarral-El Pardo,Fuencarral-El Pardo,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,5423.0
+2026,4,202604,9,Moncloa-Aravaca,Moncloa-Aravaca,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,6376.0
+2026,5,202605,1,Centro,Centro,11,Palacio,Palacio,barrio,venta,7615.0
+2026,5,202605,1,Centro,Centro,12,Embajadores,Embajadores,barrio,venta,6300.0
+2026,5,202605,1,Centro,Centro,13,Cortes,Cortes,barrio,venta,7989.0
+2026,5,202605,1,Centro,Centro,14,Justicia,Justicia,barrio,venta,9318.0
+2026,5,202605,1,Centro,Centro,15,Universidad,Universidad,barrio,venta,7870.0
+2026,5,202605,1,Centro,Centro,16,Sol,Sol,barrio,venta,7919.0
+2026,5,202605,10,Latina,Latina,101,Los CÃ¡rmenes,Los CA!rmenes,barrio,venta,4185.0
+2026,5,202605,10,Latina,Latina,102,Puerta del Ãngel,Puerta del Angel,barrio,venta,4446.0
+2026,5,202605,10,Latina,Latina,103,Lucero,Lucero,barrio,venta,3999.0
+2026,5,202605,10,Latina,Latina,104,Aluche,Aluche,barrio,venta,3759.0
+2026,5,202605,10,Latina,Latina,105,Campamento,Campamento,barrio,venta,3819.0
+2026,5,202605,10,Latina,Latina,107,Ãguilas,Aguilas,barrio,venta,3751.0
+2026,5,202605,11,Carabanchel,Carabanchel,111,Comillas,Comillas,barrio,venta,4584.0
+2026,5,202605,11,Carabanchel,Carabanchel,112,OpaÃ±el,OpaA+-el,barrio,venta,4027.0
+2026,5,202605,11,Carabanchel,Carabanchel,113,San Isidro,San Isidro,barrio,venta,3855.0
+2026,5,202605,11,Carabanchel,Carabanchel,114,Vista Alegre,Vista Alegre,barrio,venta,3688.0
+2026,5,202605,11,Carabanchel,Carabanchel,115,Puerta Bonita,Puerta Bonita,barrio,venta,3521.0
+2026,5,202605,11,Carabanchel,Carabanchel,116,Buenavista,Buenavista,barrio,venta,3759.0
+2026,5,202605,11,Carabanchel,Carabanchel,117,Abrantes,Abrantes,barrio,venta,3508.0
+2026,5,202605,12,Usera,Usera,121,Orcasitas,Orcasitas,barrio,venta,2980.0
+2026,5,202605,12,Usera,Usera,122,Orcasur,Orcasur,barrio,venta,2612.0
+2026,5,202605,12,Usera,Usera,123,San FermÃ­n,San FermAn,barrio,venta,3465.0
+2026,5,202605,12,Usera,Usera,124,Almendrales,Almendrales,barrio,venta,3948.0
+2026,5,202605,12,Usera,Usera,125,MoscardÃ³,MoscardA3,barrio,venta,3941.0
+2026,5,202605,12,Usera,Usera,126,ZofÃ­o,ZofAo,barrio,venta,3783.0
+2026,5,202605,12,Usera,Usera,127,Pradolongo,Pradolongo,barrio,venta,3655.0
+2026,5,202605,13,Puente de Vallecas,Puente de Vallecas,131,EntrevÃ­as,EntrevAas,barrio,venta,2899.0
+2026,5,202605,13,Puente de Vallecas,Puente de Vallecas,132,San Diego,San Diego,barrio,venta,3477.0
+2026,5,202605,13,Puente de Vallecas,Puente de Vallecas,133,Palomeras Bajas,Palomeras Bajas,barrio,venta,3430.0
+2026,5,202605,13,Puente de Vallecas,Puente de Vallecas,134,Palomeras Sureste,Palomeras Sureste,barrio,venta,3462.0
+2026,5,202605,13,Puente de Vallecas,Puente de Vallecas,135,Portazgo,Portazgo,barrio,venta,3404.0
+2026,5,202605,13,Puente de Vallecas,Puente de Vallecas,136,Numancia,Numancia,barrio,venta,3549.0
+2026,5,202605,14,Moratalaz,Moratalaz,143,Marroquina,Marroquina,barrio,venta,4860.0
+2026,5,202605,14,Moratalaz,Moratalaz,144,Media Legua,Media Legua,barrio,venta,4589.0
+2026,5,202605,14,Moratalaz,Moratalaz,145,FontarrÃ³n,FontarrA3n,barrio,venta,4226.0
+2026,5,202605,14,Moratalaz,Moratalaz,146,Vinateros,Vinateros,barrio,venta,4608.0
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,151,Ventas,Ventas,barrio,venta,4787.0
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,152,Pueblo Nuevo,Pueblo Nuevo,barrio,venta,4442.0
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,153,Quintana,Quintana,barrio,venta,5135.0
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,154,La ConcepciÃ³n,La ConcepciA3n,barrio,venta,5490.0
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,155,San Pascual,San Pascual,barrio,venta,5957.0
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,156,San Juan Bautista,San Juan Bautista,barrio,venta,6884.0
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,157,Colina,Colina,barrio,venta,6882.0
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,159,Costillares,Costillares,barrio,venta,6115.0
+2026,5,202605,16,Hortaleza,Hortaleza,161,Palomas,Palomas,barrio,venta,5716.0
+2026,5,202605,16,Hortaleza,Hortaleza,162,Piovera,Piovera,barrio,venta,6380.0
+2026,5,202605,16,Hortaleza,Hortaleza,163,Canillas,Canillas,barrio,venta,5132.0
+2026,5,202605,16,Hortaleza,Hortaleza,164,Pinar del Rey,Pinar del Rey,barrio,venta,4955.0
+2026,5,202605,16,Hortaleza,Hortaleza,165,ApÃ³stol Santiago,ApA3stol Santiago,barrio,venta,4987.0
+2026,5,202605,16,Hortaleza,Hortaleza,166,Valdefuentes,Valdefuentes,barrio,venta,5954.0
+2026,5,202605,17,Villaverde,Villaverde,171,"Villaverde Alto, Casco HistÃ³rico de Villaverde","Villaverde Alto, Casco HistA3rico de Villaverde",barrio,venta,2961.0
+2026,5,202605,17,Villaverde,Villaverde,172,San CristÃ³bal,San CristA3bal,barrio,venta,2621.0
+2026,5,202605,17,Villaverde,Villaverde,173,Butarque,Butarque,barrio,venta,3589.0
+2026,5,202605,17,Villaverde,Villaverde,174,Los Rosales,Los Rosales,barrio,venta,3289.0
+2026,5,202605,17,Villaverde,Villaverde,175,Ãngeles,Angeles,barrio,venta,3308.0
+2026,5,202605,18,Villa de Vallecas,Villa de Vallecas,181,Casco HistÃ³rico de Vallecas,Casco HistA3rico de Vallecas,barrio,venta,3258.0
+2026,5,202605,18,Villa de Vallecas,Villa de Vallecas,182,Santa Eugenia,Santa Eugenia,barrio,venta,3933.0
+2026,5,202605,18,Villa de Vallecas,Villa de Vallecas,183,Ensanche de Vallecas,Ensanche de Vallecas,barrio,venta,4395.0
+2026,5,202605,19,VicÃ¡lvaro,VicA!lvaro,191,Casco HistÃ³rico de VicÃ¡lvaro,Casco HistA3rico de VicA!lvaro,barrio,venta,3711.0
+2026,5,202605,19,VicÃ¡lvaro,VicA!lvaro,192,Valdebernardo,Valdebernardo,barrio,venta,3645.0
+2026,5,202605,19,VicÃ¡lvaro,VicA!lvaro,193,Valderribas,Valderribas,barrio,venta,4412.0
+2026,5,202605,19,VicÃ¡lvaro,VicA!lvaro,194,El CaÃ±averal,El CaA+-averal,barrio,venta,4479.0
+2026,5,202605,2,Arganzuela,Arganzuela,21,Imperial,Imperial,barrio,venta,6583.0
+2026,5,202605,2,Arganzuela,Arganzuela,22,Acacias,Acacias,barrio,venta,6541.0
+2026,5,202605,2,Arganzuela,Arganzuela,23,Chopera,Chopera,barrio,venta,5909.0
+2026,5,202605,2,Arganzuela,Arganzuela,24,Legazpi,Legazpi,barrio,venta,6709.0
+2026,5,202605,2,Arganzuela,Arganzuela,25,Delicias,Delicias,barrio,venta,6391.0
+2026,5,202605,2,Arganzuela,Arganzuela,26,Palos de la Frontera,Palos de la Frontera,barrio,venta,6443.0
+2026,5,202605,20,San Blas-Canillejas,San Blas-Canillejas,201,Simancas,Simancas,barrio,venta,4081.0
+2026,5,202605,20,San Blas-Canillejas,San Blas-Canillejas,202,HellÃ­n,HellAn,barrio,venta,3617.0
+2026,5,202605,20,San Blas-Canillejas,San Blas-Canillejas,203,Amposta,Amposta,barrio,venta,3400.0
+2026,5,202605,20,San Blas-Canillejas,San Blas-Canillejas,204,Arcos,Arcos,barrio,venta,3741.0
+2026,5,202605,20,San Blas-Canillejas,San Blas-Canillejas,205,Rosas,Rosas,barrio,venta,4926.0
+2026,5,202605,20,San Blas-Canillejas,San Blas-Canillejas,206,Rejas,Rejas,barrio,venta,4301.0
+2026,5,202605,20,San Blas-Canillejas,San Blas-Canillejas,207,Canillejas,Canillejas,barrio,venta,3878.0
+2026,5,202605,20,San Blas-Canillejas,San Blas-Canillejas,208,El Salvador,El Salvador,barrio,venta,5525.0
+2026,5,202605,21,Barajas,Barajas,211,Alameda de Osuna,Alameda de Osuna,barrio,venta,5404.0
+2026,5,202605,3,Retiro,Retiro,31,PacÃ­fico,PacAfico,barrio,venta,6691.0
+2026,5,202605,3,Retiro,Retiro,32,Adelfas,Adelfas,barrio,venta,6212.0
+2026,5,202605,3,Retiro,Retiro,33,Estrella,Estrella,barrio,venta,6806.0
+2026,5,202605,3,Retiro,Retiro,34,Ibiza,Ibiza,barrio,venta,9520.0
+2026,5,202605,3,Retiro,Retiro,35,Los JerÃ³nimos,Los JerA3nimos,barrio,venta,8219.0
+2026,5,202605,3,Retiro,Retiro,36,NiÃ±o JesÃºs,NiA+-o JesAos,barrio,venta,7573.0
+2026,5,202605,4,Salamanca,Salamanca,41,Recoletos,Recoletos,barrio,venta,11184.0
+2026,5,202605,4,Salamanca,Salamanca,42,Goya,Goya,barrio,venta,10435.0
+2026,5,202605,4,Salamanca,Salamanca,43,Fuente del Berro,Fuente del Berro,barrio,venta,7923.0
+2026,5,202605,4,Salamanca,Salamanca,44,Guindalera,Guindalera,barrio,venta,7416.0
+2026,5,202605,4,Salamanca,Salamanca,45,Lista,Lista,barrio,venta,10619.0
+2026,5,202605,4,Salamanca,Salamanca,46,Castellana,Castellana,barrio,venta,11272.0
+2026,5,202605,5,ChamartÃ­n,ChamartAn,51,El Viso,El Viso,barrio,venta,9703.0
+2026,5,202605,5,ChamartÃ­n,ChamartAn,52,Prosperidad,Prosperidad,barrio,venta,7569.0
+2026,5,202605,5,ChamartÃ­n,ChamartAn,53,Ciudad JardÃ­n,Ciudad JardAn,barrio,venta,7328.0
+2026,5,202605,5,ChamartÃ­n,ChamartAn,54,HispanoamÃ©rica,HispanoamA(c)rica,barrio,venta,8540.0
+2026,5,202605,5,ChamartÃ­n,ChamartAn,55,Nueva EspaÃ±a,Nueva EspaA+-a,barrio,venta,8626.0
+2026,5,202605,5,ChamartÃ­n,ChamartAn,56,Castilla,Castilla,barrio,venta,7352.0
+2026,5,202605,6,TetuÃ¡n,TetuA!n,61,Bellas Vistas,Bellas Vistas,barrio,venta,5541.0
+2026,5,202605,6,TetuÃ¡n,TetuA!n,62,Cuatro Caminos,Cuatro Caminos,barrio,venta,7428.0
+2026,5,202605,6,TetuÃ¡n,TetuA!n,63,Castillejos,Castillejos,barrio,venta,7333.0
+2026,5,202605,6,TetuÃ¡n,TetuA!n,64,Almenara,Almenara,barrio,venta,5149.0
+2026,5,202605,6,TetuÃ¡n,TetuA!n,65,Valdeacederas,Valdeacederas,barrio,venta,5225.0
+2026,5,202605,6,TetuÃ¡n,TetuA!n,66,Berruguete,Berruguete,barrio,venta,5415.0
+2026,5,202605,7,ChamberÃ­,ChamberA,71,Gaztambide,Gaztambide,barrio,venta,8111.0
+2026,5,202605,7,ChamberÃ­,ChamberA,72,Arapiles,Arapiles,barrio,venta,8534.0
+2026,5,202605,7,ChamberÃ­,ChamberA,73,Trafalgar,Trafalgar,barrio,venta,9527.0
+2026,5,202605,7,ChamberÃ­,ChamberA,74,Almagro,Almagro,barrio,venta,10382.0
+2026,5,202605,7,ChamberÃ­,ChamberA,75,RÃ­os Rosas,RAos Rosas,barrio,venta,8800.0
+2026,5,202605,7,ChamberÃ­,ChamberA,76,Vallehermoso,Vallehermoso,barrio,venta,7918.0
+2026,5,202605,8,Fuencarral-El Pardo,Fuencarral-El Pardo,83,PeÃ±agrande,PeA+-agrande,barrio,venta,5151.0
+2026,5,202605,8,Fuencarral-El Pardo,Fuencarral-El Pardo,84,Pilar,Pilar,barrio,venta,5556.0
+2026,5,202605,8,Fuencarral-El Pardo,Fuencarral-El Pardo,85,La Paz,La Paz,barrio,venta,5857.0
+2026,5,202605,8,Fuencarral-El Pardo,Fuencarral-El Pardo,86,Valverde,Valverde,barrio,venta,4962.0
+2026,5,202605,8,Fuencarral-El Pardo,Fuencarral-El Pardo,87,Mirasierra,Mirasierra,barrio,venta,6263.0
+2026,5,202605,8,Fuencarral-El Pardo,Fuencarral-El Pardo,88,El Goloso,El Goloso,barrio,venta,6805.0
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,91,Casa de Campo,Casa de Campo,barrio,venta,6312.0
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,92,ArgÃ¼elles,ArgA 1/4elles,barrio,venta,7989.0
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,93,Ciudad Universitaria,Ciudad Universitaria,barrio,venta,6107.0
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,94,Valdezarza,Valdezarza,barrio,venta,5065.0
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,95,ValdemarÃ­n,ValdemarAn,barrio,venta,6209.0
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,96,El PlantÃ­o,El PlantAo,barrio,venta,4175.0
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,97,Aravaca,Aravaca,barrio,venta,5633.0
+2026,5,202605,1,Centro,Centro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,7588.0
+2026,5,202605,10,Latina,Latina,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3980.0
+2026,5,202605,11,Carabanchel,Carabanchel,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3767.0
+2026,5,202605,12,Usera,Usera,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3635.0
+2026,5,202605,13,Puente de Vallecas,Puente de Vallecas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3399.0
+2026,5,202605,14,Moratalaz,Moratalaz,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,4606.0
+2026,5,202605,15,Ciudad Lineal,Ciudad Lineal,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,5136.0
+2026,5,202605,16,Hortaleza,Hortaleza,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,5429.0
+2026,5,202605,17,Villaverde,Villaverde,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3132.0
+2026,5,202605,18,Villa de Vallecas,Villa de Vallecas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3792.0
+2026,5,202605,19,VicÃ¡lvaro,VicA!lvaro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3917.0
+2026,5,202605,2,Arganzuela,Arganzuela,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,6422.0
+2026,5,202605,20,San Blas-Canillejas,San Blas-Canillejas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,4041.0
+2026,5,202605,21,Barajas,Barajas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,5127.0
+2026,5,202605,3,Retiro,Retiro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,7759.0
+2026,5,202605,4,Salamanca,Salamanca,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,10099.0
+2026,5,202605,5,ChamartÃ­n,ChamartAn,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,8138.0
+2026,5,202605,6,TetuÃ¡n,TetuA!n,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,6108.0
+2026,5,202605,7,ChamberÃ­,ChamberA,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,8967.0
+2026,5,202605,8,Fuencarral-El Pardo,Fuencarral-El Pardo,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,5459.0
+2026,5,202605,9,Moncloa-Aravaca,Moncloa-Aravaca,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,6313.0
+2026,6,202606,1,Centro,Centro,11,Palacio,Palacio,barrio,venta,7601.0
+2026,6,202606,1,Centro,Centro,12,Embajadores,Embajadores,barrio,venta,6346.0
+2026,6,202606,1,Centro,Centro,13,Cortes,Cortes,barrio,venta,8035.0
+2026,6,202606,1,Centro,Centro,14,Justicia,Justicia,barrio,venta,9471.0
+2026,6,202606,1,Centro,Centro,15,Universidad,Universidad,barrio,venta,7879.0
+2026,6,202606,1,Centro,Centro,16,Sol,Sol,barrio,venta,7924.0
+2026,6,202606,10,Latina,Latina,101,Los CÃ¡rmenes,Los CA!rmenes,barrio,venta,4090.0
+2026,6,202606,10,Latina,Latina,102,Puerta del Ãngel,Puerta del Angel,barrio,venta,4224.0
+2026,6,202606,10,Latina,Latina,103,Lucero,Lucero,barrio,venta,3999.0
+2026,6,202606,10,Latina,Latina,104,Aluche,Aluche,barrio,venta,3913.0
+2026,6,202606,10,Latina,Latina,105,Campamento,Campamento,barrio,venta,3861.0
+2026,6,202606,10,Latina,Latina,107,Ãguilas,Aguilas,barrio,venta,3774.0
+2026,6,202606,11,Carabanchel,Carabanchel,111,Comillas,Comillas,barrio,venta,4651.0
+2026,6,202606,11,Carabanchel,Carabanchel,112,OpaÃ±el,OpaA+-el,barrio,venta,4028.0
+2026,6,202606,11,Carabanchel,Carabanchel,113,San Isidro,San Isidro,barrio,venta,3944.0
+2026,6,202606,11,Carabanchel,Carabanchel,114,Vista Alegre,Vista Alegre,barrio,venta,3732.0
+2026,6,202606,11,Carabanchel,Carabanchel,115,Puerta Bonita,Puerta Bonita,barrio,venta,3534.0
+2026,6,202606,11,Carabanchel,Carabanchel,116,Buenavista,Buenavista,barrio,venta,3836.0
+2026,6,202606,11,Carabanchel,Carabanchel,117,Abrantes,Abrantes,barrio,venta,3558.0
+2026,6,202606,12,Usera,Usera,121,Orcasitas,Orcasitas,barrio,venta,2989.0
+2026,6,202606,12,Usera,Usera,122,Orcasur,Orcasur,barrio,venta,2650.0
+2026,6,202606,12,Usera,Usera,123,San FermÃ­n,San FermAn,barrio,venta,3488.0
+2026,6,202606,12,Usera,Usera,124,Almendrales,Almendrales,barrio,venta,4022.0
+2026,6,202606,12,Usera,Usera,125,MoscardÃ³,MoscardA3,barrio,venta,3990.0
+2026,6,202606,12,Usera,Usera,126,ZofÃ­o,ZofAo,barrio,venta,3707.0
+2026,6,202606,12,Usera,Usera,127,Pradolongo,Pradolongo,barrio,venta,3559.0
+2026,6,202606,13,Puente de Vallecas,Puente de Vallecas,131,EntrevÃ­as,EntrevAas,barrio,venta,2902.0
+2026,6,202606,13,Puente de Vallecas,Puente de Vallecas,132,San Diego,San Diego,barrio,venta,3487.0
+2026,6,202606,13,Puente de Vallecas,Puente de Vallecas,133,Palomeras Bajas,Palomeras Bajas,barrio,venta,3500.0
+2026,6,202606,13,Puente de Vallecas,Puente de Vallecas,134,Palomeras Sureste,Palomeras Sureste,barrio,venta,3459.0
+2026,6,202606,13,Puente de Vallecas,Puente de Vallecas,135,Portazgo,Portazgo,barrio,venta,3307.0
+2026,6,202606,13,Puente de Vallecas,Puente de Vallecas,136,Numancia,Numancia,barrio,venta,3549.0
+2026,6,202606,14,Moratalaz,Moratalaz,143,Marroquina,Marroquina,barrio,venta,4891.0
+2026,6,202606,14,Moratalaz,Moratalaz,144,Media Legua,Media Legua,barrio,venta,4720.0
+2026,6,202606,14,Moratalaz,Moratalaz,145,FontarrÃ³n,FontarrA3n,barrio,venta,4167.0
+2026,6,202606,14,Moratalaz,Moratalaz,146,Vinateros,Vinateros,barrio,venta,4608.0
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,151,Ventas,Ventas,barrio,venta,4782.0
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,152,Pueblo Nuevo,Pueblo Nuevo,barrio,venta,4429.0
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,153,Quintana,Quintana,barrio,venta,5251.0
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,154,La ConcepciÃ³n,La ConcepciA3n,barrio,venta,5364.0
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,155,San Pascual,San Pascual,barrio,venta,5998.0
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,156,San Juan Bautista,San Juan Bautista,barrio,venta,6883.0
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,157,Colina,Colina,barrio,venta,6676.0
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,159,Costillares,Costillares,barrio,venta,6298.0
+2026,6,202606,16,Hortaleza,Hortaleza,161,Palomas,Palomas,barrio,venta,5473.0
+2026,6,202606,16,Hortaleza,Hortaleza,162,Piovera,Piovera,barrio,venta,6532.0
+2026,6,202606,16,Hortaleza,Hortaleza,163,Canillas,Canillas,barrio,venta,5165.0
+2026,6,202606,16,Hortaleza,Hortaleza,164,Pinar del Rey,Pinar del Rey,barrio,venta,4982.0
+2026,6,202606,16,Hortaleza,Hortaleza,165,ApÃ³stol Santiago,ApA3stol Santiago,barrio,venta,4876.0
+2026,6,202606,16,Hortaleza,Hortaleza,166,Valdefuentes,Valdefuentes,barrio,venta,5948.0
+2026,6,202606,17,Villaverde,Villaverde,171,"Villaverde Alto, Casco HistÃ³rico de Villaverde","Villaverde Alto, Casco HistA3rico de Villaverde",barrio,venta,2997.0
+2026,6,202606,17,Villaverde,Villaverde,172,San CristÃ³bal,San CristA3bal,barrio,venta,2704.0
+2026,6,202606,17,Villaverde,Villaverde,173,Butarque,Butarque,barrio,venta,3740.0
+2026,6,202606,17,Villaverde,Villaverde,174,Los Rosales,Los Rosales,barrio,venta,3354.0
+2026,6,202606,17,Villaverde,Villaverde,175,Ãngeles,Angeles,barrio,venta,3372.0
+2026,6,202606,18,Villa de Vallecas,Villa de Vallecas,181,Casco HistÃ³rico de Vallecas,Casco HistA3rico de Vallecas,barrio,venta,3262.0
+2026,6,202606,18,Villa de Vallecas,Villa de Vallecas,182,Santa Eugenia,Santa Eugenia,barrio,venta,3877.0
+2026,6,202606,18,Villa de Vallecas,Villa de Vallecas,183,Ensanche de Vallecas,Ensanche de Vallecas,barrio,venta,4429.0
+2026,6,202606,19,VicÃ¡lvaro,VicA!lvaro,192,Valdebernardo,Valdebernardo,barrio,venta,3648.0
+2026,6,202606,19,VicÃ¡lvaro,VicA!lvaro,193,Valderribas,Valderribas,barrio,venta,4381.0
+2026,6,202606,19,VicÃ¡lvaro,VicA!lvaro,194,El CaÃ±averal,El CaA+-averal,barrio,venta,4449.0
+2026,6,202606,2,Arganzuela,Arganzuela,21,Imperial,Imperial,barrio,venta,6429.0
+2026,6,202606,2,Arganzuela,Arganzuela,22,Acacias,Acacias,barrio,venta,6460.0
+2026,6,202606,2,Arganzuela,Arganzuela,23,Chopera,Chopera,barrio,venta,6037.0
+2026,6,202606,2,Arganzuela,Arganzuela,24,Legazpi,Legazpi,barrio,venta,6688.0
+2026,6,202606,2,Arganzuela,Arganzuela,25,Delicias,Delicias,barrio,venta,6443.0
+2026,6,202606,2,Arganzuela,Arganzuela,26,Palos de la Frontera,Palos de la Frontera,barrio,venta,6304.0
+2026,6,202606,20,San Blas-Canillejas,San Blas-Canillejas,201,Simancas,Simancas,barrio,venta,4122.0
+2026,6,202606,20,San Blas-Canillejas,San Blas-Canillejas,202,HellÃ­n,HellAn,barrio,venta,3571.0
+2026,6,202606,20,San Blas-Canillejas,San Blas-Canillejas,203,Amposta,Amposta,barrio,venta,3375.0
+2026,6,202606,20,San Blas-Canillejas,San Blas-Canillejas,204,Arcos,Arcos,barrio,venta,3702.0
+2026,6,202606,20,San Blas-Canillejas,San Blas-Canillejas,205,Rosas,Rosas,barrio,venta,4898.0
+2026,6,202606,20,San Blas-Canillejas,San Blas-Canillejas,206,Rejas,Rejas,barrio,venta,4196.0
+2026,6,202606,20,San Blas-Canillejas,San Blas-Canillejas,207,Canillejas,Canillejas,barrio,venta,4123.0
+2026,6,202606,20,San Blas-Canillejas,San Blas-Canillejas,208,El Salvador,El Salvador,barrio,venta,5652.0
+2026,6,202606,21,Barajas,Barajas,211,Alameda de Osuna,Alameda de Osuna,barrio,venta,5426.0
+2026,6,202606,21,Barajas,Barajas,213,Casco HistÃ³rico de Barajas,Casco HistA3rico de Barajas,barrio,venta,4743.0
+2026,6,202606,21,Barajas,Barajas,215,Corralejos,Corralejos,barrio,venta,5358.0
+2026,6,202606,3,Retiro,Retiro,31,PacÃ­fico,PacAfico,barrio,venta,6721.0
+2026,6,202606,3,Retiro,Retiro,32,Adelfas,Adelfas,barrio,venta,6343.0
+2026,6,202606,3,Retiro,Retiro,33,Estrella,Estrella,barrio,venta,6701.0
+2026,6,202606,3,Retiro,Retiro,34,Ibiza,Ibiza,barrio,venta,9504.0
+2026,6,202606,3,Retiro,Retiro,35,Los JerÃ³nimos,Los JerA3nimos,barrio,venta,7980.0
+2026,6,202606,3,Retiro,Retiro,36,NiÃ±o JesÃºs,NiA+-o JesAos,barrio,venta,7568.0
+2026,6,202606,4,Salamanca,Salamanca,41,Recoletos,Recoletos,barrio,venta,11111.0
+2026,6,202606,4,Salamanca,Salamanca,42,Goya,Goya,barrio,venta,10390.0
+2026,6,202606,4,Salamanca,Salamanca,43,Fuente del Berro,Fuente del Berro,barrio,venta,7739.0
+2026,6,202606,4,Salamanca,Salamanca,44,Guindalera,Guindalera,barrio,venta,7268.0
+2026,6,202606,4,Salamanca,Salamanca,45,Lista,Lista,barrio,venta,10612.0
+2026,6,202606,4,Salamanca,Salamanca,46,Castellana,Castellana,barrio,venta,11093.0
+2026,6,202606,5,ChamartÃ­n,ChamartAn,51,El Viso,El Viso,barrio,venta,9618.0
+2026,6,202606,5,ChamartÃ­n,ChamartAn,52,Prosperidad,Prosperidad,barrio,venta,7502.0
+2026,6,202606,5,ChamartÃ­n,ChamartAn,53,Ciudad JardÃ­n,Ciudad JardAn,barrio,venta,7342.0
+2026,6,202606,5,ChamartÃ­n,ChamartAn,54,HispanoamÃ©rica,HispanoamA(c)rica,barrio,venta,8622.0
+2026,6,202606,5,ChamartÃ­n,ChamartAn,55,Nueva EspaÃ±a,Nueva EspaA+-a,barrio,venta,8706.0
+2026,6,202606,5,ChamartÃ­n,ChamartAn,56,Castilla,Castilla,barrio,venta,7117.0
+2026,6,202606,6,TetuÃ¡n,TetuA!n,61,Bellas Vistas,Bellas Vistas,barrio,venta,5486.0
+2026,6,202606,6,TetuÃ¡n,TetuA!n,62,Cuatro Caminos,Cuatro Caminos,barrio,venta,7286.0
+2026,6,202606,6,TetuÃ¡n,TetuA!n,63,Castillejos,Castillejos,barrio,venta,7500.0
+2026,6,202606,6,TetuÃ¡n,TetuA!n,64,Almenara,Almenara,barrio,venta,5164.0
+2026,6,202606,6,TetuÃ¡n,TetuA!n,65,Valdeacederas,Valdeacederas,barrio,venta,5303.0
+2026,6,202606,6,TetuÃ¡n,TetuA!n,66,Berruguete,Berruguete,barrio,venta,5368.0
+2026,6,202606,7,ChamberÃ­,ChamberA,71,Gaztambide,Gaztambide,barrio,venta,8264.0
+2026,6,202606,7,ChamberÃ­,ChamberA,72,Arapiles,Arapiles,barrio,venta,8512.0
+2026,6,202606,7,ChamberÃ­,ChamberA,73,Trafalgar,Trafalgar,barrio,venta,9464.0
+2026,6,202606,7,ChamberÃ­,ChamberA,74,Almagro,Almagro,barrio,venta,10582.0
+2026,6,202606,7,ChamberÃ­,ChamberA,75,RÃ­os Rosas,RAos Rosas,barrio,venta,8835.0
+2026,6,202606,7,ChamberÃ­,ChamberA,76,Vallehermoso,Vallehermoso,barrio,venta,7952.0
+2026,6,202606,8,Fuencarral-El Pardo,Fuencarral-El Pardo,83,PeÃ±agrande,PeA+-agrande,barrio,venta,5151.0
+2026,6,202606,8,Fuencarral-El Pardo,Fuencarral-El Pardo,84,Pilar,Pilar,barrio,venta,5536.0
+2026,6,202606,8,Fuencarral-El Pardo,Fuencarral-El Pardo,85,La Paz,La Paz,barrio,venta,5886.0
+2026,6,202606,8,Fuencarral-El Pardo,Fuencarral-El Pardo,86,Valverde,Valverde,barrio,venta,4955.0
+2026,6,202606,8,Fuencarral-El Pardo,Fuencarral-El Pardo,87,Mirasierra,Mirasierra,barrio,venta,6435.0
+2026,6,202606,8,Fuencarral-El Pardo,Fuencarral-El Pardo,88,El Goloso,El Goloso,barrio,venta,6821.0
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,91,Casa de Campo,Casa de Campo,barrio,venta,6208.0
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,92,ArgÃ¼elles,ArgA 1/4elles,barrio,venta,8180.0
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,93,Ciudad Universitaria,Ciudad Universitaria,barrio,venta,6107.0
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,94,Valdezarza,Valdezarza,barrio,venta,5096.0
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,95,ValdemarÃ­n,ValdemarAn,barrio,venta,6643.0
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,96,El PlantÃ­o,El PlantAo,barrio,venta,4287.0
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,97,Aravaca,Aravaca,barrio,venta,5444.0
+2026,6,202606,1,Centro,Centro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,7636.0
+2026,6,202606,10,Latina,Latina,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3932.0
+2026,6,202606,11,Carabanchel,Carabanchel,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3790.0
+2026,6,202606,12,Usera,Usera,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3603.0
+2026,6,202606,13,Puente de Vallecas,Puente de Vallecas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3391.0
+2026,6,202606,14,Moratalaz,Moratalaz,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,4607.0
+2026,6,202606,15,Ciudad Lineal,Ciudad Lineal,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,5174.0
+2026,6,202606,16,Hortaleza,Hortaleza,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,5431.0
+2026,6,202606,17,Villaverde,Villaverde,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3210.0
+2026,6,202606,18,Villa de Vallecas,Villa de Vallecas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3829.0
+2026,6,202606,19,VicÃ¡lvaro,VicA!lvaro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,3999.0
+2026,6,202606,2,Arganzuela,Arganzuela,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,6389.0
+2026,6,202606,20,San Blas-Canillejas,San Blas-Canillejas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,4030.0
+2026,6,202606,21,Barajas,Barajas,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,5111.0
+2026,6,202606,3,Retiro,Retiro,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,7655.0
+2026,6,202606,4,Salamanca,Salamanca,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,9988.0
+2026,6,202606,5,ChamartÃ­n,ChamartAn,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,8150.0
+2026,6,202606,6,TetuÃ¡n,TetuA!n,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,6147.0
+2026,6,202606,7,ChamberÃ­,ChamberA,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,8971.0
+2026,6,202606,8,Fuencarral-El Pardo,Fuencarral-El Pardo,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,5485.0
+2026,6,202606,9,Moncloa-Aravaca,Moncloa-Aravaca,-1,[DATO A NIVEL DISTRITO],[DATO A NIVEL DISTRITO],distrito,venta,6293.0

@@ -1,0 +1,24 @@
+{
+  "venta": {
+    "operacion": "venta",
+    "n_train": 4268,
+    "n_val": 717,
+    "best_iteration": 192,
+    "r2_score": 0.9349,
+    "rmse_std": 0.2701,
+    "rmse_euro": 526.27,
+    "mae_euro": 472.68,
+    "mape_pct": 9.33
+  },
+  "alquiler": {
+    "operacion": "alquiler",
+    "n_train": 3494,
+    "n_val": 549,
+    "best_iteration": 200,
+    "r2_score": 0.8712,
+    "rmse_std": 0.3352,
+    "rmse_euro": 1.36,
+    "mae_euro": 1.12,
+    "mape_pct": 5.24
+  }
+}
