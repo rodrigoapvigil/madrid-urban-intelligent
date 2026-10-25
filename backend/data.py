@@ -790,8 +790,8 @@ def get_monthly_series(anio: int, op: str, zona_nombre: str,
         
         df_pred['is_prediction'] = True
 
-        # 3. Combinar y limpiar
-        df = pd.concat([df_hist, df_pred]).sort_values('mes').drop_duplicates('mes', keep='first')
+        # 3. Combinar y limpiar (conservando el dato real histórico sobre la predicción)
+        df = pd.concat([df_hist, df_pred]).drop_duplicates('mes', keep='first').sort_values('mes')
         
         if not df.empty:
             df['mes_nombre'] = df['mes'].map(MONTH_NAMES)
@@ -933,8 +933,8 @@ def get_madrid_average_series(anio: int, op: str) -> pd.DataFrame:
         
         df_pred['is_prediction'] = True
 
-        # 3. Combinar
-        df = pd.concat([df_hist, df_pred]).sort_values('mes').drop_duplicates('mes', keep='first')
+        # 3. Combinar y limpiar (conservando el dato real histórico sobre la predicción)
+        df = pd.concat([df_hist, df_pred]).drop_duplicates('mes', keep='first').sort_values('mes')
         return df.fillna(0)
     except Exception as e:
         print(f"[get_madrid_average_series] error: {e}")

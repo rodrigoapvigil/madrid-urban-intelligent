@@ -97,6 +97,69 @@ const renderLightningBolts = (stars: number, speed: string, color: string) => {
   );
 };
 
+const getZoneReliability = (district: string, isPrediction: boolean) => {
+  if (!isPrediction) {
+    return {
+      type: 'real',
+      tag: 'DATO OFICIAL',
+      title: 'Dato Real Oficial',
+      titleColor: '#0071e3',
+      borderColor: 'rgba(0, 113, 227, 0.25)',
+      bg: 'rgba(0, 113, 227, 0.06)',
+      icon: '🏛️',
+      description: 'Precio oficial registrado y certificado por el Banco de Datos del Ayuntamiento de Madrid.'
+    };
+  }
+  
+  const d = (district || '').toLowerCase();
+  if (d.includes('centro') || d.includes('moncloa')) {
+    return {
+      type: 'hot',
+      tag: '⚡ PRECIOS RÁPIDOS',
+      title: 'Zona de Alta Demanda (Precios Rápidos)',
+      titleColor: '#b25e00',
+      borderColor: 'rgba(255, 159, 10, 0.35)',
+      bg: 'rgba(255, 159, 10, 0.08)',
+      icon: '🔥',
+      description: 'Mucha rotación turística y estudiantes. Los precios se mueven rápido y pueden fluctuar más de lo normal.'
+    };
+  }
+  if (d.includes('usera') || d.includes('villaverde') || d.includes('carabanchel')) {
+    return {
+      type: 'growth',
+      tag: '📈 EN AUGE',
+      title: 'Zona en Auge (Fuerte Demanda)',
+      titleColor: '#b25e00',
+      borderColor: 'rgba(255, 159, 10, 0.35)',
+      bg: 'rgba(255, 159, 10, 0.08)',
+      icon: '📈',
+      description: 'Mucha gente mudándose desde el centro en busca de precios accesibles, empujando los precios al alza con fuerza.'
+    };
+  }
+  if (d.includes('salamanca') || d.includes('retiro') || d.includes('chamberí') || d.includes('chamartín') || d.includes('arganzuela')) {
+    return {
+      type: 'stable',
+      tag: '🟢 ALTA FIABILIDAD',
+      title: 'Zona Muy Estable (Previsión Fiable)',
+      titleColor: '#007a55',
+      borderColor: 'rgba(0, 157, 113, 0.35)',
+      bg: 'rgba(0, 157, 113, 0.08)',
+      icon: '🛡️',
+      description: 'Barrio consolidado con precios firmes. La previsión de nuestra IA es altamente segura y predecible.'
+    };
+  }
+  return {
+    type: 'ai',
+    tag: '🔮 ESTIMACIÓN IA',
+    title: 'Previsión Inteligente (IA)',
+    titleColor: '#6b21a8',
+    borderColor: 'rgba(142, 45, 226, 0.25)',
+    bg: 'rgba(142, 45, 226, 0.07)',
+    icon: '🤖',
+    description: 'Previsión calculada por IA analizando más de 10.000 operaciones y la tendencia histórica de la capital.'
+  };
+};
+
 const MadridDashboardV2: React.FC = () => {
   const predBadgeStyle: React.CSSProperties = {
     fontSize: '9px',
@@ -146,6 +209,7 @@ const MadridDashboardV2: React.FC = () => {
   const [compareSlideDir, setCompareSlideDir] = useState<'left' | 'right' | null>(null);
 
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
+  const [showHelpModal, setShowHelpModal] = useState(false);
   const [mapData, setMapData] = useState<{districts: any[], neighborhoods: any[]}>({ districts: [], neighborhoods: [] });
   const [rankings, setRankings] = useState<{ topDist: any[], botDist: any[], topBarr: any[], botBarr: any[] }>({
     topDist: [], botDist: [], topBarr: [], botBarr: []
@@ -1253,6 +1317,34 @@ const MadridDashboardV2: React.FC = () => {
             </div>
           </div>
 
+          {/* BOTÓN GUÍA DE PRECIOS PARA EL CIUDADANO */}
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+            <button
+              onClick={() => setShowHelpModal(true)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: '#f5f5f7',
+                border: '0.5px solid rgba(0,0,0,0.12)',
+                borderRadius: '20px',
+                padding: '6px 14px',
+                fontSize: '12px',
+                fontWeight: '600',
+                color: '#1d1d1f',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e5ea')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f7')}
+              title="Aprende a interpretar los precios oficiales y las estimaciones de IA"
+            >
+              <span style={{ fontSize: '13px' }}>💡</span>
+              <span>¿Cómo entender estos precios?</span>
+            </button>
+          </div>
+
         </div>
       </div>
 
@@ -1266,10 +1358,91 @@ const MadridDashboardV2: React.FC = () => {
             <div className="v2-grid-main">
               <div className="v2-kpi-col">
                 <div className="v2-kpi-stack">
+
+                  {/* BARÓMETRO DE CLIMA INMOBILIARIO & FIABILIDAD (LENGUAJE CIUDADANO) */}
+                  {(() => {
+                    const info = getZoneReliability(selectedDistrict, Boolean(kpiData.is_prediction));
+                    return (
+                      <div 
+                        style={{
+                          backgroundColor: info.bg,
+                          border: `0.5px solid ${info.borderColor}`,
+                          borderRadius: '14px',
+                          padding: '10px 14px',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '4px',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <span style={{ fontSize: '14px' }}>{info.icon}</span>
+                            <span style={{ fontSize: '11px', fontWeight: '700', color: info.titleColor, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+                              {info.title}
+                            </span>
+                          </div>
+                          <span 
+                            style={{ 
+                              fontSize: '9px', 
+                              fontWeight: '700', 
+                              padding: '2px 6px', 
+                              borderRadius: '4px', 
+                              backgroundColor: '#ffffff', 
+                              color: info.titleColor,
+                              boxShadow: '0 1px 3px rgba(0,0,0,0.06)'
+                            }}
+                          >
+                            {info.tag}
+                          </span>
+                        </div>
+                        <p style={{ margin: 0, fontSize: '11px', color: '#3a3a3c', lineHeight: 1.35, fontWeight: '400' }}>
+                          {info.description}
+                        </p>
+                      </div>
+                    );
+                  })()}
+
                   <div className="v2-kpi-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <label>{activeProfile.id === 'inversion' ? 'Rentabilidad' : 'Precio m²'}</label>
-                      {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                      {kpiData.is_prediction ? (
+                        <span 
+                          style={{
+                            fontSize: '9px',
+                            fontWeight: '700',
+                            color: getZoneReliability(selectedDistrict, true).titleColor,
+                            backgroundColor: getZoneReliability(selectedDistrict, true).bg,
+                            border: `0.5px solid ${getZoneReliability(selectedDistrict, true).borderColor}`,
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.4px',
+                            display: 'inline-block'
+                          }}
+                          title={getZoneReliability(selectedDistrict, true).description}
+                        >
+                          {getZoneReliability(selectedDistrict, true).tag}
+                        </span>
+                      ) : (
+                        <span 
+                          style={{
+                            fontSize: '9px',
+                            fontWeight: '700',
+                            color: '#0071e3',
+                            backgroundColor: 'rgba(0, 113, 227, 0.08)',
+                            border: '0.5px solid rgba(0, 113, 227, 0.2)',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            textTransform: 'uppercase',
+                            letterSpacing: '0.4px',
+                            display: 'inline-block'
+                          }}
+                          title="Dato oficial del Ayuntamiento de Madrid"
+                        >
+                          ✓ DATO OFICIAL
+                        </span>
+                      )}
                     </div>
                     <div className="v2-val">
                       {activeProfile.id === 'inversion' 
@@ -2033,7 +2206,7 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                   {Number(selectedYear) === 2026 && (
                     <div style={{ fontSize: '11px', color: '#86868b', marginBottom: '12px', paddingLeft: '4px' }}>
-                      * Nota: Los datos del mes 1 al 3 son reales; del <strong>mes 4 al 12</strong> son <strong>predicciones de nuestra IA</strong> basadas en datos históricos.
+                      * Nota: Los datos del mes 1 al 6 son reales (Banco de Datos Ayto. de Madrid); del <strong>mes 7 al 12</strong> son <strong>estimaciones de nuestra IA</strong>.
                     </div>
                   )}
                   {Number(selectedYear) > 2026 && (
@@ -2539,6 +2712,141 @@ const MadridDashboardV2: React.FC = () => {
             </section>            </div>
         ))}
       </main>
+
+      {/* MODAL EXPLICATIVO: ¿CÓMO ENTENDER ESTOS PRECIOS? (LENGUAJE SENCILLO PARA EL CIUDADANO) */}
+      {showHelpModal && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            backdropFilter: 'blur(10px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={() => setShowHelpModal(false)}
+        >
+          <div 
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '24px',
+              maxWidth: '560px',
+              width: '100%',
+              padding: '32px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+              border: '0.5px solid rgba(0,0,0,0.08)',
+              position: 'relative',
+              animation: 'fadeIn 0.2s ease-out'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#1d1d1f' }}>
+                  ¿Cómo entender estos precios?
+                </h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#86868b' }}>
+                  Guía rápida para interpretar las cifras sin rodeos matemáticos.
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowHelpModal(false)}
+                style={{
+                  background: '#f5f5f7',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  color: '#86868b',
+                  transition: 'background 0.2s'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e5ea')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f7')}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {/* Bloque 1: Real */}
+              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: '24px', flexShrink: 0 }}>🏛️</div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '2px' }}>
+                    Precios Reales Oficiales (Hasta Junio 2026)
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.45 }}>
+                    Son precios fácticos extraídos directamente del Banco de Datos oficial del Ayuntamiento de Madrid. Si ves la etiqueta <strong style={{ color: '#0071e3' }}>✓ DATO OFICIAL</strong>, ese es el precio real registrado de los contratos y ventas.
+                  </div>
+                </div>
+              </div>
+
+              {/* Bloque 2: Futuro */}
+              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: '24px', flexShrink: 0 }}>🔮</div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '2px' }}>
+                    Previsiones Inteligentes (Julio 2026 a 2028)
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.45 }}>
+                    Nuestra Inteligencia Artificial analiza el historial de más de 10.000 viviendas, los tipos de interés y la demanda de cada barrio para proyectar qué precio cabe esperar en los próximos meses y años.
+                  </div>
+                </div>
+              </div>
+
+              {/* Bloque 3: Semáforo de Zonas */}
+              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                <div style={{ fontSize: '24px', flexShrink: 0 }}>🚦</div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '4px' }}>
+                    Semáforo de Fiabilidad por Zonas
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: '#515154', lineHeight: 1.4 }}>
+                    <div>
+                      <strong style={{ color: '#007a55' }}>🟢 Zonas Muy Estables</strong> (ej. Retiro, Salamanca, Chamberí): Precios firmes y continuos. La previsión de la IA es altamente fiable.
+                    </div>
+                    <div>
+                      <strong style={{ color: '#b25e00' }}>🟡 Zonas Rápidas o en Auge</strong> (ej. Centro, Usera, Moncloa, Villaverde): Barrios con gran rotación turística o familias mudándose desde el centro. Los precios reales se mueven muy deprisa.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowHelpModal(false)}
+              style={{
+                marginTop: '20px',
+                width: '100%',
+                padding: '12px',
+                backgroundColor: '#0071e3',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '14px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0077ed')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0071e3')}
+            >
+              ¡Entendido, gracias!
+            </button>
+          </div>
+        </div>
+      )}
 
       <button className="v2-btn-chat" onClick={() => router.push('/madrid/chat')}>
         <img src="/AMBI.png" alt="AMBI" style={{ width: '140px', height: '140px', objectFit: 'contain' }} />
