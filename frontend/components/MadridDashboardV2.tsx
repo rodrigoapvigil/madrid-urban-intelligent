@@ -222,8 +222,8 @@ const InfoTooltip: React.FC<{
         <div
           style={{
             position: 'absolute',
-            top: '22px',
-            right: 0,
+            top: '24px',
+            left: 0,
             width: '290px',
             backgroundColor: '#1d1d1f',
             color: '#f5f5f7',
@@ -231,7 +231,7 @@ const InfoTooltip: React.FC<{
             borderRadius: '12px',
             boxShadow: '0 10px 28px rgba(0,0,0,0.35)',
             border: '0.5px solid rgba(255,255,255,0.15)',
-            zIndex: 1000,
+            zIndex: 9999,
             fontSize: '12px',
             lineHeight: 1.45,
             pointerEvents: 'none',
@@ -2704,12 +2704,12 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                   {Number(selectedYear) === 2026 && (
                     <div style={{ fontSize: '11px', color: '#86868b', marginBottom: '12px', paddingLeft: '4px' }}>
-                      * Nota: Los datos del mes 1 al 6 son reales (Banco de Datos Ayto. de Madrid); del <strong>mes 7 al 12</strong> son <strong>estimaciones de nuestra IA</strong>.
+                      * Nota: Los datos del mes 1 al 6 son reales (Banco de Datos Ayto. de Madrid); del <strong>mes 7 al 12</strong> son <strong>proyecciones estimadas</strong>.
                     </div>
                   )}
                   {Number(selectedYear) > 2026 && (
                     <div style={{ fontSize: '11px', color: '#86868b', marginBottom: '12px', paddingLeft: '4px' }}>
-                      * Nota: Todos los meses mostrados para el año {selectedYear} son <strong>predicciones de nuestra IA</strong> basadas en datos históricos.
+                      * Nota: Todos los meses mostrados para el año {selectedYear} son <strong>predicciones estimadas</strong> basadas en datos históricos.
                     </div>
                   )}
                   <div className="v2-heatmap-scroll">
@@ -2925,7 +2925,7 @@ const MadridDashboardV2: React.FC = () => {
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
                               <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataA.precio_m2 ? new Intl.NumberFormat('es-ES').format(kpiDataA.precio_m2) + ' €/m²' : '-'}
+                                {kpiDataA.precio_m2 ? new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiDataA.precio_m2) + ' €/m²' : '-'}
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneA.toUpperCase()}
@@ -2956,7 +2956,7 @@ const MadridDashboardV2: React.FC = () => {
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
                               <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataA.precio_m2 ? new Intl.NumberFormat('es-ES').format(kpiDataA.precio_m2) + ' €/m²' : '-'}
+                                {kpiDataA.precio_m2 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(kpiDataA.precio_m2)) + ' €/m²' : '-'}
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneA.toUpperCase()}
@@ -2998,7 +2998,7 @@ const MadridDashboardV2: React.FC = () => {
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
                               <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataA.precio_m2 ? new Intl.NumberFormat('es-ES').format(kpiDataA.precio_m2) + ' €/m²' : '-'}
+                                {kpiDataA.precio_m2 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(kpiDataA.precio_m2)) + ' €/m²' : '-'}
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneA.toUpperCase()}
@@ -3089,7 +3089,7 @@ const MadridDashboardV2: React.FC = () => {
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
                               <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataB.precio_m2 ? new Intl.NumberFormat('es-ES').format(kpiDataB.precio_m2) + ' €/m²' : '-'}
+                                {kpiDataB.precio_m2 ? new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiDataB.precio_m2) + ' €/m²' : '-'}
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneB.toUpperCase()}
@@ -3120,7 +3120,7 @@ const MadridDashboardV2: React.FC = () => {
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
                               <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataB.precio_m2 ? new Intl.NumberFormat('es-ES').format(kpiDataB.precio_m2) + ' €/m²' : '-'}
+                                {kpiDataB.precio_m2 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(kpiDataB.precio_m2)) + ' €/m²' : '-'}
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneB.toUpperCase()}
@@ -3162,7 +3162,7 @@ const MadridDashboardV2: React.FC = () => {
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
                               <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataB.precio_m2 ? new Intl.NumberFormat('es-ES').format(kpiDataB.precio_m2) + ' €/m²' : '-'}
+                                {kpiDataB.precio_m2 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(kpiDataB.precio_m2)) + ' €/m²' : '-'}
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneB.toUpperCase()}

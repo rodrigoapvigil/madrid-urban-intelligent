@@ -254,9 +254,9 @@ const MadridMap: React.FC<MapProps> = ({
         }
       } else {
         if (type === 'districts') {
-          // Reducción calibrada del 15% adicional y desplace inferior para dar holgura a las tarjetas superiores
-          const urbanBounds = L.latLngBounds([40.295, -3.875], [40.620, -3.485]);
-          mapRef.current?.flyToBounds(urbanBounds, { padding: [15, 12], duration: 1 });
+          // Reducción calibrada del 15% adicional y desplace inferior para dar total holgura a la tarjeta superior de Fuencarral-El Pardo
+          const urbanBounds = L.latLngBounds([40.285, -3.890], [40.640, -3.470]);
+          mapRef.current?.flyToBounds(urbanBounds, { padding: [20, 15], duration: 1 });
         } else {
           const bounds = geoJsonLayerRef.current.getBounds();
           if (bounds.isValid()) {
