@@ -254,9 +254,9 @@ const MadridMap: React.FC<MapProps> = ({
         }
       } else {
         if (type === 'districts') {
-          // Encuadre completo del municipio urbano (~30% más contenido para que no desborde los márgenes)
-          const urbanBounds = L.latLngBounds([40.310, -3.845], [40.575, -3.515]);
-          mapRef.current?.flyToBounds(urbanBounds, { padding: [10, 10], duration: 1 });
+          // Reducción calibrada del 15% adicional y desplace inferior para dar holgura a las tarjetas superiores
+          const urbanBounds = L.latLngBounds([40.295, -3.875], [40.620, -3.485]);
+          mapRef.current?.flyToBounds(urbanBounds, { padding: [15, 12], duration: 1 });
         } else {
           const bounds = geoJsonLayerRef.current.getBounds();
           if (bounds.isValid()) {
