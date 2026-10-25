@@ -160,6 +160,106 @@ const getZoneReliability = (district: string, isPrediction: boolean) => {
   };
 };
 
+const InfoTooltip: React.FC<{
+  title: string;
+  description: string;
+  example?: string;
+  ruleOfThumb?: string;
+}> = ({ title, description, example, ruleOfThumb }) => {
+  const [open, setOpen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    if (open) {
+      document.addEventListener('mousedown', handleOutside);
+    }
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, [open]);
+
+  return (
+    <div 
+      ref={containerRef}
+      style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
+      onMouseEnter={() => setOpen(true)}
+      onMouseLeave={() => setOpen(false)}
+    >
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen(!open);
+        }}
+        aria-label={`Información sobre ${title}`}
+        style={{
+          width: '16px',
+          height: '16px',
+          borderRadius: '50%',
+          border: '0.5px solid #c7c7cc',
+          backgroundColor: open ? '#0071e3' : '#f5f5f7',
+          color: open ? '#ffffff' : '#86868b',
+          fontSize: '10px',
+          fontWeight: '700',
+          fontStyle: 'italic',
+          fontFamily: 'serif',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: 'pointer',
+          padding: 0,
+          outline: 'none',
+          transition: 'all 0.15s ease'
+        }}
+      >
+        i
+      </button>
+
+      {open && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '22px',
+            right: 0,
+            width: '290px',
+            backgroundColor: '#1d1d1f',
+            color: '#f5f5f7',
+            padding: '12px 14px',
+            borderRadius: '12px',
+            boxShadow: '0 10px 28px rgba(0,0,0,0.35)',
+            border: '0.5px solid rgba(255,255,255,0.15)',
+            zIndex: 1000,
+            fontSize: '12px',
+            lineHeight: 1.45,
+            pointerEvents: 'none',
+            animation: 'fadeIn 0.15s ease-out'
+          }}
+        >
+          <div style={{ fontWeight: '700', fontSize: '13px', color: '#ffffff', marginBottom: '4px' }}>
+            {title}
+          </div>
+          <div style={{ color: '#d2d2d7', fontSize: '11.5px', marginBottom: ruleOfThumb || example ? '6px' : '0' }}>
+            {description}
+          </div>
+          {example && (
+            <div style={{ color: '#30d158', fontSize: '11px', fontWeight: '400', marginBottom: '4px', borderTop: '0.5px solid rgba(255,255,255,0.1)', paddingTop: '5px' }}>
+              <strong style={{ color: '#ffffff', fontWeight: '600' }}>Ejemplo:</strong> {example}
+            </div>
+          )}
+          {ruleOfThumb && (
+            <div style={{ color: '#ff9f0a', fontSize: '11px', fontWeight: '400', borderTop: example ? 'none' : '0.5px solid rgba(255,255,255,0.1)', paddingTop: example ? '0' : '5px' }}>
+              <strong style={{ color: '#ffffff', fontWeight: '600' }}>Consejo:</strong> {ruleOfThumb}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const MadridDashboardV2: React.FC = () => {
   const predBadgeStyle: React.CSSProperties = {
     fontSize: '9px',
@@ -210,6 +310,7 @@ const MadridDashboardV2: React.FC = () => {
 
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showMapHelpModal, setShowMapHelpModal] = useState(false);
   const [mapData, setMapData] = useState<{districts: any[], neighborhoods: any[]}>({ districts: [], neighborhoods: [] });
   const [rankings, setRankings] = useState<{ topDist: any[], botDist: any[], topBarr: any[], botBarr: any[] }>({
     topDist: [], botDist: [], topBarr: [], botBarr: []
@@ -525,7 +626,14 @@ const MadridDashboardV2: React.FC = () => {
       const ctxOverlay = document.getElementById(`v2-overlay-${profileId}`) as HTMLCanvasElement;
 
       if (ctxA || ctxB || ctxOverlay) {
-        const createLineChart = (ctx: HTMLCanvasElement, label: string, rawData: any[], color?: string) => {
+        const createLineChart = (
+          ctx: HTMLCanvasElement, 
+          label: string, 
+          rawData: any[], 
+          otherLabel?: string, 
+          otherRawData?: any[], 
+          color?: string
+        ) => {
           const mainColor = color || activeProfile.color;
           const multiplier = activeProfile.id === 'inversion' ? 100 : 1;
           
@@ -560,7 +668,9 @@ const MadridDashboardV2: React.FC = () => {
                   borderColor: mainColor, 
                   tension: 0.4, 
                   borderWidth: 3, 
-                  pointRadius: (context) => alignedPrices[context.dataIndex] === null ? 0 : 4,
+                  pointRadius: (context) => alignedPrices[context.dataIndex] === null ? 0 : 5,
+                  pointHoverRadius: 8,
+                  pointHitRadius: 25,
                   pointBackgroundColor: (context: any) => {
                     const idx = context.dataIndex;
                     const found = rawData.find(d => d.mes === idx + 1);
@@ -605,6 +715,15 @@ const MadridDashboardV2: React.FC = () => {
             options: { 
               responsive: true, 
               maintainAspectRatio: false, 
+              interaction: {
+                mode: 'index',
+                intersect: false,
+                axis: 'x'
+              },
+              hover: {
+                mode: 'index',
+                intersect: false
+              },
               layout: { padding: { top: 15, right: 30, bottom: 20, left: 0 } },
               plugins: { 
                 legend: { 
@@ -699,7 +818,7 @@ const MadridDashboardV2: React.FC = () => {
                       const lines: string[] = [];
 
                       // 1. Precio actual y tipo de dato
-                      lines.push(`Precio actual: ${valFormatted} ${unit} [${tipoDato}]`);
+                      lines.push(`Precio actual: ${valFormatted} ${unit} (${tipoDato})`);
 
                       // 2. Variación vs mes anterior
                       if (idx > 0) {
@@ -719,7 +838,24 @@ const MadridDashboardV2: React.FC = () => {
                         lines.push(`Inicio del ejercicio ${selectedYear}`);
                       }
 
-                      // 3. Comparativa vs Media de Madrid
+                      // 3. Comparativa con la otra zona si existe
+                      if (otherLabel && otherRawData) {
+                        const otherFound = otherRawData.find(d => d.mes === idx + 1);
+                        const otherVal = otherFound ? otherFound.precio_m2 * multiplier : null;
+                        if (otherVal !== null && otherVal > 0) {
+                          const diffOther = ((val - otherVal) / otherVal) * 100;
+                          const absDiffOther = Math.abs(diffOther).toFixed(1);
+                          if (diffOther > 0.08) {
+                            lines.push(`Comparativa con ${otherLabel}: Un ${absDiffOther}% más caro`);
+                          } else if (diffOther < -0.08) {
+                            lines.push(`Comparativa con ${otherLabel}: Un ${absDiffOther}% más barato`);
+                          } else {
+                            lines.push(`Comparativa con ${otherLabel}: Mismo nivel de precio`);
+                          }
+                        }
+                      }
+
+                      // 4. Comparativa vs Media de Madrid
                       const madridItem = seriesMadrid.find(d => d.mes === idx + 1);
                       const madridVal = madridItem ? madridItem.precio_m2 * multiplier : null;
                       if (madridVal !== null && madridVal !== undefined && madridVal > 0) {
@@ -738,7 +874,7 @@ const MadridDashboardV2: React.FC = () => {
                           lines.push(`Comparativa Madrid: Un ${absDiffMadrid}% más barato que la media (${madridFmt} ${unit})`);
                         }
 
-                        // 4. Diagnóstico
+                        // 5. Diagnóstico
                         if (diffMadrid >= 20) {
                           lines.push(`Diagnóstico: Zona prémium de alta cotización`);
                         } else if (diffMadrid > 5) {
@@ -780,8 +916,8 @@ const MadridDashboardV2: React.FC = () => {
           });
         };
 
-        if (ctxA) chartsRef.current.push(createLineChart(ctxA, selectedZoneA, seriesA));
-        if (ctxB) chartsRef.current.push(createLineChart(ctxB, selectedZoneB, seriesB, '#1d1d1f'));
+        if (ctxA) chartsRef.current.push(createLineChart(ctxA, selectedZoneA, seriesA, selectedZoneB, seriesB));
+        if (ctxB) chartsRef.current.push(createLineChart(ctxB, selectedZoneB, seriesB, selectedZoneA, seriesA, '#1d1d1f'));
         if (ctxOverlay) {
           chartsRef.current.push(new ChartJS(ctxOverlay, {
             type: 'line',
@@ -812,8 +948,10 @@ const MadridDashboardV2: React.FC = () => {
                   borderWidth: 3, 
                   pointRadius: (context) => {
                     const found = seriesA.find(d => d.mes === context.dataIndex + 1);
-                    return found ? 4 : 0;
+                    return found ? 5 : 0;
                   }, 
+                  pointHoverRadius: 8,
+                  pointHitRadius: 25,
                   pointBackgroundColor: (context: any) => {
                     const idx = context.dataIndex;
                     const found = seriesA.find(d => d.mes === idx + 1);
@@ -844,6 +982,8 @@ const MadridDashboardV2: React.FC = () => {
                     const found = seriesB.find(d => d.mes === context.dataIndex + 1);
                     return found ? 5 : 0;
                   }, 
+                  pointHoverRadius: 8,
+                  pointHitRadius: 25,
                   pointBackgroundColor: (context: any) => {
                     const idx = context.dataIndex;
                     const found = seriesB.find(d => d.mes === idx + 1);
@@ -888,6 +1028,15 @@ const MadridDashboardV2: React.FC = () => {
             options: { 
               responsive: true, 
               maintainAspectRatio: false, 
+              interaction: {
+                mode: 'index',
+                intersect: false,
+                axis: 'x'
+              },
+              hover: {
+                mode: 'index',
+                intersect: false
+              },
               layout: { padding: { top: 15, right: 30, bottom: 40, left: 10 } },
               scales: { 
                 x: { 
@@ -1006,7 +1155,7 @@ const MadridDashboardV2: React.FC = () => {
                       const tipoDato = isPred ? 'Predicción' : 'Dato Real Oficial';
 
                       const lines: string[] = [
-                        `${currentZone}: ${valFormatted} ${unit} [${tipoDato}]`
+                        `${currentZone}: ${valFormatted} ${unit} (${tipoDato})`
                       ];
 
                       // Variación vs mes anterior en esta zona
@@ -1531,9 +1680,22 @@ const MadridDashboardV2: React.FC = () => {
               }}
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e5ea')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f7')}
-              title="Aprende a interpretar los precios oficiales y las estimaciones de IA"
+              title="Aprende a interpretar los precios oficiales y las previsiones estimadas"
             >
-              <span style={{ fontSize: '13px' }}>💡</span>
+              <span style={{ 
+                width: '15px', 
+                height: '15px', 
+                borderRadius: '50%', 
+                backgroundColor: '#0071e3', 
+                color: '#ffffff', 
+                display: 'inline-flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                fontSize: '10px', 
+                fontWeight: '700',
+                fontStyle: 'italic',
+                fontFamily: 'serif' 
+              }}>i</span>
               <span>¿Cómo entender estos precios?</span>
             </button>
           </div>
@@ -1595,7 +1757,21 @@ const MadridDashboardV2: React.FC = () => {
 
                   <div className="v2-kpi-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <label>{activeProfile.id === 'inversion' ? 'Rentabilidad' : 'Precio m²'}</label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <label>{activeProfile.id === 'inversion' ? 'Rentabilidad' : 'Precio m²'}</label>
+                        <InfoTooltip 
+                          title={activeProfile.id === 'inversion' ? 'Rentabilidad Bruta (Yield)' : 'Precio por Metro Cuadrado'}
+                          description={activeProfile.id === 'inversion'
+                            ? 'Porcentaje anual que rinde la vivienda a través del alquiler respecto al precio de compra.'
+                            : 'El precio unitario promedio que cuesta cada metro cuadrado de vivienda en esta zona.'}
+                          example={activeProfile.id === 'inversion'
+                            ? 'Si compras por 200.000€ y alquilas por 800€/mes (9.600€/año), la rentabilidad bruta es del 4,8% anual.'
+                            : 'Si un piso tiene 80 m² y el precio es 20 €/m², el alquiler rondará los 1.600 €/mes.'}
+                          ruleOfThumb={activeProfile.id === 'inversion'
+                            ? 'En Madrid, una rentabilidad bruta superior al 5% se considera muy atractiva.'
+                            : 'Dato clave para comparar el valor real de distintas viviendas independientemente de su tamaño.'}
+                        />
+                      </div>
                       {kpiData.is_prediction ? (
                         <span 
                           style={{
@@ -1643,7 +1819,15 @@ const MadridDashboardV2: React.FC = () => {
                   
                   <div className="v2-kpi-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <label>{activeProfile.id === 'inversion' ? 'Ticket de Inversión' : 'Ticket Medio'}</label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <label>{activeProfile.id === 'inversion' ? 'Ticket de Inversión' : 'Ticket Medio'}</label>
+                        <InfoTooltip 
+                          title={activeProfile.id === 'inversion' ? 'Ticket de Inversión' : 'Ticket Medio de Vivienda'}
+                          description="El coste total estimado de una vivienda completa estándar en este distrito o barrio (para un piso tipo de 75 a 85 m²)."
+                          example="En lugar de calcular el coste por metro, te indica directamente cuánto dinero necesitas en total para comprar o alquilar un piso típico en esta zona."
+                          ruleOfThumb="Te ayuda a saber de un vistazo si la zona entra dentro de tu presupuesto global."
+                        />
+                      </div>
                       {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                     </div>
                     <div className="v2-val">
@@ -1654,7 +1838,15 @@ const MadridDashboardV2: React.FC = () => {
                   {activeProfile.id === 'inversion' ? (
                     <div className="v2-kpi-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label>LTV Estimado (Loan-to-Value)</label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <label>LTV Estimado (Loan-to-Value)</label>
+                          <InfoTooltip 
+                            title="LTV (Loan-to-Value) / Financiación"
+                            description="Indica qué porcentaje del valor total del inmueble financias mediante hipoteca y cuánto aportas de tus propios ahorros."
+                            example="Un LTV del 70% significa que el banco aporta el 70% del precio y tú pagas el 30% restante con ahorros."
+                            ruleOfThumb="Para inversión los bancos suelen financiar el 60%-70%; para vivienda habitual hasta el 80%."
+                          />
+                        </div>
                         {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                       </div>
                       
@@ -1767,7 +1959,15 @@ const MadridDashboardV2: React.FC = () => {
                   ) : (
                     <div className="v2-kpi-card">
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <label>Estado Mercado</label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <label>Estado Mercado</label>
+                          <InfoTooltip 
+                            title="Estado del Mercado Local"
+                            description="Indica la fase del ciclo inmobiliario según las operaciones recientes de compra y alquiler."
+                            example="Crecimiento (+): Precios al alza de forma sostenida. Ajuste (-): Moderación o descenso temporal de precios."
+                            ruleOfThumb="En 'Crecimiento', los precios tienden a subir si esperas; en 'Ajuste', hay más margen para negociar."
+                          />
+                        </div>
                         {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                       </div>
                       <div className="v2-val" style={{ fontSize: '24px' }}>
@@ -1780,7 +1980,15 @@ const MadridDashboardV2: React.FC = () => {
                     <>
                       <div className="v2-kpi-card">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <label>Var. Mensual</label>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label>Var. Mensual</label>
+                            <InfoTooltip 
+                              title="Variación Mensual"
+                              description="Porcentaje de subida o bajada del precio respecto al mes inmediatamente anterior."
+                              example="Un +1.2% indica que los precios subieron un 1.2% en los últimos 30 días respecto al mes previo."
+                              ruleOfThumb="Permite detectar aceleraciones o cambios rápidos de tendencia en el corto plazo."
+                            />
+                          </div>
                           {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                         </div>
                         <div className={`v2-val accent ${kpiData.v_mes < 0 ? 'negative' : ''}`}>
@@ -1790,7 +1998,15 @@ const MadridDashboardV2: React.FC = () => {
 
                       <div className="v2-kpi-card">
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <label>Var. Anual</label>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label>Var. Anual</label>
+                            <InfoTooltip 
+                              title="Variación Anual (12 Meses)"
+                              description="La evolución acumulada del precio en el último año completo respecto al mismo mes del año anterior."
+                              example="Un +8.5% anual significa que una vivienda que costaba 200.000€ hace un año ahora se sitúa en torno a 217.000€."
+                              ruleOfThumb="Es el indicador más robusto para medir la tendencia real de fondo y la revalorización patrimonial."
+                            />
+                          </div>
                           {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                         </div>
                         <div className={`v2-val accent ${kpiData.v_anual < 0 ? 'negative' : ''}`}>
@@ -1803,7 +2019,15 @@ const MadridDashboardV2: React.FC = () => {
                     return (
                       <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <label style={{ fontSize: '10px', fontWeight: 'bold', color: activeProfile.color, letterSpacing: '0.5px' }}>AMORTIZACIÓN</label>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: activeProfile.color, letterSpacing: '0.5px' }}>AMORTIZACIÓN</label>
+                            <InfoTooltip 
+                              title="Años de Amortización (GRM)"
+                              description="Número de años completos de alquiler íntegro que se necesitan para recuperar el 100% de la inversión de compra del inmueble."
+                              example="Si el GRM es de 18 años, significa que con 18 años de rentas de alquiler se cubre el precio total de la compra."
+                              ruleOfThumb="Cuanto menor sea el número de años, más rápida es la amortización y más atractiva la inversión (lo ideal es por debajo de 20 años)."
+                            />
+                          </div>
                           {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                         </div>
                         <div className="v2-val" style={{ color: activeProfile.color }}>
@@ -1875,9 +2099,17 @@ const MadridDashboardV2: React.FC = () => {
                     return (
                       <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <label style={{ fontSize: '10px', fontWeight: 'bold', color: '#86868b', letterSpacing: '0.5px' }}>
-                            PODER ADQUISITIVO {selectedBarrio !== 'Todos' ? 'DEL BARRIO' : (selectedDistrict !== 'Todos' ? 'DEL DISTRITO' : 'DE MADRID')}
-                          </label>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: '#86868b', letterSpacing: '0.5px' }}>
+                              PODER ADQUISITIVO {selectedBarrio !== 'Todos' ? 'DEL BARRIO' : (selectedDistrict !== 'Todos' ? 'DEL DISTRITO' : 'DE MADRID')}
+                            </label>
+                            <InfoTooltip 
+                              title="Poder Adquisitivo y Años de Renta"
+                              description="Mide cuántos años de ingresos anuales brutos íntegros necesita una familia residente típica de esta zona para comprar una vivienda media."
+                              example="Si un piso medio cuesta 350.000€ y la renta media del hogar en la zona es de 50.000€/año, se necesitan 7 años íntegros de sueldo."
+                              ruleOfThumb="Menos de 5 años se considera asequible; entre 5 y 8 años moderado; más de 8 años supone un esfuerzo elevado."
+                            />
+                          </div>
                           {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                         </div>
                         <div style={{ fontSize: '12px', color: '#1d1d1f' }}>
@@ -1976,7 +2208,15 @@ const MadridDashboardV2: React.FC = () => {
                     return (
                       <div className="v2-kpi-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <label style={{ fontSize: '10px', fontWeight: 'bold', color: '#86868b', letterSpacing: '0.5px' }}>ESFUERZO DE ALQUILER</label>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: '#86868b', letterSpacing: '0.5px' }}>ESFUERZO DE ALQUILER</label>
+                            <InfoTooltip 
+                              title="Tasa de Esfuerzo Financiero en Alquiler"
+                              description="El porcentaje del sueldo neto mensual que una persona o familia debe destinar a pagar el alquiler de la vivienda en esta zona."
+                              example="Pon tu sueldo mensual (ej. 1.800€). Si el alquiler medio es 900€, tu esfuerzo sería del 50%. Con 3.000€, sería del 30%."
+                              ruleOfThumb="El Banco de España recomienda no superar el 30%-35% del sueldo neto. Superar el 40% se considera sobreesfuerzo crítico."
+                            />
+                          </div>
                           {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                         </div>
                         <div style={{ fontSize: '12px', color: '#1d1d1f' }}>
@@ -2059,7 +2299,15 @@ const MadridDashboardV2: React.FC = () => {
                     return (
                       <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <label style={{ fontSize: '10px', fontWeight: 'bold', color: '#86868b', letterSpacing: '0.5px' }}>OPORTUNIDAD DE INVERSIÓN</label>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: '#86868b', letterSpacing: '0.5px' }}>OPORTUNIDAD DE INVERSIÓN</label>
+                            <InfoTooltip 
+                              title="Oportunidad y Rentabilidad de Inversión"
+                              description="Combina el rendimiento neto del alquiler con el volumen anual de transacciones para evaluar qué tan rápido y rentable es invertir aquí."
+                              example="Un ROI neto del 4.5% con alta liquidez permite ingresar rentas estables con facilidad para vender si necesitas recuperar el capital."
+                              ruleOfThumb="A mayor liquidez (más de 300 transacciones/año), menor riesgo de quedarte atrapado con el inmueble en caso de querer venderlo."
+                            />
+                          </div>
                           {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                         </div>
                         <div style={{ fontSize: '12px', color: '#1d1d1f' }}>
@@ -2144,7 +2392,7 @@ const MadridDashboardV2: React.FC = () => {
                     let velocityColor = '#ff453a'; // red
                     if (velocity > 0) {
                       if (velocity < 2.0) {
-                        velocityLabel = 'Rápido ✅';
+                        velocityLabel = 'Rápido';
                         velocityColor = '#009d71'; // green
                       } else if (velocity < 3.0) {
                         velocityLabel = 'Moderado';
@@ -2169,7 +2417,15 @@ const MadridDashboardV2: React.FC = () => {
                       <>
                         <div className="v2-kpi-card">
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <label>¿Cuánto tardará en venderse?</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <label>¿Cuánto tardará en venderse?</label>
+                              <InfoTooltip 
+                                title="Velocidad Media de Venta"
+                                description="Tiempo estimado promedio en meses que tarda una vivienda en cerrarse y firmarse ante notario en este distrito o barrio."
+                                example="Si marca 1.5 meses, la vivienda se vende a buen ritmo. Si supera los 3 meses, la demanda es más selectiva o pausada."
+                                ruleOfThumb="Menos de 2 meses indica un mercado rápido con compradores activos; más de 3 meses exige fijar un precio muy competitivo."
+                              />
+                            </div>
                             {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                           </div>
                           <div className="v2-val" style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
@@ -2185,7 +2441,15 @@ const MadridDashboardV2: React.FC = () => {
 
                         <div className="v2-kpi-card">
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <label>¿Hay demanda en la zona?</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <label>¿Hay demanda en la zona?</label>
+                              <InfoTooltip 
+                                title="Demanda y Liquidez Local"
+                                description="Número de operaciones de compraventa cerradas en el último año según los registros notariales oficiales."
+                                example="Más de 300 transacciones anuales indican un barrio muy dinámico con compradores buscando activamente piso cada semana."
+                                ruleOfThumb="Alta demanda facilita cerrar operaciones a precio de mercado sin necesidad de aplicar grandes rebajas."
+                              />
+                            </div>
                             {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                           </div>
                           <div className="v2-val" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -2202,7 +2466,15 @@ const MadridDashboardV2: React.FC = () => {
 
                         <div className="v2-kpi-card">
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <label>Potencial de ganancia (6 meses)</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <label>Potencial de ganancia (6 meses)</label>
+                              <InfoTooltip 
+                                title="Potencial de Ganancia (6 Meses)"
+                                description="Estimación del incremento de valor que podría experimentar el inmueble si decides esperar un semestre antes de ponerlo a la venta."
+                                example="Si el potencial es de +2.5% y tu vivienda vale 300.000€, posponer la venta podría aportarte unos 7.500€ adicionales de margen."
+                                ruleOfThumb="En fases alcistas, posponer la venta puede aumentar el margen; en fases de ajuste, vender pronto protege tu beneficio."
+                              />
+                            </div>
                             {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                           </div>
                           <div className="v2-val" style={{ color: '#009d71' }}>
@@ -2220,34 +2492,43 @@ const MadridDashboardV2: React.FC = () => {
               
               <div className="v2-map-col">
                 <div className="v2-map-card">
-                  <div className="v2-map-header">
+                  <div className="v2-map-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                     <div className="v2-pill">Mapas Interactivos</div>
-                  </div>
-
-                  {/* GUÍA DEL MAPA */}
-                  <div 
-                    style={{
-                      margin: '2px 0 14px 0',
-                      padding: '8px 14px',
-                      backgroundColor: '#f5f5f7',
-                      borderRadius: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      fontSize: '11px',
-                      color: '#424245',
-                      lineHeight: 1.4,
-                      flexWrap: 'wrap',
-                      gap: '8px'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <span style={{ fontWeight: '700', color: '#1d1d1f' }}>Guía del mapa:</span>
-                      <span>Colores oscuros = precios más altos · Colores claros = precios más accesibles</span>
-                    </div>
-                    <div style={{ color: '#86868b' }}>
-                      Haz clic en un distrito para ver sus barrios (clic de nuevo para volver)
-                    </div>
+                    <button
+                      onClick={() => setShowMapHelpModal(true)}
+                      style={{
+                        background: '#f5f5f7',
+                        border: '0.5px solid #d2d2d7',
+                        borderRadius: '16px',
+                        padding: '4px 12px',
+                        fontSize: '11px',
+                        fontWeight: '600',
+                        color: '#1d1d1f',
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px',
+                        transition: 'all 0.2s'
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e5ea')}
+                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f7')}
+                    >
+                      <span style={{ 
+                        display: 'inline-flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        width: '15px', 
+                        height: '15px', 
+                        borderRadius: '50%', 
+                        background: '#0071e3', 
+                        color: '#fff', 
+                        fontSize: '10px', 
+                        fontWeight: 'bold', 
+                        fontStyle: 'italic', 
+                        fontFamily: 'serif' 
+                      }}>i</span>
+                      <span>¿Cómo usar el mapa?</span>
+                    </button>
                   </div>
 
                   <div className="v2-dual-maps">
@@ -2998,7 +3279,9 @@ const MadridDashboardV2: React.FC = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
               {/* Bloque 1: Real */}
               <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
-                <div style={{ fontSize: '24px', flexShrink: 0 }}>🏛️</div>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#0071e3', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+                  1
+                </div>
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '2px' }}>
                     Precios Reales Oficiales (Hasta Junio 2026)
@@ -3011,7 +3294,9 @@ const MadridDashboardV2: React.FC = () => {
 
               {/* Bloque 2: Futuro */}
               <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
-                <div style={{ fontSize: '24px', flexShrink: 0 }}>📊</div>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#af52de', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+                  2
+                </div>
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '2px' }}>
                     Previsiones Estimadas (Julio 2026 a 2028)
@@ -3024,17 +3309,19 @@ const MadridDashboardV2: React.FC = () => {
 
               {/* Bloque 3: Semáforo de Zonas */}
               <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
-                <div style={{ fontSize: '24px', flexShrink: 0 }}>🚦</div>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#ff9f0a', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+                  3
+                </div>
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '4px' }}>
                     Semáforo de Fiabilidad por Zonas
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: '#515154', lineHeight: 1.4 }}>
                     <div>
-                      <strong style={{ color: '#007a55' }}>🟢 Zonas Muy Estables</strong> (ej. Retiro, Salamanca, Chamberí): Precios firmes y continuos. La previsión estimada es altamente fiable.
+                      <strong style={{ color: '#007a55' }}>Zonas Muy Estables</strong> (ej. Retiro, Salamanca, Chamberí): Precios firmes y continuos. La previsión estimada es altamente fiable.
                     </div>
                     <div>
-                      <strong style={{ color: '#b25e00' }}>🟡 Zonas Rápidas o en Auge</strong> (ej. Centro, Usera, Moncloa, Villaverde): Barrios con gran rotación turística o familias mudándose desde el centro. Los precios reales se mueven con mayor dinamismo.
+                      <strong style={{ color: '#b25e00' }}>Zonas Rápidas o en Auge</strong> (ej. Centro, Usera, Moncloa, Villaverde): Barrios con gran rotación turística o familias mudándose desde el centro. Los precios reales se mueven con mayor dinamismo.
                     </div>
                   </div>
                 </div>
@@ -3043,6 +3330,157 @@ const MadridDashboardV2: React.FC = () => {
 
             <button
               onClick={() => setShowHelpModal(false)}
+              style={{
+                marginTop: '20px',
+                width: '100%',
+                padding: '12px',
+                backgroundColor: '#0071e3',
+                color: '#ffffff',
+                border: 'none',
+                borderRadius: '14px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'background 0.2s'
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#0077ed')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0071e3')}
+            >
+              ¡Entendido, gracias!
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: ¿CÓMO USAR EL MAPA? */}
+      {showMapHelpModal && (
+        <div 
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.45)',
+            backdropFilter: 'blur(10px)',
+            zIndex: 9999,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '20px'
+          }}
+          onClick={() => setShowMapHelpModal(false)}
+        >
+          <div 
+            style={{
+              backgroundColor: '#ffffff',
+              borderRadius: '24px',
+              maxWidth: '560px',
+              width: '100%',
+              padding: '32px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+              border: '0.5px solid rgba(0,0,0,0.08)',
+              position: 'relative',
+              animation: 'fadeIn 0.2s ease-out'
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: '#1d1d1f' }}>
+                  ¿Cómo usar los mapas interactivos?
+                </h3>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#86868b' }}>
+                  Guía para explorar distritos y barrios de Madrid sin perderte.
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowMapHelpModal(false)}
+                style={{
+                  background: '#f5f5f7',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  color: '#86868b',
+                  transition: 'background 0.2s'
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#e5e5ea')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f7')}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+              {/* Paso 1: Colores */}
+              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#0071e3', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+                  1
+                </div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '2px' }}>
+                    Escala de Colores
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.45 }}>
+                    Los <strong>colores más oscuros e intensos</strong> representan las zonas con precios por m² o rentabilidades más elevadas (ej. Salamanca, Chamberí, Centro). Los <strong>tonos claros o pasteles</strong> señalan barrios más económicos y accesibles.
+                  </div>
+                </div>
+              </div>
+
+              {/* Paso 2: Clic para profundizar */}
+              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#0071e3', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+                  2
+                </div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '2px' }}>
+                    Haz clic en un distrito para ver sus barrios
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.45 }}>
+                    Al pulsar sobre cualquier distrito en el mapa izquierdo, la cámara enfoca automáticamente y el mapa de la derecha te muestra todos sus barrios al detalle. Si haces clic de nuevo sobre el mismo distrito, vuelves a la vista general de Madrid.
+                  </div>
+                </div>
+              </div>
+
+              {/* Paso 3: Pasar el cursor */}
+              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#0071e3', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+                  3
+                </div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '2px' }}>
+                    Precios al pasar el cursor
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.45 }}>
+                    Apoya el puntero del ratón sobre cualquier barrio o distrito para ver su precio exacto por m², el coste estimado de una vivienda y si es un dato oficial certificado o una previsión.
+                  </div>
+                </div>
+              </div>
+
+              {/* Paso 4: Mapa Fijo */}
+              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: '#f9f9fb', borderRadius: '16px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#0071e3', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+                  4
+                </div>
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#1d1d1f', marginBottom: '2px' }}>
+                    Mapa Estático y Estable
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.45 }}>
+                    El mapa está fijado para que puedas hacer scroll por la página con total tranquilidad sin riesgo de desplazar o perder de vista Madrid por accidente.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowMapHelpModal(false)}
               style={{
                 marginTop: '20px',
                 width: '100%',

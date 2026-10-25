@@ -298,9 +298,9 @@
 .v2-dual-maps {
   display: flex;
   gap: 24px;
-  margin-top: 24px;
+  margin-top: 16px;
   flex: 1;
-  min-height: 500px;
+  min-height: 560px;
 }
 
 .v2-map-sub { flex: 1; display: flex; flex-direction: column; }
