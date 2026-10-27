@@ -157,7 +157,7 @@ def evaluar_inmueble(
         # Obtener ultimo periodo disponible en Fact_Operacion
         cur.execute("""
             SELECT MAX(id_tiempo) as max_tiempo FROM Fact_Operacion
-            WHERE tipo_operacion = ?
+            WHERE LOWER(tipo_operacion) = LOWER(?)
         """, (operacion,))
         row_tiempo = cur.fetchone()
         max_tiempo = row_tiempo["max_tiempo"] if row_tiempo and row_tiempo["max_tiempo"] else 202606
@@ -167,7 +167,7 @@ def evaluar_inmueble(
         cur.execute("""
             SELECT precio_m2, variacion_mensual, variacion_trimestral, variacion_anual
             FROM Fact_Operacion
-            WHERE id_barrio = ? AND tipo_operacion = ? AND id_tiempo = ?
+            WHERE id_barrio = ? AND LOWER(tipo_operacion) = LOWER(?) AND id_tiempo = ?
         """, (id_barrio, operacion, max_tiempo))
         row_barrio = cur.fetchone()
 
@@ -179,7 +179,7 @@ def evaluar_inmueble(
             cur.execute("""
                 SELECT AVG(precio_m2) as avg_p, AVG(variacion_trimestral) as avg_trim
                 FROM Fact_Operacion
-                WHERE id_barrio = ? AND tipo_operacion = ?
+                WHERE id_barrio = ? AND LOWER(tipo_operacion) = LOWER(?)
             """, (id_barrio, operacion))
             row_fallback = cur.fetchone()
             precio_m2_barrio = float(row_fallback["avg_p"] or 3500.0)
@@ -189,7 +189,7 @@ def evaluar_inmueble(
         cur.execute("""
             SELECT AVG(precio_m2) as avg_distrito
             FROM Fact_Operacion
-            WHERE id_distrito = ? AND tipo_operacion = ? AND id_tiempo = ?
+            WHERE id_distrito = ? AND LOWER(tipo_operacion) = LOWER(?) AND id_tiempo = ?
         """, (id_distrito, operacion, max_tiempo))
         row_dist = cur.fetchone()
         precio_m2_distrito = float(row_dist["avg_distrito"]) if row_dist and row_dist["avg_distrito"] else precio_m2_barrio
@@ -198,7 +198,7 @@ def evaluar_inmueble(
         cur.execute("""
             SELECT AVG(precio_m2) as avg_madrid
             FROM Fact_Operacion
-            WHERE tipo_operacion = ? AND id_tiempo = ?
+            WHERE LOWER(tipo_operacion) = LOWER(?) AND id_tiempo = ?
         """, (operacion, max_tiempo))
         row_mad = cur.fetchone()
         precio_m2_madrid = float(row_mad["avg_madrid"]) if row_mad and row_mad["avg_madrid"] else 3800.0
