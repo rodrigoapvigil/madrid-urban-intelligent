@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional, List
 import pandas as pd
@@ -340,9 +340,13 @@ def clear_session(session_id: str):
 try:
     from services.veredicto_engine import VeredictoRequest, VeredictoResponse, evaluar_inmueble
     from services.portal_parser import parse_portal_url, PortalParsedData
+    from services.payment_service import crear_sesion_checkout, procesar_webhook_stripe, verificar_token_descarga
+    from services.pdf_generator import generar_dossier_pdf
 except ImportError:
     from backend.services.veredicto_engine import VeredictoRequest, VeredictoResponse, evaluar_inmueble
     from backend.services.portal_parser import parse_portal_url, PortalParsedData
+    from backend.services.payment_service import crear_sesion_checkout, procesar_webhook_stripe, verificar_token_descarga
+    from backend.services.pdf_generator import generar_dossier_pdf
 
 
 class ExtraerUrlRequest(BaseModel):
@@ -411,6 +415,86 @@ async def evaluar_veredicto(req: VeredictoRequest):
         return resultado
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+class CrearSesionPagoPayload(BaseModel):
+    tipo: str = "dossier"  # 'dossier' (4,90 €) o 'suscripcion' (19 €/mes)
+    datos_inmueble: Dict[str, Any]
+    success_url: Optional[str] = None
+    cancel_url: Optional[str] = None
+
+
+@app.post("/api/veredicto/crear-sesion-pago")
+def crear_sesion_pago_endpoint(payload: CrearSesionPagoPayload):
+    """
+    Inicia la pasarela de pago seguro en Stripe Checkout para la compra
+    del Dossier Oficial de Negociacion (4,90 €) o Suscripcion Pro (19 €/mes).
+    """
+    success_url = payload.success_url or "https://dmiyc.com/madrid/veredicto"
+    cancel_url = payload.cancel_url or "https://dmiyc.com/madrid/veredicto"
+    try:
+        sesion = crear_sesion_checkout(
+            tipo=payload.tipo,
+            datos_inmueble=payload.datos_inmueble,
+            success_url=success_url,
+            cancel_url=cancel_url
+        )
+        return sesion
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creando sesion de pago: {str(e)}")
+
+
+@app.post("/api/veredicto/webhook")
+async def webhook_stripe(request: Request):
+    """
+    Recibe notificaciones de Stripe tras la confirmacion del pago.
+    """
+    payload_bytes = await request.body()
+    sig_header = request.headers.get("stripe-signature", "")
+    try:
+        resultado = procesar_webhook_stripe(payload_bytes, sig_header)
+        return resultado
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Webhook error: {str(e)}")
+
+
+@app.get("/api/veredicto/descargar-dossier")
+def descargar_dossier_pdf_endpoint(token: str = Query(..., description="Token de descarga firmado")):
+    """
+    Descarga el archivo PDF del Dossier Oficial de Negociacion tras validar el token de pago.
+    """
+    datos = verificar_token_descarga(token)
+    if not datos:
+        raise HTTPException(
+            status_code=403,
+            detail="El enlace de descarga es invalido o ha expirado. Por favor, solicita un nuevo acceso."
+        )
+
+    try:
+        precio = float(datos.get("precio", 350000))
+        metros = float(datos.get("metros", 80))
+        barrio = str(datos.get("barrio", "Goya"))
+        operacion = str(datos.get("operacion", "Venta"))
+
+        veredicto = evaluar_inmueble(
+            precio=precio,
+            metros=metros,
+            zona_str=barrio,
+            operacion=operacion
+        )
+        pdf_bytes = generar_dossier_pdf(veredicto, precio_total=precio, metros=metros)
+
+        nombre_archivo = f"Dossier_Negociacion_{veredicto.barrio_nombre}.pdf"
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{nombre_archivo}"',
+                "Cache-Control": "no-cache"
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generando dossier: {str(e)}")
 
 
 if __name__ == "__main__":
