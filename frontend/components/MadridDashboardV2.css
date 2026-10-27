@@ -345,13 +345,19 @@
   justify-content: center;
   text-align: center;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   transition: transform 0.3s ease;
   border: 1px solid #f0f0f2;
+  z-index: 1;
 }
 
 .v2-mini-kpi-card:hover {
   transform: translateY(-2px);
+  z-index: 50;
+}
+
+.v2-mini-kpi-card:focus-within {
+  z-index: 50;
 }
 
 .v2-mini-kpi-card.black-top {
