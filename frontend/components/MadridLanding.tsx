@@ -13,12 +13,11 @@ const MadridLanding: React.FC = () => {
       {/* 2. NAVBAR APPLE (BLURRED) */}
       <nav className="top-navbar">
         <div className="nav-container">
-          <a href="#" className="nav-logo">Madrid Urban Intelligent</a>
+          <a href="/" className="nav-logo">Madrid Urban Intelligence</a>
           <div className="nav-links">
-            <a href="#" className="nav-item">Tendencias</a>
-            <a href="/madrid" className="nav-item">Herramientas</a>
-            <a href="#" className="nav-item">Metodología</a>
-            <a href="#" className="nav-item">Mi Perfil</a>
+            <a href="/madrid/veredicto" className="nav-item font-semibold text-blue-400">El Veredicto</a>
+            <a href="/madrid" className="nav-item">Dashboard Analítico</a>
+            <a href="/madrid/chat" className="nav-item">Asistente AMBI</a>
           </div>
         </div>
       </nav>
@@ -28,7 +27,7 @@ const MadridLanding: React.FC = () => {
         <div className="hero-content">
           <h1 className="hero-title">
             Chatea con Ambi,<br />
-            <span className="hero-gradient-text">nuestra IA inteligente</span>
+            <span className="hero-gradient-text">nuestro modelo analítico inteligente</span>
           </h1>
           <p className="hero-subtitle">
             ¿Qué te gustaría saber de las viviendas en Madrid?<br />
@@ -36,7 +35,26 @@ const MadridLanding: React.FC = () => {
           </p>
           <div className="cta-group">
             <button className="btn-primary" onClick={handleChatClick}>Hablar con AMBI</button>
-            <a href="#" className="apple-link">Más información &gt;</a>
+            <a href="/madrid/veredicto" className="apple-link">Probar El Veredicto &gt;</a>
+          </div>
+
+          {/* Gancho Hero para El Veredicto */}
+          <div className="veredicto-hero-card" style={{ marginTop: '2rem', padding: '1.25rem', background: 'rgba(15, 23, 42, 0.85)', border: '1px solid rgba(59, 130, 246, 0.35)', borderRadius: '1rem', maxWidth: '36rem', marginLeft: 'auto', marginRight: 'auto', textAlign: 'left', backdropFilter: 'blur(8px)' }}>
+            <span style={{ display: 'inline-block', fontSize: '0.75rem', fontWeight: 700, color: '#60A5FA', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>
+              Herramienta de Negociación Oficial
+            </span>
+            <p style={{ fontSize: '0.9rem', fontWeight: 600, color: '#F1F5F9', margin: '0 0 0.75rem 0' }}>
+              ¿Has visto un piso en Idealista o Fotocasa? Descubre si tiene sobreprecio contrastándolo con las operaciones reales de cierre del Ayuntamiento de Madrid.
+            </p>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                type="button"
+                onClick={() => router.push('/madrid/veredicto')}
+                style={{ flex: 1, padding: '0.75rem 1rem', background: '#2563EB', color: '#FFFFFF', border: 'none', borderRadius: '0.75rem', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', transition: 'background 0.2s' }}
+              >
+                Comprobar Piso con El Veredicto →
+              </button>
+            </div>
           </div>
         </div>
       </section>

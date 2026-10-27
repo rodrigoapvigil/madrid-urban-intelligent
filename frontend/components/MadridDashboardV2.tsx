@@ -165,7 +165,8 @@ const InfoTooltip: React.FC<{
   description: string;
   example?: string;
   ruleOfThumb?: string;
-}> = ({ title, description, example, ruleOfThumb }) => {
+  align?: 'left' | 'right' | 'center';
+}> = ({ title, description, example, ruleOfThumb, align = 'left' }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -223,18 +224,21 @@ const InfoTooltip: React.FC<{
           style={{
             position: 'absolute',
             top: '24px',
-            left: 0,
-            width: '290px',
+            left: align === 'left' ? 0 : align === 'center' ? '50%' : 'auto',
+            right: align === 'right' ? 0 : 'auto',
+            transform: align === 'center' ? 'translateX(-50%)' : 'none',
+            width: '280px',
             backgroundColor: '#1d1d1f',
             color: '#f5f5f7',
             padding: '12px 14px',
             borderRadius: '12px',
             boxShadow: '0 10px 28px rgba(0,0,0,0.35)',
             border: '0.5px solid rgba(255,255,255,0.15)',
-            zIndex: 9999,
+            zIndex: 99999,
             fontSize: '12px',
             lineHeight: 1.45,
             pointerEvents: 'none',
+            textAlign: 'left',
             animation: 'fadeIn 0.15s ease-out'
           }}
         >
@@ -258,6 +262,93 @@ const InfoTooltip: React.FC<{
       )}
     </div>
   );
+};
+
+const getComparisonKpiInfo = (metric: string, zoneName: string) => {
+  switch (metric) {
+    case 'precio_m2_alquiler':
+      return {
+        title: `Precio m² Alquiler · ${zoneName}`,
+        description: `Indica cuánto cuesta de media cada metro cuadrado de alquiler aquí. Te permite comparar de forma directa si ${zoneName} es más cara o más barata que otras zonas, sin importar los metros que tenga cada piso.`,
+        example: `Para una casa tipo de 80 m², si el precio es 23 €/m², el alquiler mensual rondará los 1.840 €.`,
+        ruleOfThumb: `Es la cifra base para comparar el esfuerzo inicial que requiere mudarse a esta zona.`
+      };
+    case 'roi_alquiler':
+      return {
+        title: `Rentabilidad Bruta (ROI) · ${zoneName}`,
+        description: `Mide el beneficio anual que genera la vivienda en alquiler respecto al precio de compra en ${zoneName}. Te indica qué porcentaje de la inversión se recupera cada año con las cuotas de los inquilinos.`,
+        example: `Un 4% significa que por cada 100.000 € de valor del inmueble, se ingresan unos 4.000 € brutos al año.`,
+        ruleOfThumb: `En barrios muy consolidados suele ser menor (3-4%) por el alto valor de compra; en áreas en expansión o asequibles suele subir al 5% o más.`
+      };
+    case 'esfuerzo':
+      return {
+        title: `Tasa de Esfuerzo · ${zoneName}`,
+        description: `Indica qué porcentaje del sueldo neto de las familias de ${zoneName} se va exclusivamente en pagar el alquiler o la hipoteca. Es el termómetro de si los vecinos viven con desahogo o con el agua al cuello.`,
+        example: `Un 25% significa que de un sueldo de 2.000 €, 500 € van directos a la vivienda y quedan 1.500 € para los demás gastos.`,
+        ruleOfThumb: `El umbral saludable fijado por los expertos es no pasar del 30%-35%. Superar el 40% refleja tensión económica en la zona.`
+      };
+    case 'precio_m2_compra':
+      return {
+        title: `Precio m² Compra · ${zoneName}`,
+        description: `El precio medio de venta por cada metro cuadrado construido en ${zoneName}. Permite evaluar el valor patrimonial real de los pisos de la zona de forma objetiva.`,
+        example: `Si compras un piso de 90 m² a 4.500 €/m², el coste de compra rondará los 405.000 €.`,
+        ruleOfThumb: `Úsalo como referencia para calcular el tamaño de vivienda al que puedes aspirar según tu presupuesto o hipoteca.`
+      };
+    case 'poder_adquisitivo':
+      return {
+        title: `Renta Media de los Hogares · ${zoneName}`,
+        description: `Los ingresos netos medios anuales de las familias empadronadas en ${zoneName}. Refleja el poder adquisitivo real y el perfil económico de los residentes del barrio.`,
+        example: `Permite contrastar si los precios de las casas están en sintonía con los sueldos reales de quienes viven allí.`,
+        ruleOfThumb: `Zonas con rentas altas suelen tener mayor demanda comercial y menor tasa de morosidad.`
+      };
+    case 'variacion_anual':
+      return {
+        title: `Variación Anual · ${zoneName}`,
+        description: `Cuánto han subido o bajado los precios en ${zoneName} en los últimos 12 meses. Marca el ritmo de revalorización o moderación del mercado en este barrio.`,
+        example: `Un +4% significa que un piso que costaba 250.000 € el año pasado hoy ronda los 260.000 €.`,
+        ruleOfThumb: `Una variación positiva y moderada indica que el barrio gana valor con estabilidad y sin burbujas.`
+      };
+    case 'precio_m2_venta':
+      return {
+        title: `Precio m² Venta · ${zoneName}`,
+        description: `El precio medio por metro cuadrado al que se están cerrando las operaciones de compraventa en ${zoneName}. Es el baremo clave para tasar tu casa.`,
+        example: `Si quieres vender un piso de 75 m² y el metro está en 3.200 €, su valor de mercado de partida es de unos 240.000 €.`,
+        ruleOfThumb: `Ajustar el precio de salida a esta media acorta drásticamente el tiempo de venta y evita tener que hacer rebajas forzadas.`
+      };
+    case 'velocidad_venta':
+      return {
+        title: `Plazo de Venta · ${zoneName}`,
+        description: `Tiempo medio estimado en meses que tarda en venderse una vivienda en ${zoneName} desde que se publica el anuncio hasta la firma en notaría.`,
+        example: `Menos de 2 meses indica un mercado muy ágil donde los pisos se reservan rápido; más de 3 meses refleja negociaciones más pausadas.`,
+        ruleOfThumb: `Si el plazo es rápido hay poco margen para regatear; si es pausado, los compradores tienen mayor fuerza para negociar el precio.`
+      };
+    case 'roi_neto':
+      return {
+        title: `Rentabilidad Neta · ${zoneName}`,
+        description: `La ganancia anual real que te queda limpia en ${zoneName} tras descontar gastos fijos indispensables: comunidad, IBI, seguro de hogar/impago y mantenimiento.`,
+        example: `Si un alquiler genera 9.000 € brutos al año pero soportas 1.500 € en gastos, la rentabilidad neta calcula sobre los 7.500 € netos.`,
+        ruleOfThumb: `Es la cifra más honesta y decisiva para saber cuánto dinero entrará verdaderamente en tu cuenta bancaria.`
+      };
+    case 'grm':
+      return {
+        title: `Años de Recuperación (GRM) · ${zoneName}`,
+        description: `Mide cuántos años de cobro íntegro de alquiler necesitas para cubrir el precio total de compra de la vivienda en ${zoneName}.`,
+        example: `Un GRM de 20 años significa que con 20 años de rentas brutas habrás amortizado el 100% de lo que costó el piso.`,
+        ruleOfThumb: `Cuanto menor sea el número de años, más rápido recuperas el capital invertido.`
+      };
+    case 'volatilidad':
+      return {
+        title: `Estabilidad de Precios · ${zoneName}`,
+        description: `Indica la oscilación de los precios mes a mes en ${zoneName}. Te muestra si el mercado es predecible o si sufre altibajos con frecuencia.`,
+        example: `Una volatilidad baja te da la certeza de que las rentas y el valor del piso se mantendrán estables en el tiempo.`,
+        ruleOfThumb: `Para inversores conservadores, una baja volatilidad ofrece máxima tranquilidad y menor exposición a riesgos.`
+      };
+    default:
+      return {
+        title: `Indicador · ${zoneName}`,
+        description: `Métrica clave para comparar y analizar el mercado en ${zoneName}.`
+      };
+  }
 };
 
 const MadridDashboardV2: React.FC = () => {
@@ -1702,6 +1793,31 @@ const MadridDashboardV2: React.FC = () => {
             </button>
           </div>
 
+          {/* ACCESO DIRECTO A EL VEREDICTO */}
+          <div style={{ marginLeft: '8px', display: 'flex', alignItems: 'center' }}>
+            <a
+              href="/madrid/veredicto"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: '#0071e3',
+                borderRadius: '20px',
+                padding: '6px 14px',
+                fontSize: '12px',
+                fontWeight: '600',
+                color: '#ffffff',
+                textDecoration: 'none',
+                transition: 'all 0.2s',
+                boxShadow: '0 1px 4px rgba(0,113,227,0.25)'
+              }}
+              title="Comprueba si un piso en Idealista o Fotocasa está caro con El Veredicto"
+            >
+              <span>El Veredicto</span>
+              <span style={{ fontSize: '11px' }}>→</span>
+            </a>
+          </div>
+
         </div>
       </div>
 
@@ -2968,7 +3084,13 @@ const MadridDashboardV2: React.FC = () => {
                       if (p.id === 'inversion') {
                         return (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('roi_neto', selectedZoneA)}
+                                  align="left"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataA.rentabilidad ? (kpiDataA.rentabilidad * 100 * 0.85).toFixed(2) + '%' : '-'}
                               </div>
@@ -2977,7 +3099,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('grm', selectedZoneA)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataA.rentabilidad > 0 ? (1 / kpiDataA.rentabilidad).toFixed(1) + ' años' : '-'}
                               </div>
@@ -2986,7 +3114,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('volatilidad', selectedZoneA)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {volatilityZoneA || 'N/A'}
                               </div>
@@ -2999,7 +3133,13 @@ const MadridDashboardV2: React.FC = () => {
                       } else if (p.id === 'alquiler') {
                         return (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('precio_m2_alquiler', selectedZoneA)}
+                                  align="left"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataA.precio_m2 ? new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiDataA.precio_m2) + ' €/m²' : '-'}
                               </div>
@@ -3008,7 +3148,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('roi_alquiler', selectedZoneA)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataA.rentabilidad ? (kpiDataA.rentabilidad * 100).toFixed(2) + '%' : '-'}
                               </div>
@@ -3017,7 +3163,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('esfuerzo', selectedZoneA)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataA.esfuerzo_compra ? kpiDataA.esfuerzo_compra.toFixed(1) + '%' : '-'}
                               </div>
@@ -3030,7 +3182,13 @@ const MadridDashboardV2: React.FC = () => {
                       } else if (p.id === 'compra') {
                         return (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('precio_m2_compra', selectedZoneA)}
+                                  align="left"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataA.precio_m2 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(kpiDataA.precio_m2)) + ' €/m²' : '-'}
                               </div>
@@ -3039,7 +3197,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('poder_adquisitivo', selectedZoneA)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataA.renta_media ? new Intl.NumberFormat('es-ES').format(Math.round(kpiDataA.renta_media)) + ' €' : '-'}
                               </div>
@@ -3048,7 +3212,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('variacion_anual', selectedZoneA)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataA.variacion_anual !== undefined ? (kpiDataA.variacion_anual > 0 ? '+' : '') + kpiDataA.variacion_anual.toFixed(1) + '%' : '-'}
                               </div>
@@ -3072,7 +3242,13 @@ const MadridDashboardV2: React.FC = () => {
                         const velocityA_text = velocityA_num > 0 ? `${velocityA_formatted}${velocityA_suffix}${velocityA_label}` : '-';
                         return (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('precio_m2_venta', selectedZoneA)}
+                                  align="left"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataA.precio_m2 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(kpiDataA.precio_m2)) + ' €/m²' : '-'}
                               </div>
@@ -3081,7 +3257,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('velocidad_venta', selectedZoneA)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {velocityA_text}
                               </div>
@@ -3090,7 +3272,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}` }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('variacion_anual', selectedZoneA)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataA.variacion_anual !== undefined ? (kpiDataA.variacion_anual > 0 ? '+' : '') + kpiDataA.variacion_anual.toFixed(1) + '%' : '-'}
                               </div>
@@ -3132,7 +3320,13 @@ const MadridDashboardV2: React.FC = () => {
                       if (p.id === 'inversion') {
                         return (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f', position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('roi_neto', selectedZoneB)}
+                                  align="left"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataB.rentabilidad ? (kpiDataB.rentabilidad * 100 * 0.85).toFixed(2) + '%' : '-'}
                               </div>
@@ -3141,7 +3335,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f', position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('grm', selectedZoneB)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataB.rentabilidad > 0 ? (1 / kpiDataB.rentabilidad).toFixed(1) + ' años' : '-'}
                               </div>
@@ -3150,7 +3350,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f', position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('volatilidad', selectedZoneB)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {volatilityZoneB || 'N/A'}
                               </div>
@@ -3163,7 +3369,13 @@ const MadridDashboardV2: React.FC = () => {
                       } else if (p.id === 'alquiler') {
                         return (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f', position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('precio_m2_alquiler', selectedZoneB)}
+                                  align="left"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataB.precio_m2 ? new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiDataB.precio_m2) + ' €/m²' : '-'}
                               </div>
@@ -3172,7 +3384,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f', position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('roi_alquiler', selectedZoneB)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataB.rentabilidad ? (kpiDataB.rentabilidad * 100).toFixed(2) + '%' : '-'}
                               </div>
@@ -3181,7 +3399,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f', position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('esfuerzo', selectedZoneB)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataB.esfuerzo_compra ? kpiDataB.esfuerzo_compra.toFixed(1) + '%' : '-'}
                               </div>
@@ -3194,7 +3418,13 @@ const MadridDashboardV2: React.FC = () => {
                       } else if (p.id === 'compra') {
                         return (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f', position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('precio_m2_compra', selectedZoneB)}
+                                  align="left"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataB.precio_m2 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(kpiDataB.precio_m2)) + ' €/m²' : '-'}
                               </div>
@@ -3203,7 +3433,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f', position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('poder_adquisitivo', selectedZoneB)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataB.renta_media ? new Intl.NumberFormat('es-ES').format(Math.round(kpiDataB.renta_media)) + ' €' : '-'}
                               </div>
@@ -3212,7 +3448,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f', position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('variacion_anual', selectedZoneB)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataB.variacion_anual !== undefined ? (kpiDataB.variacion_anual > 0 ? '+' : '') + kpiDataB.variacion_anual.toFixed(1) + '%' : '-'}
                               </div>
@@ -3236,7 +3478,13 @@ const MadridDashboardV2: React.FC = () => {
                         const velocityB_text = velocityB_num > 0 ? `${velocityB_formatted}${velocityB_suffix}${velocityB_label}` : '-';
                         return (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f', position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('precio_m2_venta', selectedZoneB)}
+                                  align="left"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataB.precio_m2 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(kpiDataB.precio_m2)) + ' €/m²' : '-'}
                               </div>
@@ -3245,7 +3493,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f', position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('velocidad_venta', selectedZoneB)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {velocityB_text}
                               </div>
@@ -3254,7 +3508,13 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f' }}>
+                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid #1d1d1f', position: 'relative', overflow: 'visible' }}>
+                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
+                                <InfoTooltip 
+                                  {...getComparisonKpiInfo('variacion_anual', selectedZoneB)}
+                                  align="right"
+                                />
+                              </div>
                               <div className="v" style={{ fontSize: '20px' }}>
                                 {kpiDataB.variacion_anual !== undefined ? (kpiDataB.variacion_anual > 0 ? '+' : '') + kpiDataB.variacion_anual.toFixed(1) + '%' : '-'}
                               </div>
@@ -3773,7 +4033,7 @@ const MadridDashboardV2: React.FC = () => {
                   ¿Cómo usar la comparación de zonas?
                 </h3>
                 <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#86868b' }}>
-                  Aprende a contrastar dos áreas y a interpretar todos sus indicadores.
+                  Aprende a contrastar dos áreas y a interpretar sus tendencias paso a paso.
                 </p>
               </div>
               <button 
@@ -3801,10 +4061,10 @@ const MadridDashboardV2: React.FC = () => {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               
-              {/* Sección A: Modos de uso */}
-              <div style={{ borderBottom: '1px solid #e5e5ea', paddingBottom: '14px' }}>
+              {/* Sección: Modos de uso */}
+              <div>
                 <div style={{ fontSize: '13px', fontWeight: '700', color: '#0071e3', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
-                  1. Modos de Uso y Navegación
+                  Modos de Uso y Navegación
                 </div>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -3831,7 +4091,7 @@ const MadridDashboardV2: React.FC = () => {
                         Comparativa Individual (Lado a Lado)
                       </div>
                       <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '2px' }}>
-                        Muestra la curva histórica independiente de cada zona junto con sus tarjetas de resumen. <strong>Pasa el cursor sobre cualquier punto</strong> de la gráfica para ver el precio exacto, la variación porcentual frente al mes anterior y la comparación directa con la media de todo Madrid.
+                        Muestra la curva histórica independiente de cada zona junto con sus tarjetas de resumen. <strong>Pasa el cursor sobre cualquier punto</strong> de la gráfica para ver el precio exacto, la variación porcentual frente al mes anterior y la comparación directa con la media de todo Madrid. Además, cada tarjeta de métrica cuenta con su propio botón <strong>(i)</strong> para consultar su explicación detallada.
                       </div>
                     </div>
                   </div>
@@ -3847,81 +4107,6 @@ const MadridDashboardV2: React.FC = () => {
                       <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '2px' }}>
                         Al abrir la sección <em>&ldquo;Ver comparativa superpuesta&rdquo;</em>, ambas zonas se cruzan en un único gráfico bajo la misma escala junto a la media de Madrid. Te permite verificar inmediatamente cuál es más cara, cuál crece más deprisa y si hay cruces de tendencia a lo largo del año.
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Sección B: Indicadores */}
-              <div>
-                <div style={{ fontSize: '13px', fontWeight: '700', color: '#0071e3', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
-                  2. Guía de Indicadores (¿Qué significa cada métrica?)
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {/* Precio m² */}
-                  <div style={{ padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1d1d1f' }}>Precio m² (Alquiler o Compra)</span>
-                      <span style={{ fontSize: '11px', color: '#86868b' }}>€/m²</span>
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '3px' }}>
-                      El valor medio por metro cuadrado útil o construido en la zona. Permite comparar objetivamente el coste entre barrios sin que influya el tamaño de los pisos.
-                    </div>
-                  </div>
-
-                  {/* ROI % */}
-                  <div style={{ padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1d1d1f' }}>ROI % (Rentabilidad Bruta Anual)</span>
-                      <span style={{ fontSize: '11px', color: '#86868b' }}>Retorno / Año</span>
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '3px' }}>
-                      Mide el porcentaje anual de los ingresos brutos de alquiler con respecto al valor total de compra del inmueble. Por ejemplo, un 4.5% significa que por cada 100.000€ invertidos se obtienen 4.500€ brutos de rentas anuales.
-                    </div>
-                  </div>
-
-                  {/* Esfuerzo % */}
-                  <div style={{ padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1d1d1f' }}>Esfuerzo % (Tasa de Esfuerzo Financiero)</span>
-                      <span style={{ fontSize: '11px', color: '#86868b' }}>% de Sueldo Neto</span>
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '3px' }}>
-                      Porcentaje de los ingresos mensuales netos del hogar que se destinan al pago del alquiler o cuota de vivienda. El Banco de España recomienda mantenerse por debajo del 30%-35%; superar el 40% indica sobreesfuerzo y tensión económica en esa zona.
-                    </div>
-                  </div>
-
-                  {/* Poder Adquisitivo */}
-                  <div style={{ padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1d1d1f' }}>Poder Adquisitivo (Años de Renta)</span>
-                      <span style={{ fontSize: '11px', color: '#86868b' }}>Salario Anual Integro</span>
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '3px' }}>
-                      Mide cuántos años completos de sueldo anual íntegro necesita una familia residente típica de ese distrito o barrio para comprar una vivienda media. Menos de 5 años es asequible; entre 5 y 8 es moderado; más de 8 años supone alta dificultad económica.
-                    </div>
-                  </div>
-
-                  {/* Velocidad de Venta */}
-                  <div style={{ padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1d1d1f' }}>Velocidad de Venta</span>
-                      <span style={{ fontSize: '11px', color: '#86868b' }}>Meses hasta Notaría</span>
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '3px' }}>
-                      Tiempo promedio estimado en meses que tarda en cerrarse y firmarse una vivienda en esa área según el volumen de transacciones notariales. Menos de 2 meses indica un mercado rápido con alta demanda; más de 3 meses refleja un mercado más pausado.
-                    </div>
-                  </div>
-
-                  {/* Variación Anual */}
-                  <div style={{ padding: '12px', backgroundColor: '#f9f9fb', borderRadius: '14px', border: '0.5px solid rgba(0,0,0,0.04)' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                      <span style={{ fontSize: '13px', fontWeight: '700', color: '#1d1d1f' }}>Variación Anual</span>
-                      <span style={{ fontSize: '11px', color: '#86868b' }}>Tendencia 12 Meses</span>
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#515154', lineHeight: 1.4, marginTop: '3px' }}>
-                      Porcentaje de crecimiento o corrección del precio respecto al mismo mes del año anterior. Es el indicador más estable para evaluar revalorización a medio y largo plazo.
                     </div>
                   </div>
                 </div>
