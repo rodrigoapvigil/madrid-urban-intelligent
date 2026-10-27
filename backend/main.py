@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional, List
 import pandas as pd
@@ -336,6 +336,84 @@ def clear_session(session_id: str):
         del active_contexts[session_id]
     return {"status": "ok"}
 
+# ── Endpoints de El Veredicto ──────────────────────────────────────────────
+try:
+    from services.veredicto_engine import VeredictoRequest, VeredictoResponse, evaluar_inmueble
+    from services.portal_parser import parse_portal_url, PortalParsedData
+except ImportError:
+    from backend.services.veredicto_engine import VeredictoRequest, VeredictoResponse, evaluar_inmueble
+    from backend.services.portal_parser import parse_portal_url, PortalParsedData
+
+
+class ExtraerUrlRequest(BaseModel):
+    url: str
+
+
+@app.post("/api/veredicto/extraer-url", response_model=PortalParsedData)
+async def extraer_datos_url(payload: ExtraerUrlRequest):
+    """
+    Extrae de forma automatica precio, metros y barrio desde un enlace
+    de Idealista o Fotocasa con tolerancia a bloqueos (modo hibrido).
+    """
+    return await parse_portal_url(payload.url)
+
+
+@app.post("/api/veredicto/evaluar")
+async def evaluar_veredicto(req: VeredictoRequest):
+    """
+    Evalua el precio de un inmueble frente al historico oficial del Ayuntamiento de Madrid.
+    Soporta evaluacion directa por campos o complementada por URL.
+    """
+    precio = req.precio
+    metros = req.metros
+    barrio = req.barrio or req.distrito
+    operacion = req.operacion or "Venta"
+
+    # Si se aporta URL y faltan datos, intentar extraerlos
+    if req.url and (precio is None or metros is None or not barrio):
+        parsed = await parse_portal_url(req.url)
+        if precio is None and parsed.precio:
+            precio = parsed.precio
+        if metros is None and parsed.metros:
+            metros = parsed.metros
+        if not barrio and parsed.barrio:
+            barrio = parsed.barrio
+        if parsed.operacion:
+            operacion = parsed.operacion
+
+        # Si aun faltan datos, devolver respuesta indicando que requiere completar campos
+        if precio is None or metros is None or not barrio:
+            return {
+                "requiere_manual": True,
+                "mensaje": parsed.error_mensaje or "Por favor, completa precio, metros y barrio para emitir el veredicto.",
+                "datos_extraidos": {
+                    "precio": precio,
+                    "metros": metros,
+                    "barrio": barrio,
+                    "operacion": operacion,
+                    "titulo": parsed.titulo
+                }
+            }
+
+    if precio is None or metros is None or not barrio:
+        raise HTTPException(
+            status_code=400,
+            detail="Se requieren precio (> 0), metros (> 0) y barrio o distrito para emitir el veredicto."
+        )
+
+    try:
+        resultado = evaluar_inmueble(
+            precio=precio,
+            metros=metros,
+            zona_str=barrio,
+            operacion=operacion
+        )
+        return resultado
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)
+
