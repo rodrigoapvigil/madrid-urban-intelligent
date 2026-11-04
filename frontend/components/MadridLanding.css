@@ -435,9 +435,210 @@
   opacity: 0.5;
 }
 
-/* RESPONSIVE */
+/* ============================================================
+   RESPONSIVE — 3 breakpoints: tablet 1024, mobile 734, xs 480
+   REGLA: solo añadir overrides, nunca modificar reglas base
+   ============================================================ */
+
+/* Tablet (hasta 1024px) */
+@media (max-width: 1024px) {
+  .nav-container {
+    padding: 0 16px;
+  }
+
+  .hero-title {
+    font-size: 44px;
+  }
+
+  .hero-subtitle {
+    font-size: 20px;
+  }
+
+  .profile-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .chapter-container {
+    padding: 0 24px;
+  }
+
+  .steps-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    padding: 0 24px;
+  }
+
+  .faq-box {
+    padding: 0 24px;
+  }
+
+  .veredicto-cta-headline {
+    font-size: 44px;
+  }
+}
+
+/* Mobile (hasta 734px) */
 @media (max-width: 734px) {
-  .hero-title { font-size: 40px; }
-  .chapter-title { font-size: 32px; }
-  .footer-bottom { flex-direction: column; gap: 16px; }
+  /* Navbar: logo centrado, links en fila scrollable */
+  .nav-container {
+    flex-direction: column;
+    height: auto;
+    padding: 10px 16px;
+    gap: 8px;
+  }
+
+  .nav-links {
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .nav-item {
+    font-size: 13px;
+  }
+
+  /* Hero más compacto */
+  .hero-chapter {
+    height: auto;
+    min-height: 100svh;
+    padding: 100px 24px 56px;
+    align-items: flex-start;
+  }
+
+  .hero-content {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .hero-title {
+    font-size: 36px;
+    line-height: 1.1;
+  }
+
+  .hero-subtitle {
+    font-size: 17px;
+    margin-bottom: 24px;
+  }
+
+  .cta-group {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Profiles: 1 columna */
+  .profile-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .apple-card {
+    min-height: auto;
+  }
+
+  .card-image-area {
+    height: 180px;
+  }
+
+  .chapter-title,
+  .how-title,
+  .faq-title {
+    font-size: 32px;
+  }
+
+  .profiles-chapter {
+    padding: 56px 0;
+  }
+
+  .chapter-container {
+    padding: 0 20px;
+  }
+
+  /* Veredicto CTA */
+  .veredicto-cta-chapter {
+    padding: 64px 24px;
+  }
+
+  .veredicto-cta-headline {
+    font-size: 34px;
+  }
+
+  .veredicto-cta-sub {
+    font-size: 16px;
+  }
+
+  .veredicto-cta-btn {
+    display: block;
+    width: 100%;
+    text-align: center;
+    padding: 16px 24px;
+  }
+
+  /* Cómo funciona */
+  .how-it-works {
+    padding: 56px 0;
+  }
+
+  .steps-container {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    padding: 0 20px;
+  }
+
+  /* FAQ */
+  .faq-chapter {
+    padding: 56px 0;
+  }
+
+  .faq-box {
+    padding: 0 20px;
+  }
+
+  .faq-item summary {
+    font-size: 17px;
+  }
+
+  /* Footer */
+  .apple-footer {
+    padding: 56px 0;
+  }
+
+  .footer-brand {
+    font-size: 24px;
+  }
+
+  .footer-slogan {
+    font-size: 15px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 16px;
+  }
+}
+
+/* Extra small (hasta 480px) */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 30px;
+  }
+
+  .chapter-title,
+  .how-title,
+  .faq-title {
+    font-size: 28px;
+  }
+
+  .veredicto-cta-headline {
+    font-size: 28px;
+  }
+
+  .nav-logo {
+    font-size: 15px;
+  }
 }

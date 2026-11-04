@@ -1104,3 +1104,140 @@
   }
 }
 
+/* ============================================================
+   RESPONSIVE ADDITIONS — gaps not covered by existing queries
+   REGLA: solo overrides aditivos, no tocar reglas base
+   ============================================================ */
+
+/* Tablet additions */
+@media (max-width: 1024px) {
+  /* Explorer grid: colapsar de 3 a 1 columna */
+  .v2-explorer-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .v2-explorer-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: none;
+    border-bottom: 0.5px solid var(--v2-border);
+    padding-right: 0;
+    padding-bottom: 20px;
+    gap: 12px;
+  }
+
+  /* Mini KPI grid: 2 columnas en tablet */
+  .v2-mini-kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Heatmap cards: 2 columnas */
+  .v2-heatmap-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Scatter chart: ancho completo */
+  .v2-scatter-wrapper {
+    overflow-x: auto;
+  }
+}
+
+/* Mobile additions (complementa el @media 768px existente) */
+@media (max-width: 768px) {
+  /* Explorer: una sola columna con secciones apiladas */
+  .v2-explorer-grid {
+    grid-template-columns: 1fr;
+    padding: 20px 16px;
+  }
+
+  .v2-explorer-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    border-right: none;
+    border-bottom: 0.5px solid var(--v2-border);
+    padding-right: 0;
+    padding-bottom: 16px;
+    gap: 10px;
+  }
+
+  /* Mini KPI row: 2 col en móvil */
+  .v2-mini-kpi-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  /* Heatmap: 1 columna */
+  .v2-heatmap-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Veredicto CTA button dentro del dashboard */
+  .v2-veredicto-cta-btn,
+  a[href='/madrid/veredicto'] {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Section header botones */
+  .v2-section-header .v2-tabs-bg {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Rank settings en fila */
+  .v2-rank-settings {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  /* Affordability / risk tables */
+  .v2-dark-card {
+    padding: 16px;
+  }
+
+  /* Viewport padding reducido */
+  .v2-viewport {
+    padding: 16px 12px 48px;
+  }
+
+  /* Filters row */
+  .v2-filter-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Info tooltips: que no se salgan por la derecha */
+  .v2-info-tooltip {
+    right: 0;
+    left: auto;
+    transform: none;
+    max-width: calc(100vw - 32px);
+  }
+}
+
+/* Extra small (480px) */
+@media (max-width: 480px) {
+  .v2-mini-kpi-row {
+    grid-template-columns: 1fr;
+  }
+
+  .v2-kpi-stack {
+    grid-template-columns: 1fr;
+  }
+
+  .v2-nav-content {
+    padding: 8px 12px;
+  }
+
+  .v2-tabs-bg {
+    max-width: 100%;
+  }
+
+  .v2-tab-btn {
+    font-size: 10px;
+    padding: 5px 4px;
+  }
+}
+
