@@ -479,12 +479,17 @@
 
 /* Mobile (hasta 734px) */
 @media (max-width: 734px) {
-  /* Navbar: logo centrado, links en fila scrollable */
+  /* Navbar: altura automática para que los links no queden recortados */
+  .top-navbar {
+    height: auto;
+    overflow: visible;
+  }
+
   .nav-container {
     flex-direction: column;
     height: auto;
     padding: 10px 16px;
-    gap: 8px;
+    gap: 6px;
   }
 
   .nav-links {
@@ -497,11 +502,11 @@
     font-size: 13px;
   }
 
-  /* Hero más compacto */
+  /* Hero más compacto — padding-top generoso para la navbar doble fila */
   .hero-chapter {
     height: auto;
     min-height: 100svh;
-    padding: 100px 24px 56px;
+    padding: 120px 24px 56px;
     align-items: flex-start;
   }
 
