@@ -1683,8 +1683,6 @@ const MadridDashboardV2: React.FC = () => {
               ))}
             </div>
           </div>
-
-          <button className="v2-btn-profile">Mi Perfil</button>
         </div>
       </nav>
 
@@ -1753,7 +1751,7 @@ const MadridDashboardV2: React.FC = () => {
           </div>
 
           {/* BOTÓN GUÍA DE PRECIOS PARA EL CIUDADANO */}
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center' }}>
+          <div className="v2-filter-actions">
             <button
               onClick={() => setShowHelpModal(true)}
               style={{
@@ -1791,10 +1789,8 @@ const MadridDashboardV2: React.FC = () => {
               }}>i</span>
               <span>¿Cómo entender estos precios?</span>
             </button>
-          </div>
 
-          {/* ACCESO DIRECTO A EL VEREDICTO */}
-          <div style={{ marginLeft: '8px', display: 'flex', alignItems: 'center' }}>
+            {/* ACCESO DIRECTO A EL VEREDICTO */}
             <a
               href="/madrid/veredicto"
               style={{
