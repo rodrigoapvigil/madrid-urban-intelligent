@@ -38,24 +38,6 @@ const MadridLanding: React.FC = () => {
             <a href="/madrid/veredicto" className="apple-link">Probar El Veredicto &gt;</a>
           </div>
 
-          {/* Gancho Hero para El Veredicto */}
-          <div className="veredicto-hero-card" style={{ marginTop: '2rem', padding: '1.25rem', background: 'rgba(15, 23, 42, 0.85)', border: '1px solid rgba(59, 130, 246, 0.35)', borderRadius: '1rem', maxWidth: '36rem', marginLeft: 'auto', marginRight: 'auto', textAlign: 'left', backdropFilter: 'blur(8px)' }}>
-            <span style={{ display: 'inline-block', fontSize: '0.75rem', fontWeight: 700, color: '#60A5FA', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>
-              Herramienta de Negociación Oficial
-            </span>
-            <p style={{ fontSize: '0.9rem', fontWeight: 600, color: '#F1F5F9', margin: '0 0 0.75rem 0' }}>
-              ¿Has visto un piso en Idealista o Fotocasa? Descubre si tiene sobreprecio contrastándolo con las operaciones reales de cierre del Ayuntamiento de Madrid.
-            </p>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button
-                type="button"
-                onClick={() => router.push('/madrid/veredicto')}
-                style={{ flex: 1, padding: '0.75rem 1rem', background: '#2563EB', color: '#FFFFFF', border: 'none', borderRadius: '0.75rem', fontSize: '0.8rem', fontWeight: 700, cursor: 'pointer', transition: 'background 0.2s' }}
-              >
-                Comprobar Piso con El Veredicto →
-              </button>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -103,7 +85,23 @@ const MadridLanding: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. CÓMO FUNCIONA */}
+      {/* 5. EL VEREDICTO CTA */}
+      <section className="veredicto-cta-chapter">
+        <div className="veredicto-cta-inner">
+          <p className="veredicto-cta-label">Herramienta de negociación</p>
+          <h2 className="veredicto-cta-headline">
+            ¿Está este piso caro o barato?
+          </h2>
+          <p className="veredicto-cta-sub">
+            Si has visto un piso en Idealista o Fotocasa, contrástalo con las operaciones reales de cierre del Ayuntamiento de Madrid y descubre al instante si tiene sobreprecio o es una oportunidad.
+          </p>
+          <a href="/madrid/veredicto" className="veredicto-cta-btn">
+            Comprobar piso con El Veredicto →
+          </a>
+        </div>
+      </section>
+
+      {/* 6. CÓMO FUNCIONA */}
       <section className="how-it-works">
         <h2 className="how-title">Cómo funciona</h2>
         <div className="steps-container">
@@ -130,7 +128,7 @@ const MadridLanding: React.FC = () => {
         </div>
       </section>
 
-      {/* 6. FAQ */}
+      {/* 7. FAQ */}
       <section className="faq-chapter">
         <div className="faq-box">
           <h2 className="faq-title">Preguntas Frecuentes</h2>
@@ -149,7 +147,7 @@ const MadridLanding: React.FC = () => {
         </div>
       </section>
 
-      {/* 7. FOOTER */}
+      {/* 8. FOOTER */}
       <footer className="apple-footer">
         <div className="footer-content">
           <div className="footer-brand">Madrid Urban Intelligent</div>
