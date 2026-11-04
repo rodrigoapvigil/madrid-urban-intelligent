@@ -502,17 +502,18 @@
     font-size: 13px;
   }
 
-  /* Hero más compacto — padding-top generoso para la navbar doble fila */
+  /* Hero más compacto — centrado y balanceado */
   .hero-chapter {
     height: auto;
     min-height: 100svh;
     padding: 120px 24px 56px;
-    align-items: flex-start;
+    align-items: center;
   }
 
   .hero-content {
     max-width: 100%;
-    text-align: left;
+    text-align: center;
+    margin: 0 auto;
   }
 
   .hero-title {
@@ -527,8 +528,11 @@
 
   .cta-group {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     gap: 14px;
+    width: 100%;
+    max-width: 320px;
+    margin: 0 auto;
   }
 
   .btn-primary {
@@ -593,6 +597,13 @@
     grid-template-columns: 1fr;
     gap: 32px;
     padding: 0 20px;
+    text-align: center;
+  }
+
+  .step-item {
+    text-align: center;
+    max-width: 320px;
+    margin: 0 auto;
   }
 
   /* FAQ */
