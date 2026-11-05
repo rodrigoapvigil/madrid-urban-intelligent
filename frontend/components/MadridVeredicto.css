@@ -1,0 +1,495 @@
+/* MadridVeredicto.css - Apple Glass & Dark Chapter Design System */
+
+.veredicto-root {
+  min-height: 100vh;
+  background-color: #0a192f;
+  color: #f1f5f9;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* NAVBAR GLASS APPLE */
+.veredicto-navbar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  background: rgba(10, 25, 47, 0.82);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  z-index: 1000;
+}
+
+.veredicto-nav-container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.veredicto-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+
+.veredicto-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.veredicto-nav-item {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.veredicto-nav-item:hover {
+  color: #ffffff;
+}
+
+.veredicto-nav-item.active {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+/* MAIN CONTAINER */
+.veredicto-main {
+  flex: 1;
+  max-width: 820px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  box-sizing: border-box;
+}
+
+/* HERO SECTION */
+.veredicto-hero {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.veredicto-badge-official {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 999px;
+  color: #60a5fa;
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.veredicto-title {
+  font-size: 44px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  margin: 0 0 16px 0;
+  line-height: 1.15;
+}
+
+.veredicto-subtitle {
+  font-size: 17px;
+  color: rgba(255, 255, 255, 0.7);
+  max-width: 620px;
+  margin: 0 auto;
+  line-height: 1.55;
+}
+
+/* OPERATION SEGMENTED CONTROL */
+.veredicto-segmented-wrap {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.veredicto-segmented {
+  display: flex;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.veredicto-segment-btn {
+  padding: 8px 20px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.veredicto-segment-btn.active {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+}
+
+/* GLASS INPUT CARD */
+.veredicto-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 24px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  overflow: hidden;
+  margin-bottom: 40px;
+}
+
+.veredicto-tabs {
+  display: flex;
+  background: rgba(10, 15, 30, 0.6);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.veredicto-tab-btn {
+  flex: 1;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+}
+
+.veredicto-tab-btn.active {
+  color: #60a5fa;
+  background: rgba(30, 41, 59, 0.5);
+  border-bottom-color: #3b82f6;
+}
+
+.veredicto-card-body {
+  padding: 28px;
+}
+
+/* FORM STYLING */
+.veredicto-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 8px;
+}
+
+.veredicto-input {
+  width: 100%;
+  background: rgba(10, 15, 30, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #ffffff;
+  outline: none;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+
+.veredicto-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.veredicto-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.veredicto-manual-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.veredicto-btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 28px;
+  background: #2563eb;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
+}
+
+.veredicto-btn-primary:hover:not(:disabled) {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+}
+
+.veredicto-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.veredicto-helper-text {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.4;
+}
+
+/* ALERTS */
+.veredicto-alert-error {
+  padding: 12px 16px;
+  background: rgba(153, 27, 27, 0.25);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 12px;
+  color: #fca5a5;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.veredicto-alert-info {
+  padding: 12px 16px;
+  background: rgba(30, 58, 138, 0.3);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: 12px;
+  color: #93c5fd;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* RESULTS SECTION */
+.veredicto-results {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: veredictoFadeIn 0.4s ease;
+}
+
+@keyframes veredictoFadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.veredicto-result-hero {
+  padding: 28px;
+  border-radius: 20px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.veredicto-result-hero.CARO {
+  background: linear-gradient(180deg, rgba(69, 10, 10, 0.45) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.veredicto-result-hero.BARATO {
+  background: linear-gradient(180deg, rgba(6, 78, 59, 0.45) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.veredicto-result-hero.EN_LINEA {
+  background: linear-gradient(180deg, rgba(30, 58, 138, 0.45) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border-color: rgba(59, 130, 246, 0.4);
+}
+
+.veredicto-state-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid currentColor;
+}
+
+.veredicto-hero-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+/* 4 KPI METRIC TILES */
+.veredicto-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.veredicto-kpi-tile {
+  background: rgba(10, 15, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.veredicto-kpi-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 4px;
+}
+
+.veredicto-kpi-val {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.veredicto-kpi-sub {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+/* ARGUMENTS BOX */
+.veredicto-args-card {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 24px;
+}
+
+.veredicto-arg-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(10, 15, 30, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 8px;
+}
+
+.veredicto-arg-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid #3b82f6;
+  color: #60a5fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* MONETIZATION DOSSIER CARD */
+.veredicto-dossier-card {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 58, 138, 0.35) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.4);
+  border-radius: 20px;
+  padding: 28px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+}
+
+.veredicto-footer {
+  padding: 40px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* RESPONSIVE MOBILE BREAKPOINTS */
+@media (max-width: 734px) {
+  .veredicto-nav-container {
+    height: auto;
+    flex-direction: column;
+    padding: 10px 16px;
+    gap: 8px;
+  }
+
+  .veredicto-nav-links {
+    gap: 16px;
+  }
+
+  .veredicto-title {
+    font-size: 32px;
+  }
+
+  .veredicto-subtitle {
+    font-size: 15px;
+  }
+
+  .veredicto-main {
+    padding: 28px 16px 60px;
+  }
+
+  .veredicto-card-body {
+    padding: 20px 16px;
+  }
+
+  .veredicto-manual-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .veredicto-kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .veredicto-dossier-card {
+    flex-direction: column;
+    text-align: left;
+    align-items: stretch;
+  }
+
+  .veredicto-btn-primary {
+    width: 100%;
+  }
+}

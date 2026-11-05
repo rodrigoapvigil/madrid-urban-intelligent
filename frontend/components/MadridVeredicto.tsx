@@ -18,6 +18,7 @@ import {
   Sparkles
 } from 'lucide-react';
 import { VeredictoResponse, VeredictoEstado } from '../types/veredicto';
+import './MadridVeredicto.css';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -216,181 +217,176 @@ export default function MadridVeredicto() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0F1D] text-slate-100 flex flex-col font-sans">
-      {/* 1. Header de Navegación */}
-      <header className="border-b border-slate-800/80 bg-[#0A0F1D]/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 text-slate-100 font-semibold text-lg tracking-tight hover:opacity-90 transition">
+    <div className="veredicto-root">
+      {/* 1. Header de Navegación Apple Glass */}
+      <nav className="veredicto-navbar">
+        <div className="veredicto-nav-container">
+          <Link href="/" className="veredicto-nav-brand">
             <Building2 className="w-5 h-5 text-blue-500" />
             <span>Madrid Urban Intelligence</span>
           </Link>
-          <div className="flex items-center gap-4 text-sm">
-            <Link href="/madrid" className="text-slate-400 hover:text-slate-200 transition">
+          <div className="veredicto-nav-links">
+            <Link href="/madrid" className="veredicto-nav-item">
               Dashboard Analítico
             </Link>
-            <Link href="/madrid/veredicto" className="text-blue-400 font-medium border-b-2 border-blue-500 pb-0.5">
+            <Link href="/madrid/veredicto" className="veredicto-nav-item active">
               El Veredicto
             </Link>
           </div>
         </div>
-      </header>
+      </nav>
 
       {/* 2. Contenedor Principal */}
-      <main className="flex-1 max-w-4xl mx-auto px-4 py-10 w-full">
+      <main className="veredicto-main">
         {/* Banner de descarga post-pago si viene de Stripe */}
         {downloadToken && (
-          <div className="mb-8 p-5 bg-emerald-950/40 border border-emerald-800/60 rounded-xl flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <CheckCircle2 className="w-6 h-6 text-emerald-400 flex-shrink-0" />
+          <div style={{
+            marginBottom: '32px',
+            padding: '20px',
+            background: 'rgba(6, 78, 59, 0.35)',
+            border: '1px solid rgba(16, 185, 129, 0.4)',
+            borderRadius: '16px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <CheckCircle2 style={{ width: '24px', height: '24px', color: '#34d399', flexShrink: 0 }} />
               <div>
-                <p className="font-semibold text-emerald-200 text-sm">Pago verificado con éxito</p>
-                <p className="text-xs text-emerald-300/80">Tu Dossier Oficial de Negociación está generado y listo para descargar en PDF.</p>
+                <p style={{ fontWeight: 600, color: '#a7f3d0', fontSize: '14px', margin: 0 }}>Pago verificado con éxito</p>
+                <p style={{ fontSize: '12px', color: 'rgba(167, 243, 208, 0.8)', margin: '4px 0 0' }}>Tu Dossier Oficial de Negociación está generado y listo para descargar en PDF.</p>
               </div>
             </div>
             <a
               href={`${API_BASE_URL}/api/veredicto/descargar-dossier?token=${downloadToken}`}
               download
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-semibold flex items-center gap-2 transition flex-shrink-0"
+              className="veredicto-btn-primary"
+              style={{ padding: '10px 18px', fontSize: '12px', flexShrink: 0 }}
             >
-              <Download className="w-4 h-4" />
+              <Download style={{ width: '16px', height: '16px' }} />
               <span>Descargar PDF</span>
             </a>
           </div>
         )}
 
         {/* Hero Section */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-950/60 border border-blue-800/50 text-blue-400 text-xs font-medium mb-4">
-            <ShieldCheck className="w-3.5 h-3.5" />
+        <div className="veredicto-hero">
+          <div className="veredicto-badge-official">
+            <ShieldCheck style={{ width: '14px', height: '14px' }} />
             <span>Auditoría basada en series oficiales de cierre del Ayuntamiento de Madrid</span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight mb-4 leading-tight">
+          <h1 className="veredicto-title">
             El Veredicto Inmobiliario
           </h1>
-          <p className="text-base md:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+          <p className="veredicto-subtitle">
             Descubre si un piso tiene sobreprecio o es una oportunidad contrastándolo con las operaciones reales de cierre de su barrio.
           </p>
         </div>
 
         {/* Selector de Operación (Venta / Alquiler) */}
-        <div className="flex justify-center mb-6">
-          <div className="bg-slate-900 border border-slate-800 p-1 rounded-xl flex gap-1">
+        <div className="veredicto-segmented-wrap">
+          <div className="veredicto-segmented">
             <button
               type="button"
               onClick={() => setOperacion('Venta')}
-              className={`px-6 py-2 rounded-lg text-xs font-semibold transition ${
-                operacion === 'Venta'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+              className={`veredicto-segment-btn ${operacion === 'Venta' ? 'active' : ''}`}
             >
               Comprar / Venta
             </button>
             <button
               type="button"
               onClick={() => setOperacion('Alquiler')}
-              className={`px-6 py-2 rounded-lg text-xs font-semibold transition ${
-                operacion === 'Alquiler'
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+              className={`veredicto-segment-btn ${operacion === 'Alquiler' ? 'active' : ''}`}
             >
               Alquiler
             </button>
           </div>
         </div>
 
-        {/* Tarjeta de Entrada (Pestañas: URL vs Manual) */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl shadow-xl overflow-hidden mb-10 backdrop-blur-sm">
-          <div className="flex border-b border-slate-800 bg-slate-950/50">
+        {/* Tarjeta Glass de Entrada (Pestañas: URL vs Manual) */}
+        <div className="veredicto-card">
+          <div className="veredicto-tabs">
             <button
               onClick={() => setActiveTab('url')}
-              className={`flex-1 py-3.5 text-xs md:text-sm font-semibold transition flex items-center justify-center gap-2 ${
-                activeTab === 'url'
-                  ? 'text-blue-400 border-b-2 border-blue-500 bg-slate-900/40'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+              className={`veredicto-tab-btn ${activeTab === 'url' ? 'active' : ''}`}
             >
-              <ExternalLink className="w-4 h-4" />
+              <ExternalLink style={{ width: '16px', height: '16px' }} />
               <span>Pegar enlace (Idealista o Fotocasa)</span>
             </button>
             <button
               onClick={() => setActiveTab('manual')}
-              className={`flex-1 py-3.5 text-xs md:text-sm font-semibold transition flex items-center justify-center gap-2 ${
-                activeTab === 'manual'
-                  ? 'text-blue-400 border-b-2 border-blue-500 bg-slate-900/40'
-                  : 'text-slate-400 hover:text-slate-200'
-              }`}
+              className={`veredicto-tab-btn ${activeTab === 'manual' ? 'active' : ''}`}
             >
-              <FileText className="w-4 h-4" />
+              <FileText style={{ width: '16px', height: '16px' }} />
               <span>Entrada manual (3 datos)</span>
             </button>
           </div>
 
-          <div className="p-6 md:p-8">
+          <div className="veredicto-card-body">
             {errorMessage && (
-              <div className="mb-6 p-4 bg-red-950/40 border border-red-800/60 rounded-xl text-red-300 text-xs flex items-center gap-3">
-                <AlertTriangle className="w-4 h-4 flex-shrink-0 text-red-400" />
+              <div className="veredicto-alert-error">
+                <AlertTriangle style={{ width: '16px', height: '16px', flexShrink: 0 }} />
                 <span>{errorMessage}</span>
               </div>
             )}
 
             {infoNotice && (
-              <div className="mb-6 p-4 bg-blue-950/40 border border-blue-800/60 rounded-xl text-blue-300 text-xs flex items-center gap-3">
-                <Sparkles className="w-4 h-4 flex-shrink-0 text-blue-400" />
+              <div className="veredicto-alert-info">
+                <Sparkles style={{ width: '16px', height: '16px', flexShrink: 0 }} />
                 <span>{infoNotice}</span>
               </div>
             )}
 
             {/* PESTAÑA 1: Pegar URL */}
             {activeTab === 'url' ? (
-              <form onSubmit={handleExtractUrl} className="space-y-4">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wider">
+              <form onSubmit={handleExtractUrl}>
+                <div style={{ marginBottom: '16px' }}>
+                  <label className="veredicto-label">
                     Enlace de Idealista, Fotocasa o Habitaclia
                   </label>
-                  <div className="relative">
-                    <input
-                      type="url"
-                      value={urlInput}
-                      onChange={(e) => setUrlInput(e.target.value)}
-                      placeholder="https://www.idealista.com/inmueble/10543210/..."
-                      className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-4 py-3.5 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition"
-                      disabled={isExtracting}
-                    />
-                  </div>
+                  <input
+                    type="url"
+                    value={urlInput}
+                    onChange={(e) => setUrlInput(e.target.value)}
+                    placeholder="https://www.idealista.com/inmueble/10543210/..."
+                    className="veredicto-input"
+                    disabled={isExtracting}
+                  />
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2">
-                  <span className="text-xs text-slate-500">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
+                  <span className="veredicto-helper-text">
                     Si el portal aplica protección antibot, podrás rellenar los datos manualmente sin esperas.
                   </span>
-                  <button
-                    type="submit"
-                    disabled={isExtracting}
-                    className="w-full sm:w-auto px-6 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-blue-950/50"
-                  >
-                    {isExtracting ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                        <span>Analizando enlace...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Search className="w-4 h-4" />
-                        <span>Analizar Inmueble</span>
-                      </>
-                    )}
-                  </button>
+                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <button
+                      type="submit"
+                      disabled={isExtracting}
+                      className="veredicto-btn-primary"
+                    >
+                      {isExtracting ? (
+                        <>
+                          <div style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                          <span>Analizando enlace...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Search style={{ width: '16px', height: '16px' }} />
+                          <span>Analizar Inmueble</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </form>
             ) : (
               /* PESTAÑA 2: Entrada Manual */
-              <form onSubmit={handleManualSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <form onSubmit={handleManualSubmit}>
+                <div className="veredicto-manual-grid">
                   {/* Precio */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wider">
+                    <label className="veredicto-label">
                       Precio ({operacion === 'Venta' ? '€' : '€/mes'})
                     </label>
                     <input
@@ -399,14 +395,14 @@ export default function MadridVeredicto() {
                       value={precioInput}
                       onChange={(e) => setPrecioInput(e.target.value)}
                       placeholder={operacion === 'Venta' ? 'Ej. 380000' : 'Ej. 1400'}
-                      className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition"
+                      className="veredicto-input"
                       required
                     />
                   </div>
 
                   {/* Metros */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wider">
+                    <label className="veredicto-label">
                       Superficie (m²)
                     </label>
                     <input
@@ -415,14 +411,14 @@ export default function MadridVeredicto() {
                       value={metrosInput}
                       onChange={(e) => setMetrosInput(e.target.value)}
                       placeholder="Ej. 75"
-                      className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition"
+                      className="veredicto-input"
                       required
                     />
                   </div>
 
                   {/* Barrio */}
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wider">
+                    <label className="veredicto-label">
                       Barrio o Distrito
                     </label>
                     <input
@@ -431,7 +427,7 @@ export default function MadridVeredicto() {
                       value={barrioInput}
                       onChange={(e) => setBarrioInput(e.target.value)}
                       placeholder="Ej. Goya, Almagro..."
-                      className="w-full bg-slate-950 border border-slate-700/80 rounded-xl px-4 py-3 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 transition"
+                      className="veredicto-input"
                       required
                     />
                     <datalist id="barrios-list">
@@ -442,20 +438,20 @@ export default function MadridVeredicto() {
                   </div>
                 </div>
 
-                <div className="flex justify-end pt-2">
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
                   <button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full sm:w-auto px-8 py-3.5 bg-blue-600 hover:bg-blue-500 disabled:bg-blue-800 text-white font-semibold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-blue-950/50"
+                    className="veredicto-btn-primary"
                   >
                     {isLoading ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        <div style={{ width: '14px', height: '14px', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
                         <span>Calculando veredicto...</span>
                       </>
                     ) : (
                       <>
-                        <ArrowRight className="w-4 h-4" />
+                        <ArrowRight style={{ width: '16px', height: '16px' }} />
                         <span>Obtener Veredicto Inmediato</span>
                       </>
                     )}
@@ -468,70 +464,76 @@ export default function MadridVeredicto() {
 
         {/* 3. Resultados del Veredicto */}
         {resultado && (
-          <div className="space-y-8 animate-fadeIn">
-            {/* Tarjeta de Veredicto Principal */}
-            <div className={`p-6 md:p-8 rounded-2xl border ${badgeConfig[resultado.estado].border} ${badgeConfig[resultado.estado].bg} backdrop-blur-md shadow-2xl`}>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <div className="veredicto-results">
+            {/* Tarjeta de Veredicto Principal con Efecto Glass y Gradiente */}
+            <div className={`veredicto-result-hero ${resultado.estado}`}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', marginBottom: '20px' }}>
                 <div>
-                  <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold tracking-wider mb-2 ${badgeConfig[resultado.estado].text} bg-slate-950/60 border ${badgeConfig[resultado.estado].border}`}>
+                  <span
+                    className="veredicto-state-badge"
+                    style={{
+                      color: resultado.estado === 'CARO' ? '#f87171' : resultado.estado === 'BARATO' ? '#34d399' : '#60a5fa',
+                      borderColor: resultado.estado === 'CARO' ? 'rgba(239, 68, 68, 0.4)' : resultado.estado === 'BARATO' ? 'rgba(16, 185, 129, 0.4)' : 'rgba(59, 130, 246, 0.4)'
+                    }}
+                  >
                     {badgeConfig[resultado.estado].label}
                   </span>
-                  <h2 className="text-2xl md:text-3xl font-extrabold text-white">
+                  <h2 className="veredicto-hero-title">
                     {resultado.estado === 'CARO' && `Sobreprecio del +${resultado.desviacion_pct_barrio.toFixed(1)}%`}
                     {resultado.estado === 'BARATO' && `Descuento del ${resultado.desviacion_pct_barrio.toFixed(1)}%`}
                     {resultado.estado === 'EN_LINEA' && 'Alineado con el mercado oficial'}
                   </h2>
                 </div>
-                <div className="text-right">
-                  <p className="text-xs text-slate-400">Zona analizada</p>
-                  <p className="text-base font-bold text-slate-100">{resultado.barrio_nombre} ({resultado.distrito_nombre})</p>
-                  <p className="text-xs text-slate-500">Datos oficiales: {resultado.fecha_cierre_referencia}</p>
+                <div style={{ textAlign: 'right' }}>
+                  <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', margin: 0 }}>Zona analizada</p>
+                  <p style={{ fontSize: '15px', fontWeight: 700, color: '#ffffff', margin: '2px 0 0' }}>{resultado.barrio_nombre} ({resultado.distrito_nombre})</p>
+                  <p style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', margin: '2px 0 0' }}>Datos de cierre: {resultado.fecha_cierre_referencia}</p>
                 </div>
               </div>
 
               {/* Grid de 4 Indicadores Clave */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-4 border-t border-slate-800/80">
-                <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60">
-                  <p className="text-xs text-slate-400 mb-1">Inmueble analizado</p>
-                  <p className="text-xl font-bold text-white">{resultado.precio_m2_inmueble.toLocaleString()} €/m²</p>
-                  <p className="text-[11px] text-slate-500">Ratio resultante</p>
+              <div className="veredicto-kpi-grid">
+                <div className="veredicto-kpi-tile">
+                  <p className="veredicto-kpi-label">Inmueble analizado</p>
+                  <p className="veredicto-kpi-val">{resultado.precio_m2_inmueble.toLocaleString()} €/m²</p>
+                  <p className="veredicto-kpi-sub" style={{ color: 'rgba(255,255,255,0.4)' }}>Ratio resultante</p>
                 </div>
-                <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60">
-                  <p className="text-xs text-slate-400 mb-1">Media en {resultado.barrio_nombre}</p>
-                  <p className="text-xl font-bold text-slate-200">{resultado.precio_m2_barrio_medio.toLocaleString()} €/m²</p>
-                  <p className={`text-[11px] font-semibold ${resultado.desviacion_pct_barrio > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                <div className="veredicto-kpi-tile">
+                  <p className="veredicto-kpi-label">Media en {resultado.barrio_nombre}</p>
+                  <p className="veredicto-kpi-val">{resultado.precio_m2_barrio_medio.toLocaleString()} €/m²</p>
+                  <p className="veredicto-kpi-sub" style={{ color: resultado.desviacion_pct_barrio > 0 ? '#f87171' : '#34d399' }}>
                     {resultado.desviacion_pct_barrio > 0 ? '+' : ''}{resultado.desviacion_pct_barrio.toFixed(1)}% vs barrio
                   </p>
                 </div>
-                <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60">
-                  <p className="text-xs text-slate-400 mb-1">Media en Madrid</p>
-                  <p className="text-xl font-bold text-slate-200">{resultado.precio_m2_madrid_medio.toLocaleString()} €/m²</p>
-                  <p className={`text-[11px] font-semibold ${resultado.desviacion_pct_madrid > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                <div className="veredicto-kpi-tile">
+                  <p className="veredicto-kpi-label">Media en Madrid</p>
+                  <p className="veredicto-kpi-val">{resultado.precio_m2_madrid_medio.toLocaleString()} €/m²</p>
+                  <p className="veredicto-kpi-sub" style={{ color: resultado.desviacion_pct_madrid > 0 ? '#f87171' : '#34d399' }}>
                     {resultado.desviacion_pct_madrid > 0 ? '+' : ''}{resultado.desviacion_pct_madrid.toFixed(1)}% vs Madrid
                   </p>
                 </div>
-                <div className="bg-slate-950/60 p-4 rounded-xl border border-slate-800/60">
-                  <p className="text-xs text-slate-400 mb-1">Margen de negociación</p>
-                  <p className="text-xl font-bold text-blue-400">
+                <div className="veredicto-kpi-tile">
+                  <p className="veredicto-kpi-label">Margen de negociación</p>
+                  <p className="veredicto-kpi-val" style={{ color: '#60a5fa' }}>
                     {resultado.margen_negociacion_estimado_eur > 0
                       ? `${resultado.margen_negociacion_estimado_eur.toLocaleString()} €`
                       : '0 € (En precio)'}
                   </p>
-                  <p className="text-[11px] text-slate-500">Descuento objetivo sugerido</p>
+                  <p className="veredicto-kpi-sub" style={{ color: 'rgba(255,255,255,0.4)' }}>Descuento objetivo sugerido</p>
                 </div>
               </div>
             </div>
 
             {/* Argumentos Tácticos para la Negociación */}
-            <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 md:p-8">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-blue-400" />
+            <div className="veredicto-args-card">
+              <h3 style={{ fontSize: '17px', fontWeight: 700, color: '#ffffff', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <TrendingUp style={{ width: '18px', height: '18px', color: '#60a5fa' }} />
                 <span>Argumentario para negociar con el vendedor o justificar ante el banco</span>
               </h3>
-              <div className="space-y-3">
+              <div>
                 {resultado.resumen_argumentos.map((arg, idx) => (
-                  <div key={idx} className="p-3.5 bg-slate-950/60 border border-slate-800/80 rounded-xl text-xs md:text-sm text-slate-300 leading-relaxed flex items-start gap-3">
-                    <span className="w-5 h-5 rounded-full bg-blue-950 border border-blue-800/60 text-blue-400 flex items-center justify-center font-bold text-xs flex-shrink-0 mt-0.5">
+                  <div key={idx} className="veredicto-arg-item">
+                    <span className="veredicto-arg-num">
                       {idx + 1}
                     </span>
                     <span>{arg}</span>
@@ -541,32 +543,56 @@ export default function MadridVeredicto() {
             </div>
 
             {/* SECCIÓN DE MONETIZACIÓN: Dossier Oficial (4,90 €) + Suscripción Pro */}
-            <div className="p-6 md:p-8 bg-gradient-to-br from-slate-900 to-blue-950/30 border border-blue-800/40 rounded-2xl shadow-xl flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="space-y-2 max-w-xl">
-                <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider text-blue-300 bg-blue-900/40 border border-blue-700/50 uppercase">
+            <div className="veredicto-dossier-card">
+              <div style={{ maxWidth: '540px' }}>
+                <span style={{
+                  display: 'inline-block',
+                  padding: '3px 10px',
+                  borderRadius: '999px',
+                  fontSize: '10px',
+                  fontWeight: 700,
+                  letterSpacing: '0.05em',
+                  color: '#93c5fd',
+                  background: 'rgba(30, 58, 138, 0.4)',
+                  border: '1px solid rgba(59, 130, 246, 0.4)',
+                  textTransform: 'uppercase',
+                  marginBottom: '10px'
+                }}>
                   Documento Certificado para Negociación
                 </span>
-                <h3 className="text-xl font-extrabold text-white">
+                <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#ffffff', margin: '0 0 8px 0' }}>
                   Descarga el Dossier Oficial de Negociación en PDF
                 </h3>
-                <p className="text-xs text-slate-300 leading-relaxed">
+                <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.5, margin: 0 }}>
                   Informe imprimible de alta fidelidad con el histórico municipal de cierre del Ayuntamiento de Madrid, métricas de comparables en {resultado.barrio_nombre} y los 5 argumentos estructurados para presentar al propietario, agencia o departamento de riesgos de tu banco.
                 </p>
               </div>
 
-              <div className="flex flex-col gap-2 w-full md:w-auto flex-shrink-0">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '260px' }}>
                 <button
                   type="button"
                   onClick={() => handleComprarDossier('dossier')}
-                  className="px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 transition shadow-lg shadow-blue-900/30"
+                  className="veredicto-btn-primary"
+                  style={{ width: '100%', padding: '14px 20px' }}
                 >
-                  <Download className="w-4 h-4" />
+                  <Download style={{ width: '16px', height: '16px' }} />
                   <span>Descargar Dossier Completo (4,90 €)</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => handleComprarDossier('suscripcion')}
-                  className="px-6 py-2.5 bg-slate-950 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-xl text-[11px] font-medium transition text-center"
+                  style={{
+                    width: '100%',
+                    padding: '10px 16px',
+                    background: 'rgba(15, 23, 42, 0.9)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
+                    borderRadius: '12px',
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.2s'
+                  }}
                 >
                   Tarifa Pro Inversores: 19 €/mes (Análisis ilimitados)
                 </button>
@@ -576,11 +602,13 @@ export default function MadridVeredicto() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-800/80 py-8 text-center text-xs text-slate-500 bg-[#0A0F1D]">
-        <div className="max-w-6xl mx-auto px-4">
-          <p className="mb-2">Madrid Urban Intelligence — Plataforma analítica de precios inmobiliarios y series oficiales.</p>
-          <p className="text-[11px] text-slate-600">
+      {/* Footer Apple Dark */}
+      <footer className="veredicto-footer">
+        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
+          <p style={{ margin: '0 0 8px 0', fontWeight: 500, color: 'rgba(255, 255, 255, 0.6)' }}>
+            Madrid Urban Intelligence — Plataforma analítica de precios inmobiliarios y series oficiales.
+          </p>
+          <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255, 255, 255, 0.35)' }}>
             Las estimaciones y veredictos se generan a partir de datos estadísticos públicos del Ayuntamiento de Madrid. No constituyen tasación pericial oficial conforme a la Orden ECO/805/2003.
           </p>
         </div>
