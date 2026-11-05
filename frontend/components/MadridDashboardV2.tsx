@@ -400,6 +400,7 @@ const MadridDashboardV2: React.FC = () => {
   const [compareSlideDir, setCompareSlideDir] = useState<'left' | 'right' | null>(null);
 
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
+  const [isDashboardLoading, setIsDashboardLoading] = useState(true);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showMapHelpModal, setShowMapHelpModal] = useState(false);
   const [showHeatmapHelpModal, setShowHeatmapHelpModal] = useState(false);
@@ -472,6 +473,7 @@ const MadridDashboardV2: React.FC = () => {
   // Fetch KPIs and Series
   useEffect(() => {
     const op = activeProfile.op;
+    setIsDashboardLoading(true);
     
     fetch(`${API_BASE}/kpis?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
       .then(res => res.json())
@@ -485,7 +487,8 @@ const MadridDashboardV2: React.FC = () => {
         is_prediction: data.is_prediction,
         renta_media: data.renta_media,
         transacciones: data.transacciones
-      }));
+      }))
+      .finally(() => setIsDashboardLoading(false));
 
     // Series Madrid (Average)
     fetch(`${API_BASE}/series?year=${selectedYear}&op=${op}`)
@@ -1666,6 +1669,27 @@ const MadridDashboardV2: React.FC = () => {
 
   return (
     <div className="v2-root">
+      {/* LOADING OVERLAY */}
+      {isDashboardLoading && (
+        <div className="v2-loading-overlay">
+          <div className="v2-loading-card">
+            <div className="v2-loading-brain">
+              <div className="v2-loading-pulse" />
+              <div className="v2-loading-pulse v2-loading-pulse--2" />
+              <div className="v2-loading-pulse v2-loading-pulse--3" />
+            </div>
+            <p className="v2-loading-title">Analizando el mercado</p>
+            <p className="v2-loading-sub">
+              Cargando datos de forma inteligente&hellip;<br />
+              esto tomará unas neuronas más.
+            </p>
+            <div className="v2-loading-bar">
+              <div className="v2-loading-bar-fill" />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 1. NAV BAR (APPLE STYLE GLASS) */}
       <nav className="v2-nav">
         <div className="v2-nav-content">

@@ -1344,3 +1344,126 @@
   }
 }
 
+/* ============================================================
+   LOADING OVERLAY
+   ============================================================ */
+
+.v2-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(248, 248, 252, 0.72);
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  animation: v2OverlayFadeIn 0.3s ease;
+}
+
+@keyframes v2OverlayFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes v2OverlayFadeOut {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.v2-loading-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 40px 48px;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.10), 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 0.5px solid rgba(0, 0, 0, 0.07);
+  text-align: center;
+  max-width: 340px;
+  width: 90%;
+  animation: v2CardSlideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes v2CardSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+
+/* Tres puntos animados de "neuronas" */
+.v2-loading-brain {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  height: 36px;
+}
+
+.v2-loading-pulse {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #0071e3;
+  animation: v2PulseAnim 1.4s ease-in-out infinite;
+}
+
+.v2-loading-pulse--2 {
+  background: #34aadc;
+  animation-delay: 0.2s;
+  width: 16px;
+  height: 16px;
+}
+
+.v2-loading-pulse--3 {
+  background: #5ac8fa;
+  animation-delay: 0.4s;
+  width: 10px;
+  height: 10px;
+}
+
+@keyframes v2PulseAnim {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+.v2-loading-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #1d1d1f;
+  letter-spacing: -0.02em;
+  margin: 0 0 8px 0;
+}
+
+.v2-loading-sub {
+  font-size: 13px;
+  font-weight: 400;
+  color: #86868b;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+}
+
+/* Barra de progreso indeterminada */
+.v2-loading-bar {
+  height: 3px;
+  background: #f0f0f4;
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.v2-loading-bar-fill {
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(90deg, #0071e3, #34aadc, #5ac8fa);
+  border-radius: 99px;
+  animation: v2LoadingBarAnim 1.6s ease-in-out infinite;
+}
+
+@keyframes v2LoadingBarAnim {
+  0%   { transform: translateX(-150%); }
+  100% { transform: translateX(350%); }
+}
