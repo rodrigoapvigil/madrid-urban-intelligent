@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -15,55 +15,33 @@ interface MapProps {
   onDistrictClick: (districtName: string | null) => void;
 }
 
+const normalize = (str: string) => {
+  if (!str) return '';
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+};
+
+const getColor = (d: number, profile: string) => {
+  if (profile === 'Alquiler') {
+    return d > 20 ? '#005187' : d > 16 ? '#4d82bc' : d > 13 ? '#84b6f4' : d > 10 ? '#c4dafa' : '#fcffff';
+  }
+  if (profile === 'Compra') {
+    return d > 6000 ? '#003817' : d > 4500 ? '#026842' : d > 3000 ? '#009d71' : d > 1500 ? '#5ccda7' : '#98ffe0';
+  }
+  if (profile === 'Inversión') {
+    return d > 0.065 ? '#7a0177' : d > 0.058 ? '#ae017e' : d > 0.052 ? '#dd3497' : d > 0.046 ? '#f768a1' : d > 0.040 ? '#fbb4b9' : '#fff7f3';
+  }
+  return d > 9000 ? '#8c2d04' : d > 7000 ? '#d94801' : d > 5000 ? '#f16913' : d > 3500 ? '#fd8d3c' : d > 2000 ? '#fec44f' : '#fff5eb';
+};
+
 const MadridMap: React.FC<MapProps> = ({ 
   type, data, selectedYear, selectedMonth, selectedProfile, 
   selectedDistrict, selectedBarrio, onDistrictClick 
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
-  const containerId = `map-${type}-${Math.random().toString(36).substr(2, 9)}`;
+  const containerId = useRef(`map-${type}-${Math.random().toString(36).slice(2, 11)}`).current;
 
-  const normalize = (str: string) => {
-    if (!str) return '';
-    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
-  };
-
-  const getColor = (d: number, profile: string) => {
-    // Alquiler: Blue tones (Price per m2) - Custom palette from image
-    if (profile === 'Alquiler') {
-      return d > 20  ? '#005187' :
-             d > 16  ? '#4d82bc' :
-             d > 13  ? '#84b6f4' :
-             d > 10  ? '#c4dafa' :
-                       '#fcffff';
-    }
-    // Compra: Green tones (Price per m2) - Custom palette from image
-    if (profile === 'Compra') {
-      return d > 6000 ? '#003817' :
-             d > 4500 ? '#026842' :
-             d > 3000 ? '#009d71' :
-             d > 1500 ? '#5ccda7' :
-                        '#98ffe0';
-    }
-    // Inversión: Fucsia/Purple tones (Yield/Rentabilidad)
-    if (profile === 'Inversión') {
-      return d > 0.065 ? '#7a0177' : // High yield (> 6.5%)
-             d > 0.058 ? '#ae017e' : 
-             d > 0.052 ? '#dd3497' :
-             d > 0.046 ? '#f768a1' :
-             d > 0.040 ? '#fbb4b9' : // Low yield (> 4%)
-                         '#fff7f3';
-    }
-    // Venta: Orange tones (Price per m2) - Increased granularity for better contrast
-    return d > 9000 ? '#8c2d04' : // Luxury areas
-           d > 7000 ? '#d94801' :
-           d > 5000 ? '#f16913' :
-           d > 3500 ? '#fd8d3c' :
-           d > 2000 ? '#fec44f' : // Yellowish-orange
-                      '#fff5eb';
-  };
-
-  const style = (feature: any) => {
+  const style = useCallback((feature: any) => {
     const props = feature.properties;
     const name = props.barrio || props.name || props.distrito_nombre || props.nombre || props.distrito;
     
@@ -96,7 +74,7 @@ const MadridMap: React.FC<MapProps> = ({
       color: 'white',
       fillOpacity: isExcluded ? 0.1 : 0.7
     };
-  };
+  }, [data, selectedProfile, selectedDistrict, selectedBarrio, type]);
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -271,7 +249,7 @@ const MadridMap: React.FC<MapProps> = ({
     return () => {
       resizeObserver.disconnect();
     };
-  }, [type, data, selectedProfile, selectedDistrict, selectedBarrio]);
+  }, [type, data, selectedProfile, selectedDistrict, selectedBarrio, containerId, selectedMonth, selectedYear, onDistrictClick, style]);
 
   return <div id={containerId} style={{ width: '100%', height: '100%', borderRadius: '12px', overflow: 'hidden' }} />;
 };

@@ -19,8 +19,7 @@ import {
 } from 'lucide-react';
 import { VeredictoResponse, VeredictoEstado } from '../types/veredicto';
 import './MadridVeredicto.css';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+import { apiFetch, apiUrl } from '../lib/api';
 
 export default function MadridVeredicto() {
   const searchParams = useSearchParams();
@@ -73,7 +72,7 @@ export default function MadridVeredicto() {
     setInfoNotice(null);
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/veredicto/extraer-url`, {
+      const res = await apiFetch('/veredicto/extraer-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: urlInput.trim() })
@@ -134,7 +133,7 @@ export default function MadridVeredicto() {
     setIsLoading(true);
     setErrorMessage(null);
     try {
-      const res = await fetch(`${API_BASE_URL}/api/veredicto/evaluar`, {
+      const res = await apiFetch('/veredicto/evaluar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -169,7 +168,7 @@ export default function MadridVeredicto() {
 
     try {
       const currentUrl = typeof window !== 'undefined' ? window.location.href.split('?')[0] : '';
-      const res = await fetch(`${API_BASE_URL}/api/veredicto/crear-sesion-pago`, {
+      const res = await apiFetch('/veredicto/crear-sesion-pago', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -259,7 +258,7 @@ export default function MadridVeredicto() {
               </div>
             </div>
             <a
-              href={`${API_BASE_URL}/api/veredicto/descargar-dossier?token=${downloadToken}`}
+              href={apiUrl(`/veredicto/descargar-dossier?token=${encodeURIComponent(downloadToken)}`)}
               download
               className="veredicto-btn-primary"
               style={{ padding: '10px 18px', fontSize: '12px', flexShrink: 0 }}
@@ -386,49 +385,57 @@ export default function MadridVeredicto() {
                 <div className="veredicto-manual-grid">
                   {/* Precio */}
                   <div>
-                    <label className="veredicto-label">
+                    <label htmlFor="veredicto-precio" className="veredicto-label">
                       Precio ({operacion === 'Venta' ? '€' : '€/mes'})
                     </label>
                     <input
+                      id="veredicto-precio"
                       type="number"
                       step="any"
                       value={precioInput}
-                      onChange={(e) => setPrecioInput(e.target.value)}
+                      onChange={(e) => { setPrecioInput(e.target.value); setErrorMessage(null); }}
                       placeholder={operacion === 'Venta' ? 'Ej. 380000' : 'Ej. 1400'}
                       className="veredicto-input"
                       required
+                      min="0.01"
+                      aria-invalid={Boolean(errorMessage && (!precioInput || Number(precioInput) <= 0))}
                     />
                   </div>
 
                   {/* Metros */}
                   <div>
-                    <label className="veredicto-label">
+                    <label htmlFor="veredicto-metros" className="veredicto-label">
                       Superficie (m²)
                     </label>
                     <input
+                      id="veredicto-metros"
                       type="number"
                       step="any"
                       value={metrosInput}
-                      onChange={(e) => setMetrosInput(e.target.value)}
+                      onChange={(e) => { setMetrosInput(e.target.value); setErrorMessage(null); }}
                       placeholder="Ej. 75"
                       className="veredicto-input"
                       required
+                      min="0.01"
+                      aria-invalid={Boolean(errorMessage && (!metrosInput || Number(metrosInput) <= 0))}
                     />
                   </div>
 
                   {/* Barrio */}
                   <div>
-                    <label className="veredicto-label">
+                    <label htmlFor="veredicto-barrio" className="veredicto-label">
                       Barrio o Distrito
                     </label>
                     <input
+                      id="veredicto-barrio"
                       type="text"
                       list="barrios-list"
                       value={barrioInput}
-                      onChange={(e) => setBarrioInput(e.target.value)}
+                      onChange={(e) => { setBarrioInput(e.target.value); setErrorMessage(null); }}
                       placeholder="Ej. Goya, Almagro..."
                       className="veredicto-input"
                       required
+                      aria-invalid={Boolean(errorMessage && !barrioInput.trim())}
                     />
                     <datalist id="barrios-list">
                       {barriosSugeridos.map((b) => (

@@ -42,14 +42,34 @@ app.add_middleware(
 def read_root():
     return {"message": "Madrid Urban Intelligence API is running"}
 
+@app.get("/api/health")
+def health_check():
+    """Endpoint ligero para monitorizar el backend y el acceso al almacén de datos."""
+    return {
+        "status": "ok",
+        "database_available": os.path.exists(data.DB_PATH),
+        "predictions_available": os.path.exists(data.PREDICTIONS_CSV_PATH),
+    }
+
 @app.get("/api/filters")
 def get_filters():
     years = data.get_years()
     districts = data.get_districts()
+    latest_year = max(years) if years else 2024
+    months_by_year = {
+        str(year): data.get_months_for_year(year)
+        for year in years
+    }
+    latest_months = months_by_year.get(str(latest_year), list(data.MONTH_NAMES.values()))
     return {
         "years": years,
-        "months": list(data.MONTH_NAMES.values()),
-        "districts": districts
+        "months": latest_months,
+        "months_by_year": months_by_year,
+        "districts": districts,
+        "latest_period": {
+            "year": latest_year,
+            "month": latest_months[-1] if latest_months else "Diciembre",
+        },
     }
 
 @app.get("/api/neighborhoods")

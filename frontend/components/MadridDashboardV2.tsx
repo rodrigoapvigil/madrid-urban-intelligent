@@ -1,11 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import './MadridDashboardV2.css';
+import { API_BASE, apiFetch } from '../lib/api';
 
 ChartJS.register(ChartDataLabels);
 
@@ -17,8 +20,6 @@ const PROFILES = [
   { id: 'venta', label: 'Venta', color: '#ff9f0a', op: 'venta' },
   { id: 'inversion', label: 'Inversión', color: '#af52de', op: 'inversion' },
 ];
-
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
 
 const getServiceIcon = (key: string) => {
   switch (key) {
@@ -374,8 +375,8 @@ const MadridDashboardV2: React.FC = () => {
   
   // State: Custom Dropdowns
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [selectedYear, setSelectedYear] = useState('2024');
-  const [selectedMonth, setSelectedMonth] = useState('Abril');
+  const [selectedYear, setSelectedYear] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('Todos');
   const [selectedBarrio, setSelectedBarrio] = useState('Todos');
   const [selectedZoneA, setSelectedZoneA] = useState('Salamanca');
@@ -383,6 +384,7 @@ const MadridDashboardV2: React.FC = () => {
 
   // State: Dynamic Options
   const [availableYears, setAvailableYears] = useState<string[]>(['2023', '2024', '2025']);
+  const [monthsByYear, setMonthsByYear] = useState<Record<string, string[]>>({});
   const [availableDistricts, setAvailableDistricts] = useState<string[]>(['Todos', 'Salamanca', 'Centro', 'Chamberí', 'Retiro']);
   const [availableBarrios, setAvailableBarrios] = useState<string[]>(['Todos']);
 
@@ -401,6 +403,10 @@ const MadridDashboardV2: React.FC = () => {
 
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
   const [isDashboardLoading, setIsDashboardLoading] = useState(true);
+  const [dashboardLoadError, setDashboardLoadError] = useState<string | null>(null);
+  const [filtersReady, setFiltersReady] = useState(false);
+  const [filtersAttempt, setFiltersAttempt] = useState(0);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showMapHelpModal, setShowMapHelpModal] = useState(false);
   const [showHeatmapHelpModal, setShowHeatmapHelpModal] = useState(false);
@@ -438,6 +444,7 @@ const MadridDashboardV2: React.FC = () => {
   const [containerHeight, setContainerHeight] = useState('auto');
   const activePanelRef = useRef<HTMLDivElement>(null);
   const chartsRef = useRef<any[]>([]);
+  const latestDashboardRequest = useRef(0);
 
   const activeProfile = PROFILES[profileIdx];
 
@@ -453,31 +460,52 @@ const MadridDashboardV2: React.FC = () => {
 
   // Fetch initial filters
   useEffect(() => {
-    fetch(`${API_BASE}/filters`)
+    apiFetch('/filters')
       .then(res => res.json())
       .then(data => {
-        if (data.years) setAvailableYears(data.years.map(String));
+        const years = (data.years || []).map(String);
+        if (years.length) setAvailableYears(years);
+        if (data.months_by_year) setMonthsByYear(data.months_by_year);
         if (data.districts) setAvailableDistricts(['Todos', ...data.districts]);
+        const latestPeriod = data.latest_period || {};
+        const defaultYear = String(latestPeriod.year || years[years.length - 1] || '2024');
+        const months = data.months_by_year?.[defaultYear] || data.months || [];
+        setSelectedYear(defaultYear);
+        setSelectedMonth(latestPeriod.month || months[months.length - 1] || 'Diciembre');
+        setFiltersReady(true);
       })
-      .catch(err => console.error("Error loading filters:", err));
-  }, []);
+      .catch(err => {
+        console.error("Error loading filters:", err);
+        setDashboardLoadError('No se han podido cargar los filtros. Comprueba la conexión con la API.');
+        setIsDashboardLoading(false);
+      });
+  }, [filtersAttempt]);
 
   // Fetch barrios when district changes
   useEffect(() => {
+    if (!filtersReady) return;
     fetch(`${API_BASE}/neighborhoods?district=${encodeURIComponent(selectedDistrict)}`)
       .then(res => res.json())
-      .then(data => setAvailableBarrios(data))
+      .then(data => {
+        setAvailableBarrios(data);
+        setSelectedBarrio('Todos');
+      })
       .catch(err => console.error("Error loading neighborhoods:", err));
-  }, [selectedDistrict]);
+  }, [selectedDistrict, filtersReady]);
 
   // Fetch KPIs and Series
   useEffect(() => {
+    if (!filtersReady || !selectedYear || !selectedMonth) return;
     const op = activeProfile.op;
+    const requestId = ++latestDashboardRequest.current;
     setIsDashboardLoading(true);
+    setDashboardLoadError(null);
     
-    fetch(`${API_BASE}/kpis?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
+    apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
       .then(res => res.json())
-      .then(data => setKpiData({
+      .then(data => {
+        if (requestId !== latestDashboardRequest.current) return;
+        setKpiData({
         p_m2: data.precio_m2,
         p_vivienda: data.precio_vivienda,
         v_mes: data.variacion_mensual,
@@ -487,8 +515,16 @@ const MadridDashboardV2: React.FC = () => {
         is_prediction: data.is_prediction,
         renta_media: data.renta_media,
         transacciones: data.transacciones
-      }))
-      .finally(() => setIsDashboardLoading(false));
+        });
+      })
+      .catch(error => {
+        if (requestId === latestDashboardRequest.current) {
+          setDashboardLoadError(error instanceof Error ? error.message : 'No se han podido cargar los datos del mercado.');
+        }
+      })
+      .finally(() => {
+        if (requestId === latestDashboardRequest.current) setIsDashboardLoading(false);
+      });
 
     // Series Madrid (Average)
     fetch(`${API_BASE}/series?year=${selectedYear}&op=${op}`)
@@ -584,7 +620,7 @@ const MadridDashboardV2: React.FC = () => {
       .then(data => setConnectivityData(data))
       .catch(err => { console.error("Error loading connectivity:", err); setConnectivityData(null); });
 
-  }, [selectedYear, selectedMonth, profileIdx, selectedDistrict, selectedBarrio, selectedZoneA, selectedZoneB, compareLevel, rankingLevel]);
+  }, [selectedYear, selectedMonth, profileIdx, selectedDistrict, selectedBarrio, selectedZoneA, selectedZoneB, compareLevel, rankingLevel, filtersReady, loadAttempt, activeProfile.id, activeProfile.op]);
 
   // Fetch liquidity data (for Inversión profile only)
   useEffect(() => {
@@ -702,13 +738,42 @@ const MadridDashboardV2: React.FC = () => {
   // Cerrar dropdowns al hacer clic fuera
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (!(e.target as HTMLElement).closest('.v2-dropdown-container')) {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.v2-dropdown-container, .v2-dropdown-menu, .v2-dropdown-backdrop')) {
         setActiveDropdown(null);
       }
     };
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setActiveDropdown(null);
+    };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, []);
+
+  // En móvil, el selector es una capa modal independiente: bloquea el fondo y
+  // permite desplazar solo la lista, sin mover la página que queda detrás.
+  useEffect(() => {
+    const isMobileFilter = typeof window !== 'undefined'
+      && window.matchMedia('(max-width: 768px)').matches
+      && ['year', 'month', 'dist', 'barrio'].includes(activeDropdown || '');
+    if (!isMobileFilter) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const preventBackgroundTouch = (event: TouchEvent) => {
+      if (!(event.target as HTMLElement).closest('.v2-dropdown-menu')) event.preventDefault();
+    };
+    document.addEventListener('touchmove', preventBackgroundTouch, { passive: false });
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('touchmove', preventBackgroundTouch);
+    };
+  }, [activeDropdown]);
 
   // Inicialización de Gráficas (Chart.js)
   useEffect(() => {
@@ -1640,7 +1705,7 @@ const MadridDashboardV2: React.FC = () => {
 
     const timer = setTimeout(initCharts, 150);
     return () => clearTimeout(timer);
-  }, [profileIdx, isTransitioning, compareLevel, activeProfile.color, seriesA, seriesB, seriesMadrid, activeProfile.id, scatterData, interestImpactData, riskReturnData, liquidityLevel, selectedDistrict, selectedBarrio]);
+  }, [profileIdx, isTransitioning, compareLevel, activeProfile.color, seriesA, seriesB, seriesMadrid, activeProfile.id, scatterData, interestImpactData, riskReturnData, liquidityLevel, selectedDistrict, selectedBarrio, selectedYear, selectedZoneA, selectedZoneB]);
 
   const handleProfileChange = (newIdx: number) => {
     if (newIdx === profileIdx || isTransitioning) return;
@@ -1690,6 +1755,16 @@ const MadridDashboardV2: React.FC = () => {
         </div>
       )}
 
+      {dashboardLoadError && !isDashboardLoading && (
+        <div className="v2-api-error" role="alert">
+          <div>
+            <strong>No hemos podido actualizar el mercado.</strong>
+            <span>{dashboardLoadError}</span>
+          </div>
+          <button type="button" onClick={() => filtersReady ? setLoadAttempt(value => value + 1) : setFiltersAttempt(value => value + 1)}>Reintentar</button>
+        </div>
+      )}
+
       {/* 1. NAV BAR (APPLE STYLE GLASS) */}
       <nav className="v2-nav">
         <div className="v2-nav-content">
@@ -1710,68 +1785,77 @@ const MadridDashboardV2: React.FC = () => {
         </div>
       </nav>
 
+      {activeDropdown && ['year', 'month', 'dist', 'barrio'].includes(activeDropdown) && (
+        createPortal(<button
+          type="button"
+          className="v2-dropdown-backdrop"
+          aria-label="Cerrar opciones"
+          onClick={() => setActiveDropdown(null)}
+        />, document.body)
+      )}
+
       {/* 2. FILTROS REFINADOS (CUSTOM APPLE DROPDOWNS) */}
-      <div className="v2-filters">
+      <div className={`v2-filters ${['year', 'month', 'dist', 'barrio'].includes(activeDropdown || '') ? 'v2-filters-open' : ''}`}>
         <div className="v2-filter-group">
           
           {/* AÑO */}
           <div className="v2-dropdown-container">
             <span className="v2-filter-label">Año</span>
-            <div className={`v2-custom-select ${activeDropdown === 'year' ? 'open' : ''}`} onClick={() => setActiveDropdown(activeDropdown === 'year' ? null : 'year')}>
+            <button type="button" className={`v2-custom-select ${activeDropdown === 'year' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'year'} onClick={() => setActiveDropdown(activeDropdown === 'year' ? null : 'year')}>
               {selectedYear}
-              {activeDropdown === 'year' && (
-                <div className="v2-dropdown-menu">
+            </button>
+            {activeDropdown === 'year' && (
+                createPortal(<div className="v2-dropdown-menu" role="listbox" aria-label="Año">
                   {availableYears.map(y => (
-                    <div key={y} className="v2-dropdown-item" onClick={(e) => { e.stopPropagation(); setSelectedYear(y); setActiveDropdown(null); }}>{y}</div>
+                    <button type="button" key={y} className="v2-dropdown-item" role="option" aria-selected={selectedYear === y} onClick={(e) => { e.stopPropagation(); setSelectedYear(y); const months = monthsByYear[y] || []; setSelectedMonth(months[months.length - 1] || 'Diciembre'); setActiveDropdown(null); }}>{y}</button>
                   ))}
-                </div>
+                </div>, document.body)
               )}
-            </div>
           </div>
 
           {/* MES */}
           <div className="v2-dropdown-container">
             <span className="v2-filter-label">Mes</span>
-            <div className={`v2-custom-select ${activeDropdown === 'month' ? 'open' : ''}`} onClick={() => setActiveDropdown(activeDropdown === 'month' ? null : 'month')}>
+            <button type="button" className={`v2-custom-select ${activeDropdown === 'month' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'month'} onClick={() => setActiveDropdown(activeDropdown === 'month' ? null : 'month')}>
               {selectedMonth}
-              {activeDropdown === 'month' && (
-                <div className="v2-dropdown-menu">
-                  {['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'].map(m => (
-                    <div key={m} className="v2-dropdown-item" onClick={(e) => { e.stopPropagation(); setSelectedMonth(m); setActiveDropdown(null); }}>{m}</div>
+            </button>
+            {activeDropdown === 'month' && (
+                createPortal(<div className="v2-dropdown-menu" role="listbox" aria-label="Mes">
+                  {(monthsByYear[selectedYear] || ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']).map(m => (
+                    <button type="button" key={m} className="v2-dropdown-item" role="option" aria-selected={selectedMonth === m} onClick={(e) => { e.stopPropagation(); setSelectedMonth(m); setActiveDropdown(null); }}>{m}</button>
                   ))}
-                </div>
+                </div>, document.body)
               )}
-            </div>
           </div>
 
           {/* DISTRITO */}
           <div className="v2-dropdown-container">
             <span className="v2-filter-label">Distrito</span>
-            <div className={`v2-custom-select ${activeDropdown === 'dist' ? 'open' : ''}`} onClick={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')}>
+            <button type="button" className={`v2-custom-select ${activeDropdown === 'dist' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'dist'} onClick={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')}>
               {selectedDistrict}
-              {activeDropdown === 'dist' && (
-                <div className="v2-dropdown-menu">
+            </button>
+            {activeDropdown === 'dist' && (
+                createPortal(<div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
                   {availableDistricts.map(d => (
-                    <div key={d} className="v2-dropdown-item" onClick={(e) => { e.stopPropagation(); setSelectedDistrict(d); setActiveDropdown(null); }}>{d}</div>
+                    <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={selectedDistrict === d} onClick={(e) => { e.stopPropagation(); setSelectedDistrict(d); setActiveDropdown(null); }}>{d}</button>
                   ))}
-                </div>
+                </div>, document.body)
               )}
-            </div>
           </div>
 
           {/* BARRIO */}
           <div className="v2-dropdown-container">
             <span className="v2-filter-label">Barrio</span>
-            <div className={`v2-custom-select ${activeDropdown === 'barrio' ? 'open' : ''}`} onClick={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')}>
+            <button type="button" className={`v2-custom-select ${activeDropdown === 'barrio' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'barrio'} onClick={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')}>
               {selectedBarrio}
-              {activeDropdown === 'barrio' && (
-                <div className="v2-dropdown-menu">
+            </button>
+            {activeDropdown === 'barrio' && (
+                createPortal(<div className="v2-dropdown-menu" role="listbox" aria-label="Barrio">
                   {availableBarrios.map(b => (
-                    <div key={b} className="v2-dropdown-item" onClick={(e) => { e.stopPropagation(); setSelectedBarrio(b); setActiveDropdown(null); }}>{b}</div>
+                    <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={selectedBarrio === b} onClick={(e) => { e.stopPropagation(); setSelectedBarrio(b); setActiveDropdown(null); }}>{b}</button>
                   ))}
-                </div>
+                </div>, document.body)
               )}
-            </div>
           </div>
 
           {/* BOTÓN GUÍA DE PRECIOS PARA EL CIUDADANO */}
@@ -4159,7 +4243,7 @@ const MadridDashboardV2: React.FC = () => {
       )}
 
       <button className="v2-btn-chat" onClick={() => router.push('/madrid/chat')}>
-        <img src="/AMBI.png" alt="AMBI" style={{ width: '140px', height: '140px', objectFit: 'contain' }} />
+        <Image src="/AMBI.png" alt="AMBI" width={140} height={140} style={{ objectFit: 'contain' }} />
       </button>
 
       {/* FOOTER */}

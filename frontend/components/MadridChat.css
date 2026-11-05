@@ -276,6 +276,37 @@
   border-radius: 4px;
 }
 
+.ambi-data-placeholder {
+  display: flex;
+  min-height: 120px;
+  height: 100%;
+  padding: 20px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+  color: #6e6e73;
+  background: linear-gradient(110deg, #f4f4f6 8%, #fbfbfc 18%, #f4f4f6 33%);
+  background-size: 200% 100%;
+  border-radius: 12px;
+  animation: ambiSkeleton 1.4s linear infinite;
+}
+
+.ambi-data-placeholder button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  background: #0071e3;
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+@keyframes ambiSkeleton {
+  to { background-position: -200% 0; }
+}
+
 /* ============================================================
    RESPONSIVE — Chat layout
    ============================================================ */

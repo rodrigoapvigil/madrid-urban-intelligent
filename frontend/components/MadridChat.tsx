@@ -15,7 +15,9 @@ import {
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import ReactMarkdown from 'react-markdown';
+import Image from 'next/image';
 import './MadridChat.css';
+import { apiFetch } from '../lib/api';
 
 ChartJS.register(
   CategoryScale,
@@ -34,8 +36,6 @@ type Message = {
   content: string;
 };
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8001/api';
-
 const MadridChat: React.FC = () => {
   const router = useRouter();
   const [message, setMessage] = useState('');
@@ -50,6 +50,8 @@ const MadridChat: React.FC = () => {
   const [kpiData, setKpiData] = useState<any>(null);
   const [seriesData, setSeriesData] = useState<any[]>([]);
   const [mapData, setMapData] = useState<any>({ districts: [], neighborhoods: [] });
+  const [dashboardDataStatus, setDashboardDataStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [dataRetry, setDataRetry] = useState(0);
 
   // Generar un ID de sesión único al montar el componente
   useEffect(() => {
@@ -66,26 +68,29 @@ const MadridChat: React.FC = () => {
   // Fetch data when context changes
   useEffect(() => {
     const fetchDashboardData = async () => {
+      setDashboardDataStatus('loading');
       try {
         const barrioParam = chatContext.barrio && chatContext.barrio !== 'Todos' ? `&barrio=${encodeURIComponent(chatContext.barrio)}` : '';
         const zoneType = chatContext.barrio && chatContext.barrio !== 'Todos' ? 'barrio' : 'distrito';
         const zoneName = chatContext.barrio && chatContext.barrio !== 'Todos' ? chatContext.barrio : chatContext.district;
 
         const [kpiRes, seriesRes, mapRes] = await Promise.all([
-          fetch(`${API_BASE}/kpis?year=${chatContext.year}&op=${chatContext.op}&district=${encodeURIComponent(chatContext.district)}${barrioParam}`),
-          fetch(`${API_BASE}/series?year=${chatContext.year}&op=${chatContext.op}&zona=${encodeURIComponent(zoneName)}&tipo_zona=${zoneType}`),
-          fetch(`${API_BASE}/map?year=${chatContext.year}&interest=${chatContext.op === 'alquiler' ? 'Alquiler' : chatContext.op === 'inversion' ? 'Inversión' : 'Venta'}`)
+          apiFetch(`/kpis?year=${chatContext.year}&op=${chatContext.op}&district=${encodeURIComponent(chatContext.district)}${barrioParam}`),
+          apiFetch(`/series?year=${chatContext.year}&op=${chatContext.op}&zona=${encodeURIComponent(zoneName)}&tipo_zona=${zoneType}`),
+          apiFetch(`/map?year=${chatContext.year}&interest=${chatContext.op === 'alquiler' ? 'Alquiler' : chatContext.op === 'inversion' ? 'Inversión' : 'Venta'}`)
         ]);
 
         if (kpiRes.ok) setKpiData(await kpiRes.json());
         if (seriesRes.ok) setSeriesData(await seriesRes.json());
         if (mapRes.ok) setMapData(await mapRes.json());
+        setDashboardDataStatus('ready');
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
+        setDashboardDataStatus('error');
       }
     };
     fetchDashboardData();
-  }, [chatContext]);
+  }, [chatContext, dataRetry]);
 
   const handleSend = async () => {
     if (!message.trim() || isLoading) return;
@@ -99,7 +104,7 @@ const MadridChat: React.FC = () => {
     setChatHistory(newHistory);
 
     try {
-      const res = await fetch(`${API_BASE}/chat`, {
+      const res = await apiFetch('/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: userMessage, session_id: sessionId })
@@ -177,7 +182,7 @@ const MadridChat: React.FC = () => {
       {/* 1. SECCIÓN IZQUIERDA (NAV BAR MINIMALISTA) */}
       <nav className="ambi-nav-sidebar">
         <div className="nav-brand-small" onClick={() => router.push('/')} style={{ cursor: 'pointer', marginBottom: '20px', textAlign: 'center' }}>
-          <img src="/AMBI.png" alt="AMBI" style={{ width: '40px', height: '40px', objectFit: 'contain', opacity: 0.9 }} />
+          <Image src="/AMBI.png" alt="AMBI" width={40} height={40} style={{ objectFit: 'contain', opacity: 0.9 }} />
         </div>
         <button className="nav-icon-btn" onClick={() => router.push('/madrid')}>
           <span className="icon">🏠</span>
@@ -186,7 +191,7 @@ const MadridChat: React.FC = () => {
         <button className="nav-icon-btn active">
           <span className="icon">💬</span>
         </button>
-        <button className="nav-icon-btn" onClick={() => router.push('/dashboard')}>
+        <button className="nav-icon-btn" aria-label="Abrir dashboard" onClick={() => router.push('/madrid')}>
           <span className="icon">📊</span>
         </button>
       </nav>
@@ -199,7 +204,7 @@ const MadridChat: React.FC = () => {
           <div className="chat-container">
             {!hasStarted && (
               <div className="chat-welcome-hero" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '20px 10px' }}>
-                <img src="/AMBI.png" alt="AMBI" style={{ width: '180px', height: '180px', objectFit: 'contain', marginBottom: '16px' }} />
+                <Image src="/AMBI.png" alt="AMBI" width={180} height={180} priority style={{ objectFit: 'contain', marginBottom: '16px' }} />
                 <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#1d1d1f', marginBottom: '8px' }}>Bienvenido a AMBI</h1>
                 <p style={{ color: '#86868b', fontSize: '15px', maxWidth: '460px', marginBottom: '18px', lineHeight: '1.4' }}>
                   El asistente conversacional de inteligencia inmobiliaria de Madrid.
@@ -303,11 +308,13 @@ const MadridChat: React.FC = () => {
               Evolución {chatContext.op.charAt(0).toUpperCase() + chatContext.op.slice(1)} ({chatContext.year})
             </h3>
             <div style={{ height: '220px', width: '100%' }}>
-              {seriesData.length > 0 ? (
+              {dashboardDataStatus === 'loading' ? (
+                <div className="ambi-data-placeholder" aria-live="polite">Cargando evolución del mercado…</div>
+              ) : seriesData.length > 0 ? (
                 <Line data={chartData} options={chartOptions} />
               ) : (
-                <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#86868b' }}>
-                  No hay datos de tendencia para este contexto.
+                <div className="ambi-data-placeholder">
+                  {dashboardDataStatus === 'error' ? 'No se han podido cargar las tendencias.' : 'No hay datos de tendencia para este contexto.'}
                 </div>
               )}
             </div>
@@ -333,8 +340,9 @@ const MadridChat: React.FC = () => {
                     onDistrictClick={() => {}}
                   />
                 ) : (
-                  <div style={{ display: 'flex', height: '100%', alignItems: 'center', justifyContent: 'center', color: '#86868b', backgroundColor: '#f0f0f0' }}>
-                    Cargando mapa...
+                  <div className="ambi-data-placeholder" role={dashboardDataStatus === 'error' ? 'alert' : undefined}>
+                    {dashboardDataStatus === 'loading' ? 'Cargando mapa…' : 'No se ha podido cargar el mapa.'}
+                    {dashboardDataStatus === 'error' && <button type="button" onClick={() => setDataRetry(value => value + 1)}>Reintentar</button>}
                   </div>
                 );
               })()}
