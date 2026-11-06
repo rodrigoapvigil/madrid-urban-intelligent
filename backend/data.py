@@ -153,7 +153,10 @@ def get_months_for_year(anio: int) -> list:
     try:
         conn = _conn()
         df = pd.read_sql(
-            f"SELECT DISTINCT mes FROM Dim_Tiempo WHERE anio = {anio} ORDER BY mes", conn)
+            "SELECT DISTINCT mes FROM Dim_Tiempo WHERE anio = ? ORDER BY mes",
+            conn,
+            params=[int(anio)]
+        )
         conn.close()
         return [MONTH_NAMES[m] for m in df['mes'].tolist()]
     except:
@@ -1369,15 +1372,18 @@ def get_connectivity_analysis(distrito: str = "Todos", barrio: str = "Todos"):
     conn = _conn()
     try:
         conditions = ["id_barrio != -1", "nombre NOT LIKE '%[DATO A NIVEL DISTRITO]%'"]
+        params = []
         
         if distrito != "Todos" and distrito != "":
-            df_dist = pd.read_sql(f"SELECT id_distrito FROM Dim_Distrito WHERE nombre = '{distrito}'", conn)
+            df_dist = pd.read_sql("SELECT id_distrito FROM Dim_Distrito WHERE nombre = ?", conn, params=[str(distrito)])
             if not df_dist.empty:
                 dist_id = int(df_dist.iloc[0]['id_distrito'])
-                conditions.append(f"id_distrito = {dist_id}")
+                conditions.append("id_distrito = ?")
+                params.append(dist_id)
         
         if barrio != "Todos" and barrio != "":
-            conditions.append(f"nombre = '{barrio}'")
+            conditions.append("nombre = ?")
+            params.append(str(barrio))
             
         where_clause = " AND ".join(conditions)
         q = f"""
@@ -1390,7 +1396,7 @@ def get_connectivity_analysis(distrito: str = "Todos", barrio: str = "Todos"):
             FROM Dim_Barrio
             WHERE {where_clause}
         """
-        df = pd.read_sql(q, conn)
+        df = pd.read_sql(q, conn, params=params)
         conn.close()
         
         if df.empty or pd.isna(df.iloc[0]['dist_transport']):
@@ -1730,16 +1736,16 @@ def get_zone_liquidity_data(zone_name: str, level: str = "distrito") -> dict:
         df_filtered = df_trans[df_trans['anio'] == year_to_query]
         
         if level == "barrio":
-            q = f"SELECT id_barrio, nombre FROM Dim_Barrio WHERE nombre = '{zone_name}'"
-            df_zone = pd.read_sql(q, conn)
+            q = "SELECT id_barrio, nombre FROM Dim_Barrio WHERE nombre = ?"
+            df_zone = pd.read_sql(q, conn, params=[str(zone_name)])
             if df_zone.empty:
                 conn.close()
                 return {"transactions": 0, "speed": "Moderado", "color": "orange"}
             id_val = int(df_zone.iloc[0]['id_barrio'])
             tx = int(df_filtered[df_filtered['id_barrio'] == id_val]['num_transacciones'].sum())
         else:
-            q = f"SELECT id_distrito, nombre FROM Dim_Distrito WHERE nombre = '{zone_name}'"
-            df_zone = pd.read_sql(q, conn)
+            q = "SELECT id_distrito, nombre FROM Dim_Distrito WHERE nombre = ?"
+            df_zone = pd.read_sql(q, conn, params=[str(zone_name)])
             if df_zone.empty:
                 conn.close()
                 return {"transactions": 0, "speed": "Moderado", "color": "orange"}

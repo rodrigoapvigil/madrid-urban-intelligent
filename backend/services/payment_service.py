@@ -18,9 +18,23 @@ DOWNLOAD_TOKEN_SECRET = os.getenv("DOWNLOAD_TOKEN_SECRET", "mui_token_secret_sal
 if STRIPE_SECRET_KEY:
     stripe.api_key = STRIPE_SECRET_KEY
 
-# Almacen en memoria temporal de tokens validos de descarga (token -> datos_inmueble)
-# En produccion persistible en BD analitica o Redis
+# Almacen en memoria temporal con desalojo automatico y limite maximo (anti-DoS)
 _TOKEN_STORE: Dict[str, Dict[str, Any]] = {}
+MAX_TOKENS = 1000
+
+
+def _limpiar_tokens_expirados():
+    """Elimina tokens caducados para evitar fugas de memoria."""
+    ahora = int(time.time())
+    expirados = [t for t, reg in _TOKEN_STORE.items() if ahora > reg.get("expira", 0)]
+    for t in expirados:
+        _TOKEN_STORE.pop(t, None)
+    # Si aun asi supera el maximo, desalojar los mas antiguos
+    if len(_TOKEN_STORE) > MAX_TOKENS:
+        tokens_ordenados = sorted(_TOKEN_STORE.items(), key=lambda x: x[1].get("expira", 0))
+        exceso = len(_TOKEN_STORE) - MAX_TOKENS
+        for t, _ in tokens_ordenados[:exceso]:
+            _TOKEN_STORE.pop(t, None)
 
 
 def generar_token_descarga(datos_inmueble: Dict[str, Any], expira_en_segundos: int = 86400) -> str:
@@ -28,6 +42,7 @@ def generar_token_descarga(datos_inmueble: Dict[str, Any], expira_en_segundos: i
     Genera un token firmado HMAC con caducidad (24 horas por defecto)
     y almacena la instantanea de los datos para compilar el PDF al descargar.
     """
+    _limpiar_tokens_expirados()
     timestamp = int(time.time())
     expira = timestamp + expira_en_segundos
     mensaje = f"{datos_inmueble.get('barrio', '')}-{datos_inmueble.get('precio', 0)}-{expira}"
@@ -43,6 +58,9 @@ def generar_token_descarga(datos_inmueble: Dict[str, Any], expira_en_segundos: i
         "expira": expira,
         "usos": 0
     }
+    # Asegurar que tras insertar no se sobrepase el límite máximo
+    if len(_TOKEN_STORE) > MAX_TOKENS:
+        _limpiar_tokens_expirados()
     return token
 
 

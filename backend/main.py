@@ -34,9 +34,20 @@ app.add_middleware(
     allow_origins=allowed_origins,
     allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "Accept", "X-Requested-With"],
 )
+
+# Middleware de Cabeceras de Seguridad HTTP (Hardening 100/100)
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    return response
 
 @app.get("/")
 def read_root():
@@ -214,9 +225,18 @@ class ChatResponse(BaseModel):
     session_id: str
     context: Optional[Dict[str, Any]] = None
 
-# Diccionarios para almacenar la memoria y contexto por sesión
-active_memories = {}
-active_contexts = {}
+# Diccionarios para almacenar la memoria y contexto por sesión con límite máximo (anti-DoS)
+active_memories: Dict[str, Any] = {}
+active_contexts: Dict[str, Any] = {}
+MAX_CHAT_SESSIONS = 500
+
+def _guard_chat_sessions(new_session_id: str):
+    """Garantiza que el número de sesiones en memoria no exceda el límite permitido."""
+    if new_session_id not in active_memories and len(active_memories) >= MAX_CHAT_SESSIONS:
+        # Desalojar la sesión más antigua
+        oldest_key = next(iter(active_memories))
+        active_memories.pop(oldest_key, None)
+        active_contexts.pop(oldest_key, None)
 
 def extract_context(message: str, current_context: dict) -> dict:
     new_context = current_context.copy()
@@ -283,6 +303,7 @@ def chat_endpoint(request: ChatRequest):
 
     # Obtener o crear la memoria para esta sesión
     if session_id not in active_memories:
+        _guard_chat_sessions(session_id)
         active_memories[session_id] = ConversationBufferWindowMemory(k=5, return_messages=False)
         active_contexts[session_id] = {"year": 2026, "month": "Marzo", "op": "alquiler", "district": "Todos", "barrio": "Todos"}
         

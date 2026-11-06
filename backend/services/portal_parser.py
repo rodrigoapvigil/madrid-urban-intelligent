@@ -5,6 +5,9 @@ con soporte para modo híbrido y fallback manual ante bloqueos antibot.
 """
 import re
 import json
+import ipaddress
+import socket
+from urllib.parse import urlparse
 from typing import Optional, Dict, Any, Tuple
 import httpx
 from bs4 import BeautifulSoup
@@ -166,12 +169,72 @@ def parse_html_content(html: str, url: str = "") -> PortalParsedData:
     )
 
 
+ALLOWED_PORTAL_DOMAINS = {
+    "idealista.com",
+    "fotocasa.es",
+    "habitaclia.com",
+    "pisos.com",
+    "yaencontre.com"
+}
+
+
+def es_url_segura(url: str) -> Tuple[bool, Optional[str]]:
+    """
+    Valida de forma estricta contra ataques SSRF:
+    1. Esquema exclusivamente https:// (o http:// en dominios autorizados)
+    2. Dominio perteneciente a la lista blanca de portales inmobiliarios
+    3. Ninguna resolución hacia localhost o rangos IP privados/reservados
+    """
+    if not url:
+        return False, "Dirección URL vacía."
+    
+    try:
+        parsed = urlparse(url)
+    except Exception:
+        return False, "Formato de URL no válido."
+
+    if parsed.scheme not in ("http", "https"):
+        return False, "Protocolo no permitido. Solo se admite HTTP/HTTPS."
+
+    hostname = (parsed.hostname or "").lower()
+    if not hostname:
+        return False, "Host no identificado en el enlace."
+
+    # Validar lista blanca de dominios (coincidencia exacta o subdominio)
+    dominio_permitido = any(
+        hostname == allowed or hostname.endswith("." + allowed)
+        for allowed in ALLOWED_PORTAL_DOMAINS
+    )
+    if not dominio_permitido:
+        return False, f"Solo se admiten enlaces oficiales de Idealista, Fotocasa, Habitaclia o Pisos.com."
+
+    # Comprobar resolución DNS para evitar bypass con DNS Rebinding o IPs privadas
+    try:
+        ip_info = socket.getaddrinfo(hostname, None)
+        for entry in ip_info:
+            ip_str = entry[4][0]
+            ip_obj = ipaddress.ip_address(ip_str)
+            if (
+                ip_obj.is_private
+                or ip_obj.is_loopback
+                or ip_obj.is_reserved
+                or ip_obj.is_link_local
+                or ip_obj.is_multicast
+            ):
+                return False, "La dirección resuelve a una red no pública o protegida."
+    except Exception:
+        return False, "No fue posible resolver la dirección del portal."
+
+    return True, None
+
+
 async def parse_portal_url(url: str, timeout_sec: float = 4.0) -> PortalParsedData:
-    """Descarga de forma asincrona la URL y extrae los datos."""
-    if not url or not url.startswith("http"):
+    """Descarga de forma asíncrona la URL validada y extrae los datos."""
+    url_valida, motivo_error = es_url_segura(url)
+    if not url_valida:
         return PortalParsedData(
             requiere_manual=True,
-            error_mensaje="La direccion web introducida no es valida."
+            error_mensaje=motivo_error or "Enlace no válido."
         )
 
     try:
@@ -181,13 +244,13 @@ async def parse_portal_url(url: str, timeout_sec: float = 4.0) -> PortalParsedDa
             if resp.status_code in [403, 429]:
                 return PortalParsedData(
                     requiere_manual=True,
-                    error_mensaje="El portal inmobiliario aplico verificacion antibot. Introduce precio, metros y barrio manualmente para obtener tu veredicto inmediato."
+                    error_mensaje="El portal inmobiliario aplicó verificación antibot. Introduce precio, metros y barrio manualmente para obtener tu veredicto inmediato."
                 )
 
             if resp.status_code != 200:
                 return PortalParsedData(
                     requiere_manual=True,
-                    error_mensaje=f"No fue posible acceder a la pagina del anuncio (codigo {resp.status_code})."
+                    error_mensaje=f"No fue posible acceder a la página del anuncio (código {resp.status_code})."
                 )
 
             return parse_html_content(resp.text, url=url)
@@ -195,10 +258,10 @@ async def parse_portal_url(url: str, timeout_sec: float = 4.0) -> PortalParsedDa
     except httpx.TimeoutException:
         return PortalParsedData(
             requiere_manual=True,
-            error_mensaje="El portal tardo demasiado en responder. Introduce los datos manualmente."
+            error_mensaje="El portal tardó demasiado en responder. Introduce los datos manualmente."
         )
     except Exception as e:
         return PortalParsedData(
             requiere_manual=True,
-            error_mensaje="No fue posible extraer los datos de la URL. Por favor, rellenalos de forma manual."
+            error_mensaje="No fue posible extraer los datos de la URL. Por favor, rellénalos de forma manual."
         )
