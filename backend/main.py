@@ -58,6 +58,7 @@ def health_check():
     """Endpoint ligero para monitorizar el backend y el acceso al almacén de datos."""
     return {
         "status": "ok",
+        "deployment_commit": os.getenv("RENDER_GIT_COMMIT", "local"),
         "database_available": os.path.exists(data.DB_PATH),
         "predictions_available": os.path.exists(data.PREDICTIONS_CSV_PATH),
     }
