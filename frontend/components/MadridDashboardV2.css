@@ -44,10 +44,11 @@
 }
 
 .v2-brand {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  color: #1d1d1f;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.2;
+  color: #17212d;
   cursor: pointer;
   transition: opacity 0.2s;
 }
@@ -1604,16 +1605,19 @@
 @media (max-width: 768px) {
   .v2-root { padding-top: 98px; }
 
-  .v2-nav { padding: 6px 0; }
+  .v2-nav { padding: 4px 0; }
 
   .v2-nav-content {
-    gap: 5px;
-    padding: 6px 12px;
+    gap: 4px;
+    padding: 4px 12px;
   }
 
   .v2-nav .v2-brand {
-    font-size: 14px;
-    line-height: 18px;
+    font-size: 19px;
+    font-weight: 750;
+    letter-spacing: -0.04em;
+    line-height: 24px;
+    text-align: center;
   }
 
   .v2-nav .v2-tabs-container {
