@@ -15,14 +15,14 @@ export default function ParticleField() {
     if (!canvas || !context) return;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const particles: Particle[] = [];
-    const count = window.innerWidth < 640 ? 430 : 760;
+    const count = window.innerWidth < 640 ? 1350 : 2400;
     const goldenAngle = Math.PI * (3 - Math.sqrt(5));
     for (let i = 0; i < count; i += 1) {
       const y = 1 - 2 * ((i + 0.5) / count);
       particles.push({
         latitude: Math.asin(y),
         longitude: goldenAngle * i,
-        size: 0.6 + ((i * 17) % 10) / 10,
+        size: 0.8 + ((i * 17) % 10) / 8,
         color: i % 91 === 0 ? 'coral' : i % 6 === 0 ? 'mist' : 'blue',
       });
     }
@@ -49,6 +49,12 @@ export default function ParticleField() {
       const radius = Math.min(width * 0.48, height * 0.84);
       const centerX = width * 0.51;
       const centerY = height * 0.84;
+      const glow = context.createRadialGradient(centerX - radius * 0.22, centerY - radius * 0.28, radius * 0.04, centerX, centerY, radius * 1.05);
+      glow.addColorStop(0, 'rgba(0,153,255,0.13)');
+      glow.addColorStop(0.62, 'rgba(22,118,223,0.055)');
+      glow.addColorStop(1, 'rgba(6,26,48,0)');
+      context.fillStyle = glow;
+      context.fillRect(0, 0, width, height);
       for (const particle of particles) {
         const cosLat = Math.cos(particle.latitude);
         const x0 = cosLat * Math.cos(particle.longitude + angle);

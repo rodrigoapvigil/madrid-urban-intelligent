@@ -13,7 +13,7 @@
   overflow: clip;
   color: var(--mi-white);
   background: var(--mi-abyss);
-  font-family: Inter, "DM Sans", system-ui, sans-serif;
+  font-family: Matter, Inter, "DM Sans", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 .mi-home *, .mi-home *::before, .mi-home *::after { box-sizing: border-box; }
@@ -288,12 +288,13 @@
 .mi-nav a { font-size: 12px; letter-spacing: .09em; }
 .mi-header__cta { min-height: 50px; padding-inline: 20px; font-size: 13px; }
 .mi-hero { min-height: max(760px,calc(100svh - 92px)); background: transparent; }
+.mi-hero__field { bottom: 0; }
 .mi-hero::before { display: none; }
 .mi-hero__wash,.mi-statement::after { display: none; }
 .mi-statement,.mi-platform,.mi-insight,.mi-scale,.mi-audience,.mi-method,.mi-closing,.mi-footer { background: transparent; }
 .mi-statement::after { opacity: .48; }
 .mi-statement__inner { padding-block: 20px; }
-.mi-kinetic { width: 100%; overflow: clip; font-size: clamp(72px,10vw,144px) !important; }
+.mi-kinetic { width: 100%; overflow: clip; font-size: clamp(86px,15vw,220px) !important; letter-spacing: -.046em !important; line-height: 1 !important; }
 .mi-kinetic span { display: block; width: fit-content; max-width: 100%; line-height: .92; }
 .mi-kinetic span + span { margin-left: auto; color: #a8d9f5; }
 .mi-statement__claim { margin: 0 0 12px !important; color: var(--mi-white) !important; font-size: clamp(22px,2.5vw,34px) !important; font-weight: 500; letter-spacing: -.04em; line-height: 1.25 !important; }
@@ -350,7 +351,7 @@
   .mi-header__cta { min-height: 46px; }
   .mi-platform__grid { grid-template-columns: minmax(0,1fr) minmax(0,.9fr); gap: 42px; }
   .mi-city-visual { min-height: 420px; }
-  .mi-kinetic { font-size: clamp(64px,10vw,105px) !important; }
+.mi-kinetic { font-size: clamp(74px,12vw,145px) !important; }
 }
 @media (max-width: 650px) {
   .mi-home { --mi-wrap: calc(100% - 40px); }
@@ -364,7 +365,7 @@
   .mi-hero__content { padding-top: clamp(72px,10vh,100px); }
   .mi-statement,.mi-platform,.mi-insight,.mi-scale,.mi-audience,.mi-method { padding-block: 86px; }
   .mi-statement__inner { padding-block: 6px; }
-  .mi-kinetic { width: calc(100vw - 28px); margin-inline: -10px !important; font-size: clamp(50px,12.2vw,72px) !important; line-height: .96 !important; }
+  .mi-kinetic { width: calc(100vw - 28px); margin-inline: -10px !important; font-size: clamp(48px,11vw,72px) !important; line-height: 1 !important; }
   .mi-kinetic span { max-width: 100%; }
   .mi-kinetic span + span { margin-top: 7px; }
   .mi-statement__claim { font-size: 20px !important; }
@@ -377,7 +378,7 @@
   .mi-city-visual { min-height: 320px; }
   .mi-scale__stats { margin-top: 34px; }
   .mi-scale__stats article { min-height: 150px; padding: 18px 8px; }
-  .mi-scale__stats strong { font-size: 76px; }
+  .mi-scale__stats strong { font-size: 88px; }
   .mi-scale__stats span { font-size: 10px; }
   .mi-scale__stats small { font-size: 11px; }
   .mi-audience__list article { padding: 13px 8px; border-radius: 0; }
