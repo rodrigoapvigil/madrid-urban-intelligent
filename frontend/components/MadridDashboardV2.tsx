@@ -23,6 +23,42 @@ const PROFILES = [
 
 const MONTHS_ES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
+const getNiceChartScale = (datasets: Array<Array<number | null>>) => {
+  const values = datasets.flat().filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
+  if (!values.length) return { min: undefined, max: undefined, stepSize: undefined };
+  const low = Math.min(...values);
+  const high = Math.max(...values);
+  const spread = Math.max(high - low, Math.abs(high) * 0.04, 0.1);
+  const paddedLow = Math.max(0, low - spread * 0.16);
+  const paddedHigh = high + spread * 0.16;
+  const rawStep = Math.max((paddedHigh - paddedLow) / 5, 0.01);
+  const magnitude = 10 ** Math.floor(Math.log10(rawStep));
+  const normalized = rawStep / magnitude;
+  const nice = normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 2.5 ? 2.5 : normalized <= 5 ? 5 : 10;
+  const stepSize = nice * magnitude;
+  return {
+    min: Math.max(0, Math.floor(paddedLow / stepSize) * stepSize),
+    max: Math.ceil(paddedHigh / stepSize) * stepSize,
+    stepSize,
+  };
+};
+
+const createAreaGradient = (context: any, color: string, opacity = 0.28) => {
+  const chart = context.chart;
+  const area = chart.chartArea;
+  if (!area || !color.startsWith('#')) return `${color}22`;
+  const hex = color.slice(1);
+  const value = hex.length === 3 ? hex.split('').map((part: string) => part + part).join('') : hex;
+  const red = parseInt(value.slice(0, 2), 16);
+  const green = parseInt(value.slice(2, 4), 16);
+  const blue = parseInt(value.slice(4, 6), 16);
+  const gradient = chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
+  gradient.addColorStop(0, `rgba(${red}, ${green}, ${blue}, ${opacity})`);
+  gradient.addColorStop(0.55, `rgba(${red}, ${green}, ${blue}, ${opacity * 0.42})`);
+  gradient.addColorStop(1, `rgba(${red}, ${green}, ${blue}, 0.01)`);
+  return gradient;
+};
+
 const getCurrentMadridPeriod = () => {
   const parts = new Intl.DateTimeFormat('es-ES', {
     timeZone: 'Europe/Madrid',
@@ -819,6 +855,11 @@ const MadridDashboardV2: React.FC = () => {
             const found = rawData.find(d => d.mes === i + 1);
             return found ? found.precio_m2 * multiplier : null;
           });
+          const alignedMadrid = Array.from({ length: 12 }, (_, i) => {
+            const found = seriesMadrid.find(d => d.mes === i + 1);
+            return found ? found.precio_m2 * multiplier : null;
+          });
+          const scale = getNiceChartScale([alignedPrices, alignedMadrid]);
 
           return new ChartJS(ctx, {
             type: 'line',
@@ -830,7 +871,7 @@ const MadridDashboardV2: React.FC = () => {
                     const originalFit = chart.legend.fit;
                     chart.legend.fit = function fit() {
                       originalFit.bind(chart.legend)();
-                      this.height += 35; // margin below the legend
+                      this.height += 8;
                     };
                   }
                 }
@@ -840,37 +881,31 @@ const MadridDashboardV2: React.FC = () => {
               labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
               datasets: [
                 { 
-                  label, 
+                  label: `${label} · Dato real`,
                   data: alignedPrices, 
                   borderColor: mainColor, 
-                  tension: 0.4, 
-                  borderWidth: 3, 
-                  pointRadius: (context) => alignedPrices[context.dataIndex] === null ? 0 : 5,
-                  pointHoverRadius: 8,
-                  pointHitRadius: 25,
-                  pointBackgroundColor: (context: any) => {
-                    const idx = context.dataIndex;
-                    const found = rawData.find(d => d.mes === idx + 1);
-                    if (found && found.is_prediction) return '#8e2de2';
-                    return mainColor;
-                  },
+                  tension: 0.38,
+                  cubicInterpolationMode: 'monotone',
+                  fill: 'start',
+                  backgroundColor: (context: any) => createAreaGradient(context, mainColor),
+                  borderWidth: 3,
+                  pointRadius: 0,
+                  pointHoverRadius: 5,
+                  pointHitRadius: 14,
                   segment: {
                     borderColor: (context: any) => {
-                      const found = rawData.find(d => d.mes === context.p0DataIndex + 1);
+                      const found = rawData.find(d => d.mes === context.p1DataIndex + 1);
                       return found && found.is_prediction ? '#8e2de2' : mainColor;
                     },
                     borderDash: (context: any) => {
-                      const found = rawData.find(d => d.mes === context.p0DataIndex + 1);
+                      const found = rawData.find(d => d.mes === context.p1DataIndex + 1);
                       return found && found.is_prediction ? [5, 5] : undefined;
                     },
                   }
                 },
                 { 
                   label: 'Media Madrid', 
-                  data: Array.from({ length: 12 }, (_, i) => {
-                    const found = seriesMadrid.find(d => d.mes === i + 1);
-                    return found ? found.precio_m2 * multiplier : null;
-                  }), 
+                  data: alignedMadrid,
                   borderColor: '#d2d2d7', 
                   borderWidth: 1.5, 
                   pointRadius: 0,
@@ -908,14 +943,14 @@ const MadridDashboardV2: React.FC = () => {
                   position: 'top', 
                   align: 'end',
                   labels: { 
-                    boxWidth: 24, 
+                    boxWidth: 14,
                     usePointStyle: false, 
-                    font: { size: 11, weight: 500 },
-                    padding: 15
+                    font: { size: 10, weight: 500 },
+                    padding: 10
                   }
                 }, 
                 datalabels: {
-                  display: (context) => context.chart.width >= 560,
+                  display: false,
                   align: (context) => {
                     const val = context.dataset.data[context.dataIndex] as number;
                     const madridVal = context.chart.data.datasets[1].data[context.dataIndex] as number;
@@ -1075,16 +1110,20 @@ const MadridDashboardV2: React.FC = () => {
                 x: { 
                   grid: { display: false },
                   offset: true,
-                  ticks: { padding: 12 }
+                  ticks: { padding: 10, maxRotation: 0, minRotation: 0, autoSkip: true, maxTicksLimit: 12, font: { size: 9 } }
                 }, 
                 y: { 
-                  grid: { color: '#f5f5f7' }, 
+                  min: scale.min,
+                  max: scale.max,
+                  grid: { color: '#e8ebef', lineWidth: 1 },
                   border: { display: false },
-                  grace: '10%',
                   ticks: {
-                    padding: 15,
+                    stepSize: scale.stepSize,
+                    padding: 8,
+                    maxTicksLimit: 7,
+                    font: { size: 10 },
                     callback: (value) => {
-                      const unit = activeProfile.id === 'inversion' ? '%' : '€';
+                      const unit = activeProfile.id === 'inversion' ? '%' : '€/m²';
                       return new Intl.NumberFormat('es-ES').format(Number(value)) + unit;
                     }
                   }
@@ -1097,6 +1136,11 @@ const MadridDashboardV2: React.FC = () => {
         if (ctxA) chartsRef.current.push(createLineChart(ctxA, selectedZoneA, seriesA, selectedZoneB, seriesB));
         if (ctxB) chartsRef.current.push(createLineChart(ctxB, selectedZoneB, seriesB, selectedZoneA, seriesA, '#1d1d1f'));
         if (ctxOverlay) {
+          const overlayMultiplier = activeProfile.id === 'inversion' ? 100 : 1;
+          const overlayA = Array.from({ length: 12 }, (_, i) => { const found = seriesA.find(d => d.mes === i + 1); return found ? found.precio_m2 * overlayMultiplier : null; });
+          const overlayB = Array.from({ length: 12 }, (_, i) => { const found = seriesB.find(d => d.mes === i + 1); return found ? found.precio_m2 * overlayMultiplier : null; });
+          const overlayMadrid = Array.from({ length: 12 }, (_, i) => { const found = seriesMadrid.find(d => d.mes === i + 1); return found ? found.precio_m2 * overlayMultiplier : null; });
+          const overlayScale = getNiceChartScale([overlayA, overlayB, overlayMadrid]);
           chartsRef.current.push(new ChartJS(ctxOverlay, {
             type: 'line',
             plugins: [
@@ -1107,7 +1151,7 @@ const MadridDashboardV2: React.FC = () => {
                     const originalFit = chart.legend.fit;
                     chart.legend.fit = function fit() {
                       originalFit.bind(chart.legend)();
-                      this.height += 35; // margin below the legend
+                      this.height += 8;
                     };
                   }
                 }
@@ -1117,75 +1161,52 @@ const MadridDashboardV2: React.FC = () => {
               labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
               datasets: [
                 { 
-                  label: selectedZoneA, 
-                  data: Array.from({ length: 12 }, (_, i) => {
-                    const found = seriesA.find(d => d.mes === i + 1);
-                    return found ? found.precio_m2 * (activeProfile.id === 'inversion' ? 100 : 1) : null;
-                  }), 
+                  label: `${selectedZoneA} · Dato real`,
+                  data: overlayA,
                   borderColor: activeProfile.color, 
                   borderWidth: 3, 
-                  pointRadius: (context) => {
-                    const found = seriesA.find(d => d.mes === context.dataIndex + 1);
-                    return found ? 5 : 0;
-                  }, 
-                  pointHoverRadius: 8,
-                  pointHitRadius: 25,
-                  pointBackgroundColor: (context: any) => {
-                    const idx = context.dataIndex;
-                    const found = seriesA.find(d => d.mes === idx + 1);
-                    if (found && found.is_prediction) return '#8e2de2';
-                    return activeProfile.color;
-                  },
-                  tension: 0.4,
+                  pointRadius: 0,
+                  pointHoverRadius: 5,
+                  pointHitRadius: 14,
+                  fill: 'start',
+                  backgroundColor: (context: any) => createAreaGradient(context, activeProfile.color, 0.12),
+                  tension: 0.38,
+                  cubicInterpolationMode: 'monotone',
                   segment: {
                     borderColor: (context: any) => {
-                      const found = seriesA.find(d => d.mes === context.p0DataIndex + 1);
+                      const found = seriesA.find(d => d.mes === context.p1DataIndex + 1);
                       return found && found.is_prediction ? '#8e2de2' : activeProfile.color;
                     },
                     borderDash: (context: any) => {
-                      const found = seriesA.find(d => d.mes === context.p0DataIndex + 1);
+                      const found = seriesA.find(d => d.mes === context.p1DataIndex + 1);
                       return found && found.is_prediction ? [5, 5] : undefined;
                     }
                   }
                 },
                 { 
-                  label: selectedZoneB, 
-                  data: Array.from({ length: 12 }, (_, i) => {
-                    const found = seriesB.find(d => d.mes === i + 1);
-                    return found ? found.precio_m2 * (activeProfile.id === 'inversion' ? 100 : 1) : null;
-                  }), 
+                  label: `${selectedZoneB} · Dato real`,
+                  data: overlayB,
                   borderColor: '#1d1d1f', 
                   borderWidth: 2.5, 
-                  pointRadius: (context) => {
-                    const found = seriesB.find(d => d.mes === context.dataIndex + 1);
-                    return found ? 5 : 0;
-                  }, 
-                  pointHoverRadius: 8,
-                  pointHitRadius: 25,
-                  pointBackgroundColor: (context: any) => {
-                    const idx = context.dataIndex;
-                    const found = seriesB.find(d => d.mes === idx + 1);
-                    if (found && found.is_prediction) return '#8e2de2';
-                    return '#1d1d1f';
-                  },
-                  tension: 0.4,
+                  pointRadius: 0,
+                  pointHoverRadius: 5,
+                  pointHitRadius: 14,
+                  tension: 0.38,
+                  cubicInterpolationMode: 'monotone',
                   segment: {
                     borderColor: (context: any) => {
-                      const found = seriesB.find(d => d.mes === context.p0DataIndex + 1);
+                      const found = seriesB.find(d => d.mes === context.p1DataIndex + 1);
                       return found && found.is_prediction ? '#8e2de2' : '#1d1d1f';
                     },
                     borderDash: (context: any) => {
-                      const found = seriesB.find(d => d.mes === context.p0DataIndex + 1);
+                      const found = seriesB.find(d => d.mes === context.p1DataIndex + 1);
                       return found && found.is_prediction ? [5, 5] : undefined;
                     }
                   }
                 },
                 { 
                   label: 'Media Madrid', 
-                  data: Array.from({ length: 12 }, (_, i) => {
-                    const found = seriesMadrid.find(d => d.mes === i + 1);
-                    return found ? found.precio_m2 * (activeProfile.id === 'inversion' ? 100 : 1) : null;
-                  }), 
+                  data: overlayMadrid,
                   borderColor: '#d2d2d7', 
                   borderWidth: 1.5, 
                   pointRadius: 0, 
@@ -1215,21 +1236,25 @@ const MadridDashboardV2: React.FC = () => {
                 mode: 'index',
                 intersect: false
               },
-              layout: { padding: { top: 15, right: 30, bottom: 40, left: 10 } },
+              layout: { padding: { top: 8, right: 12, bottom: 14, left: 4 } },
               scales: { 
                 x: { 
                   grid: { display: false },
                   offset: true,
-                  ticks: { padding: 12 }
+                  ticks: { padding: 10, maxRotation: 0, minRotation: 0, autoSkip: true, maxTicksLimit: 12, font: { size: 9 } }
                 }, 
                 y: { 
-                  grid: { color: '#f5f5f7' }, 
+                  min: overlayScale.min,
+                  max: overlayScale.max,
+                  grid: { color: '#e8ebef', lineWidth: 1 },
                   border: { display: false },
-                  grace: '10%',
                   ticks: {
-                    padding: 15,
+                    stepSize: overlayScale.stepSize,
+                    padding: 8,
+                    maxTicksLimit: 7,
+                    font: { size: 10 },
                     callback: (value) => {
-                      const unit = activeProfile.id === 'inversion' ? '%' : '€';
+                      const unit = activeProfile.id === 'inversion' ? '%' : '€/m²';
                       return new Intl.NumberFormat('es-ES').format(Number(value)) + unit;
                     }
                   }
@@ -1241,13 +1266,14 @@ const MadridDashboardV2: React.FC = () => {
                   position: 'top', 
                   align: 'end',
                   labels: { 
-                    boxWidth: 24, 
+                  boxWidth: 14,
                     usePointStyle: false, 
-                    font: { size: 11, weight: 'bold' },
-                    padding: 15
+                  font: { size: 10, weight: 'bold' },
+                  padding: 8
                   }
                 }, 
                 datalabels: {
+                display: false,
                   align: (context) => {
                     const val = context.dataset.data[context.dataIndex] as number;
                     const otherIdx = context.datasetIndex === 0 ? 1 : 0;
@@ -1274,7 +1300,7 @@ const MadridDashboardV2: React.FC = () => {
                   formatter: (value, context) => {
                     if (context.datasetIndex === 2) return null; // No etiquetas para Madrid
                     if (value === null) return null;
-                    const unit = activeProfile.id === 'inversion' ? '%' : '€';
+                      const unit = activeProfile.id === 'inversion' ? '%' : '€/m²';
                     return new Intl.NumberFormat('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value) + unit;
                   }
                 },

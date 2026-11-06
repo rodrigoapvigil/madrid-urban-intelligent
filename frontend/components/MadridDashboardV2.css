@@ -475,13 +475,13 @@
 }
 
 .v2-chart-wrap {
-  height: 400px; 
+  height: 460px;
   width: 100%;
   position: relative;
 }
 
 .v2-chart-wrap.large {
-  height: 580px; /* Increased to avoid cutting X-axis */
+  height: 520px;
 }
 
 /* 7. RESPONSIVENESS */
@@ -1767,7 +1767,8 @@
     line-height: 1.35;
   }
 
-  .v2-chart-wrap { height: 250px; }
+  .v2-chart-wrap { height: 390px; }
+  .v2-chart-wrap.large { height: 440px; }
 
   .v2-comp-kpis-row {
     grid-template-columns: minmax(0, 1fr) !important;
