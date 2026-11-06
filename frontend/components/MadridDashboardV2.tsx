@@ -6,11 +6,61 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import { RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
 import './MadridDashboardV2.css';
 import { apiFetch } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
 
 ChartJS.register(ChartDataLabels);
+
+const updateChartZoom = (canvasId: string, action: 'in' | 'out' | 'reset') => {
+  const chart = ChartJS.getChart(canvasId) as any;
+  if (!chart) return;
+
+  if (!chart._initialView) {
+    chart._initialView = {
+      x: { min: chart.scales.x.min, max: chart.scales.x.max },
+      y: { min: chart.scales.y.min, max: chart.scales.y.max },
+    };
+  }
+
+  if (action === 'reset') {
+    chart.options.scales.x.min = chart._initialView.x.min;
+    chart.options.scales.x.max = chart._initialView.x.max;
+    chart.options.scales.y.min = chart._initialView.y.min;
+    chart.options.scales.y.max = chart._initialView.y.max;
+    chart.update('none');
+    return;
+  }
+
+  const factor = action === 'in' ? 0.72 : 1 / 0.72;
+  (['x', 'y'] as const).forEach(axis => {
+    const scale = chart.scales[axis];
+    const initial = chart._initialView[axis];
+    const currentMin = scale.min;
+    const currentMax = scale.max;
+    const center = (currentMin + currentMax) / 2;
+    const range = (currentMax - currentMin) * factor;
+    const nextMin = center - range / 2;
+    const nextMax = center + range / 2;
+    if (action === 'out' && (nextMin < initial.min || nextMax > initial.max)) {
+      chart.options.scales[axis].min = initial.min;
+      chart.options.scales[axis].max = initial.max;
+    } else {
+      chart.options.scales[axis].min = nextMin;
+      chart.options.scales[axis].max = nextMax;
+    }
+  });
+  chart.update('none');
+};
+
+const ChartZoomControls = ({ chartId }: { chartId: string }) => (
+  <div className="v2-chart-controls" role="group" aria-label="Controles de zoom de la gráfica">
+    <button type="button" title="Acercar" aria-label="Acercar gráfica" onClick={() => updateChartZoom(chartId, 'in')}><ZoomIn size={17} /></button>
+    <button type="button" title="Alejar" aria-label="Alejar gráfica" onClick={() => updateChartZoom(chartId, 'out')}><ZoomOut size={17} /></button>
+    <button type="button" title="Restablecer vista" aria-label="Restablecer zoom de la gráfica" onClick={() => updateChartZoom(chartId, 'reset')}><RotateCcw size={16} /></button>
+  </div>
+);
 
 const MadridMap = dynamic(() => import('./MadridMap'), { ssr: false });
 
@@ -3242,7 +3292,7 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {p.id === 'inversion' ? 'Rentabilidad' : 'Precio m²'} ({p.label}) - {selectedZoneA}
                       </div>
-                      <div className="v2-chart-wrap"><canvas id={`v2-chartA-${p.id}`}></canvas></div>
+                      <div className="v2-chart-wrap"><ChartZoomControls chartId={`v2-chartA-${p.id}`} /><canvas id={`v2-chartA-${p.id}`}></canvas></div>
                     </div>
                     {(() => {
                       if (p.id === 'inversion') {
@@ -3465,7 +3515,7 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {p.id === 'inversion' ? 'Rentabilidad' : 'Precio m²'} ({p.label}) - {selectedZoneB}
                       </div>
-                      <div className="v2-chart-wrap"><canvas id={`v2-chartB-${p.id}`}></canvas></div>
+                      <div className="v2-chart-wrap"><ChartZoomControls chartId={`v2-chartB-${p.id}`} /><canvas id={`v2-chartB-${p.id}`}></canvas></div>
                     </div>
                     {(() => {
                       if (p.id === 'inversion') {
@@ -3689,6 +3739,7 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                   <div className="v2-overlay-body">
                     <div className="v2-chart-wrap large">
+                      <ChartZoomControls chartId={`v2-overlay-${p.id}`} />
                       <canvas id={`v2-overlay-${p.id}`}></canvas>
                     </div>
                   </div>

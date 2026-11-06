@@ -484,6 +484,42 @@
   height: 520px;
 }
 
+.v2-chart-controls {
+  position: absolute;
+  z-index: 4;
+  top: 4px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px;
+  background: rgba(255, 255, 255, .94);
+  border: 1px solid #e7e9ee;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, .08);
+}
+
+.v2-chart-controls button {
+  display: inline-flex;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #c21875;
+  cursor: pointer;
+}
+
+.v2-chart-controls button:hover,
+.v2-chart-controls button:focus-visible { background: #fce7f3; outline: 2px solid #db2777; outline-offset: 1px; }
+
+@media (max-width: 480px) {
+  .v2-chart-controls { top: 2px; right: 3px; gap: 0; }
+  .v2-chart-controls button { width: 32px; height: 32px; }
+}
+
 /* 7. RESPONSIVENESS */
 
 /* Laptops & Small Desktops (under 1440px) */
