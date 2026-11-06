@@ -228,40 +228,59 @@ def es_url_segura(url: str) -> Tuple[bool, Optional[str]]:
     return True, None
 
 
-async def parse_portal_url(url: str, timeout_sec: float = 4.0) -> PortalParsedData:
-    """Descarga de forma asíncrona la URL validada y extrae los datos."""
-    url_valida, motivo_error = es_url_segura(url)
-    if not url_valida:
-        return PortalParsedData(
-            requiere_manual=True,
-            error_mensaje=motivo_error or "Enlace no válido."
-        )
+async def parse_portal_url(url: str, timeout_sec: float = 4.0, max_redirects: int = 3) -> PortalParsedData:
+    """
+    Descarga de forma asíncrona la URL validada verificando de forma estricta
+    cada salto de redirección contra ataques SSRF.
+    """
+    from urllib.parse import urljoin
 
-    try:
-        async with httpx.AsyncClient(headers=HEADERS, follow_redirects=True, timeout=timeout_sec) as client:
-            resp = await client.get(url)
+    current_url = url
+    for _ in range(max_redirects + 1):
+        url_valida, motivo_error = es_url_segura(current_url)
+        if not url_valida:
+            return PortalParsedData(
+                requiere_manual=True,
+                error_mensaje=motivo_error or "Enlace no válido."
+            )
 
-            if resp.status_code in [403, 429]:
-                return PortalParsedData(
-                    requiere_manual=True,
-                    error_mensaje="El portal inmobiliario aplicó verificación antibot. Introduce precio, metros y barrio manualmente para obtener tu veredicto inmediato."
-                )
+        try:
+            async with httpx.AsyncClient(headers=HEADERS, follow_redirects=False, timeout=timeout_sec) as client:
+                resp = await client.get(current_url)
 
-            if resp.status_code != 200:
-                return PortalParsedData(
-                    requiere_manual=True,
-                    error_mensaje=f"No fue posible acceder a la página del anuncio (código {resp.status_code})."
-                )
+                if resp.status_code in [301, 302, 303, 307, 308]:
+                    location = resp.headers.get("Location")
+                    if not location:
+                        break
+                    current_url = urljoin(current_url, location)
+                    continue
 
-            return parse_html_content(resp.text, url=url)
+                if resp.status_code in [403, 429]:
+                    return PortalParsedData(
+                        requiere_manual=True,
+                        error_mensaje="El portal inmobiliario aplicó verificación antibot. Introduce precio, metros y barrio manualmente para obtener tu veredicto inmediato."
+                    )
 
-    except httpx.TimeoutException:
-        return PortalParsedData(
-            requiere_manual=True,
-            error_mensaje="El portal tardó demasiado en responder. Introduce los datos manualmente."
-        )
-    except Exception as e:
-        return PortalParsedData(
-            requiere_manual=True,
-            error_mensaje="No fue posible extraer los datos de la URL. Por favor, rellénalos de forma manual."
-        )
+                if resp.status_code != 200:
+                    return PortalParsedData(
+                        requiere_manual=True,
+                        error_mensaje=f"No fue posible acceder a la página del anuncio (código {resp.status_code})."
+                    )
+
+                return parse_html_content(resp.text, url=current_url)
+
+        except httpx.TimeoutException:
+            return PortalParsedData(
+                requiere_manual=True,
+                error_mensaje="El portal tardó demasiado en responder. Introduce los datos manualmente."
+            )
+        except Exception:
+            return PortalParsedData(
+                requiere_manual=True,
+                error_mensaje="No fue posible extraer los datos de la URL. Por favor, rellénalos de forma manual."
+            )
+
+    return PortalParsedData(
+        requiere_manual=True,
+        error_mensaje="Demasiadas redirecciones al consultar el enlace."
+    )

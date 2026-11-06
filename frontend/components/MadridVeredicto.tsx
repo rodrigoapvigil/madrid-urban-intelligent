@@ -23,6 +23,7 @@ import { SiteFooter, SiteHeader } from './SiteChrome';
 export default function MadridVeredicto() {
   const searchParams = useSearchParams();
   const tokenParam = searchParams.get('token');
+  const sessionIdParam = searchParams.get('session_id');
 
   // Modo de entrada: 'url' o 'manual'
   const [activeTab, setActiveTab] = useState<'url' | 'manual'>('url');
@@ -91,8 +92,23 @@ export default function MadridVeredicto() {
   useEffect(() => {
     if (tokenParam) {
       setDownloadToken(tokenParam);
+    } else if (sessionIdParam) {
+      // Si el usuario regresa de Stripe Checkout, validar la sesión y obtener el token firmado
+      apiFetch(`/veredicto/confirmar-sesion?session_id=${encodeURIComponent(sessionIdParam)}`)
+        .then(res => {
+          if (res.ok) return res.json();
+          throw new Error('Pago aún no completado');
+        })
+        .then(data => {
+          if (data.token) {
+            setDownloadToken(data.token);
+          }
+        })
+        .catch(() => {
+          // Si aún no está listo, el usuario puede refrescar o contactar soporte
+        });
     }
-  }, [tokenParam]);
+  }, [tokenParam, sessionIdParam]);
 
   // Manejador para extraer datos desde la URL
   const handleExtractUrl = async (e: React.FormEvent) => {

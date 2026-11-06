@@ -124,10 +124,16 @@ def clean_string(s):
     return s.replace(" ", "_").replace("-", "_").replace(".", "")
 
 
+ALLOWED_OPERATIONS = {"venta", "alquiler", "inversion"}
+
 def _clean_op(op: str) -> str:
-    """Normaliza el tipo de operación: 'compra' -> 'venta'."""
+    """Normaliza y valida estrictamente el tipo de operación contra lista blanca."""
     s = str(op).strip().lower()
-    return 'venta' if s in ('compra', 'compra-venta') else s
+    if s in ('compra', 'compra-venta'):
+        return 'venta'
+    if s in ALLOWED_OPERATIONS:
+        return s
+    return 'venta'
 
 
 def _conn():
@@ -184,15 +190,16 @@ def get_neighborhoods(distrito: str = "Todos") -> list:
         
         if not distrito or distrito == "Todos":
             q = "SELECT DISTINCT nombre FROM Dim_Barrio ORDER BY nombre"
+            df = pd.read_sql(q, conn)
         else:
-            q = f"""
+            q = """
                 SELECT DISTINCT b.nombre
                 FROM Dim_Barrio b
                 JOIN Dim_Distrito d ON b.id_distrito = d.id_distrito
-                WHERE d.nombre = '{distrito}'
+                WHERE d.nombre = ?
                 ORDER BY b.nombre
             """
-        df = pd.read_sql(q, conn)
+            df = pd.read_sql(q, conn, params=[str(distrito)])
         conn.close()
         
         nombres = df['nombre'].tolist()
@@ -215,7 +222,8 @@ def get_map_data(anio: int, mes: str, interest: str = "Compra-venta"):
         return pd.DataFrame(), pd.DataFrame()
 
     conn = _conn()
-    month_id = MONTH_IDS[mes]
+    month_id = int(MONTH_IDS.get(mes, 1))
+    anio_int = int(anio)
     op_base = "alquiler" if interest in ["Alquiler", "Inversión"] else "venta"
 
     try:
@@ -225,11 +233,11 @@ def get_map_data(anio: int, mes: str, interest: str = "Compra-venta"):
             FROM Dim_Barrio b
         """
 
-        q_stability = f"""
+        q_stability = """
             SELECT id_barrio, 
                    100 * (1 - (SQRT(AVG(precio_m2 * precio_m2) - AVG(precio_m2) * AVG(precio_m2)) / NULLIF(AVG(precio_m2), 0))) as stability
             FROM Fact_Operacion
-            WHERE tipo_operacion = '{op_base}'
+            WHERE tipo_operacion = ?
             GROUP BY id_barrio
         """
 
@@ -237,9 +245,9 @@ def get_map_data(anio: int, mes: str, interest: str = "Compra-venta"):
         if interest == "Inversión":
             price_extra = f""",
                 (SELECT AVG(f2.precio_promedio_vivienda) FROM Fact_Operacion f2 JOIN Dim_Tiempo t2 ON f2.id_tiempo = t2.id_tiempo 
-                 WHERE f2.id_barrio = b.id_barrio AND f2.tipo_operacion = 'venta' AND t2.anio = {anio} AND t2.mes = {month_id}) as precio_venta,
+                 WHERE f2.id_barrio = b.id_barrio AND f2.tipo_operacion = 'venta' AND t2.anio = {anio_int} AND t2.mes = {month_id}) as precio_venta,
                 (SELECT AVG(f3.precio_promedio_vivienda) FROM Fact_Operacion f3 JOIN Dim_Tiempo t3 ON f3.id_tiempo = t3.id_tiempo 
-                 WHERE f3.id_barrio = b.id_barrio AND f3.tipo_operacion = 'alquiler' AND t3.anio = {anio} AND t3.mes = {month_id}) as precio_alquiler
+                 WHERE f3.id_barrio = b.id_barrio AND f3.tipo_operacion = 'alquiler' AND t3.anio = {anio_int} AND t3.mes = {month_id}) as precio_alquiler
             """
 
         q_barrio = f"""
@@ -255,12 +263,12 @@ def get_map_data(anio: int, mes: str, interest: str = "Compra-venta"):
             JOIN Dim_Distrito d ON b.id_distrito  = d.id_distrito
             JOIN Dim_Tiempo t   ON f.id_tiempo    = t.id_tiempo
             LEFT JOIN ({q_connectivity}) conn ON b.id_barrio = conn.id_barrio
-            LEFT JOIN ({q_stability}) stab ON b.id_barrio = stab.id_barrio
-            WHERE t.anio = {anio} AND t.mes = {month_id}
-              AND f.tipo_operacion = '{op_base}'
+            LEFT JOIN ({q_stability.replace('?', f"'{op_base}'")}) stab ON b.id_barrio = stab.id_barrio
+            WHERE t.anio = ? AND t.mes = ?
+              AND f.tipo_operacion = ?
             GROUP BY b.nombre, d.nombre
         """
-        df_barrio = pd.read_sql(q_barrio, conn)
+        df_barrio = pd.read_sql(q_barrio, conn, params=[anio_int, month_id, op_base])
 
         if df_barrio.empty and anio >= 2026:
             pred_df = _get_predictions_df()
@@ -384,13 +392,13 @@ def get_map_data(anio: int, mes: str, interest: str = "Compra-venta"):
                 JOIN Dim_Barrio b   ON b.id_distrito = d.id_distrito
                 JOIN Dim_Tiempo t   ON f.id_tiempo   = t.id_tiempo
                 LEFT JOIN ({q_connectivity}) conn ON b.id_barrio = conn.id_barrio
-                LEFT JOIN ({q_stability}) stab ON b.id_barrio = stab.id_barrio
-                WHERE t.anio = {anio} AND t.mes = {month_id}
-                  AND f.tipo_operacion = '{op_base}'
+                LEFT JOIN ({q_stability.replace('?', f"'{op_base}'")}) stab ON b.id_barrio = stab.id_barrio
+                WHERE t.anio = ? AND t.mes = ?
+                  AND f.tipo_operacion = ?
                   AND f.id_barrio != -1
                 GROUP BY d.nombre
             """
-            df_dist = pd.read_sql(q_dist, conn)
+            df_dist = pd.read_sql(q_dist, conn, params=[anio_int, month_id, op_base])
             
             if interest == "Inversión" and not df_barrio.empty and 'precio_venta' in df_barrio.columns:
                 # Calculate extra columns for Investment on district level
@@ -420,11 +428,14 @@ def _get_price_for_period(year, month_id, op, district, barrio):
     op = _clean_op(op)
     # check SQLite first
     conn = sqlite3.connect(DB_PATH)
+    params = [int(year), int(month_id), op]
     filter_clause = ""
-    if barrio != "Todos":
-        filter_clause = f"AND b.nombre = '{barrio}'"
-    elif district != "Todos":
-        filter_clause = f"AND d.nombre = '{district}'"
+    if barrio != "Todos" and barrio != "":
+        filter_clause = "AND b.nombre = ?"
+        params.append(str(barrio))
+    elif district != "Todos" and district != "":
+        filter_clause = "AND d.nombre = ?"
+        params.append(str(district))
         
     q = f"""
         SELECT AVG(f.precio_m2) as p_m2
@@ -432,12 +443,12 @@ def _get_price_for_period(year, month_id, op, district, barrio):
         JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
         JOIN Dim_Barrio b ON f.id_barrio = b.id_barrio
         JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito
-        WHERE t.anio = {year} AND t.mes = {month_id} 
-          AND f.tipo_operacion = '{op}'
+        WHERE t.anio = ? AND t.mes = ? 
+          AND f.tipo_operacion = ?
           {filter_clause}
     """
     try:
-        res_df = pd.read_sql(q, conn)
+        res_df = pd.read_sql(q, conn, params=params)
         val = res_df.iloc[0]['p_m2']
         if val is not None:
             conn.close()
@@ -485,28 +496,26 @@ def get_kpi_data(anio: int, mes: str, op: str, distrito: str = "Todos", barrio: 
         return 0, 0, 0, 0, 0, 0, 0, 0, 0, "N/A", False, 0.0, 0.0
     transactions = get_transaction_count(anio, distrito, barrio)
     conn = _conn()
-    month_id = MONTH_IDS[mes]
+    month_id = MONTH_IDS.get(mes, 1)
     op_l = _clean_op(op)
     
     # En Inversión, consultamos la operación 'alquiler' pero nos interesa la rentabilidad
     real_op = "alquiler" if op_l == "inversion" else op_l
     val_col = "rentabilidad_bruta" if op_l == "inversion" else "precio_m2"
     
-    # Filtro jerárquico
+    # Filtro jerárquico parametrizado
     filter_clause = ""
-    join_clause = ""
     select_renta = "AVG(d.renta_media_hogar)" 
+    params = [int(anio), int(month_id), real_op]
     
-    if barrio != "Todos":
-        filter_clause = f"AND b.nombre = '{barrio}'"
-        join_clause = "JOIN Dim_Barrio b ON f.id_barrio = b.id_barrio"
+    if barrio != "Todos" and barrio != "":
+        filter_clause = "AND b.nombre = ?"
         select_renta = "AVG(b.renta_media_hogar)"
-    elif distrito != "Todos":
-        filter_clause = f"AND d.nombre = '{distrito}'"
-        join_clause = "JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito"
+        params.append(str(barrio))
+    elif distrito != "Todos" and distrito != "":
+        filter_clause = "AND d.nombre = ?"
         select_renta = "AVG(d.renta_media_hogar)"
-    else:
-        join_clause = "JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito"
+        params.append(str(distrito))
 
     q = f"""
         SELECT AVG(f.{val_col}) as p_m2, 
@@ -521,14 +530,14 @@ def get_kpi_data(anio: int, mes: str, op: str, distrito: str = "Todos", barrio: 
         JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
         JOIN Dim_Barrio b ON f.id_barrio = b.id_barrio
         JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito
-        WHERE t.anio = {anio} AND t.mes = {month_id} 
-          AND f.tipo_operacion = '{real_op}'
+        WHERE t.anio = ? AND t.mes = ? 
+          AND f.tipo_operacion = ?
           AND f.id_barrio != -1
           {filter_clause}
     """
 
     try:
-        res_df = pd.read_sql(q, conn)
+        res_df = pd.read_sql(q, conn, params=params)
         
         # FALLBACK A PREDICCIONES (Desde CSV)
         is_pred = False
@@ -608,21 +617,24 @@ def get_kpi_data(anio: int, mes: str, op: str, distrito: str = "Todos", barrio: 
                             JOIN Dim_Barrio b ON f.id_barrio = b.id_barrio
                             JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito
                             WHERE f.rentabilidad_bruta IS NOT NULL AND f.rentabilidad_bruta > 0
-                              AND f.tipo_operacion = '{real_op}'
+                              AND f.tipo_operacion = ?
                               {filter_clause}
                         """
                         try:
-                            avg_rent_val = pd.read_sql(q_hist_rent, conn).iloc[0]['avg_rent']
+                            rent_params = [real_op]
+                            if filter_clause:
+                                rent_params.append(params[-1])
+                            avg_rent_val = pd.read_sql(q_hist_rent, conn, params=rent_params).iloc[0]['avg_rent']
                             if avg_rent_val is None or pd.isna(avg_rent_val) or avg_rent_val <= 0:
                                 # Fallback: rentabilidad media global para ese tipo de operacion
-                                q_global_rent = f"""
+                                q_global_rent = """
                                     SELECT AVG(f.rentabilidad_bruta) as avg_rent
                                     FROM Fact_Operacion f
                                     WHERE f.rentabilidad_bruta IS NOT NULL AND f.rentabilidad_bruta > 0
-                                      AND f.tipo_operacion = '{real_op}'
+                                      AND f.tipo_operacion = ?
                                 """
                                 try:
-                                    avg_rent_val = pd.read_sql(q_global_rent, conn).iloc[0]['avg_rent']
+                                    avg_rent_val = pd.read_sql(q_global_rent, conn, params=[real_op]).iloc[0]['avg_rent']
                                     if avg_rent_val is None or pd.isna(avg_rent_val) or avg_rent_val <= 0:
                                         avg_rent_val = 0.049  # promedio real de la BD (~4.9%)
                                 except:
@@ -662,9 +674,23 @@ def get_kpi_data(anio: int, mes: str, op: str, distrito: str = "Todos", barrio: 
                 p_m2_venta_pred = _get_price_for_period(anio, month_id, 'venta', distrito, barrio)
                 p_vivienda_venta = p_m2_venta_pred * s_m
             else:
-                q_venta = q.replace(f"f.tipo_operacion = '{real_op}'", "f.tipo_operacion = 'venta'").replace(f"f.{val_col}", "f.precio_m2")
+                q_venta = f"""
+                    SELECT AVG(f.precio_m2) as p_m2,
+                           AVG(b.superficie_media_vivienda) as s_m
+                    FROM Fact_Operacion f
+                    JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
+                    JOIN Dim_Barrio b ON f.id_barrio = b.id_barrio
+                    JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito
+                    WHERE t.anio = ? AND t.mes = ?
+                      AND f.tipo_operacion = 'venta'
+                      AND f.id_barrio != -1
+                      {filter_clause}
+                """
                 try:
-                    res_v = pd.read_sql(q_venta, conn).iloc[0]
+                    venta_params = [int(anio), int(month_id)]
+                    if filter_clause:
+                        venta_params.append(params[-1])
+                    res_v = pd.read_sql(q_venta, conn, params=venta_params).iloc[0]
                     p_vivienda_venta = (res_v['p_m2'] or 0) * (res_v['s_m'] or 0)
                 except:
                     p_vivienda_venta = 0
@@ -692,9 +718,11 @@ def get_kpi_data(anio: int, mes: str, op: str, distrito: str = "Todos", barrio: 
 
         # Cálculo dinámico de Variación Anual si el de la DB es 0 o insuficiente
         if v_a == 0:
-            q_prev = q.replace(f"t.anio = {anio}", f"t.anio = {anio - 1}")
             try:
-                res_prev = pd.read_sql(q_prev, conn).iloc[0]
+                prev_params = [int(anio - 1), int(month_id), real_op]
+                if filter_clause:
+                    prev_params.append(params[-1])
+                res_prev = pd.read_sql(q, conn, params=prev_params).iloc[0]
                 p_m2_prev = res_prev['p_m2'] or 0
                 if p_m2_prev > 0:
                     v_a = ((p_m2 / p_m2_prev) - 1) * 100
@@ -703,6 +731,7 @@ def get_kpi_data(anio: int, mes: str, op: str, distrito: str = "Todos", barrio: 
                     elif v_a >= 0: estado_mercado = "Estable"
                     else: estado_mercado = "Ajuste"
             except:
+                pass
                 pass
 
         return (p_m2, p_vivienda, v_m, v_t, v_a, r_m, s_m, p_vivienda_venta, esfuerzo_compra, estado_mercado, is_pred, rentabilidad, transactions)
@@ -736,7 +765,7 @@ def get_monthly_series(anio: int, op: str, zona_nombre: str,
                 FROM Fact_Operacion f
                 JOIN Dim_Barrio b ON f.id_barrio = b.id_barrio
                 JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
-                WHERE t.anio = {anio} AND b.nombre = '{zona_nombre}' AND f.tipo_operacion = '{real_op}'
+                WHERE t.anio = ? AND b.nombre = ? AND f.tipo_operacion = ?
                 GROUP BY t.mes ORDER BY t.mes
             """
         else:
@@ -745,10 +774,10 @@ def get_monthly_series(anio: int, op: str, zona_nombre: str,
                 FROM Fact_Operacion f
                 JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito
                 JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
-                WHERE t.anio = {anio} AND d.nombre = '{zona_nombre}' AND f.tipo_operacion = '{real_op}'
+                WHERE t.anio = ? AND d.nombre = ? AND f.tipo_operacion = ?
                 GROUP BY t.mes ORDER BY t.mes
             """
-        df_hist = pd.read_sql(q_hist, conn)
+        df_hist = pd.read_sql(q_hist, conn, params=[int(anio), str(zona_nombre), real_op])
         df_hist['is_prediction'] = False
 
         # 2. Obtener Predicciones desde CSV
@@ -817,16 +846,16 @@ def get_comparison_kpis(anio: int, mes: str, op: str,
     if not os.path.exists(DB_PATH) or not zona_nombre:
         return 0, 0, 0
     conn = _conn()
-    month_id = MONTH_IDS[mes]
+    month_id = MONTH_IDS.get(mes, 1)
     op_l = _clean_op(op)
 
     try:
         if zona_tipo == "barrio":
             join_clause = "JOIN Dim_Barrio b ON f.id_barrio = b.id_barrio"
-            where_zona  = f"AND b.nombre = '{zona_nombre}'"
+            where_zona  = "AND b.nombre = ?"
         else:
             join_clause = "JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito"
-            where_zona  = f"AND d.nombre = '{zona_nombre}'"
+            where_zona  = "AND d.nombre = ?"
 
         q = f"""
             SELECT AVG(f.precio_promedio_vivienda) as p_vivienda,
@@ -836,11 +865,11 @@ def get_comparison_kpis(anio: int, mes: str, op: str,
             FROM Fact_Operacion f
             {join_clause}
             JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
-            WHERE t.anio = {anio} AND t.mes = {month_id}
-              AND f.tipo_operacion = '{op_l}'
+            WHERE t.anio = ? AND t.mes = ?
+              AND f.tipo_operacion = ?
               {where_zona}
         """
-        res = pd.read_sql(q, conn).iloc[0]
+        res = pd.read_sql(q, conn, params=[int(anio), int(month_id), op_l, str(zona_nombre)]).iloc[0]
         p_vivienda = res['p_vivienda'] or 0
         v_t        = res['v_t']        or 0
         p_m2       = res['p_m2']       or 0
@@ -907,10 +936,10 @@ def get_madrid_average_series(anio: int, op: str) -> pd.DataFrame:
             SELECT t.mes, AVG(f.{val_col}) as precio_m2
             FROM Fact_Operacion f
             JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
-            WHERE t.anio = {anio} AND f.tipo_operacion = '{real_op}'
+            WHERE t.anio = ? AND f.tipo_operacion = ?
             GROUP BY t.mes ORDER BY t.mes
         """
-        df_hist = pd.read_sql(q_hist, conn)
+        df_hist = pd.read_sql(q_hist, conn, params=[int(anio), real_op])
         df_hist['is_prediction'] = False
 
         # 2. Predicción desde CSV
@@ -952,67 +981,82 @@ def get_rankings(anio: int, mes: str, op: str, level: str = "barrio", category: 
     """
     if not os.path.exists(DB_PATH): return pd.DataFrame()
     conn = _conn()
-    month_id = MONTH_IDS[mes]
+    month_id = MONTH_IDS.get(mes, 1)
     op_l = _clean_op(op)
     
     # En Inversión, usamos la operación 'alquiler' para obtener la rentabilidad
     real_op = "alquiler" if op_l == "inversion" else op_l
+    anio_int = int(anio)
 
     try:
         # Filtro de distrito para el nivel barrio
         dist_filter = ""
-        if level == "barrio" and distrito != "Todos":
-            dist_filter = f" AND d.nombre = '{distrito}'"
+        params_base = [anio_int, int(month_id), real_op]
+        if level == "barrio" and distrito != "Todos" and distrito != "":
+            dist_filter = " AND d.nombre = ?"
+            params_base.append(str(distrito))
 
         if level == "barrio":
             group_col = "b.nombre"
             join_chain = "JOIN Dim_Barrio b ON f.id_barrio = b.id_barrio JOIN Dim_Distrito d ON b.id_distrito = d.id_distrito"
-            base_q = f"FROM Fact_Operacion f {join_chain} JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo WHERE t.anio = {anio} AND t.mes = {month_id} AND f.tipo_operacion = '{real_op}' {dist_filter}"
+            base_q = f"FROM Fact_Operacion f {join_chain} JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo WHERE t.anio = ? AND t.mes = ? AND f.tipo_operacion = ? {dist_filter}"
         else:
             group_col = "d.nombre"
             join_chain = "JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito"
-            base_q = f"FROM Fact_Operacion f {join_chain} JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo WHERE t.anio = {anio} AND t.mes = {month_id} AND f.tipo_operacion = '{real_op}'"
+            base_q = f"FROM Fact_Operacion f {join_chain} JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo WHERE t.anio = ? AND t.mes = ? AND f.tipo_operacion = ?"
 
+        renta_select = 'AVG(b.renta_media_hogar)' if level == 'barrio' else 'AVG(d.renta_media_hogar)'
         if category == "Precio":
-            q = f"SELECT {group_col} as name, AVG(f.precio_promedio_vivienda) as value, {'AVG(b.renta_media_hogar)' if level == 'barrio' else 'AVG(d.renta_media_hogar)'} as renta_hogar {base_q} GROUP BY name ORDER BY value DESC"
+            q = f"SELECT {group_col} as name, AVG(f.precio_promedio_vivienda) as value, {renta_select} as renta_hogar {base_q} GROUP BY name ORDER BY value DESC"
+            df = pd.read_sql(q, conn, params=params_base)
         elif category == "Rentabilidad":
-            q = f"SELECT {group_col} as name, AVG(f.rentabilidad_bruta) as value, {'AVG(b.renta_media_hogar)' if level == 'barrio' else 'AVG(d.renta_media_hogar)'} as renta_hogar {base_q} GROUP BY name ORDER BY value DESC"
+            q = f"SELECT {group_col} as name, AVG(f.rentabilidad_bruta) as value, {renta_select} as renta_hogar {base_q} GROUP BY name ORDER BY value DESC"
+            df = pd.read_sql(q, conn, params=params_base)
         elif category == "Conectividad":
             if level == "barrio":
+                conn_params = [str(distrito)] if (distrito != "Todos" and distrito != "") else []
+                conn_filter = "AND d.nombre = ?" if conn_params else ""
                 q = f"""
                     SELECT b.nombre as name, 
                            MIN(100, ( (5000 - b.dist_min_public_transport_m) / 100 + b.count_public_transport_500m * 2 )) as value 
                     FROM Dim_Barrio b 
                     JOIN Dim_Distrito d ON b.id_distrito = d.id_distrito
-                    WHERE 1=1 {dist_filter}
+                    WHERE 1=1 {conn_filter}
                     ORDER BY value DESC
                 """
+                df = pd.read_sql(q, conn, params=conn_params) if conn_params else pd.read_sql(q, conn)
             else:
-                q = f"""
+                q = """
                     SELECT d.nombre as name, 
                            AVG(MIN(100, ( (5000 - b.dist_min_public_transport_m) / 100 + b.count_public_transport_500m * 2 ))) as value 
                     FROM Dim_Barrio b 
                     JOIN Dim_Distrito d ON b.id_distrito = d.id_distrito
                     GROUP BY name ORDER BY value DESC
                 """
+                df = pd.read_sql(q, conn)
         elif category == "Estabilidad":
+            stab_params = [real_op, anio_int, anio_int - 1]
+            if level == "barrio" and distrito != "Todos" and distrito != "":
+                stab_filter = "AND d.nombre = ?"
+                stab_params.append(str(distrito))
+            else:
+                stab_filter = ""
             q = f"""
                 SELECT {group_col} as name, 
                        100 * (1 - (SQRT(AVG(f.precio_m2 * f.precio_m2) - AVG(f.precio_m2) * AVG(f.precio_m2)) / NULLIF(AVG(f.precio_m2), 0))) as value
                 FROM Fact_Operacion f
                 {join_chain}
                 JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
-                WHERE f.tipo_operacion = '{real_op}'
-                  AND (t.anio = {anio} OR t.anio = {anio-1})
-                  {dist_filter}
+                WHERE f.tipo_operacion = ?
+                  AND (t.anio = ? OR t.anio = ?)
+                  {stab_filter}
                 GROUP BY name 
                 HAVING COUNT(*) > 1
                 ORDER BY value DESC
             """
+            df = pd.read_sql(q, conn, params=stab_params)
         else:
             return pd.DataFrame()
-
-        df = pd.read_sql(q, conn)
         
         # FALLBACK A PREDICCIONES
         if df.empty and anio >= 2026:
@@ -1150,7 +1194,7 @@ def get_heatmap_data(year: int, op: str, level: str = "distrito"):
                 FROM Fact_Operacion f
                 JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito
                 JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
-                WHERE t.anio = {int(year)} AND f.tipo_operacion = '{real_op}'
+                WHERE t.anio = ? AND f.tipo_operacion = ?
                   AND f.id_barrio != -1
                 GROUP BY zona, t.mes
             """
@@ -1160,12 +1204,12 @@ def get_heatmap_data(year: int, op: str, level: str = "distrito"):
                 FROM Fact_Operacion f
                 JOIN Dim_Barrio b ON f.id_barrio = b.id_barrio
                 JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
-                WHERE t.anio = {int(year)} AND f.tipo_operacion = '{real_op}'
+                WHERE t.anio = ? AND f.tipo_operacion = ?
                   AND b.id_barrio != -1
                   AND b.nombre NOT LIKE '%[DATO A NIVEL DISTRITO]%'
                 GROUP BY zona, t.mes
             """
-        df = pd.read_sql(q, conn)
+        df = pd.read_sql(q, conn, params=[int(year), real_op])
         
         # Filtrar nombres de distrito si estamos a nivel barrio
         if level != "distrito" and not df.empty:
@@ -1237,22 +1281,22 @@ def get_heatmap_data(year: int, op: str, level: str = "distrito"):
 
 def get_affordability_data(anio: int, mes: str, op: str) -> pd.DataFrame:
     conn = _conn()
-    month_id = MONTH_IDS[mes]
+    month_id = MONTH_IDS.get(mes, 1)
     op_l = _clean_op(op)
     real_op = "alquiler" if op_l == "inversion" else op_l
     
-    q = f"""
+    q = """
         SELECT d.nombre as distrito,
                d.renta_media_hogar as renta_anual,
                AVG(f.precio_promedio_vivienda) as ticket_medio
         FROM Fact_Operacion f
         JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito
         JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
-        WHERE t.anio = {anio} AND t.mes = {month_id} AND f.tipo_operacion = '{real_op}'
+        WHERE t.anio = ? AND t.mes = ? AND f.tipo_operacion = ?
         GROUP BY d.nombre
     """
     try:
-        df = pd.read_sql(q, conn)
+        df = pd.read_sql(q, conn, params=[int(anio), int(month_id), real_op])
         if df.empty or df['ticket_medio'].isnull().all():
             # Fallback to predictions
             pred_df = _get_predictions_df()
@@ -1276,17 +1320,17 @@ def get_seasonal_averages(anio: int, op: str) -> list:
     op_l = _clean_op(op)
     real_op = "alquiler" if op_l == "inversion" else op_l
     
-    q = f"""
+    q = """
         SELECT t.mes,
                AVG(f.precio_m2) as precio_m2
         FROM Fact_Operacion f
         JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
-        WHERE t.anio = {anio} AND f.tipo_operacion = '{real_op}'
+        WHERE t.anio = ? AND f.tipo_operacion = ?
         GROUP BY t.mes
         ORDER BY t.mes
     """
     try:
-        df = pd.read_sql(q, conn)
+        df = pd.read_sql(q, conn, params=[int(anio), real_op])
         if df.empty or df['precio_m2'].isnull().all():
             # Fallback to predictions
             pred_df = _get_predictions_df()
@@ -1315,24 +1359,25 @@ def get_seasonal_averages(anio: int, op: str) -> list:
 
 def get_scatter_opportunity_data(anio: int, mes: str, op: str, level: str = "distrito") -> pd.DataFrame:
     conn = _conn()
-    month_id = MONTH_IDS[mes]
+    month_id = MONTH_IDS.get(mes, 1)
     op_l = _clean_op(op)
     real_op = "alquiler" if op_l == "inversion" else op_l
+    name_col = "d.nombre" if level == "distrito" else "b.nombre"
     
     # Try querying from DB first
     q = f"""
-        SELECT {'d.nombre' if level == 'distrito' else 'b.nombre'} as name,
+        SELECT {name_col} as name,
                AVG(f.precio_m2) as precio_m2,
                AVG(b.dist_min_public_transport_m) as dist_transport
         FROM Fact_Operacion f
         JOIN Dim_Barrio b ON f.id_barrio = b.id_barrio
         JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito
         JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
-        WHERE t.anio = {anio} AND t.mes = {month_id} AND f.tipo_operacion = '{real_op}'
+        WHERE t.anio = ? AND t.mes = ? AND f.tipo_operacion = ?
         GROUP BY name
     """
     try:
-        df = pd.read_sql(q, conn)
+        df = pd.read_sql(q, conn, params=[int(anio), int(month_id), real_op])
         if df.empty or df['precio_m2'].isnull().all():
             # Fallback to predictions
             pred_df = _get_predictions_df()
@@ -1578,26 +1623,32 @@ def get_interest_rate_impact_data(district: str = "Todos", barrio: str = "Todos"
     
     conn = _conn()
     filter_clause = ""
-    if barrio != "Todos":
-        filter_clause = f"AND b.nombre = '{barrio}'"
-    elif district != "Todos":
-        filter_clause = f"AND d.nombre = '{district}'"
+    param_val = None
+    if barrio != "Todos" and barrio != "":
+        filter_clause = "AND b.nombre = ?"
+        param_val = str(barrio)
+    elif district != "Todos" and district != "":
+        filter_clause = "AND d.nombre = ?"
+        param_val = str(district)
         
     results = []
     try:
         for year in years:
+            params = [int(year)]
+            if param_val is not None:
+                params.append(param_val)
             q = f"""
                 SELECT AVG(f.precio_m2) as p_m2
                 FROM Fact_Operacion f
                 JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
                 JOIN Dim_Barrio b ON f.id_barrio = b.id_barrio
                 JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito
-                WHERE t.anio = {year}
+                WHERE t.anio = ?
                   AND f.tipo_operacion = 'venta'
                   {filter_clause}
             """
             p_m2 = 0.0
-            res_df = pd.read_sql(q, conn)
+            res_df = pd.read_sql(q, conn, params=params)
             if not res_df.empty:
                 val = res_df.iloc[0]['p_m2']
                 if val is not None:

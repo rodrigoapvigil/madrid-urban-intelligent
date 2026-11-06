@@ -32,7 +32,7 @@ allowed_origins = default_origins + env_origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_origin_regex=r"https://.*\.vercel\.app",
+    allow_origin_regex=r"^https:\/\/(dmiyc|madrid-urban-intelligent)[a-zA-Z0-9-]*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "Accept", "X-Requested-With"],
@@ -171,6 +171,8 @@ def api_seasonal_trend(anio: int = 2026, op: str = "alquiler"):
 
 @app.get("/api/debug-path")
 def debug_path():
+    if os.getenv("ENVIRONMENT") == "production" or os.getenv("RENDER") == "true":
+        raise HTTPException(status_code=404, detail="Endpoint no disponible en producción.")
     return {"db_path": data.DB_PATH, "backend_dir": data._BACKEND_DIR}
 
 @app.get("/api/heatmap")
@@ -364,10 +366,13 @@ def chat_endpoint(request: ChatRequest):
 
         return ChatResponse(response=answer_text, session_id=session_id, context=new_context)
     except Exception as e:
-        import traceback
-        error_msg = traceback.format_exc()
-        print(f"Error en RAG:\n{error_msg}")
-        return ChatResponse(response=f"Error interno: {str(e)}", session_id=session_id, context=new_context)
+        import logging
+        logging.getLogger("uvicorn.error").error(f"Error interno en chat conversacional: {e}", exc_info=True)
+        return ChatResponse(
+            response="El motor conversacional ha experimentado una incidencia puntual. Puedes consultar todas las métricas, comparativas y gráficos directamente en el Dashboard interactivo.",
+            session_id=session_id,
+            context=new_context
+        )
 
 @app.delete("/api/chat/session/{session_id}")
 def clear_session(session_id: str):
@@ -381,12 +386,16 @@ def clear_session(session_id: str):
 try:
     from services.veredicto_engine import VeredictoRequest, VeredictoResponse, evaluar_inmueble
     from services.portal_parser import parse_portal_url, PortalParsedData
-    from services.payment_service import crear_sesion_checkout, procesar_webhook_stripe, verificar_token_descarga
+    from services.payment_service import (
+        crear_sesion_checkout, procesar_webhook_stripe, verificar_token_descarga, confirmar_pago_y_generar_token
+    )
     from services.pdf_generator import generar_dossier_pdf
 except ImportError:
     from backend.services.veredicto_engine import VeredictoRequest, VeredictoResponse, evaluar_inmueble
     from backend.services.portal_parser import parse_portal_url, PortalParsedData
-    from backend.services.payment_service import crear_sesion_checkout, procesar_webhook_stripe, verificar_token_descarga
+    from backend.services.payment_service import (
+        crear_sesion_checkout, procesar_webhook_stripe, verificar_token_descarga, confirmar_pago_y_generar_token
+    )
     from backend.services.pdf_generator import generar_dossier_pdf
 
 
@@ -497,6 +506,24 @@ async def webhook_stripe(request: Request):
         return resultado
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Webhook error: {str(e)}")
+
+
+@app.get("/api/veredicto/confirmar-sesion")
+def confirmar_sesion_endpoint(session_id: str = Query(..., description="ID de sesión de Stripe Checkout")):
+    """
+    Verifica con Stripe si la sesión de pago ha sido completada y devuelve el token firmado de descarga.
+    """
+    token, datos, status = confirmar_pago_y_generar_token(session_id)
+    if status != "paid" or not token:
+        raise HTTPException(
+            status_code=402,
+            detail=f"El pago no ha sido confirmado por la pasarela (estado: {status})."
+        )
+    return {
+        "status": "ok",
+        "token": token,
+        "datos": datos
+    }
 
 
 @app.get("/api/veredicto/descargar-dossier")
