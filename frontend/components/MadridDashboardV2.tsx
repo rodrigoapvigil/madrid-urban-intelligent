@@ -59,6 +59,19 @@ const createAreaGradient = (context: any, color: string, opacity = 0.28) => {
   return gradient;
 };
 
+const createForecastRegionPlugin = (id: string, firstForecastIndex: number) => ({
+  id,
+  beforeDatasetsDraw(chart: any) {
+    if (firstForecastIndex < 0 || !chart.chartArea || !chart.scales.x) return;
+    const startX = chart.scales.x.getPixelForValue(firstForecastIndex);
+    const { top, bottom, right } = chart.chartArea;
+    chart.ctx.save();
+    chart.ctx.fillStyle = 'rgba(142, 45, 226, 0.055)';
+    chart.ctx.fillRect(startX, top, Math.max(0, right - startX), bottom - top);
+    chart.ctx.restore();
+  },
+});
+
 const getCurrentMadridPeriod = () => {
   const parts = new Intl.DateTimeFormat('es-ES', {
     timeZone: 'Europe/Madrid',
@@ -859,11 +872,22 @@ const MadridDashboardV2: React.FC = () => {
             const found = seriesMadrid.find(d => d.mes === i + 1);
             return found ? found.precio_m2 * multiplier : null;
           });
+          const predictionStart = rawData.findIndex(d => d.is_prediction);
+          const actualPrices = alignedPrices.map((value, index) => {
+            const found = rawData.find(d => d.mes === index + 1);
+            return found && !found.is_prediction ? value : null;
+          });
+          const forecastPrices = alignedPrices.map((value, index) => {
+            const found = rawData.find(d => d.mes === index + 1);
+            const isBoundary = predictionStart > 0 && index === predictionStart - 1;
+            return found?.is_prediction || isBoundary ? value : null;
+          });
           const scale = getNiceChartScale([alignedPrices, alignedMadrid]);
 
           return new ChartJS(ctx, {
             type: 'line',
             plugins: [
+              createForecastRegionPlugin(`forecastRegion-${label}`, predictionStart),
               {
                 id: 'legendSpacing',
                 beforeInit(chart) {
@@ -881,46 +905,42 @@ const MadridDashboardV2: React.FC = () => {
               labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
               datasets: [
                 { 
+                  label: 'Media Madrid',
+                  data: alignedMadrid,
+                  borderColor: '#e89a34',
+                  backgroundColor: (context: any) => createAreaGradient(context, '#e89a34', 0.17),
+                  fill: 'start',
+                  borderWidth: 2.25,
+                  tension: 0.32,
+                  cubicInterpolationMode: 'monotone',
+                  pointRadius: 0,
+                },
+                {
                   label: `${label} · Dato real`,
-                  data: alignedPrices, 
-                  borderColor: mainColor, 
+                  data: actualPrices,
+                  borderColor: mainColor,
+                  backgroundColor: (context: any) => createAreaGradient(context, mainColor, 0.24),
+                  fill: { target: 0 },
                   tension: 0.38,
                   cubicInterpolationMode: 'monotone',
-                  fill: 'start',
-                  backgroundColor: (context: any) => createAreaGradient(context, mainColor),
                   borderWidth: 3,
                   pointRadius: 0,
                   pointHoverRadius: 5,
                   pointHitRadius: 14,
-                  segment: {
-                    borderColor: (context: any) => {
-                      const found = rawData.find(d => d.mes === context.p1DataIndex + 1);
-                      return found && found.is_prediction ? '#8e2de2' : mainColor;
-                    },
-                    borderDash: (context: any) => {
-                      const found = rawData.find(d => d.mes === context.p1DataIndex + 1);
-                      return found && found.is_prediction ? [5, 5] : undefined;
-                    },
-                  }
-                },
-                { 
-                  label: 'Media Madrid', 
-                  data: alignedMadrid,
-                  borderColor: '#d2d2d7', 
-                  borderWidth: 1.5, 
-                  pointRadius: 0,
-                  borderDash: [5, 5],
-                  segment: {
-                    borderDash: (ctx: any) => [5, 5],
-                  }
                 },
                 {
                   label: 'Proyección (Predicción)',
-                  data: [],
+                  data: forecastPrices,
                   borderColor: '#8e2de2',
-                  borderDash: [5, 5],
-                  borderWidth: 2.5,
-                  pointRadius: 0
+                  backgroundColor: (context: any) => createAreaGradient(context, '#8e2de2', 0.24),
+                  fill: { target: 0 },
+                  tension: 0.38,
+                  cubicInterpolationMode: 'monotone',
+                  borderDash: [6, 4],
+                  borderWidth: 3,
+                  pointRadius: 0,
+                  pointHoverRadius: 5,
+                  pointHitRadius: 14,
                 }
               ]
             },
@@ -970,7 +990,7 @@ const MadridDashboardV2: React.FC = () => {
                   },
                   font: { size: 9, weight: 'bold' },
                   formatter: (value, context) => {
-                    if (context.datasetIndex !== 0) return null;
+                    if (context.datasetIndex === 0) return null;
                     if (value === null) return null;
                     const unit = activeProfile.id === 'inversion' ? '%' : '€';
                     return new Intl.NumberFormat('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value) + unit;
@@ -1008,7 +1028,7 @@ const MadridDashboardV2: React.FC = () => {
                       }
 
                       // Línea 2: Media Madrid
-                      if (context.datasetIndex === 1) {
+                      if (context.datasetIndex === 0) {
                         const formatted = new Intl.NumberFormat('es-ES', { 
                           minimumFractionDigits: activeProfile.id === 'alquiler' ? 2 : 1, 
                           maximumFractionDigits: 2 
@@ -1141,9 +1161,12 @@ const MadridDashboardV2: React.FC = () => {
           const overlayB = Array.from({ length: 12 }, (_, i) => { const found = seriesB.find(d => d.mes === i + 1); return found ? found.precio_m2 * overlayMultiplier : null; });
           const overlayMadrid = Array.from({ length: 12 }, (_, i) => { const found = seriesMadrid.find(d => d.mes === i + 1); return found ? found.precio_m2 * overlayMultiplier : null; });
           const overlayScale = getNiceChartScale([overlayA, overlayB, overlayMadrid]);
+          const forecastIndices = [seriesA.findIndex(d => d.is_prediction), seriesB.findIndex(d => d.is_prediction)].filter(index => index >= 0);
+          const firstForecastIndex = forecastIndices.length ? Math.min(...forecastIndices) : -1;
           chartsRef.current.push(new ChartJS(ctxOverlay, {
             type: 'line',
             plugins: [
+              createForecastRegionPlugin(`forecastRegion-overlay-${activeProfile.id}`, firstForecastIndex),
               {
                 id: 'legendSpacing',
                 beforeInit(chart) {
@@ -1168,8 +1191,8 @@ const MadridDashboardV2: React.FC = () => {
                   pointRadius: 0,
                   pointHoverRadius: 5,
                   pointHitRadius: 14,
-                  fill: 'start',
-                  backgroundColor: (context: any) => createAreaGradient(context, activeProfile.color, 0.12),
+                  fill: { target: 2 },
+                  backgroundColor: (context: any) => createAreaGradient(context, activeProfile.color, 0.16),
                   tension: 0.38,
                   cubicInterpolationMode: 'monotone',
                   segment: {
@@ -1191,6 +1214,8 @@ const MadridDashboardV2: React.FC = () => {
                   pointRadius: 0,
                   pointHoverRadius: 5,
                   pointHitRadius: 14,
+                  fill: { target: 2 },
+                  backgroundColor: (context: any) => createAreaGradient(context, '#344054', 0.14),
                   tension: 0.38,
                   cubicInterpolationMode: 'monotone',
                   segment: {
@@ -1207,12 +1232,13 @@ const MadridDashboardV2: React.FC = () => {
                 { 
                   label: 'Media Madrid', 
                   data: overlayMadrid,
-                  borderColor: '#d2d2d7', 
-                  borderWidth: 1.5, 
+                  borderColor: '#e89a34',
+                  backgroundColor: (context: any) => createAreaGradient(context, '#e89a34', 0.17),
+                  fill: 'start',
+                  borderWidth: 2.25,
                   pointRadius: 0, 
-                  tension: 0.4,
-                  borderDash: [5, 5],
-                  segment: { borderDash: (ctx: any) => [5, 5] }
+                  tension: 0.32,
+                  cubicInterpolationMode: 'monotone'
                 },
                 {
                   label: 'Proyección (Predicción)',
