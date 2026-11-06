@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import Image from 'next/image';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import './MadridDashboardV2.css';
@@ -398,8 +397,6 @@ const MadridDashboardV2: React.FC = () => {
 
   // State: Niveles Comparativa
   const [compareLevel, setCompareLevel] = useState<'Distritos' | 'Barrios'>('Distritos');
-  const [isCompareTransitioning, setIsCompareTransitioning] = useState(false);
-  const [compareSlideDir, setCompareSlideDir] = useState<'left' | 'right' | null>(null);
 
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
   const [isDashboardLoading, setIsDashboardLoading] = useState(true);
@@ -759,7 +756,7 @@ const MadridDashboardV2: React.FC = () => {
   useEffect(() => {
     const isMobileFilter = typeof window !== 'undefined'
       && window.matchMedia('(max-width: 768px)').matches
-      && ['year', 'month', 'dist', 'barrio'].includes(activeDropdown || '');
+      && ['year', 'month', 'dist', 'barrio', 'zoneA', 'zoneB'].includes(activeDropdown || '');
     if (!isMobileFilter) return;
 
     const previousOverflow = document.body.style.overflow;
@@ -899,6 +896,7 @@ const MadridDashboardV2: React.FC = () => {
                   }
                 }, 
                 datalabels: {
+                  display: (context) => context.chart.width >= 560,
                   align: (context) => {
                     const val = context.dataset.data[context.dataIndex] as number;
                     const madridVal = context.chart.data.datasets[1].data[context.dataIndex] as number;
@@ -1716,14 +1714,11 @@ const MadridDashboardV2: React.FC = () => {
   };
 
   const handleLevelToggle = (level: 'Distritos' | 'Barrios') => {
-    if (level === compareLevel || isCompareTransitioning) return;
-    setCompareSlideDir(level === 'Barrios' ? 'right' : 'left');
-    setIsCompareTransitioning(true);
-    setTimeout(() => {
-      setCompareLevel(level);
-      setIsCompareTransitioning(false);
-      setCompareSlideDir(null);
-    }, 480);
+    if (level === compareLevel) return;
+    const availableZones = (level === 'Distritos' ? availableDistricts : availableBarrios).filter(zone => zone !== 'Todos');
+    if (!availableZones.includes(selectedZoneA)) setSelectedZoneA(availableZones[0] || 'Todos');
+    if (!availableZones.includes(selectedZoneB)) setSelectedZoneB(availableZones[1] || availableZones[0] || 'Todos');
+    setCompareLevel(level);
   };
 
   const getSlideClass = (idx: number) => {
@@ -1785,7 +1780,7 @@ const MadridDashboardV2: React.FC = () => {
         </div>
       </nav>
 
-      {activeDropdown && ['year', 'month', 'dist', 'barrio'].includes(activeDropdown) && (
+      {activeDropdown && ['year', 'month', 'dist', 'barrio', 'zoneA', 'zoneB'].includes(activeDropdown) && (
         createPortal(<button
           type="button"
           className="v2-dropdown-backdrop"
@@ -2802,10 +2797,10 @@ const MadridDashboardV2: React.FC = () => {
                 </div>
                 <div className="v2-rank-settings">
                   <label>Ver por:</label>
-                  <div className="v2-tabs-bg small">
-                    <span className="v2-indicator" style={{ transform: `translateX(${rankingLevel === 'Distritos' ? '0' : '100%'})`, width: '80px' }} />
-                    <button className={`v2-tab-btn ${rankingLevel === 'Distritos' ? 'active' : ''}`} style={{ minWidth: '80px' }} onClick={() => setRankingLevel('Distritos')}>Distritos</button>
-                    <button className={`v2-tab-btn ${rankingLevel === 'Barrios' ? 'active' : ''}`} style={{ minWidth: '80px' }} onClick={() => setRankingLevel('Barrios')}>Barrios</button>
+                  <div className="v2-tabs-bg small v2-level-switch" role="group" aria-label="Nivel de exploración">
+                    <span className="v2-indicator" style={{ transform: `translateX(${rankingLevel === 'Distritos' ? '0' : '100%'})` }} />
+                    <button type="button" aria-pressed={rankingLevel === 'Distritos'} className={`v2-tab-btn ${rankingLevel === 'Distritos' ? 'active' : ''}`} onClick={() => setRankingLevel('Distritos')}>Distritos</button>
+                    <button type="button" aria-pressed={rankingLevel === 'Barrios'} className={`v2-tab-btn ${rankingLevel === 'Barrios' ? 'active' : ''}`} onClick={() => setRankingLevel('Barrios')}>Barrios</button>
                   </div>
                 </div>
                 <div className="v2-rank-desc">
@@ -3153,11 +3148,42 @@ const MadridDashboardV2: React.FC = () => {
                   </button>
                 </div>
                 <div className="v2-tabs-container" style={{ flex: 'none' }}>
-                  <div className="v2-tabs-bg">
-                    <span className="v2-indicator" style={{ transform: `translateX(${compareLevel === 'Distritos' ? '0' : '100%'})`, width: '110px' }} />
-                    <button className={`v2-tab-btn ${compareLevel === 'Distritos' ? 'active' : ''}`} style={{ minWidth: '110px' }} onClick={() => handleLevelToggle('Distritos')}>Distritos</button>
-                    <button className={`v2-tab-btn ${compareLevel === 'Barrios' ? 'active' : ''}`} style={{ minWidth: '110px' }} onClick={() => handleLevelToggle('Barrios')}>Barrios</button>
+                  <div className="v2-tabs-bg v2-level-switch" role="group" aria-label="Nivel de comparación">
+                    <span className="v2-indicator" style={{ transform: `translateX(${compareLevel === 'Distritos' ? '0' : '100%'})` }} />
+                    <button type="button" aria-pressed={compareLevel === 'Distritos'} className={`v2-tab-btn ${compareLevel === 'Distritos' ? 'active' : ''}`} onClick={() => handleLevelToggle('Distritos')}>Distritos</button>
+                    <button type="button" aria-pressed={compareLevel === 'Barrios'} className={`v2-tab-btn ${compareLevel === 'Barrios' ? 'active' : ''}`} onClick={() => handleLevelToggle('Barrios')}>Barrios</button>
                   </div>
+                </div>
+              </div>
+
+              <div className="v2-compare-zone-selectors">
+                <div className={`v2-dropdown-container v2-compare-zone-select ${activeDropdown === 'zoneA' ? 'v2-z-up' : ''}`}>
+                  <span className="v2-filter-label">Zona A</span>
+                  <button type="button" className={`v2-custom-select ${activeDropdown === 'zoneA' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'zoneA'} onClick={() => setActiveDropdown(activeDropdown === 'zoneA' ? null : 'zoneA')}>
+                    {selectedZoneA}
+                  </button>
+                  {activeDropdown === 'zoneA' && createPortal(
+                    <div className="v2-dropdown-menu" role="listbox" aria-label="Seleccionar Zona A">
+                      {(compareLevel === 'Distritos' ? availableDistricts : availableBarrios).map(z => (
+                        <button type="button" key={z} className="v2-dropdown-item" role="option" aria-selected={selectedZoneA === z} onClick={() => { setSelectedZoneA(z); setActiveDropdown(null); }}>{z}</button>
+                      ))}
+                    </div>,
+                    document.body
+                  )}
+                </div>
+                <div className={`v2-dropdown-container v2-compare-zone-select ${activeDropdown === 'zoneB' ? 'v2-z-up' : ''}`}>
+                  <span className="v2-filter-label">Zona B</span>
+                  <button type="button" className={`v2-custom-select ${activeDropdown === 'zoneB' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'zoneB'} onClick={() => setActiveDropdown(activeDropdown === 'zoneB' ? null : 'zoneB')}>
+                    {selectedZoneB}
+                  </button>
+                  {activeDropdown === 'zoneB' && createPortal(
+                    <div className="v2-dropdown-menu" role="listbox" aria-label="Seleccionar Zona B">
+                      {(compareLevel === 'Distritos' ? availableDistricts : availableBarrios).map(z => (
+                        <button type="button" key={z} className="v2-dropdown-item" role="option" aria-selected={selectedZoneB === z} onClick={() => { setSelectedZoneB(z); setActiveDropdown(null); }}>{z}</button>
+                      ))}
+                    </div>,
+                    document.body
+                  )}
                 </div>
               </div>
 
@@ -3165,19 +3191,6 @@ const MadridDashboardV2: React.FC = () => {
                 <div className="v2-compare-grid">
                   {/* ZONA A (IZQ) */}
                   <div className="v2-comp-col">
-                    <div className={`v2-dropdown-container ${activeDropdown === 'zoneA' ? 'v2-z-up' : ''}`} style={{ marginBottom: '16px' }}>
-                      <span className="v2-filter-label">Zona A</span>
-                      <div className={`v2-custom-select ${activeDropdown === 'zoneA' ? 'open' : ''}`} onClick={() => setActiveDropdown(activeDropdown === 'zoneA' ? null : 'zoneA')}>
-                        {selectedZoneA}
-                        {activeDropdown === 'zoneA' && (
-                          <div className="v2-dropdown-menu">
-                            {(compareLevel === 'Distritos' ? availableDistricts : availableBarrios).map(z => (
-                              <div key={z} className="v2-dropdown-item" onClick={(e) => { e.stopPropagation(); setSelectedZoneA(z); setActiveDropdown(null); }}>{z}</div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
                     <div className="v2-chart-card">
                       <div className="v2-chart-head">
                         Evolución {p.id === 'inversion' ? 'Rentabilidad' : 'Precio m²'} ({p.label}) - {selectedZoneA}
@@ -3401,19 +3414,6 @@ const MadridDashboardV2: React.FC = () => {
 
                   {/* ZONA B (DER) */}
                   <div className="v2-comp-col">
-                    <div className={`v2-dropdown-container ${activeDropdown === 'zoneB' ? 'v2-z-up' : ''}`} style={{ marginBottom: '16px' }}>
-                      <span className="v2-filter-label">Zona B</span>
-                      <div className={`v2-custom-select ${activeDropdown === 'zoneB' ? 'open' : ''}`} onClick={() => setActiveDropdown(activeDropdown === 'zoneB' ? null : 'zoneB')}>
-                        {selectedZoneB}
-                        {activeDropdown === 'zoneB' && (
-                          <div className="v2-dropdown-menu">
-                            {(compareLevel === 'Distritos' ? availableDistricts : availableBarrios).map(z => (
-                              <div key={z} className="v2-dropdown-item" onClick={(e) => { e.stopPropagation(); setSelectedZoneB(z); setActiveDropdown(null); }}>{z}</div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
                     <div className="v2-chart-card">
                       <div className="v2-chart-head">
                         Evolución {p.id === 'inversion' ? 'Rentabilidad' : 'Precio m²'} ({p.label}) - {selectedZoneB}
@@ -4241,10 +4241,6 @@ const MadridDashboardV2: React.FC = () => {
           </div>
         </div>
       )}
-
-      <button className="v2-btn-chat" onClick={() => router.push('/madrid/chat')}>
-        <Image src="/AMBI.png" alt="AMBI" width={140} height={140} style={{ objectFit: 'contain' }} />
-      </button>
 
       {/* FOOTER */}
       <footer className="apple-footer">
