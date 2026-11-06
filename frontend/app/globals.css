@@ -9,3 +9,9 @@ body {
 * {
   box-sizing: border-box;
 }
+
+html { scroll-behavior: smooth; }
+body { color: #17263b; background: #fff; }
+::selection { color: #fff; background: #075da8; }
+:focus-visible { outline-color: #075da8; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

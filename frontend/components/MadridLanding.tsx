@@ -1,7 +1,13 @@
 import React from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import './MadridLanding.css';
 import { SiteFooter, SiteHeader } from './SiteChrome';
+import madridHero from './imagen/madrid.jpg';
+import rentImage from './imagen/alquilar.jpg';
+import buyImage from './imagen/comprar.jpg';
+import sellImage from './imagen/vender.jpg';
+import investImage from './imagen/invertir.jpg';
 
 const MadridLanding: React.FC = () => {
   const router = useRouter();
@@ -15,9 +21,10 @@ const MadridLanding: React.FC = () => {
 
       {/* 3. HERO SECTION (DARK CHAPTER) */}
       <section className="hero-chapter">
+        <Image src={madridHero} alt="" fill priority sizes="100vw" className="hero-media-image" />
         <div className="hero-content">
           <h1 className="hero-title">
-            Chatea con Ambi,<br />
+            Chatea con AMBI,
             <span className="hero-gradient-text">nuestro modelo analítico inteligente</span>
           </h1>
           <p className="hero-subtitle">
@@ -38,7 +45,7 @@ const MadridLanding: React.FC = () => {
           <h2 className="chapter-title">Diseñado para cada necesidad</h2>
           <div className="profile-grid">
             <div className="apple-card">
-              <div className="card-image-area bg-alquiler"></div>
+              <div className="card-image-area"><Image src={rentImage} alt="" fill sizes="(max-width: 734px) 100vw, 25vw" /></div>
               <div className="card-content">
                 <h3 className="card-title">Alquiler</h3>
                 <p className="card-desc">En modalidad de alquiler, busca asequibilidad y conveniencia para encontrar el hogar ideal.</p>
@@ -47,7 +54,7 @@ const MadridLanding: React.FC = () => {
             </div>
 
             <div className="apple-card">
-              <div className="card-image-area bg-compra"></div>
+              <div className="card-image-area"><Image src={buyImage} alt="" fill sizes="(max-width: 734px) 100vw, 25vw" /></div>
               <div className="card-content">
                 <h3 className="card-title">Compra</h3>
                 <p className="card-desc">Busca un hogar, estabilidad y máxima calidad de vida, con un enfoque estratégico.</p>
@@ -56,7 +63,7 @@ const MadridLanding: React.FC = () => {
             </div>
 
             <div className="apple-card">
-              <div className="card-image-area bg-venta"></div>
+              <div className="card-image-area"><Image src={sellImage} alt="" fill sizes="(max-width: 734px) 100vw, 25vw" /></div>
               <div className="card-content">
                 <h3 className="card-title">Venta</h3>
                 <p className="card-desc">Busca maximizar el beneficio y el mejor timing de venta de tu propiedad.</p>
@@ -65,7 +72,7 @@ const MadridLanding: React.FC = () => {
             </div>
 
             <div className="apple-card">
-              <div className="card-image-area bg-inversion"></div>
+              <div className="card-image-area"><Image src={investImage} alt="" fill sizes="(max-width: 734px) 100vw, 25vw" /></div>
               <div className="card-content">
                 <h3 className="card-title">Inversión</h3>
                 <p className="card-desc">Busca rentabilidad financiera sólida e ingresos pasivos a través de activos estratégicos.</p>
@@ -79,7 +86,6 @@ const MadridLanding: React.FC = () => {
       {/* 5. EL VEREDICTO CTA */}
       <section className="veredicto-cta-chapter">
         <div className="veredicto-cta-inner">
-          <p className="veredicto-cta-label">Herramienta de negociación</p>
           <h2 className="veredicto-cta-headline">
             ¿Está este piso caro o barato?
           </h2>

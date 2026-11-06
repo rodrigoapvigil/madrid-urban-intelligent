@@ -517,3 +517,64 @@
 .veredicto-manual-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .veredicto-footer { display: none; }
 @media (max-width: 734px) { .veredicto-manual-grid { grid-template-columns: 1fr; } }
+
+/* Veredicto: readable canvas, clear task path and usable result states. */
+.veredicto-root { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.veredicto-main { max-width: 960px; padding: 56px 28px 72px; }
+.veredicto-hero { margin: 4px auto 34px; }
+.veredicto-title { color: #14243b; font-size: 46px; letter-spacing: -.04em; }
+.veredicto-subtitle { max-width: 660px; color: #526176; line-height: 1.65; }
+.veredicto-segmented-wrap { margin-bottom: 22px; }
+.veredicto-segmented { border-radius: 12px; padding: 4px; }
+.veredicto-segment-btn { min-height: 42px; padding: 9px 22px; border-radius: 9px; }
+.veredicto-card { border-radius: 16px; box-shadow: 0 8px 26px rgba(17,34,57,.075); }
+.veredicto-tabs { padding: 6px; gap: 6px; }
+.veredicto-tab-btn { min-height: 48px; border-radius: 10px; border-bottom: 0; }
+.veredicto-tab-btn.active { box-shadow: 0 1px 4px rgba(17,34,57,.1); }
+.veredicto-card-body { padding: 28px; }
+.veredicto-label { color: #344256; font-size: 11px; letter-spacing: .07em; }
+.veredicto-input { min-height: 48px; border-radius: 9px; color: #17263b; border-color: #c9d2dd; }
+.veredicto-input:focus { background: #fff; border-color: #075da8; box-shadow: 0 0 0 3px rgba(7,93,168,.14); }
+.veredicto-input:disabled { opacity: 1; }
+.veredicto-btn-primary { min-height: 48px; border-radius: 9px; background: #075da8; box-shadow: 0 5px 14px rgba(7,93,168,.2); }
+.veredicto-btn-primary:hover:not(:disabled) { background: #064d8a; box-shadow: 0 8px 18px rgba(7,93,168,.22); }
+.veredicto-alert-error { color: #8f2424; background: #fff4f2; border-color: #f2c5bf; }
+.veredicto-alert-info { color: #164c79; background: #eff7fd; border-color: #c4deef; }
+.veredicto-results { gap: 18px; }
+.veredicto-result-hero { padding: 28px; border-radius: 16px; box-shadow: 0 8px 24px rgba(17,34,57,.07); }
+.veredicto-result-hero.CARO { background: #fff5f3; border-color: #f0c8c2; }
+.veredicto-result-hero.BARATO { background: #f1f8f3; border-color: #cce3d1; }
+.veredicto-result-hero.EN_LINEA { background: #f1f6fb; border-color: #cadbeb; }
+.veredicto-result-hero .veredicto-hero-title { color: #17263b; font-size: 27px; }
+.veredicto-result-hero p { color: #526176 !important; }
+.veredicto-result-hero .veredicto-kpi-grid { border-color: #dce3eb; }
+.veredicto-result-hero .veredicto-kpi-tile { background: rgba(255,255,255,.82); border-color: #e0e6ed; }
+.veredicto-result-hero .veredicto-kpi-label { color: #526176 !important; }
+.veredicto-result-hero .veredicto-kpi-val { color: #17263b; }
+.veredicto-result-hero .veredicto-kpi-sub { color: #526176 !important; }
+.veredicto-result-hero.CARO .veredicto-state-badge { color: #a83224 !important; background: #fff !important; border-color: #e9b5ad !important; }
+.veredicto-result-hero.BARATO .veredicto-state-badge { color: #247341 !important; background: #fff !important; border-color: #b9d9c1 !important; }
+.veredicto-result-hero.EN_LINEA .veredicto-state-badge { color: #075da8 !important; background: #fff !important; border-color: #b9d3e8 !important; }
+.veredicto-args-card { padding: 24px; border-radius: 16px; background: #f7f9fb; border-color: #e0e6ed; }
+.veredicto-args-card h3 { color: #17263b !important; }
+.veredicto-arg-item { color: #344256; background: #fff; border-color: #e1e6ec; }
+.veredicto-arg-num { color: #075da8; background: #eaf3fa; border-color: #9cc4e0; }
+.veredicto-dossier-card { border-radius: 16px; background: #f2f6fa; border-color: #d5e0ea; box-shadow: 0 8px 26px rgba(17,34,57,.07); }
+.veredicto-dossier-card h3, .veredicto-dossier-card p { color: #17263b !important; }
+.veredicto-dossier-card button:not(.veredicto-btn-primary) { color: #344256 !important; background: #fff !important; border-color: #c9d2dd !important; }
+.veredicto-root :focus-visible { outline: 3px solid #075da8; outline-offset: 3px; }
+@media (max-width: 734px) {
+  .veredicto-main { padding: 36px 16px 52px; }
+  .veredicto-title { font-size: 36px; }
+  .veredicto-hero { margin-bottom: 28px; }
+  .veredicto-badge-official { max-width: 100%; border-radius: 12px; text-align: left; line-height: 1.4; }
+  .veredicto-card-body { padding: 20px 16px; }
+  .veredicto-tab-btn { flex-direction: column; gap: 5px; font-size: 12px; }
+  .veredicto-result-hero { padding: 20px 16px; }
+  .veredicto-result-hero > div:first-child > div:last-child { text-align: left !important; }
+  .veredicto-kpi-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .veredicto-kpi-tile { padding: 12px; }
+  .veredicto-kpi-val { font-size: 16px; }
+  .veredicto-args-card, .veredicto-dossier-card { padding: 19px 16px; }
+  .veredicto-dossier-card > div:last-child { min-width: 0 !important; }
+}
