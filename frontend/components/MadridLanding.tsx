@@ -79,8 +79,6 @@ export default function MadridLanding() {
           <div className="mi-wrap mi-statement__inner">
             <p className="mi-kicker mi-kicker--muted">Democratizando la información</p>
             <h2 id="mi-statement-title" className="mi-kinetic"><span>Datos</span><span>para todos</span></h2>
-            <p className="mi-statement__claim">Cómo los datos dan forma a cada decisión.</p>
-            <p className="mi-statement__copy">Una cifra aislada cuenta poco. El periodo, la zona y la referencia de Madrid permiten entender qué está cambiando y dónde.</p>
             <div className="mi-statement__coordinates" aria-hidden="true"><span>21 DISTRITOS</span><span>131 BARRIOS</span><span>MADRID · ESPAÑA</span></div>
           </div>
         </section>

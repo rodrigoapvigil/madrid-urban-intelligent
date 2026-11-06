@@ -573,3 +573,55 @@
 @media (prefers-reduced-motion: reduce) {
   .mi-atmosphere { animation: none !important; transform: none !important; }
 }
+
+/* Faster, larger statement beat with a brighter arrival. */
+.mi-home { --mi-kinetic-size: clamp(129px,21.75vw,442px); }
+.mi-statement { min-height: 125svh; position: relative; }
+.mi-statement::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .12;
+  background: radial-gradient(ellipse 68% 62% at 52% 50%,rgba(0,130,124,.52),transparent 74%);
+}
+.mi-statement__inner { z-index: 1; grid-template-rows: auto 1fr auto; gap: clamp(16px,3vh,34px); }
+.mi-bridge { font-size: clamp(45px,7vw,100px); }
+@supports (animation-timeline: view()) {
+  .mi-kinetic span:first-child,.mi-kinetic span:last-child { animation-range: entry 0% exit 68%; }
+  .mi-statement::before {
+    animation: mi-statement-glow linear both;
+    animation-timeline: --mi-statement-timeline;
+    animation-range: entry 0% exit 72%;
+  }
+  @keyframes mi-kinetic-left {
+    0% { transform: translate3d(-24vw,18vh,0) scale(.34); opacity:0; }
+    18% { transform: translate3d(0,0,0) scale(1); opacity:1; }
+    46% { transform: translate3d(0,0,0) scale(1); opacity:1; }
+    100% { transform: translate3d(6vw,-18vh,0) scale(1.28); opacity:0; }
+  }
+  @keyframes mi-kinetic-right {
+    0% { transform: translate3d(25vw,-16vh,0) scale(.34); opacity:0; }
+    18% { transform: translate3d(0,0,0) scale(1); opacity:1; }
+    46% { transform: translate3d(0,0,0) scale(1); opacity:1; }
+    100% { transform: translate3d(-5vw,18vh,0) scale(1.28); opacity:0; }
+  }
+  @keyframes mi-statement-glow {
+    from { opacity: .08; }
+    40% { opacity: .42; }
+    to { opacity: .18; }
+  }
+}
+@media (max-width: 1050px) {
+  .mi-home { --mi-kinetic-size: clamp(106px,25vw,220px); }
+  .mi-statement { min-height: 125svh; }
+}
+@media (max-width: 650px) {
+  .mi-home { --mi-kinetic-size: clamp(72px,20.5vw,80px); }
+  .mi-statement { min-height: 115svh; }
+  .mi-statement__inner { grid-template-rows: auto 1fr auto; gap: 14px; }
+  .mi-kinetic { letter-spacing: -.065em !important; }
+  .mi-bridge { font-size: clamp(42px,11.2vw,59px); }
+  .mi-statement::before { background: radial-gradient(ellipse 92% 58% at 50% 50%,rgba(0,130,124,.6),transparent 76%); }
+}
