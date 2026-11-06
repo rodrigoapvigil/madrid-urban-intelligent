@@ -46,9 +46,9 @@ export default function ParticleField() {
 
     const draw = () => {
       context.clearRect(0, 0, width, height);
-      const radius = Math.min(width * 0.48, height * 0.84);
-      const centerX = width * 0.51;
-      const centerY = height * 0.84;
+      const radius = Math.min(width * 0.34, height * 0.44);
+      const centerX = width * 0.5;
+      const centerY = height * 0.5;
       const glow = context.createRadialGradient(centerX - radius * 0.22, centerY - radius * 0.28, radius * 0.04, centerX, centerY, radius * 1.05);
       glow.addColorStop(0, 'rgba(0,130,124,0.16)');
       glow.addColorStop(0.62, 'rgba(0,130,124,0.06)');
