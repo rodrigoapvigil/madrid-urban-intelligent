@@ -625,3 +625,21 @@
   .mi-bridge { font-size: clamp(42px,11.2vw,59px); }
   .mi-statement::before { background: radial-gradient(ellipse 92% 58% at 50% 50%,rgba(0,130,124,.6),transparent 76%); }
 }
+
+/* The headline follows scroll continuously and exits only through the sides. */
+@supports (animation-timeline: view()) {
+  .mi-kinetic span:first-child,.mi-kinetic span:last-child {
+    animation-duration: 1s;
+    animation-timing-function: linear;
+    animation-range: entry 0% exit 100%;
+    opacity: 1;
+  }
+  @keyframes mi-kinetic-left {
+    from { transform: translate3d(100vw,0,0) scale(1); opacity:1; }
+    to { transform: translate3d(-100vw,0,0) scale(1); opacity:1; }
+  }
+  @keyframes mi-kinetic-right {
+    from { transform: translate3d(-100vw,0,0) scale(1); opacity:1; }
+    to { transform: translate3d(100vw,0,0) scale(1); opacity:1; }
+  }
+}
