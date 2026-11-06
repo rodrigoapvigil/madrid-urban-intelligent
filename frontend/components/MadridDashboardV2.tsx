@@ -59,19 +59,6 @@ const createAreaGradient = (context: any, color: string, opacity = 0.28) => {
   return gradient;
 };
 
-const createForecastRegionPlugin = (id: string, firstForecastIndex: number) => ({
-  id,
-  beforeDatasetsDraw(chart: any) {
-    if (firstForecastIndex < 0 || !chart.chartArea || !chart.scales.x) return;
-    const startX = chart.scales.x.getPixelForValue(firstForecastIndex);
-    const { top, bottom, right } = chart.chartArea;
-    chart.ctx.save();
-    chart.ctx.fillStyle = 'rgba(142, 45, 226, 0.055)';
-    chart.ctx.fillRect(startX, top, Math.max(0, right - startX), bottom - top);
-    chart.ctx.restore();
-  },
-});
-
 const getCurrentMadridPeriod = () => {
   const parts = new Intl.DateTimeFormat('es-ES', {
     timeZone: 'Europe/Madrid',
@@ -887,7 +874,6 @@ const MadridDashboardV2: React.FC = () => {
           return new ChartJS(ctx, {
             type: 'line',
             plugins: [
-              createForecastRegionPlugin(`forecastRegion-${label}`, predictionStart),
               {
                 id: 'legendSpacing',
                 beforeInit(chart) {
@@ -1161,12 +1147,9 @@ const MadridDashboardV2: React.FC = () => {
           const overlayB = Array.from({ length: 12 }, (_, i) => { const found = seriesB.find(d => d.mes === i + 1); return found ? found.precio_m2 * overlayMultiplier : null; });
           const overlayMadrid = Array.from({ length: 12 }, (_, i) => { const found = seriesMadrid.find(d => d.mes === i + 1); return found ? found.precio_m2 * overlayMultiplier : null; });
           const overlayScale = getNiceChartScale([overlayA, overlayB, overlayMadrid]);
-          const forecastIndices = [seriesA.findIndex(d => d.is_prediction), seriesB.findIndex(d => d.is_prediction)].filter(index => index >= 0);
-          const firstForecastIndex = forecastIndices.length ? Math.min(...forecastIndices) : -1;
           chartsRef.current.push(new ChartJS(ctxOverlay, {
             type: 'line',
             plugins: [
-              createForecastRegionPlugin(`forecastRegion-overlay-${activeProfile.id}`, firstForecastIndex),
               {
                 id: 'legendSpacing',
                 beforeInit(chart) {
