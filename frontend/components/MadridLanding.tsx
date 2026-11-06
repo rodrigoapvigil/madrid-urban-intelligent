@@ -33,19 +33,19 @@ const markets = [
   },
 ];
 
-const particlePoints = Array.from({ length: 420 }, (_, index) => {
-  const y = 1 - 2 * (index + 0.5) / 420;
+const particlePoints = Array.from({ length: 1400 }, (_, index) => {
+  const y = 1 - 2 * (index + 0.5) / 1400;
   const radius = Math.sqrt(1 - y * y);
   const angle = Math.PI * (3 - Math.sqrt(5)) * index;
   const x = radius * Math.cos(angle);
   const z = radius * Math.sin(angle);
-  if (z < -0.22) return null;
+  if (z < -0.34) return null;
   return {
     key: index,
     cx: 300 + x * 255,
     cy: 300 + y * 255,
-    r: 0.75 + (index % 4) * 0.32,
-    opacity: Math.min(0.96, 0.24 + (z + 0.22) * 0.72),
+    r: 0.82 + (index % 5) * 0.28,
+    opacity: Math.min(0.98, 0.3 + (z + 0.34) * 0.78),
     className: index % 67 === 0 ? 'mi-particle mi-particle--coral' : index % 5 === 0 ? 'mi-particle mi-particle--white' : 'mi-particle',
   };
 }).filter((point): point is NonNullable<typeof point> => point !== null);
@@ -72,10 +72,10 @@ function ParticleSphere() {
           <circle key={point.key} className={point.className} cx={point.cx} cy={point.cy} r={point.r} opacity={point.opacity} />
         ))}
       </g>
-      <g className="mi-sphere__orbits" fill="none" stroke="rgba(185,228,255,.3)">
-        <ellipse cx="300" cy="300" rx="273" ry="87" transform="rotate(-31 300 300)" />
-        <ellipse cx="300" cy="300" rx="273" ry="87" transform="rotate(39 300 300)" />
-        <circle cx="300" cy="300" r="279" strokeDasharray="1 9" stroke="rgba(0,153,255,.54)" />
+      <g className="mi-sphere__orbits" fill="none">
+        <circle cx="300" cy="300" r="279" stroke="rgba(185,228,255,.24)" />
+        <ellipse cx="300" cy="300" rx="252" ry="54" stroke="rgba(185,228,255,.18)" />
+        <ellipse cx="300" cy="300" rx="252" ry="54" transform="rotate(63 300 300)" stroke="rgba(0,153,255,.3)" strokeDasharray="1 7" />
       </g>
       <circle className="mi-sphere__spark" cx="503" cy="181" r="4" />
       <circle className="mi-sphere__spark mi-sphere__spark--coral" cx="123" cy="418" r="3" />
@@ -135,28 +135,36 @@ export default function MadridLanding() {
         </section>
 
         <section className="mi-explore" id="explorar" aria-labelledby="mi-explore-title">
-          <div className="mi-wrap mi-explore__layout">
-            <div className="mi-explore__copy">
+          <div className="mi-wrap">
+            <div className="mi-explore__heading">
               <p className="mi-kicker mi-kicker--muted">Explora Madrid</p>
               <h2 id="mi-explore-title">Una ciudad.<br /><span>Cuatro perspectivas.</span></h2>
               <p className="mi-body">Elige la pregunta que quieres responder. La plataforma ordena la información para que puedas leer el mercado a tu manera.</p>
-              <Link href="/madrid" className="mi-inline-link">Ver todos los datos <ArrowRight aria-hidden="true" /></Link>
-              <div className="mi-explore__network"><MadridNetwork /><span>Una red. 21 distritos. 131 barrios.</span></div>
             </div>
-            <div className="mi-market-list">
-              {markets.map(({ number, title, text, href, Icon }) => (
-                <Link className="mi-market" href={href} key={number}>
-                  <span className="mi-market__number">{number}</span>
-                  <span className="mi-market__icon"><Icon aria-hidden="true" /></span>
-                  <span className="mi-market__copy"><strong>{title}</strong><small>{text}</small></span>
+            <div className="mi-explore__layout">
+              <div className="mi-explore__services">
+                <div className="mi-market-list">
+                  {markets.map(({ number, title, text, href, Icon }) => (
+                    <Link className="mi-market" href={href} key={number}>
+                      <span className="mi-market__number">{number}</span>
+                      <span className="mi-market__icon"><Icon aria-hidden="true" /></span>
+                      <span className="mi-market__copy"><strong>{title}</strong><small>{text}</small></span>
+                      <span className="mi-market__arrow"><ArrowUpRight aria-hidden="true" /></span>
+                    </Link>
+                  ))}
+                </div>
+                <Link className="mi-verdict-link" href="/madrid/veredicto">
+                  <span className="mi-verdict-link__icon"><ShieldCheck aria-hidden="true" /></span>
+                  <span><strong>El Veredicto</strong><small>Contrasta el precio de una vivienda con su zona.</small></span>
                   <span className="mi-market__arrow"><ArrowUpRight aria-hidden="true" /></span>
                 </Link>
-              ))}
-              <Link className="mi-verdict-link" href="/madrid/veredicto">
-                <span className="mi-verdict-link__icon"><ShieldCheck aria-hidden="true" /></span>
-                <span><strong>El Veredicto</strong><small>Contrasta el precio de una vivienda con su zona.</small></span>
-                <span className="mi-market__arrow"><ArrowUpRight aria-hidden="true" /></span>
-              </Link>
+                <Link href="/madrid" className="mi-inline-link">Ver todos los datos <ArrowRight aria-hidden="true" /></Link>
+              </div>
+              <aside className="mi-explore__visual" aria-label="Mapa conceptual de relaciones entre Madrid, los distritos y los barrios">
+                <span className="mi-explore__visual-label">Red urbana · Madrid</span>
+                <MadridNetwork />
+                <div className="mi-explore__visual-caption"><span>01 — 21 distritos</span><span>131 barrios</span></div>
+              </aside>
             </div>
           </div>
         </section>
@@ -173,6 +181,37 @@ export default function MadridLanding() {
               <article><strong>131</strong><span>Barrios</span><small>El detalle detrás de cada tendencia</small></article>
             </div>
             <p className="mi-stats__note">Una plataforma para entender la evolución residencial de Madrid con datos oficiales y estimaciones claramente identificadas.</p>
+          </div>
+        </section>
+
+        <section className="mi-approach" aria-labelledby="mi-approach-title">
+          <div className="mi-wrap mi-approach__layout">
+            <div className="mi-approach__intro">
+              <p className="mi-kicker mi-kicker--muted">Claridad en cada lectura</p>
+              <h2 id="mi-approach-title">Dato real.<br /><span>Estimación visible.</span></h2>
+              <p>La fuente y la naturaleza de cada cifra forman parte de la lectura: operaciones observadas y proyecciones aparecen claramente diferenciadas.</p>
+              <Link href="/madrid" className="mi-inline-link">Explorar los indicadores <ArrowRight aria-hidden="true" /></Link>
+            </div>
+            <div className="mi-approach__steps">
+              <article className="mi-approach-step">
+                <span className="mi-approach-step__index">01</span>
+                <span className="mi-approach-step__mark mi-approach-step__mark--official"><i /></span>
+                <div><strong>Operaciones oficiales</strong><p>Series históricas basadas en datos públicos de cierre del Ayuntamiento de Madrid.</p></div>
+                <span className="mi-approach-step__tag">Dato real</span>
+              </article>
+              <article className="mi-approach-step">
+                <span className="mi-approach-step__index">02</span>
+                <span className="mi-approach-step__mark mi-approach-step__mark--compare"><i /></span>
+                <div><strong>Contexto por zona</strong><p>Consulta distritos y barrios junto a la referencia de la media de Madrid.</p></div>
+                <span className="mi-approach-step__tag">Comparativa</span>
+              </article>
+              <article className="mi-approach-step">
+                <span className="mi-approach-step__index">03</span>
+                <span className="mi-approach-step__mark mi-approach-step__mark--forecast"><i /></span>
+                <div><strong>Tendencia estimada</strong><p>Las proyecciones se identifican para separarlas de los valores observados.</p></div>
+                <span className="mi-approach-step__tag">Estimación</span>
+              </article>
+            </div>
           </div>
         </section>
 
