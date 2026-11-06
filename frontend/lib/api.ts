@@ -16,24 +16,84 @@ function normalizeApiBase(value: string): string {
 
 export const API_BASE = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || LOCAL_API_BASE);
 
+const API_CACHE_TTL_MS = 2 * 60 * 1000;
+const API_CACHE_MAX_ENTRIES = 80;
+
+type CachedApiResponse = {
+  body: string;
+  status: number;
+  statusText: string;
+  headers: [string, string][];
+  expiresAt: number;
+};
+
+const apiResponseCache = new Map<string, CachedApiResponse>();
+const apiRequestsInFlight = new Map<string, Promise<CachedApiResponse>>();
+
 export function apiUrl(path: string): string {
   return `${API_BASE}/${path.replace(/^\/+/, '')}`;
 }
 
 export async function apiFetch(path: string, init: RequestInit = {}, timeoutMs = 20000): Promise<Response> {
-  const controller = new AbortController();
-  const timeout = globalThis.setTimeout(() => controller.abort(), timeoutMs);
+  const url = apiUrl(path);
+  const method = (init.method || 'GET').toUpperCase();
+  const cacheable = method === 'GET' && !init.signal && init.cache !== 'no-store' && init.cache !== 'reload';
+  const respond = (cached: CachedApiResponse) => new Response(cached.body, {
+    status: cached.status,
+    statusText: cached.statusText,
+    headers: cached.headers,
+  });
 
-  try {
-    const response = await fetch(apiUrl(path), { ...init, signal: init.signal || controller.signal });
-    if (!response.ok) throw new Error(`La API respondió con HTTP ${response.status}`);
-    return response;
-  } catch (error) {
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new Error('La API ha tardado demasiado en responder. Inténtalo de nuevo.');
+  if (cacheable) {
+    const cached = apiResponseCache.get(url);
+    if (cached && cached.expiresAt > Date.now()) return respond(cached);
+    if (cached) apiResponseCache.delete(url);
+
+    const pending = apiRequestsInFlight.get(url);
+    if (pending) return respond(await pending);
+  }
+
+  const request = async (): Promise<CachedApiResponse> => {
+    const controller = new AbortController();
+    const timeout = globalThis.setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+      const response = await fetch(url, { ...init, signal: init.signal || controller.signal });
+      if (!response.ok) throw new Error(`La API respondió con HTTP ${response.status}`);
+      const body = await response.text();
+      const result: CachedApiResponse = {
+        body,
+        status: response.status,
+        statusText: response.statusText,
+        headers: Array.from(response.headers.entries()),
+        expiresAt: Date.now() + API_CACHE_TTL_MS,
+      };
+
+      if (cacheable && body.length <= 1_000_000 && !/no-store/i.test(response.headers.get('Cache-Control') || '')) {
+        if (apiResponseCache.size >= API_CACHE_MAX_ENTRIES) {
+          const oldestKey = apiResponseCache.keys().next().value;
+          if (oldestKey) apiResponseCache.delete(oldestKey);
+        }
+        apiResponseCache.set(url, result);
+      }
+      return result;
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        throw new Error('La API ha tardado demasiado en responder. Inténtalo de nuevo.');
+      }
+      throw error;
+    } finally {
+      globalThis.clearTimeout(timeout);
     }
-    throw error;
+  };
+
+  if (!cacheable) return respond(await request());
+
+  const pending = request();
+  apiRequestsInFlight.set(url, pending);
+  try {
+    return respond(await pending);
   } finally {
-    globalThis.clearTimeout(timeout);
+    if (apiRequestsInFlight.get(url) === pending) apiRequestsInFlight.delete(url);
   }
 }

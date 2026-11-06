@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import './MadridDashboardV2.css';
-import { API_BASE, apiFetch } from '../lib/api';
+import { apiFetch } from '../lib/api';
 
 ChartJS.register(ChartDataLabels);
 
@@ -19,6 +19,20 @@ const PROFILES = [
   { id: 'venta', label: 'Venta', color: '#ff9f0a', op: 'venta' },
   { id: 'inversion', label: 'Inversión', color: '#af52de', op: 'inversion' },
 ];
+
+const MONTHS_ES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+
+const getCurrentMadridPeriod = () => {
+  const parts = new Intl.DateTimeFormat('es-ES', {
+    timeZone: 'Europe/Madrid',
+    year: 'numeric',
+    month: 'long',
+  }).formatToParts(new Date());
+  const year = parts.find(part => part.type === 'year')?.value || String(new Date().getFullYear());
+  const month = parts.find(part => part.type === 'month')?.value || '';
+  const monthLabel = `${month.charAt(0).toLocaleUpperCase('es-ES')}${month.slice(1)}`;
+  return { year, month: MONTHS_ES.includes(monthLabel) ? monthLabel : MONTHS_ES[new Date().getMonth()] };
+};
 
 const getServiceIcon = (key: string) => {
   switch (key) {
@@ -442,6 +456,7 @@ const MadridDashboardV2: React.FC = () => {
   const activePanelRef = useRef<HTMLDivElement>(null);
   const chartsRef = useRef<any[]>([]);
   const latestDashboardRequest = useRef(0);
+  const hasLoadedPrimaryKpis = useRef(false);
 
   const activeProfile = PROFILES[profileIdx];
 
@@ -461,14 +476,16 @@ const MadridDashboardV2: React.FC = () => {
       .then(res => res.json())
       .then(data => {
         const years = (data.years || []).map(String);
-        if (years.length) setAvailableYears(years);
-        if (data.months_by_year) setMonthsByYear(data.months_by_year);
+        const currentPeriod = getCurrentMadridPeriod();
+        const allYears = Array.from(new Set([...years, currentPeriod.year])).sort((a, b) => Number(a) - Number(b));
+        const months = { ...(data.months_by_year || {}) } as Record<string, string[]>;
+        const currentMonths = new Set([...(months[currentPeriod.year] || []), currentPeriod.month]);
+        months[currentPeriod.year] = MONTHS_ES.filter(month => currentMonths.has(month));
+        if (allYears.length) setAvailableYears(allYears);
+        setMonthsByYear(months);
         if (data.districts) setAvailableDistricts(['Todos', ...data.districts]);
-        const latestPeriod = data.latest_period || {};
-        const defaultYear = String(latestPeriod.year || years[years.length - 1] || '2024');
-        const months = data.months_by_year?.[defaultYear] || data.months || [];
-        setSelectedYear(defaultYear);
-        setSelectedMonth(latestPeriod.month || months[months.length - 1] || 'Diciembre');
+        setSelectedYear(currentPeriod.year);
+        setSelectedMonth(currentPeriod.month);
         setFiltersReady(true);
       })
       .catch(err => {
@@ -481,7 +498,7 @@ const MadridDashboardV2: React.FC = () => {
   // Fetch barrios when district changes
   useEffect(() => {
     if (!filtersReady) return;
-    fetch(`${API_BASE}/neighborhoods?district=${encodeURIComponent(selectedDistrict)}`)
+    apiFetch(`/neighborhoods?district=${encodeURIComponent(selectedDistrict)}`)
       .then(res => res.json())
       .then(data => {
         setAvailableBarrios(data);
@@ -495,13 +512,14 @@ const MadridDashboardV2: React.FC = () => {
     if (!filtersReady || !selectedYear || !selectedMonth) return;
     const op = activeProfile.op;
     const requestId = ++latestDashboardRequest.current;
-    setIsDashboardLoading(true);
+    if (!hasLoadedPrimaryKpis.current) setIsDashboardLoading(true);
     setDashboardLoadError(null);
     
     apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
       .then(res => res.json())
       .then(data => {
         if (requestId !== latestDashboardRequest.current) return;
+        hasLoadedPrimaryKpis.current = true;
         setKpiData({
         p_m2: data.precio_m2,
         p_vivienda: data.precio_vivienda,
@@ -524,34 +542,34 @@ const MadridDashboardV2: React.FC = () => {
       });
 
     // Series Madrid (Average)
-    fetch(`${API_BASE}/series?year=${selectedYear}&op=${op}`)
+    apiFetch(`/series?year=${selectedYear}&op=${op}`)
       .then(res => res.json())
       .then(data => setSeriesMadrid(data));
 
     // Series Zone A
-    fetch(`${API_BASE}/series?year=${selectedYear}&op=${op}&zona=${encodeURIComponent(selectedZoneA)}&tipo_zona=${compareLevel.toLowerCase().slice(0, -1)}`)
+    apiFetch(`/series?year=${selectedYear}&op=${op}&zona=${encodeURIComponent(selectedZoneA)}&tipo_zona=${compareLevel.toLowerCase().slice(0, -1)}`)
       .then(res => res.json())
       .then(data => setSeriesA(data));
 
     // Series Zone B
-    fetch(`${API_BASE}/series?year=${selectedYear}&op=${op}&zona=${encodeURIComponent(selectedZoneB)}&tipo_zona=${compareLevel.toLowerCase().slice(0, -1)}`)
+    apiFetch(`/series?year=${selectedYear}&op=${op}&zona=${encodeURIComponent(selectedZoneB)}&tipo_zona=${compareLevel.toLowerCase().slice(0, -1)}`)
       .then(res => res.json())
       .then(data => setSeriesB(data));
 
     // KPIs Zone A
     const zoneAParam = compareLevel === 'Distritos' ? `district=${encodeURIComponent(selectedZoneA)}` : `barrio=${encodeURIComponent(selectedZoneA)}`;
-    fetch(`${API_BASE}/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneAParam}`)
+    apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneAParam}`)
       .then(res => res.json())
       .then(data => setKpiDataA(data));
 
     // KPIs Zone B
     const zoneBParam = compareLevel === 'Distritos' ? `district=${encodeURIComponent(selectedZoneB)}` : `barrio=${encodeURIComponent(selectedZoneB)}`;
-    fetch(`${API_BASE}/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneBParam}`)
+    apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneBParam}`)
       .then(res => res.json())
       .then(data => setKpiDataB(data));
 
     // Map Data
-    fetch(`${API_BASE}/map?year=${selectedYear}&month=${selectedMonth}&interest=${activeProfile.id === 'alquiler' ? 'Alquiler' : activeProfile.id === 'compra' ? 'Compra-venta' : activeProfile.id === 'venta' ? 'Venta' : 'Inversión'}`)
+    apiFetch(`/map?year=${selectedYear}&month=${selectedMonth}&interest=${activeProfile.id === 'alquiler' ? 'Alquiler' : activeProfile.id === 'compra' ? 'Compra-venta' : activeProfile.id === 'venta' ? 'Venta' : 'Inversión'}`)
       .then(res => res.json())
       .then(data => setMapData(data))
       .catch(err => console.error("Error loading map data:", err));
@@ -559,8 +577,8 @@ const MadridDashboardV2: React.FC = () => {
     // Rankings Data
     if (activeProfile.id === 'venta') {
       Promise.all([
-        fetch(`${API_BASE}/liquidity?year=${selectedYear}&level=distrito`).then(r => r.ok ? r.json() : []).catch(() => []),
-        fetch(`${API_BASE}/liquidity?year=${selectedYear}&level=barrio`).then(r => r.ok ? r.json() : []).catch(() => []),
+        apiFetch(`/liquidity?year=${selectedYear}&level=distrito`).then(r => r.ok ? r.json() : []).catch(() => []),
+        apiFetch(`/liquidity?year=${selectedYear}&level=barrio`).then(r => r.ok ? r.json() : []).catch(() => []),
       ]).then(([dist, barr]) => {
         const mapLiquidity = (list: any[]) => list.map(item => ({
           name: item.name,
@@ -576,8 +594,8 @@ const MadridDashboardV2: React.FC = () => {
     } else {
       const category = activeProfile.id === 'inversion' ? 'Rentabilidad' : 'Precio';
       Promise.all([
-        fetch(`${API_BASE}/rankings?year=${selectedYear}&month=${selectedMonth}&op=${op}&level=distrito&category=${category}`).then(r => r.ok ? r.json() : []).catch(() => []),
-        fetch(`${API_BASE}/rankings?year=${selectedYear}&month=${selectedMonth}&op=${op}&level=barrio&category=${category}`).then(r => r.ok ? r.json() : []).catch(() => []),
+        apiFetch(`/rankings?year=${selectedYear}&month=${selectedMonth}&op=${op}&level=distrito&category=${category}`).then(r => r.ok ? r.json() : []).catch(() => []),
+        apiFetch(`/rankings?year=${selectedYear}&month=${selectedMonth}&op=${op}&level=barrio&category=${category}`).then(r => r.ok ? r.json() : []).catch(() => []),
       ]).then(([dist, barr]) => {
         setRankings({
           topDist: (dist || []).slice(0, 10),
@@ -589,30 +607,30 @@ const MadridDashboardV2: React.FC = () => {
     }
 
     if (activeProfile.id === 'alquiler') {
-      fetch(`${API_BASE}/affordability?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.id}`)
+      apiFetch(`/affordability?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.id}`)
         .then(res => res.ok ? res.json() : [])
         .then(data => setAffordabilityData(Array.isArray(data) ? data : []))
         .catch(err => { console.error("Error loading affordability:", err); setAffordabilityData([]); });
         
-      fetch(`${API_BASE}/seasonal-trend?anio=${selectedYear}&op=${activeProfile.id}`)
+      apiFetch(`/seasonal-trend?anio=${selectedYear}&op=${activeProfile.id}`)
         .then(res => res.ok ? res.json() : [])
         .then(data => setSeasonalTrend(Array.isArray(data) ? data : []))
         .catch(err => { console.error("Error loading seasonal trend:", err); setSeasonalTrend([]); });
     }
     
     if (activeProfile.id !== 'inversion') {
-      fetch(`${API_BASE}/scatter-opportunity?year=${selectedYear}&month=${selectedMonth}&op=${op}&level=${rankingLevel.toLowerCase().slice(0, -1)}`)
+      apiFetch(`/scatter-opportunity?year=${selectedYear}&month=${selectedMonth}&op=${op}&level=${rankingLevel.toLowerCase().slice(0, -1)}`)
         .then(res => res.ok ? res.json() : [])
         .then(data => setScatterData(Array.isArray(data) ? data : []))
         .catch(() => setScatterData([]));
     }
     
-    fetch(`${API_BASE}/heatmap?year=${selectedYear}&op=${activeProfile.id}&level=${rankingLevel.toLowerCase().slice(0, -1)}`)
+    apiFetch(`/heatmap?year=${selectedYear}&op=${activeProfile.id}&level=${rankingLevel.toLowerCase().slice(0, -1)}`)
       .then(res => res.ok ? res.json() : [])
       .then(data => setHeatmapData(Array.isArray(data) ? data : []))
       .catch(() => setHeatmapData([]));
 
-    fetch(`${API_BASE}/connectivity-analysis?district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
+    apiFetch(`/connectivity-analysis?district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
       .then(res => res.ok ? res.json() : null)
       .then(data => setConnectivityData(data))
       .catch(err => { console.error("Error loading connectivity:", err); setConnectivityData(null); });
@@ -622,7 +640,7 @@ const MadridDashboardV2: React.FC = () => {
   // Fetch liquidity data (for Inversión profile only)
   useEffect(() => {
     if (activeProfile.id === 'inversion') {
-      fetch(`${API_BASE}/liquidity?year=${selectedYear}&level=${liquidityLevel}`)
+      apiFetch(`/liquidity?year=${selectedYear}&level=${liquidityLevel}`)
         .then(res => res.ok ? res.json() : [])
         .then(data => setLiquidityData(data))
         .catch(err => { console.error("Error fetching liquidity data:", err); setLiquidityData([]); });
@@ -632,7 +650,7 @@ const MadridDashboardV2: React.FC = () => {
   // Fetch interest rate impact data (for Inversión profile only)
   useEffect(() => {
     if (activeProfile.id === 'inversion') {
-      fetch(`${API_BASE}/interest-rate-impact?district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
+      apiFetch(`/interest-rate-impact?district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
         .then(res => res.ok ? res.json() : [])
         .then(data => setInterestImpactData(data))
         .catch(err => { console.error("Error fetching interest rate impact data:", err); setInterestImpactData([]); });
@@ -643,7 +661,7 @@ const MadridDashboardV2: React.FC = () => {
   useEffect(() => {
     if (activeProfile.id === 'inversion') {
       const level = liquidityLevel === 'distrito' ? 'distrito' : 'barrio';
-      fetch(`${API_BASE}/risk-return-matrix?level=${level}&district=${encodeURIComponent(selectedDistrict)}`)
+      apiFetch(`/risk-return-matrix?level=${level}&district=${encodeURIComponent(selectedDistrict)}`)
         .then(res => res.ok ? res.json() : [])
         .then(data => setRiskReturnData(data))
         .catch(err => { console.error("Error fetching risk return data:", err); setRiskReturnData([]); });
@@ -654,7 +672,7 @@ const MadridDashboardV2: React.FC = () => {
   useEffect(() => {
     if (activeProfile.id === 'inversion') {
       const level = compareLevel.toLowerCase() === 'distritos' ? 'distrito' : 'barrio';
-      fetch(`${API_BASE}/zone-liquidity?name=${encodeURIComponent(selectedZoneA)}&level=${level}`)
+      apiFetch(`/zone-liquidity?name=${encodeURIComponent(selectedZoneA)}&level=${level}`)
         .then(res => res.ok ? res.json() : { speed: 'N/A' })
         .then(data => setLiquidityZoneA(data.speed))
         .catch(() => setLiquidityZoneA('N/A'));
@@ -664,7 +682,7 @@ const MadridDashboardV2: React.FC = () => {
   useEffect(() => {
     if (activeProfile.id === 'inversion') {
       const level = compareLevel.toLowerCase() === 'distritos' ? 'distrito' : 'barrio';
-      fetch(`${API_BASE}/zone-liquidity?name=${encodeURIComponent(selectedZoneB)}&level=${level}`)
+      apiFetch(`/zone-liquidity?name=${encodeURIComponent(selectedZoneB)}&level=${level}`)
         .then(res => res.ok ? res.json() : { speed: 'N/A' })
         .then(data => setLiquidityZoneB(data.speed))
         .catch(() => setLiquidityZoneB('N/A'));
@@ -675,7 +693,7 @@ const MadridDashboardV2: React.FC = () => {
   useEffect(() => {
     if (activeProfile.id === 'inversion') {
       const level = compareLevel.toLowerCase() === 'distritos' ? 'distrito' : 'barrio';
-      fetch(`${API_BASE}/risk-return-matrix?level=${level}&district=Todos`)
+      apiFetch(`/risk-return-matrix?level=${level}&district=Todos`)
         .then(res => res.ok ? res.json() : [])
         .then(data => {
           const found = data.find((d: any) => d.name.toLowerCase() === selectedZoneA.toLowerCase());
@@ -692,7 +710,7 @@ const MadridDashboardV2: React.FC = () => {
   useEffect(() => {
     if (activeProfile.id === 'inversion') {
       const level = compareLevel.toLowerCase() === 'distritos' ? 'distrito' : 'barrio';
-      fetch(`${API_BASE}/risk-return-matrix?level=${level}&district=Todos`)
+      apiFetch(`/risk-return-matrix?level=${level}&district=Todos`)
         .then(res => res.ok ? res.json() : [])
         .then(data => {
           const found = data.find((d: any) => d.name.toLowerCase() === selectedZoneB.toLowerCase());
@@ -2798,7 +2816,7 @@ const MadridDashboardV2: React.FC = () => {
                 <div className="v2-rank-settings">
                   <label>Ver por:</label>
                   <div className="v2-tabs-bg small v2-level-switch" role="group" aria-label="Nivel de exploración">
-                    <span className="v2-indicator" style={{ transform: `translateX(${rankingLevel === 'Distritos' ? '0' : '100%'})` }} />
+                    <span className="v2-indicator" style={{ transform: `translateX(${rankingLevel === 'Distritos' ? '0' : '100%'})`, backgroundColor: activeProfile.color }} />
                     <button type="button" aria-pressed={rankingLevel === 'Distritos'} className={`v2-tab-btn ${rankingLevel === 'Distritos' ? 'active' : ''}`} onClick={() => setRankingLevel('Distritos')}>Distritos</button>
                     <button type="button" aria-pressed={rankingLevel === 'Barrios'} className={`v2-tab-btn ${rankingLevel === 'Barrios' ? 'active' : ''}`} onClick={() => setRankingLevel('Barrios')}>Barrios</button>
                   </div>
@@ -3149,7 +3167,7 @@ const MadridDashboardV2: React.FC = () => {
                 </div>
                 <div className="v2-tabs-container" style={{ flex: 'none' }}>
                   <div className="v2-tabs-bg v2-level-switch" role="group" aria-label="Nivel de comparación">
-                    <span className="v2-indicator" style={{ transform: `translateX(${compareLevel === 'Distritos' ? '0' : '100%'})` }} />
+                    <span className="v2-indicator" style={{ transform: `translateX(${compareLevel === 'Distritos' ? '0' : '100%'})`, backgroundColor: activeProfile.color }} />
                     <button type="button" aria-pressed={compareLevel === 'Distritos'} className={`v2-tab-btn ${compareLevel === 'Distritos' ? 'active' : ''}`} onClick={() => handleLevelToggle('Distritos')}>Distritos</button>
                     <button type="button" aria-pressed={compareLevel === 'Barrios'} className={`v2-tab-btn ${compareLevel === 'Barrios' ? 'active' : ''}`} onClick={() => handleLevelToggle('Barrios')}>Barrios</button>
                   </div>
