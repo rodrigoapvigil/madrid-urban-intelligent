@@ -56,12 +56,16 @@ def read_root():
 @app.get("/api/health")
 def health_check():
     """Endpoint ligero para monitorizar el backend y el acceso al almacén de datos."""
-    return {
+    health = {
         "status": "ok",
         "deployment_commit": os.getenv("RENDER_GIT_COMMIT", "local"),
         "database_available": os.path.exists(data.DB_PATH),
         "predictions_available": os.path.exists(data.PREDICTIONS_CSV_PATH),
     }
+    if not health["database_available"]:
+        health["status"] = "unhealthy"
+        raise HTTPException(status_code=503, detail=health)
+    return health
 
 @app.get("/api/filters")
 def get_filters():
