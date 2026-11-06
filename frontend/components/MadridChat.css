@@ -383,3 +383,39 @@
     padding: 12px;
   }
 }
+
+/* AMBI follows the shared blue-and-sand brand while keeping data colors intact. */
+.ambi-page-shell { background: var(--mui-paper); }
+.ambi-app-root { background: var(--mui-paper); color: var(--mui-ink); font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.ambi-nav-sidebar { background: var(--mui-blue-950); border-color: rgba(213,206,192,.2); }
+.nav-brand-small { color: #fffefa; }
+.nav-icon-btn { color: #fffefa; }
+.nav-icon-btn:hover { background: rgba(0,153,255,.2); }
+.nav-icon-btn.active { background: var(--mui-iris-gradient); }
+.nav-divider { background: rgba(213,206,192,.3); }
+.ambi-chat-section { background: var(--mui-paper-raised); border-color: var(--mui-line); }
+.chat-welcome-hero h1 { color: var(--mui-blue-950); letter-spacing: -.045em; }
+.chat-welcome-hero p { color: var(--mui-muted); }
+.welcome-pill { color: var(--mui-blue-800); background: #e4f1ff; }
+.input-pill { background: #fffefa; border-color: var(--mui-line); box-shadow: 0 5px 18px rgba(7,24,46,.05); }
+.input-pill:focus-within { border-color: var(--mui-sky); box-shadow: 0 0 0 3px rgba(0,153,255,.14); }
+.input-pill input { color: var(--mui-ink); }
+.send-btn-round { width: 44px; height: 44px; color: #27130d; background: var(--mui-coral); transition: transform 160ms ease, background-color 160ms ease; }
+.send-btn-round:hover:not(:disabled) { background: #ff6848; transform: translateY(-1px); }
+.send-btn-round:focus-visible, .mic-btn:focus-visible, .nav-icon-btn:focus-visible { outline: 3px solid var(--mui-iris); outline-offset: 3px; }
+.ambi-visual-section { background: var(--mui-paper) !important; }
+.visual-header { background: rgba(245,242,235,.92); border-bottom: 1px solid var(--mui-line); }
+.visual-tabs { background: #e8e2d6; }
+.visual-tabs .tab { color: #42546a; }
+.visual-tabs .tab.active { color: var(--mui-blue-950); background: var(--mui-paper-raised); box-shadow: 0 2px 8px rgba(7,24,46,.09); }
+.visual-content-area { background: var(--mui-paper); }
+.map-placeholder { background: #e8e2d6; box-shadow: inset 0 0 20px rgba(7,24,46,.05); }
+.map-legend { color: var(--mui-ink); border: 1px solid var(--mui-line); }
+.ambi-data-placeholder { color: var(--mui-muted); background: linear-gradient(110deg,#eeeae2 8%,#fffefa 18%,#eeeae2 33%); }
+.ambi-data-placeholder button { background: var(--mui-iris-gradient); }
+.message-bubble.user { background: var(--mui-iris-gradient) !important; color: #fff !important; }
+.message-bubble.assistant { background: #eeeae2 !important; color: var(--mui-ink) !important; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ambi-app-root *, .ambi-app-root *::before, .ambi-app-root *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+}

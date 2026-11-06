@@ -1,3 +1,24 @@
+:root {
+  color-scheme: light;
+  --mui-blue-950: #07182e;
+  --mui-blue-900: #0b2b50;
+  --mui-blue-800: #124a82;
+  --mui-iris: #1676df;
+  --mui-sky: #0099ff;
+  --mui-iris-gradient: linear-gradient(135deg, #0f5eaa 0%, #0b58ad 48%, #0754b7 100%);
+  --mui-sand: #d5cec0;
+  --mui-paper: #f5f2eb;
+  --mui-paper-raised: #fffefa;
+  --mui-coral: #f04923;
+  --mui-coral-deep: #b93519;
+  --mui-ink: #13243a;
+  --mui-muted: #4b5b70;
+  --mui-line: rgba(12, 43, 80, .14);
+  --mui-shadow: 0 12px 32px rgba(7, 24, 46, .08);
+  --mui-radius-card: 16px;
+  --mui-radius-control: 10px;
+}
+
 body {
   margin: 0;
   padding: 0;
@@ -11,7 +32,7 @@ body {
 }
 
 html { scroll-behavior: smooth; }
-body { color: #17263b; background: #fff; }
-::selection { color: #fff; background: #075da8; }
-:focus-visible { outline-color: #075da8; }
+body { color: var(--mui-ink); background: var(--mui-paper); }
+::selection { color: #fff; background: var(--mui-blue-800); }
+:focus-visible { outline-color: var(--mui-iris); }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

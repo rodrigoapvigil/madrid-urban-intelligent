@@ -1921,3 +1921,74 @@
 @media (prefers-reduced-motion: reduce) {
   .v2-root *, .v2-root *::before, .v2-root *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* MUI analytics skin — warm reading surfaces inside a deep-blue application frame. */
+.v2-root {
+  --v2-apple-bg: var(--mui-paper);
+  --v2-card-bg: var(--mui-paper-raised);
+  --v2-border: rgba(12, 43, 80, .14);
+  --v2-text-main: var(--mui-ink);
+  --v2-text-sec: var(--mui-muted);
+  --v2-shadow: 0 10px 28px rgba(7, 24, 46, .075);
+  background: var(--mui-paper);
+  color: var(--mui-ink);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.v2-root .site-header {
+  background:
+    radial-gradient(ellipse at 18% -80%, rgba(0,153,255,.28), transparent 52%),
+    linear-gradient(110deg, var(--mui-blue-950), var(--mui-blue-900));
+}
+.v2-root .site-header .v2-tabs-bg { background: rgba(255,254,250,.12); }
+.v2-root .site-header .v2-tab-btn { color: rgba(255,254,250,.82); }
+.v2-root .site-header .v2-tab-btn:hover { color: #fff; }
+.v2-root .v2-filters { background: var(--mui-paper); border-color: var(--mui-line); }
+.v2-root .v2-filter-label { color: #52647a; }
+.v2-root .v2-custom-select { color: var(--mui-ink); }
+.v2-root .v2-dropdown-menu { background: var(--mui-paper-raised); border-color: var(--mui-line); }
+.v2-root .v2-dropdown-item { color: var(--mui-ink); }
+.v2-root .v2-dropdown-item:hover { background: var(--mui-iris-gradient); color: #fff; }
+.v2-root .v2-kpi-card,
+.v2-root .v2-map-card,
+.v2-root .v2-chart-card,
+.v2-root .v2-overlay-wrapper,
+.v2-root .v2-connectivity-card,
+.v2-root .v2-affordability-card,
+.v2-root .v2-explorer-grid,
+.v2-root .v2-heatmap-card {
+  background-color: var(--mui-paper-raised);
+  border-color: var(--v2-border);
+  box-shadow: var(--v2-shadow);
+}
+.v2-root .v2-kpi-card { border-radius: var(--mui-radius-card); }
+.v2-root .v2-chart-card,
+.v2-root .v2-map-card,
+.v2-root .v2-explorer-grid { border-radius: 20px; }
+.v2-root .v2-chart-head,
+.v2-root .v2-section-header h2,
+.v2-root .v2-rank-title { color: var(--mui-ink); }
+.v2-root .v2-rank-mini-card,
+.v2-root .v2-connectivity-item,
+.v2-root .v2-connectivity-summary,
+.v2-root .v2-map-placeholder { background: #f1eee7; border-color: var(--mui-line); }
+.v2-root .v2-connectivity-item:hover { background: #e8e2d6; }
+.v2-root .v2-heatmap-table th { background: #e8e2d6; color: var(--mui-ink); }
+.v2-root .v2-heatmap-table .zona-name { background: var(--mui-paper); }
+.v2-root .v2-chart-controls { background: rgba(255,254,250,.97); border-color: var(--mui-line); }
+.v2-root .v2-chart-controls button { color: var(--mui-coral-deep); }
+.v2-root .v2-chart-controls button:hover,
+.v2-root .v2-chart-controls button:focus-visible { color: #7e2615; background: #fce6df; outline-color: var(--mui-coral); }
+.v2-root .v2-tab-btn:focus-visible,
+.v2-root .v2-dropdown-item:focus-visible,
+.v2-root .v2-chart-controls button:focus-visible { outline-color: var(--mui-iris); }
+.v2-root .v2-loading-overlay { background: rgba(7,24,46,.4); backdrop-filter: blur(5px); }
+.v2-root .v2-loading-card { background: var(--mui-paper-raised); border-color: var(--mui-line); }
+.v2-root .v2-loading-bar-fill { background: var(--mui-iris-gradient); }
+.v2-root .v2-api-error { color: #7f2716; background: #fff0eb; border-color: rgba(240,73,35,.28); }
+.v2-root .v2-api-error button { color: #fff; background: var(--mui-blue-800); }
+.v2-root .apple-footer { background: var(--mui-blue-950); }
+
+@media (max-width: 768px) {
+  .v2-root .v2-filters { background: var(--mui-paper); }
+  .v2-root .v2-dropdown-menu { background: var(--mui-paper-raised); }
+}
