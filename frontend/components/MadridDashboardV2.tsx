@@ -1773,10 +1773,10 @@ const MadridDashboardV2: React.FC = () => {
           </div>
           
           <div className="v2-tabs-container">
-            <div className="v2-tabs-bg">
+            <div className="v2-tabs-bg" role="group" aria-label="Perfil de mercado">
               <div className="v2-indicator" style={{ transform: `translateX(${profileIdx * 100}%)` }} />
               {PROFILES.map((p, i) => (
-                <button key={p.id} className={`v2-tab-btn ${profileIdx === i ? 'active' : ''}`} onClick={() => handleProfileChange(i)}>
+                <button key={p.id} type="button" aria-pressed={profileIdx === i} className={`v2-tab-btn ${profileIdx === i ? 'active' : ''}`} onClick={() => handleProfileChange(i)}>
                   {p.label}
                 </button>
               ))}
