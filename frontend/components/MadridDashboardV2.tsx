@@ -8,6 +8,7 @@ import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import './MadridDashboardV2.css';
 import { apiFetch } from '../lib/api';
+import { SiteFooter, SiteHeader } from './SiteChrome';
 
 ChartJS.register(ChartDataLabels);
 
@@ -1778,25 +1779,18 @@ const MadridDashboardV2: React.FC = () => {
         </div>
       )}
 
-      {/* 1. NAV BAR (APPLE STYLE GLASS) */}
-      <nav className="v2-nav">
-        <div className="v2-nav-content">
-          <div className="v2-brand" onClick={() => router.push('/')}>
-            Madrid Urban Intelligent
-          </div>
-          
-          <div className="v2-tabs-container">
-            <div className="v2-tabs-bg" role="group" aria-label="Perfil de mercado">
-              <div className="v2-indicator" style={{ transform: `translateX(${profileIdx * 100}%)` }} />
-              {PROFILES.map((p, i) => (
-                <button key={p.id} type="button" aria-pressed={profileIdx === i} className={`v2-tab-btn ${profileIdx === i ? 'active' : ''}`} onClick={() => handleProfileChange(i)}>
-                  {p.label}
-                </button>
-              ))}
-            </div>
+      <SiteHeader activePath="/madrid">
+        <div className="v2-tabs-container">
+          <div className="v2-tabs-bg" role="group" aria-label="Perfil de mercado">
+            <div className="v2-indicator" style={{ transform: `translateX(${profileIdx * 100}%)` }} />
+            {PROFILES.map((p, i) => (
+              <button key={p.id} type="button" aria-pressed={profileIdx === i} className={`v2-tab-btn ${profileIdx === i ? 'active' : ''}`} onClick={() => handleProfileChange(i)}>
+                {p.label}
+              </button>
+            ))}
           </div>
         </div>
-      </nav>
+      </SiteHeader>
 
       {activeDropdown && ['year', 'month', 'dist', 'barrio', 'zoneA', 'zoneB'].includes(activeDropdown) && (
         createPortal(<button
@@ -4260,16 +4254,7 @@ const MadridDashboardV2: React.FC = () => {
         </div>
       )}
 
-      {/* FOOTER */}
-      <footer className="apple-footer">
-        <div className="footer-content">
-          <div className="footer-brand">Madrid Urban Intelligent</div>
-          <div className="footer-slogan">&ldquo;Transformando datos urbanos en decisiones inteligentes para todos los ciudadanos.&rdquo;</div>
-          <div className="footer-bottom">
-            <span>© 2026 Madrid Urban Intelligent. Todos los derechos reservados.</span>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 };

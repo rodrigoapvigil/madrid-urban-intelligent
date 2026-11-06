@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import {
   Search,
@@ -11,7 +10,6 @@ import {
   TrendingUp,
   ArrowRight,
   Download,
-  Building2,
   ShieldCheck,
   ChevronDown,
   ExternalLink,
@@ -20,6 +18,7 @@ import {
 import { VeredictoResponse, VeredictoEstado } from '../types/veredicto';
 import './MadridVeredicto.css';
 import { apiFetch, apiUrl } from '../lib/api';
+import { SiteFooter, SiteHeader } from './SiteChrome';
 
 export default function MadridVeredicto() {
   const searchParams = useSearchParams();
@@ -33,7 +32,11 @@ export default function MadridVeredicto() {
   const [urlInput, setUrlInput] = useState('');
   const [precioInput, setPrecioInput] = useState('');
   const [metrosInput, setMetrosInput] = useState('');
-  const [barrioInput, setBarrioInput] = useState('Goya');
+  const [districtOptions, setDistrictOptions] = useState<string[]>([]);
+  const [selectedDistrict, setSelectedDistrict] = useState('');
+  const [neighborhoodOptions, setNeighborhoodOptions] = useState<string[]>([]);
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState('');
+  const [isLoadingNeighborhoods, setIsLoadingNeighborhoods] = useState(false);
 
   // Estados de carga y resultado
   const [isLoading, setIsLoading] = useState(false);
@@ -45,13 +48,45 @@ export default function MadridVeredicto() {
   // Estado para token de descarga directa si viene del checkout
   const [downloadToken, setDownloadToken] = useState<string | null>(tokenParam);
 
-  // Lista de barrios sugeridos frecuentes
-  const barriosSugeridos = [
-    'Goya', 'Recoletos', 'Castellana', 'Almagro', 'Trafalgar', 'Justicia',
-    'Cortes', 'Palacio', 'Embajadores', 'Universidad', 'Sol', 'Argüelles',
-    'Vallehermoso', 'Prosperidad', 'El Viso', 'Hispanoamérica', 'Lista',
-    'Ibiza', 'Jerónimos', 'Pacífico', 'Chamberí', 'Salamanca', 'Retiro', 'Centro'
-  ];
+  useEffect(() => {
+    let active = true;
+    apiFetch('/filters').then(response => {
+      if (!response.ok) throw new Error('No se pudieron cargar los distritos.');
+      return response.json();
+    }).then(data => {
+      if (active) setDistrictOptions(Array.isArray(data.districts) ? data.districts : []);
+    }).catch(() => {
+      if (active) setErrorMessage('No se pudieron cargar los distritos de Madrid. Recarga la página para intentarlo de nuevo.');
+    });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!selectedDistrict) {
+      setNeighborhoodOptions([]);
+      setSelectedNeighborhood('');
+      return;
+    }
+    let active = true;
+    setIsLoadingNeighborhoods(true);
+    setNeighborhoodOptions([]);
+    setSelectedNeighborhood('');
+    apiFetch(`/neighborhoods?district=${encodeURIComponent(selectedDistrict)}`).then(response => {
+      if (!response.ok) throw new Error('No se pudieron cargar los barrios.');
+      return response.json();
+    }).then(data => {
+      if (!active) return;
+      const neighborhoods = Array.isArray(data) ? data : data.neighborhoods;
+      const options = Array.isArray(neighborhoods) ? neighborhoods.filter((name: string) => name !== 'Todos') : [];
+      setNeighborhoodOptions(options);
+      setSelectedNeighborhood('Todos');
+    }).catch(() => {
+      if (active) setErrorMessage('No se pudieron cargar los barrios de este distrito. Vuelve a seleccionarlo para reintentar.');
+    }).finally(() => {
+      if (active) setIsLoadingNeighborhoods(false);
+    });
+    return () => { active = false; };
+  }, [selectedDistrict]);
 
   useEffect(() => {
     if (tokenParam) {
@@ -86,7 +121,6 @@ export default function MadridVeredicto() {
 
       if (data.precio) setPrecioInput(String(data.precio));
       if (data.metros) setMetrosInput(String(data.metros));
-      if (data.barrio) setBarrioInput(data.barrio);
       if (data.operacion) setOperacion(data.operacion as 'Venta' | 'Alquiler');
 
       if (data.requiere_manual) {
@@ -121,12 +155,13 @@ export default function MadridVeredicto() {
       setErrorMessage('Introduce una superficie en m² válida mayor que cero.');
       return;
     }
-    if (!barrioInput.trim()) {
-      setErrorMessage('Indica el barrio o distrito de Madrid.');
+    if (!selectedDistrict || !selectedNeighborhood) {
+      setErrorMessage('Selecciona un distrito y un barrio, o elige todo el distrito.');
       return;
     }
 
-    await ejecutarEvaluacion(precio, metros, barrioInput.trim(), operacion);
+    const location = selectedNeighborhood === 'Todos' ? selectedDistrict : selectedNeighborhood;
+    await ejecutarEvaluacion(precio, metros, location, operacion);
   };
 
   const ejecutarEvaluacion = async (precio: number, metros: number, barrio: string, op: string) => {
@@ -218,22 +253,7 @@ export default function MadridVeredicto() {
   return (
     <div className="veredicto-root">
       {/* 1. Header de Navegación Apple Glass */}
-      <nav className="veredicto-navbar">
-        <div className="veredicto-nav-container">
-          <Link href="/" className="veredicto-nav-brand">
-            <Building2 className="w-5 h-5 text-blue-500" />
-            <span>Madrid Urban Intelligence</span>
-          </Link>
-          <div className="veredicto-nav-links">
-            <Link href="/madrid" className="veredicto-nav-item">
-              Dashboard Analítico
-            </Link>
-            <Link href="/madrid/veredicto" className="veredicto-nav-item active">
-              El Veredicto
-            </Link>
-          </div>
-        </div>
-      </nav>
+      <SiteHeader activePath="/madrid/veredicto" />
 
       {/* 2. Contenedor Principal */}
       <main className="veredicto-main">
@@ -318,7 +338,7 @@ export default function MadridVeredicto() {
               className={`veredicto-tab-btn ${activeTab === 'manual' ? 'active' : ''}`}
             >
               <FileText style={{ width: '16px', height: '16px' }} />
-              <span>Entrada manual (3 datos)</span>
+              <span>Entrada manual (4 datos)</span>
             </button>
           </div>
 
@@ -421,27 +441,24 @@ export default function MadridVeredicto() {
                     />
                   </div>
 
-                  {/* Barrio */}
+                  {/* Distrito */}
                   <div>
-                    <label htmlFor="veredicto-barrio" className="veredicto-label">
-                      Barrio o Distrito
+                    <label htmlFor="veredicto-distrito" className="veredicto-label">
+                      Distrito
                     </label>
-                    <input
-                      id="veredicto-barrio"
-                      type="text"
-                      list="barrios-list"
-                      value={barrioInput}
-                      onChange={(e) => { setBarrioInput(e.target.value); setErrorMessage(null); }}
-                      placeholder="Ej. Goya, Almagro..."
-                      className="veredicto-input"
-                      required
-                      aria-invalid={Boolean(errorMessage && !barrioInput.trim())}
-                    />
-                    <datalist id="barrios-list">
-                      {barriosSugeridos.map((b) => (
-                        <option key={b} value={b} />
-                      ))}
-                    </datalist>
+                    <select id="veredicto-distrito" value={selectedDistrict} onChange={(e) => { setSelectedDistrict(e.target.value); setErrorMessage(null); }} className="veredicto-input" required aria-invalid={Boolean(errorMessage && !selectedDistrict)}>
+                      <option value="">Selecciona un distrito</option>
+                      {districtOptions.map(district => <option key={district} value={district}>{district}</option>)}
+                    </select>
+                  </div>
+                  {/* Barrio dependiente del distrito */}
+                  <div>
+                    <label htmlFor="veredicto-barrio" className="veredicto-label">Barrio</label>
+                    <select id="veredicto-barrio" value={selectedNeighborhood} onChange={(e) => { setSelectedNeighborhood(e.target.value); setErrorMessage(null); }} className="veredicto-input" required disabled={!selectedDistrict || isLoadingNeighborhoods} aria-invalid={Boolean(errorMessage && !selectedNeighborhood)}>
+                      <option value="">{!selectedDistrict ? 'Primero selecciona un distrito' : isLoadingNeighborhoods ? 'Cargando barrios…' : 'Selecciona un barrio'}</option>
+                      {selectedDistrict && <option value="Todos">Todo el distrito</option>}
+                      {neighborhoodOptions.map(neighborhood => <option key={neighborhood} value={neighborhood}>{neighborhood}</option>)}
+                    </select>
                   </div>
                 </div>
 
@@ -610,16 +627,7 @@ export default function MadridVeredicto() {
       </main>
 
       {/* Footer Apple Dark */}
-      <footer className="veredicto-footer">
-        <div style={{ maxWidth: '820px', margin: '0 auto' }}>
-          <p style={{ margin: '0 0 8px 0', fontWeight: 500, color: 'rgba(255, 255, 255, 0.6)' }}>
-            Madrid Urban Intelligence — Plataforma analítica de precios inmobiliarios y series oficiales.
-          </p>
-          <p style={{ margin: 0, fontSize: '11px', color: 'rgba(255, 255, 255, 0.35)' }}>
-            Las estimaciones y veredictos se generan a partir de datos estadísticos públicos del Ayuntamiento de Madrid. No constituyen tasación pericial oficial conforme a la Orden ECO/805/2003.
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }

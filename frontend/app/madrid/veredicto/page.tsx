@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function VeredictoPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#0A0F1D] flex items-center justify-center text-slate-400">Cargando El Veredicto...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center text-slate-600">Cargando El Veredicto...</div>}>
       <MadridVeredicto />
     </Suspense>
   );

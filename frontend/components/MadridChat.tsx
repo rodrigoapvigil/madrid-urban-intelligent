@@ -18,6 +18,7 @@ import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
 import './MadridChat.css';
 import { apiFetch } from '../lib/api';
+import { SiteFooter, SiteHeader } from './SiteChrome';
 
 ChartJS.register(
   CategoryScale,
@@ -177,6 +178,8 @@ const MadridChat: React.FC = () => {
   };
 
   return (
+    <div className="ambi-page-shell">
+    <SiteHeader activePath="/madrid/chat" />
     <div className="ambi-app-root">
       
       {/* 1. SECCIÓN IZQUIERDA (NAV BAR MINIMALISTA) */}
@@ -376,6 +379,8 @@ const MadridChat: React.FC = () => {
         </section>
 
       </div>
+    </div>
+    <SiteFooter />
     </div>
   );
 };

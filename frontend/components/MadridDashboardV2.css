@@ -11,9 +11,9 @@
 }
 
 .v2-root {
-  background: var(--v2-apple-bg);
+  background: #fff;
   min-height: 100vh;
-  padding-top: 52px;
+  padding-top: 0;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
   color: var(--v2-text-main);
   -webkit-font-smoothing: antialiased;
@@ -534,7 +534,7 @@
 /* Mobile Devices */
 @media (max-width: 768px) {
   .v2-root {
-    padding-top: 100px; /* More space for stacked nav items if needed */
+    padding-top: 0;
   }
 
   .v2-nav {
@@ -1583,7 +1583,7 @@
 
 /* Header profiles: una sola fila para liberar espacio en móvil. */
 @media (max-width: 768px) {
-  .v2-root { padding-top: 98px; }
+  .v2-root { padding-top: 0; }
 
   .v2-nav { padding: 4px 0; }
 
@@ -1633,6 +1633,19 @@
     white-space: nowrap;
     font-size: 12px;
   }
+}
+
+/* Los perfiles viven dentro de la cabecera compartida. */
+.site-header-context .v2-tabs-container { flex: none; width: min(100%, 400px); margin: 0 auto; }
+.site-header-context .v2-tabs-bg { width: 100%; background: rgba(255,255,255,.12); }
+.site-header-context .v2-tab-btn { color: #fff; }
+.site-header-context .v2-tab-btn.active { color: #fff; }
+@media (max-width: 768px) {
+  .site-header-context { width: 100%; }
+  .site-header-context .v2-tabs-container { width: min(100%, 400px); }
+  .site-header-context .v2-tabs-bg { display:flex; flex-flow:row nowrap; justify-content:space-between; gap:3px; padding:4px; overflow-x:auto; overflow-y:hidden; scrollbar-width:none; }
+  .site-header-context .v2-tabs-bg::-webkit-scrollbar { display:none; }
+  .site-header-context .v2-tab-btn { flex:0 0 auto; width:auto; min-width:0; }
 }
 
 @media (max-width: 360px) {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import './MadridLanding.css';
+import { SiteFooter, SiteHeader } from './SiteChrome';
 
 const MadridLanding: React.FC = () => {
   const router = useRouter();
@@ -10,17 +11,7 @@ const MadridLanding: React.FC = () => {
   };
   return (
     <div className="apple-landing-root" data-od-id="madrid-intelligence-landing">
-      {/* 2. NAVBAR APPLE (BLURRED) */}
-      <nav className="top-navbar">
-        <div className="nav-container">
-          <a href="/" className="nav-logo">Madrid Urban Intelligence</a>
-          <div className="nav-links">
-            <a href="/madrid/veredicto" className="nav-item font-semibold text-blue-400">El Veredicto</a>
-            <a href="/madrid" className="nav-item">Dashboard Analítico</a>
-            <a href="/madrid/chat" className="nav-item">Asistente AMBI</a>
-          </div>
-        </div>
-      </nav>
+      <SiteHeader />
 
       {/* 3. HERO SECTION (DARK CHAPTER) */}
       <section className="hero-chapter">
@@ -147,16 +138,7 @@ const MadridLanding: React.FC = () => {
         </div>
       </section>
 
-      {/* 8. FOOTER */}
-      <footer className="apple-footer">
-        <div className="footer-content">
-          <div className="footer-brand">Madrid Urban Intelligent</div>
-          <div className="footer-slogan">&ldquo;Transformando datos urbanos en decisiones inteligentes para todos los ciudadanos.&rdquo;</div>
-          <div className="footer-bottom">
-            <span>© 2026 Madrid Urban Intelligent. Todos los derechos reservados.</span>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 };
