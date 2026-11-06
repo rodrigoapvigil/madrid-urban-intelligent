@@ -20,15 +20,15 @@ const audiences = [
 function MadridNetwork() {
   return (
     <svg className="mi-network" viewBox="0 0 520 420" role="img" aria-label="Visualización de la red urbana de Madrid">
-      <defs><radialGradient id="networkGlow"><stop stopColor="#0099ff" stopOpacity=".22"/><stop offset="1" stopColor="#0099ff" stopOpacity="0"/></radialGradient></defs>
+      <defs><radialGradient id="networkGlow"><stop stopColor="#00827c" stopOpacity=".22"/><stop offset="1" stopColor="#00827c" stopOpacity="0"/></radialGradient></defs>
       <circle cx="260" cy="210" r="205" fill="url(#networkGlow)" />
-      <g fill="none" stroke="rgba(168,217,245,.38)" strokeWidth="1">
+      <g fill="none" stroke="rgba(203,255,252,.38)" strokeWidth="1">
         <path d="M78 215 153 111 268 72 374 128 440 226 363 332 247 354 131 307 78 215Z" />
         <path d="m153 111 94 243m21-282-22 282m128-226-106 226m173-106-173 0m-285-12 210 12m-115-104 221 17m-243 92 232-87" />
         <path d="m78 215 190-143 172 154-193 128-116-243 185 17 47 204-232-25Z" />
       </g>
       {[[78,215,5],[153,111,4],[268,72,5],[374,128,4],[440,226,5],[363,332,4],[247,354,5],[131,307,4],[247,215,8],[153,214,3],[327,213,4],[211,151,3],[305,286,4],[199,278,3],[374,278,3],[105,260,2],[411,171,3]].map(([cx,cy,r],i)=><circle key={i} cx={cx} cy={cy} r={r} className={i%5===0?'mi-network__node mi-network__node--coral':'mi-network__node'} />)}
-      <circle cx="247" cy="215" r="26" fill="none" stroke="rgba(0,153,255,.4)"/><circle cx="247" cy="215" r="42" fill="none" stroke="rgba(213,206,192,.3)" strokeDasharray="2 7"/>
+      <circle cx="247" cy="215" r="26" fill="none" stroke="rgba(0,130,124,.55)"/><circle cx="247" cy="215" r="42" fill="none" stroke="rgba(187,199,198,.3)" strokeDasharray="2 7"/>
     </svg>
   );
 }
@@ -38,11 +38,11 @@ function TrendVisual() {
     <div className="mi-trend" aria-label="Ilustración conceptual de una tendencia mensual comparada con la media de Madrid">
       <div className="mi-trend__top"><span><i className="mi-dot mi-dot--blue"/> Zona seleccionada</span><span><i className="mi-dot mi-dot--sand"/> Media Madrid</span></div>
       <svg viewBox="0 0 620 300" role="img" aria-label="Dos líneas muestran la evolución mensual de una zona y la media de Madrid">
-        <defs><linearGradient id="trendFill" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#0099ff" stopOpacity=".22"/><stop offset="1" stopColor="#0099ff" stopOpacity="0"/></linearGradient></defs>
-        {[54,112,170,228].map(y=><line key={y} x1="44" x2="602" y1={y} y2={y} stroke="rgba(213,206,192,.14)"/>)}
+        <defs><linearGradient id="trendFill" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#00827c" stopOpacity=".22"/><stop offset="1" stopColor="#00827c" stopOpacity="0"/></linearGradient></defs>
+        {[54,112,170,228].map(y=><line key={y} x1="44" x2="602" y1={y} y2={y} stroke="rgba(187,199,198,.14)"/>)}
         <path d="M46 209 C92 201 99 165 145 171 S205 184 246 152 S302 129 341 140 S401 156 440 107 S506 116 545 81 S579 77 601 48 L601 228 L46 228Z" fill="url(#trendFill)"/>
-        <path d="M46 209 C92 201 99 165 145 171 S205 184 246 152 S302 129 341 140 S401 156 440 107 S506 116 545 81 S579 77 601 48" fill="none" stroke="#50baff" strokeWidth="3" strokeLinecap="round"/>
-        <path d="M46 223 C100 216 104 202 145 207 S203 205 246 196 S302 186 341 191 S401 190 440 181 S506 184 545 170 S582 169 601 162" fill="none" stroke="#d5cec0" strokeWidth="2" strokeLinecap="round"/>
+        <path d="M46 209 C92 201 99 165 145 171 S205 184 246 152 S302 129 341 140 S401 156 440 107 S506 116 545 81 S579 77 601 48" fill="none" stroke="#00bfb1" strokeWidth="3" strokeLinecap="round"/>
+        <path d="M46 223 C100 216 104 202 145 207 S203 205 246 196 S302 186 341 191 S401 190 440 181 S506 184 545 170 S582 169 601 162" fill="none" stroke="#bbc7c6" strokeWidth="2" strokeLinecap="round"/>
         <text x="46" y="260">Ene</text><text x="145" y="260">Mar</text><text x="245" y="260">May</text><text x="342" y="260">Jul</text><text x="441" y="260">Sep</text><text x="540" y="260">Nov</text>
       </svg>
       <div className="mi-trend__caption"><span>Evolución mensual</span><span>Dato real y proyección identificados</span></div>
@@ -75,8 +75,8 @@ export default function MadridLanding() {
 
         <section className="mi-statement" id="lectura" aria-labelledby="mi-statement-title">
           <div className="mi-wrap mi-statement__inner">
-            <p className="mi-kicker mi-kicker--muted">Una lectura distinta de la ciudad</p>
-            <h2 id="mi-statement-title" className="mi-kinetic"><span>Democratizando</span><span>la información</span></h2>
+            <p className="mi-kicker mi-kicker--muted">Democratizando la información</p>
+            <h2 id="mi-statement-title" className="mi-kinetic"><span>Datos</span><span>para todos</span></h2>
             <div className="mi-statement__bottom"><div><p className="mi-statement__claim">Cómo los datos dan forma a cada decisión.</p><p>Una cifra aislada cuenta poco. El periodo, la zona y la referencia de Madrid permiten entender qué está cambiando y dónde.</p></div><Link href="/madrid" className="mi-round-link" aria-label="Descubrir el dashboard"><ArrowDown aria-hidden="true"/></Link></div>
             <div className="mi-statement__coordinates" aria-hidden="true"><span>21 DISTRITOS</span><span>131 BARRIOS</span><span>MADRID · ESPAÑA</span></div>
           </div>

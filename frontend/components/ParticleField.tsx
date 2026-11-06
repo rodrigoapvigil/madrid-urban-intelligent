@@ -50,9 +50,9 @@ export default function ParticleField() {
       const centerX = width * 0.51;
       const centerY = height * 0.84;
       const glow = context.createRadialGradient(centerX - radius * 0.22, centerY - radius * 0.28, radius * 0.04, centerX, centerY, radius * 1.05);
-      glow.addColorStop(0, 'rgba(0,153,255,0.13)');
-      glow.addColorStop(0.62, 'rgba(22,118,223,0.055)');
-      glow.addColorStop(1, 'rgba(6,26,48,0)');
+      glow.addColorStop(0, 'rgba(0,130,124,0.16)');
+      glow.addColorStop(0.62, 'rgba(0,130,124,0.06)');
+      glow.addColorStop(1, 'rgba(1,38,36,0)');
       context.fillStyle = glow;
       context.fillRect(0, 0, width, height);
       for (const particle of particles) {
@@ -71,10 +71,10 @@ export default function ParticleField() {
         context.beginPath();
         context.arc(x, py, particle.size * perspective, 0, Math.PI * 2);
         context.fillStyle = particle.color === 'coral'
-          ? `rgba(240,73,35,${alpha})`
+          ? `rgba(253,233,255,${alpha})`
           : particle.color === 'mist'
-            ? `rgba(213,230,241,${alpha})`
-            : `rgba(67,177,255,${alpha})`;
+            ? `rgba(203,255,252,${alpha})`
+            : `rgba(0,190,176,${alpha})`;
         context.fill();
       }
       if (!paused && !reducedMotion) angle += 0.0009;
