@@ -352,6 +352,7 @@
     100% { transform: translate3d(-27vw,24vh,0) scale(1.38); }
   }
 }
+
 @media (max-width: 1050px) {
   .mi-home { --mi-wrap: calc(100% - 64px); }
   .mi-header { min-height: 90px; grid-template-columns: 1fr auto; padding-inline: 32px; }
@@ -643,3 +644,46 @@
     to { transform: translate3d(100vw,0,0) scale(1); opacity:1; }
   }
 }
+
+/* Final cascade for the explorer redesign. */
+.mi-home .mi-profile { grid-template-columns: minmax(0,1fr) 38px; gap:18px; padding:14px 18px; }
+.mi-home .mi-profile__number,.mi-home .mi-profile__icon { display:none !important; }
+.mi-home .mi-profile__copy strong { font-size:27px; }
+.mi-home .mi-profile__copy small { max-width:500px; font-size:15px; }
+.mi-home .mi-profile__arrow { width:38px; height:38px; }
+.mi-home .mi-verdict { grid-template-columns:minmax(0,1fr) 22px; padding-inline:18px; }
+.mi-home .mi-verdict > span:first-child { display:grid; gap:5px; }
+.mi-home .mi-verdict__icon { display:none; }
+.mi-home .mi-city-visual { min-height:570px; overflow:hidden; border-radius:16px; background:#edfffe; color:#012624; }
+.mi-home .mi-city-visual::before { display:none; }
+.mi-home .mi-city-visual__label { top:28px; left:32px; z-index:2; color:#315b58; font-size:11px; letter-spacing:.12em; }
+.mi-district-map { position:relative; width:min(100%,560px); margin:44px auto 18px; }
+.mi-district-map svg { display:block; width:100%; height:auto; overflow:visible; }
+.mi-district-map__district { fill:#fff; stroke:#76aaa6; stroke-width:1.6; stroke-linejoin:round; vector-effect:non-scaling-stroke; }
+.mi-district-map__district--accent { fill:#d8f3ef; }
+.mi-district-map__beacon { transform-box:fill-box; transform-origin:center; animation:mi-map-beacon 3.6s ease-in-out infinite; }
+.mi-district-map__pulse { fill:rgba(0,130,124,.14); stroke:rgba(0,130,124,.46); stroke-width:1; }
+.mi-district-map__point { fill:#007a73; stroke:#edfffe; stroke-width:1.5; }
+.mi-district-map__caption { display:flex; justify-content:space-between; padding:0 26px; color:#315b58; font-size:11px; letter-spacing:.12em; text-transform:uppercase; }
+.mi-district-map__loading { width:65%; aspect-ratio:1; margin:50px auto; border:1px solid #8cbab6; border-radius:50%; background:radial-gradient(circle,rgba(0,130,124,.16),transparent 65%); animation:mi-map-loading 1.8s ease-in-out infinite alternate; }
+.mi-home .mi-audience__list article { grid-template-columns:minmax(0,1fr); }
+.mi-home .mi-audience__list article > span,.mi-home .mi-audience__list article > svg { display:none !important; }
+.mi-home .mi-method__steps article { grid-template-columns:minmax(0,1fr) auto; }
+.mi-home .mi-method__index { display:none; }
+.mi-home .mi-method__tag { color:#012624; border-color:rgba(1,38,36,.2); background:#edfffe; }
+@keyframes mi-map-beacon { 0%,100% { opacity:.68; transform:scale(.88); } 50% { opacity:1; transform:scale(1.22); } }
+@keyframes mi-map-loading { to { opacity:.45; transform:scale(.94); } }
+@media (max-width:1050px) {
+  .mi-home .mi-city-visual { min-height:460px; }
+  .mi-home .mi-profile { min-height:108px; padding-inline:12px; }
+}
+@media (max-width:650px) {
+  .mi-home .mi-profile { min-height:100px; padding:12px 14px; }
+  .mi-home .mi-profile__copy strong { font-size:23px; }
+  .mi-home .mi-profile__copy small { font-size:14px; }
+  .mi-home .mi-city-visual { min-height:430px; padding:18px; }
+  .mi-home .mi-city-visual__label { top:18px; left:20px; }
+  .mi-district-map { margin:38px auto 12px; }
+  .mi-district-map__caption { padding:0 10px; font-size:9px; }
+}
+@media (prefers-reduced-motion:reduce) { .mi-district-map__beacon,.mi-district-map__loading { animation:none; } }
