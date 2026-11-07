@@ -105,7 +105,15 @@
 .mi-hero h1 span { color: var(--mi-mist); }
 .mi-hero__lead { max-width: 580px; margin: 26px auto 0; color: var(--mi-silver); font-size: 16px; line-height: 1.5; text-wrap: balance; }
 .mi-hero__content .mi-button { margin-top: 28px; }
-.mi-hero__skyline { position: absolute; z-index: 1; right: 0; bottom: 48px; left: 0; width: 100%; height: auto; max-height: 64%; object-fit: contain; object-position: center bottom; opacity: .92; pointer-events: none; user-select: none; mask-image: linear-gradient(to bottom, transparent 0%, #000 12%, #000 92%, transparent 100%); }
+.mi-hero-artwork { position: absolute; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
+.mi-hero-artwork__canvas { position: absolute; right: 0; bottom: 48px; left: 0; height: 64%; display: flex; align-items: flex-end; justify-content: center; mask-image: linear-gradient(to bottom, transparent 0%, #000 12%, #000 92%, transparent 100%); }
+.mi-hero__skyline { position: absolute; right: 0; bottom: 0; left: 0; width: 100%; height: auto; max-height: 100%; margin-inline: auto; object-fit: contain; object-position: center bottom; pointer-events: none; user-select: none; }
+.mi-hero__skyline--base { z-index: 1; }
+.mi-hero__skyline--fragment { z-index: 2; mix-blend-mode: screen; }
+.mi-hero__skyline--west { clip-path: polygon(0 0,58% 0,52% 48%,0 56%); }
+.mi-hero__skyline--east { clip-path: polygon(53% 44%,100% 34%,100% 100%,44% 100%); }
+.mi-hero-artwork__glow { position: absolute; top: 0; left: 0; width: min(48vw,680px); aspect-ratio: 1; border-radius: 50%; opacity: 0; pointer-events: none; background: radial-gradient(circle,rgba(85,225,215,.2) 0%,rgba(0,191,177,.11) 24%,rgba(0,191,177,.035) 48%,transparent 70%); mix-blend-mode: screen; transform: translate3d(var(--mi-glow-x,-1000px),var(--mi-glow-y,-1000px),0) translate(-50%,-50%); transition: opacity .35s ease; }
+.mi-hero-artwork__glow.is-visible { opacity: 1; }
 .mi-hero__meta { position: absolute; z-index: 2; right: max(64px,calc((100vw - 1480px)/2)); bottom: 32px; display: flex; align-items: center; gap: 12px; color: var(--mi-silver); font-size: 9px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; }
 .mi-hero__meta i { width: 22px; height: 1px; background: var(--mi-teal); }
 .mi-scroll { position: absolute; z-index: 2; bottom: 25px; left: max(64px,calc((100vw - 1480px)/2)); min-height: 44px; display: inline-flex; align-items: center; gap: 11px; color: var(--mi-silver) !important; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
@@ -255,7 +263,9 @@
   .mi-nav { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; gap: clamp(20px,4vw,42px); }
   .mi-header__cta { grid-column: 2; grid-row: 1; }
   .mi-hero { min-height: max(760px,calc(100svh - 80px)); }
-  .mi-hero__skyline { bottom: 52px; width: 118%; max-width: none; left: 50%; transform: translateX(-50%); }
+  .mi-hero-artwork__canvas { bottom: 52px; width: 118%; max-width: none; left: 50%; right: auto; transform: translateX(-50%); }
+  .mi-hero__skyline { width: 100%; }
+  .mi-hero-artwork__glow { width: min(65vw,560px); }
   .mi-statement__inner { top: 112px; min-height: calc(100svh - 112px); }
   .mi-kinetic { font-size: clamp(132px,19vw,240px); }
   .mi-platform__grid { gap: 22px; }
@@ -285,7 +295,9 @@
   .mi-hero__lead { max-width: 420px; margin-top: 19px; font-size: 14px; }
   .mi-hero__content .mi-button { margin-top: 23px; }
   .mi-button { min-height: 46px; padding-inline: 15px; font-size: 10px; }
-  .mi-hero__skyline { bottom: 58px; width: 190%; max-width: none; max-height: 45%; opacity: .82; }
+  .mi-hero-artwork__canvas { bottom: 88px; left: -45%; right: auto; width: 190%; height: 48%; max-height: none; transform: none; }
+  .mi-hero__skyline { max-height: 100%; }
+  .mi-hero-artwork__glow { display: none; }
   .mi-hero__meta { right: 18px; bottom: 18px; gap: 7px; font-size: 7px; }
   .mi-hero__meta i { width: 13px; }
   .mi-scroll { bottom: 15px; left: 17px; max-width: 46%; gap: 7px; font-size: 7px; letter-spacing: .06em; }
@@ -354,4 +366,6 @@
 @media (prefers-reduced-motion: reduce) {
   .mi-home *, .mi-home *::before, .mi-home *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .mi-kinetic span { transform: none !important; }
+  .mi-hero__skyline--fragment { display: none; }
+  .mi-hero-artwork__glow { display: none; }
 }
