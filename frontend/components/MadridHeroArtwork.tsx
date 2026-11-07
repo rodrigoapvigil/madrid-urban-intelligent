@@ -8,7 +8,7 @@ const description = 'Ilustración panorámica de Madrid con el edificio Metrópo
 
 export default function MadridHeroArtwork() {
   const artworkRef = useRef<HTMLDivElement>(null);
-  const glowRef = useRef<HTMLDivElement>(null);
+  const edgeLightRef = useRef<HTMLImageElement>(null);
   const reducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll({
     target: artworkRef,
@@ -27,9 +27,10 @@ export default function MadridHeroArtwork() {
 
   useEffect(() => {
     const artwork = artworkRef.current;
-    const glow = glowRef.current;
+    const edgeLight = edgeLightRef.current;
     const hero = artwork?.closest('.mi-hero');
-    if (!artwork || !glow || !hero) return;
+    const canvas = artwork?.querySelector('.mi-hero-artwork__canvas');
+    if (!artwork || !edgeLight || !canvas || !hero) return;
 
     let frame = 0;
     let clientX = 0;
@@ -42,14 +43,14 @@ export default function MadridHeroArtwork() {
       clientY = event.clientY;
       if (frame) return;
       frame = window.requestAnimationFrame(() => {
-        const bounds = artwork.getBoundingClientRect();
-        glow.style.setProperty('--mi-glow-x', `${clientX - bounds.left}px`);
-        glow.style.setProperty('--mi-glow-y', `${clientY - bounds.top}px`);
-        glow.classList.add('is-visible');
+        const bounds = canvas.getBoundingClientRect();
+        edgeLight.style.setProperty('--mi-edge-x', `${clientX - bounds.left}px`);
+        edgeLight.style.setProperty('--mi-edge-y', `${clientY - bounds.top}px`);
+        edgeLight.classList.add('is-visible');
         frame = 0;
       });
     };
-    const onPointerLeave = () => glow.classList.remove('is-visible');
+    const onPointerLeave = () => edgeLight.classList.remove('is-visible');
 
     hero.addEventListener('pointermove', onPointerMove, { passive: true });
     hero.addEventListener('pointerleave', onPointerLeave, { passive: true });
@@ -76,8 +77,8 @@ export default function MadridHeroArtwork() {
           <motion.img className="mi-hero__skyline mi-hero__skyline--fragment mi-hero__skyline--west" src={skyline} alt="" style={{ opacity: fragmentOpacity, x: leftX, y: leftY }} draggable={false} />
           <motion.img className="mi-hero__skyline mi-hero__skyline--fragment mi-hero__skyline--east" src={skyline} alt="" style={{ opacity: fragmentOpacity, x: rightX, y: rightY }} draggable={false} />
         </>}
+        <img className="mi-hero__skyline mi-hero-artwork__edge-light" src="/madrid-skyline-buildings.svg" alt="" draggable={false} ref={edgeLightRef} />
       </div>
-      <div className="mi-hero-artwork__glow" ref={glowRef} />
     </div>
   );
 }
