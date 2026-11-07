@@ -2,22 +2,22 @@
 <ns0:svg xmlns:ns0="http://www.w3.org/2000/svg" viewBox="0 0 2200 760" width="2625" height="780" preserveAspectRatio="none" fill="none">
   <ns0:defs>
     <ns0:linearGradient id="line" x1="0" y1="0" x2="0" y2="1">
-      <ns0:stop stop-color="#CBFFFC" stop-opacity=".82" />
-      <ns0:stop offset=".58" stop-color="#8BE4DD" stop-opacity=".55" />
-      <ns0:stop offset="1" stop-color="#00BFB1" stop-opacity=".2" />
+      <ns0:stop stop-color="#F2F0EC" stop-opacity=".82" />
+      <ns0:stop offset=".58" stop-color="#9FB2C6" stop-opacity=".55" />
+      <ns0:stop offset="1" stop-color="#5FA8D3" stop-opacity=".2" />
     </ns0:linearGradient>
     <ns0:linearGradient id="ground" x1="0" y1="0" x2="1" y2="0">
-      <ns0:stop stop-color="#CBFFFC" stop-opacity="0" />
-      <ns0:stop offset=".15" stop-color="#CBFFFC" stop-opacity=".48" />
-      <ns0:stop offset=".5" stop-color="#CBFFFC" stop-opacity=".68" />
-      <ns0:stop offset=".85" stop-color="#CBFFFC" stop-opacity=".48" />
-      <ns0:stop offset="1" stop-color="#CBFFFC" stop-opacity="0" />
+      <ns0:stop stop-color="#F2F0EC" stop-opacity="0" />
+      <ns0:stop offset=".15" stop-color="#F2F0EC" stop-opacity=".48" />
+      <ns0:stop offset=".5" stop-color="#F2F0EC" stop-opacity=".68" />
+      <ns0:stop offset=".85" stop-color="#F2F0EC" stop-opacity=".48" />
+      <ns0:stop offset="1" stop-color="#F2F0EC" stop-opacity="0" />
     </ns0:linearGradient>
     <ns0:pattern id="windows" width="28" height="34" patternUnits="userSpaceOnUse">
-      <ns0:path d="M7 7v16m14-16v16M3 25h8m6 0h8" stroke="#CBFFFC" stroke-opacity=".28" stroke-width="1.4" />
+      <ns0:path d="M7 7v16m14-16v16M3 25h8m6 0h8" stroke="#F2F0EC" stroke-opacity=".28" stroke-width="1.4" />
     </ns0:pattern>
     <ns0:pattern id="fine-windows" width="22" height="28" patternUnits="userSpaceOnUse">
-      <ns0:path d="M6 6v13m10-13v13M3 21h16" stroke="#CBFFFC" stroke-opacity=".25" stroke-width="1.2" />
+      <ns0:path d="M6 6v13m10-13v13M3 21h16" stroke="#F2F0EC" stroke-opacity=".25" stroke-width="1.2" />
     </ns0:pattern>
   </ns0:defs>
   <ns0:g stroke="url(#line)" stroke-linecap="round" stroke-linejoin="round">

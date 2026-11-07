@@ -14,6 +14,7 @@ import {
   Legend
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { cssColorResolverPlugin } from '../lib/colors';
 import ReactMarkdown from 'react-markdown';
 import Image from 'next/image';
 import './MadridChat.css';
@@ -27,7 +28,8 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  cssColorResolverPlugin
 );
 
 const MadridMap = dynamic(() => import('./MadridMap'), { ssr: false });
@@ -140,7 +142,7 @@ const MadridChat: React.FC = () => {
   };
 
   // Chart Configuration
-  const chartColor = chatContext.op === 'alquiler' ? '#005187' : chatContext.op === 'inversion' ? '#af52de' : '#009d71';
+  const chartColor = chatContext.op === 'alquiler' ? 'var(--azul-linea)' : chatContext.op === 'inversion' ? 'var(--texto-secundario-azul)' : 'var(--azul-linea)';
   const chartZoneLabel = chatContext.barrio && chatContext.barrio !== 'Todos' ? chatContext.barrio : chatContext.district;
   const chartData = {
     labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
@@ -173,7 +175,7 @@ const MadridChat: React.FC = () => {
     },
     scales: {
       x: { grid: { display: false } },
-      y: { grid: { color: '#f5f5f7' }, border: { display: false } }
+      y: { grid: { color: 'var(--blanco-humo)' }, border: { display: false } }
     }
   };
 
@@ -208,29 +210,29 @@ const MadridChat: React.FC = () => {
             {!hasStarted && (
               <div className="chat-welcome-hero" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '20px 10px' }}>
                 <Image src="/AMBI.png" alt="AMBI" width={180} height={180} priority style={{ objectFit: 'contain', marginBottom: '16px' }} />
-                <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#1d1d1f', marginBottom: '8px' }}>Bienvenido a AMBI</h1>
-                <p style={{ color: '#86868b', fontSize: '15px', maxWidth: '460px', marginBottom: '18px', lineHeight: '1.4' }}>
+                <h1 style={{ fontSize: '26px', fontWeight: '700', color: 'var(--azul-noche)', marginBottom: '8px' }}>Bienvenido a AMBI</h1>
+                <p style={{ color: 'var(--azul-linea)', fontSize: '15px', maxWidth: '460px', marginBottom: '18px', lineHeight: '1.4' }}>
                   El asistente conversacional de inteligencia inmobiliaria de Madrid.
                 </p>
                 <div style={{
-                  backgroundColor: '#f5f5f7',
-                  border: '1px solid #e5e5ea',
+                  backgroundColor: 'var(--blanco-humo)',
+                  border: '1px solid var(--humo-2)',
                   borderRadius: '16px',
                   padding: '16px 20px',
                   maxWidth: '500px',
                   marginBottom: '16px'
                 }}>
-                  <div style={{ display: 'inline-block', backgroundColor: '#e8f2ff', color: '#0071e3', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', padding: '4px 10px', borderRadius: '12px', marginBottom: '8px' }}>
+                  <div style={{ display: 'inline-block', backgroundColor: 'var(--blanco-humo)', color: 'var(--precio-subida)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', padding: '4px 10px', borderRadius: '12px', marginBottom: '8px' }}>
                     Fase Experimental
                   </div>
-                  <p style={{ fontSize: '13px', color: '#48484a', lineHeight: '1.5', margin: '0 0 12px 0' }}>
+                  <p style={{ fontSize: '13px', color: 'var(--azul-linea)', lineHeight: '1.5', margin: '0 0 12px 0' }}>
                     El motor de lenguaje de AMBI se encuentra en calibración para la versión web pública. Puedes explorar todas las métricas oficiales, mapas y series en tiempo real en el Dashboard.
                   </p>
                   <button
                     onClick={() => router.push('/madrid')}
                     style={{
-                      backgroundColor: '#0071e3',
-                      color: '#ffffff',
+                      backgroundColor: 'var(--precio-subida)',
+                      color: 'var(--blanco-humo)',
                       border: 'none',
                       borderRadius: '8px',
                       padding: '8px 16px',
@@ -249,14 +251,14 @@ const MadridChat: React.FC = () => {
               {chatHistory.map((msg, idx) => (
                 <div key={idx} className={`message-bubble ${msg.role}`} style={{
                   alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                  backgroundColor: msg.role === 'user' ? '#0071e3' : '#f5f5f7',
-                  color: msg.role === 'user' ? 'white' : '#1d1d1f',
+                  backgroundColor: msg.role === 'user' ? 'var(--precio-subida)' : 'var(--blanco-humo)',
+                  color: msg.role === 'user' ? 'var(--blanco-humo)' : 'var(--azul-noche)',
                   padding: '12px 18px',
                   borderRadius: '18px',
                   maxWidth: '85%',
                   lineHeight: '1.5',
                   fontSize: '15px',
-                  boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
+                  boxShadow: '0 2px 5px color-mix(in srgb, var(--azul-noche) 5%, transparent)'
                 }}>
                   {msg.role === 'assistant' ? (
                     <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -269,8 +271,8 @@ const MadridChat: React.FC = () => {
               {isLoading && (
                 <div className="message-bubble assistant" style={{
                   alignSelf: 'flex-start',
-                  backgroundColor: '#f5f5f7',
-                  color: '#1d1d1f',
+                  backgroundColor: 'var(--blanco-humo)',
+                  color: 'var(--azul-noche)',
                   padding: '12px 18px',
                   borderRadius: '18px',
                   maxWidth: '85%',
@@ -278,9 +280,9 @@ const MadridChat: React.FC = () => {
                   gap: '4px',
                   alignItems: 'center'
                 }}>
-                  <span className="typing-dot" style={{ width: '6px', height: '6px', backgroundColor: '#86868b', borderRadius: '50%', animation: 'blink 1.4s infinite both' }}></span>
-                  <span className="typing-dot" style={{ width: '6px', height: '6px', backgroundColor: '#86868b', borderRadius: '50%', animation: 'blink 1.4s infinite both', animationDelay: '0.2s' }}></span>
-                  <span className="typing-dot" style={{ width: '6px', height: '6px', backgroundColor: '#86868b', borderRadius: '50%', animation: 'blink 1.4s infinite both', animationDelay: '0.4s' }}></span>
+                  <span className="typing-dot" style={{ width: '6px', height: '6px', backgroundColor: 'var(--texto-secundario-azul)', borderRadius: '50%', animation: 'blink 1.4s infinite both' }}></span>
+                  <span className="typing-dot" style={{ width: '6px', height: '6px', backgroundColor: 'var(--texto-secundario-azul)', borderRadius: '50%', animation: 'blink 1.4s infinite both', animationDelay: '0.2s' }}></span>
+                  <span className="typing-dot" style={{ width: '6px', height: '6px', backgroundColor: 'var(--texto-secundario-azul)', borderRadius: '50%', animation: 'blink 1.4s infinite both', animationDelay: '0.4s' }}></span>
                   <style>{`@keyframes blink { 0% { opacity: 0.2; } 20% { opacity: 1; } 100% { opacity: 0.2; } }`}</style>
                 </div>
               )}
@@ -304,10 +306,10 @@ const MadridChat: React.FC = () => {
         </section>
 
         {/* 3. SECCIÓN DERECHA (INFORMACIÓN VISUAL DINÁMICA) */}
-        <section className="ambi-visual-section" style={{ flex: 1, minHeight: 0, backgroundColor: '#f5f5f7', padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto' }}>
+        <section className="ambi-visual-section" style={{ flex: 1, minHeight: 0, backgroundColor: 'var(--blanco-humo)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto' }}>
           
-          <div style={{ backgroundColor: 'white', padding: '15px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-            <h3 style={{ margin: '0 0 15px 0', fontSize: '16px', fontWeight: 600, color: '#1d1d1f' }}>
+          <div style={{ backgroundColor: 'var(--blanco-humo)', padding: '15px', borderRadius: '16px', boxShadow: '0 2px 8px color-mix(in srgb, var(--azul-noche) 5%, transparent)' }}>
+            <h3 style={{ margin: '0 0 15px 0', fontSize: '16px', fontWeight: 600, color: 'var(--azul-noche)' }}>
               Evolución {chatContext.op.charAt(0).toUpperCase() + chatContext.op.slice(1)} ({chatContext.year})
             </h3>
             <div style={{ height: '220px', width: '100%' }}>
@@ -323,8 +325,8 @@ const MadridChat: React.FC = () => {
             </div>
           </div>
 
-          <div style={{ backgroundColor: 'white', padding: '15px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)', flexGrow: 1, minHeight: '300px', display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', fontWeight: 600, color: '#1d1d1f' }}>
+          <div style={{ backgroundColor: 'var(--blanco-humo)', padding: '15px', borderRadius: '16px', boxShadow: '0 2px 8px color-mix(in srgb, var(--azul-noche) 5%, transparent)', flexGrow: 1, minHeight: '300px', display: 'flex', flexDirection: 'column' }}>
+            <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', fontWeight: 600, color: 'var(--azul-noche)' }}>
               Mapa de Calor: {chatContext.barrio && chatContext.barrio !== 'Todos' ? chatContext.barrio : (chatContext.district === 'Todos' ? 'Madrid' : chatContext.district)}
             </h3>
             <div style={{ flexGrow: 1, borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
@@ -353,22 +355,22 @@ const MadridChat: React.FC = () => {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-            <div style={{ backgroundColor: 'white', padding: '15px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-              <div style={{ fontSize: '13px', color: '#86868b', marginBottom: '5px' }}>Precio Medio m²</div>
+            <div style={{ backgroundColor: 'var(--blanco-humo)', padding: '15px', borderRadius: '16px', boxShadow: '0 2px 8px color-mix(in srgb, var(--azul-noche) 5%, transparent)' }}>
+              <div style={{ fontSize: '13px', color: 'var(--azul-linea)', marginBottom: '5px' }}>Precio Medio m²</div>
               <div style={{ fontSize: '24px', fontWeight: 700, color: chartColor }}>
                 {kpiData?.precio_m2 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(kpiData.precio_m2) + ' €' : '---'}
               </div>
-              <div style={{ fontSize: '12px', color: kpiData?.variacion_anual > 0 ? '#34c759' : '#ff3b30', marginTop: '5px', fontWeight: 500 }}>
+              <div style={{ fontSize: '12px', color: kpiData?.variacion_anual > 0 ? 'var(--azul-linea)' : 'var(--coral-texto)', marginTop: '5px', fontWeight: 500 }}>
                 {kpiData?.variacion_anual ? (kpiData.variacion_anual > 0 ? '+' : '') + kpiData.variacion_anual.toFixed(1) + '% (anual)' : ''}
               </div>
             </div>
             
-            <div style={{ backgroundColor: 'white', padding: '15px', borderRadius: '16px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-              <div style={{ fontSize: '13px', color: '#86868b', marginBottom: '5px' }}>{chatContext.op === 'alquiler' ? 'Renta Mensual Media' : 'Precio Total Medio'}</div>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: '#1d1d1f' }}>
+            <div style={{ backgroundColor: 'var(--blanco-humo)', padding: '15px', borderRadius: '16px', boxShadow: '0 2px 8px color-mix(in srgb, var(--azul-noche) 5%, transparent)' }}>
+              <div style={{ fontSize: '13px', color: 'var(--azul-linea)', marginBottom: '5px' }}>{chatContext.op === 'alquiler' ? 'Renta Mensual Media' : 'Precio Total Medio'}</div>
+              <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--azul-noche)' }}>
                 {kpiData?.precio_vivienda ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(kpiData.precio_vivienda) + ' €' : '---'}
               </div>
-              <div style={{ fontSize: '12px', color: '#86868b', marginTop: '5px' }}>
+              <div style={{ fontSize: '12px', color: 'var(--azul-linea)', marginTop: '5px' }}>
                 {chatContext.barrio && chatContext.barrio !== 'Todos' 
                   ? `Promedio en ${chatContext.barrio}` 
                   : (chatContext.district === 'Todos' ? 'Promedio en Madrid' : `Promedio en ${chatContext.district}`)}

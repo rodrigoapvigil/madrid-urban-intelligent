@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Pause, Play } from 'lucide-react';
+import { colorWithAlpha, resolveCssColor } from '../lib/colors';
 
 type Particle = { latitude: number; longitude: number; size: number; color: string };
 
@@ -13,6 +14,13 @@ export default function ParticleField() {
     const canvas = canvasRef.current;
     const context = canvas?.getContext('2d', { alpha: true });
     if (!canvas || !context) return;
+    const palette = {
+      line: resolveCssColor('var(--azul-linea)'),
+      night: resolveCssColor('var(--azul-noche)'),
+      coral: resolveCssColor('var(--coral)'),
+      smoke: resolveCssColor('var(--blanco-humo)'),
+      rise: resolveCssColor('var(--precio-subida)'),
+    };
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const particles: Particle[] = [];
     const count = window.innerWidth < 640 ? 1350 : 2400;
@@ -50,9 +58,9 @@ export default function ParticleField() {
       const centerX = width * 0.5;
       const centerY = height * 0.5;
       const glow = context.createRadialGradient(centerX - radius * 0.22, centerY - radius * 0.28, radius * 0.04, centerX, centerY, radius * 1.05);
-      glow.addColorStop(0, 'rgba(0,130,124,0.16)');
-      glow.addColorStop(0.62, 'rgba(0,130,124,0.06)');
-      glow.addColorStop(1, 'rgba(1,38,36,0)');
+      glow.addColorStop(0, colorWithAlpha(palette.line, 0.16));
+      glow.addColorStop(0.62, colorWithAlpha(palette.line, 0.06));
+      glow.addColorStop(1, colorWithAlpha(palette.night, 0));
       context.fillStyle = glow;
       context.fillRect(0, 0, width, height);
       for (const particle of particles) {
@@ -70,11 +78,7 @@ export default function ParticleField() {
         const alpha = Math.min(0.94, 0.2 + (z + 0.25) * 0.54);
         context.beginPath();
         context.arc(x, py, particle.size * perspective, 0, Math.PI * 2);
-        context.fillStyle = particle.color === 'coral'
-          ? `rgba(253,233,255,${alpha})`
-          : particle.color === 'mist'
-            ? `rgba(203,255,252,${alpha})`
-            : `rgba(0,190,176,${alpha})`;
+        context.fillStyle = colorWithAlpha(particle.color === 'coral' ? palette.coral : particle.color === 'mist' ? palette.smoke : palette.rise, alpha);
         context.fill();
       }
       if (!paused && !reducedMotion) angle += 0.0009;

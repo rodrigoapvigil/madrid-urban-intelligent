@@ -22,15 +22,15 @@ const normalize = (str: string) => {
 
 const getColor = (d: number, profile: string) => {
   if (profile === 'Alquiler') {
-    return d > 20 ? '#005187' : d > 16 ? '#4d82bc' : d > 13 ? '#84b6f4' : d > 10 ? '#c4dafa' : '#fcffff';
+    return d > 20 ? 'var(--azul-linea)' : d > 16 ? 'var(--precio-subida)' : d > 13 ? 'var(--precio-subida)' : d > 10 ? 'var(--humo-2)' : 'var(--blanco-humo)';
   }
   if (profile === 'Compra') {
-    return d > 6000 ? '#003817' : d > 4500 ? '#026842' : d > 3000 ? '#009d71' : d > 1500 ? '#5ccda7' : '#98ffe0';
+    return d > 6000 ? 'var(--azul-noche)' : d > 4500 ? 'var(--azul-noche-2)' : d > 3000 ? 'var(--azul-linea)' : d > 1500 ? 'var(--precio-subida)' : 'var(--texto-secundario-azul)';
   }
   if (profile === 'Inversión') {
-    return d > 0.065 ? '#7a0177' : d > 0.058 ? '#ae017e' : d > 0.052 ? '#dd3497' : d > 0.046 ? '#f768a1' : d > 0.040 ? '#fbb4b9' : '#fff7f3';
+    return d > 0.065 ? 'var(--azul-noche-2)' : d > 0.058 ? 'var(--azul-linea)' : d > 0.052 ? 'var(--precio-subida)' : d > 0.046 ? 'var(--texto-secundario-azul)' : d > 0.040 ? 'var(--humo-2)' : 'var(--blanco-humo)';
   }
-  return d > 9000 ? '#8c2d04' : d > 7000 ? '#d94801' : d > 5000 ? '#f16913' : d > 3500 ? '#fd8d3c' : d > 2000 ? '#fec44f' : '#fff5eb';
+  return d > 9000 ? 'var(--azul-noche)' : d > 7000 ? 'var(--azul-noche-2)' : d > 5000 ? 'var(--azul-linea)' : d > 3500 ? 'var(--precio-subida)' : d > 2000 ? 'var(--texto-secundario-azul)' : 'var(--blanco-humo)';
 };
 
 const MadridMap: React.FC<MapProps> = ({ 
@@ -61,6 +61,10 @@ const MadridMap: React.FC<MapProps> = ({
       const geoName = normalize(name);
       return dName === geoName || dName.includes(geoName) || geoName.includes(dName);
     });
+
+    const isSelected = type === 'districts'
+      ? Boolean(selectedDistrict && normalize(name) === normalize(selectedDistrict))
+      : Boolean(selectedBarrio && normalize(name) === normalize(selectedBarrio));
     
     let val = 0;
     if (item) {
@@ -68,11 +72,11 @@ const MadridMap: React.FC<MapProps> = ({
     }
 
     return {
-      fillColor: isExcluded ? '#f0f0f0' : getColor(val, selectedProfile),
+      fillColor: isExcluded ? 'var(--humo-2)' : isSelected ? 'var(--coral)' : getColor(val, selectedProfile),
       weight: isExcluded ? 0.5 : 1,
       opacity: isExcluded ? 0.2 : 1,
-      color: 'white',
-      fillOpacity: isExcluded ? 0.1 : 0.7
+      color: 'var(--blanco-humo)',
+      fillOpacity: isExcluded ? 0.1 : isSelected ? 0.82 : 0.7
     };
   }, [data, selectedProfile, selectedDistrict, selectedBarrio, type]);
 
@@ -145,32 +149,32 @@ const MadridMap: React.FC<MapProps> = ({
           });
           
           let popupContent = `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 6px; min-width: 180px; border-radius: 12px;">`;
-          popupContent += `<strong style="font-size: 15px; color: #1d1d1f; display: block; margin-bottom: 8px; border-bottom: 0.5px solid #eee; padding-bottom: 4px;">${name}</strong>`;
+          popupContent += `<strong style="font-size: 15px; color: var(--azul-noche); display: block; margin-bottom: 8px; border-bottom: 0.5px solid var(--blanco-humo); padding-bottom: 4px;">${name}</strong>`;
           
           if (item) {
             const fmtPrice = (v: number) => new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(v);
             const fmtYield = (v: number) => (v * 100).toFixed(2) + '%';
             
-            popupContent += `<div style="color: #424245; font-size: 13px; line-height: 1.6;">`;
+            popupContent += `<div style="color: var(--azul-linea); font-size: 13px; line-height: 1.6;">`;
             
             if (selectedProfile === 'Alquiler') {
-              popupContent += `<div style="display: flex; justify-content: space-between;"><span>Precio m² Alquiler:</span> <span style="color: #0071e3; font-weight: 600;">${fmtPrice(item.precio_m2)} €/m²${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; margin-top: 2px;"><span>Alquiler Promedio:</span> <span style="color: #1d1d1f; font-weight: 600;">${fmtPrice(item.precio_vivienda)} €/mes${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between;"><span>Precio m² Alquiler:</span> <span style="color: var(--precio-subida); font-weight: 600;">${fmtPrice(item.precio_m2)} €/m²${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; margin-top: 2px;"><span>Alquiler Promedio:</span> <span style="color: var(--azul-noche); font-weight: 600;">${fmtPrice(item.precio_vivienda)} €/mes${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
             } else if (selectedProfile === 'Compra' || selectedProfile === 'Venta') {
               const label = selectedProfile === 'Compra' ? 'Compra' : 'Venta';
-              const color = selectedProfile === 'Compra' ? '#34c759' : '#f59e0b';
+              const color = selectedProfile === 'Compra' ? 'var(--azul-linea)' : 'var(--coral)';
               popupContent += `<div style="display: flex; justify-content: space-between;"><span>Precio m² ${label}:</span> <span style="color: ${color}; font-weight: 600;">${fmtPrice(item.precio_m2)} €/m²${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; margin-top: 2px;"><span>Precio Vivienda:</span> <span style="color: #1d1d1f; font-weight: 600;">${fmtPrice(item.precio_vivienda)} €${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; margin-top: 2px;"><span>Precio Vivienda:</span> <span style="color: var(--azul-noche); font-weight: 600;">${fmtPrice(item.precio_vivienda)} €${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
             } else if (selectedProfile === 'Inversión') {
               const buyPriceM2 = item.precio_venta_m2 || item.precio_m2;
-              popupContent += `<div style="display: flex; justify-content: space-between;"><span>Precio m² Compra:</span> <span style="color: #34c759; font-weight: 600;">${fmtPrice(buyPriceM2)} €/m²${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; margin-top: 2px;"><span>Rentabilidad:</span> <span style="color: #af52de; font-weight: 600;">${fmtYield(item.rentabilidad)}${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; margin-top: 2px;"><span>Alquiler Estimado:</span> <span style="color: #0071e3; font-weight: 600;">${fmtPrice(item.precio_alquiler || item.precio_vivienda)} €/mes${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between;"><span>Precio m² Compra:</span> <span style="color: var(--azul-linea); font-weight: 600;">${fmtPrice(buyPriceM2)} €/m²${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; margin-top: 2px;"><span>Rentabilidad:</span> <span style="color: var(--texto-secundario-azul); font-weight: 600;">${fmtYield(item.rentabilidad)}${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; margin-top: 2px;"><span>Alquiler Estimado:</span> <span style="color: var(--precio-subida); font-weight: 600;">${fmtPrice(item.precio_alquiler || item.precio_vivienda)} €/mes${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
             }
             
             popupContent += `</div>`;
           } else {
-            popupContent += `<div style="color: #999; font-size: 12px; font-style: italic; margin-top: 4px;">Sin datos registrados por el Ayuntamiento de Madrid</div>`;
+            popupContent += `<div style="color: var(--texto-secundario-azul); font-size: 12px; font-style: italic; margin-top: 4px;">Sin datos registrados por el Ayuntamiento de Madrid</div>`;
           }
           popupContent += `</div>`;
           
@@ -186,7 +190,7 @@ const MadridMap: React.FC<MapProps> = ({
               const l = e.target;
               l.setStyle({
                 weight: 2,
-                color: '#666',
+                color: 'var(--azul-linea)',
                 fillOpacity: 0.9
               });
               l.openPopup();

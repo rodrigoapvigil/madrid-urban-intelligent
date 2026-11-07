@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { colorWithAlpha, resolveCssColor } from '../lib/colors';
 
 type Position = [number, number, ...number[]];
 type Ring = Position[];
@@ -147,6 +148,13 @@ export default function MadridDistrictMap() {
     if (!canvas || !wrapper || !districts.length) return;
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
+    const palette = {
+      night: resolveCssColor('var(--azul-noche)'),
+      line: resolveCssColor('var(--azul-linea)'),
+      rise: resolveCssColor('var(--precio-subida)'),
+      smoke: resolveCssColor('var(--blanco-humo)'),
+      coral: resolveCssColor('var(--coral)'),
+    };
     const rand = seeded(20261107);
     const isSmallScreen = window.matchMedia('(max-width: 700px)').matches;
     const points: { x: number; y: number; district: number; border: boolean; lamp: boolean; intensity: number }[] = [];
@@ -189,8 +197,8 @@ export default function MadridDistrictMap() {
     const lampCtx = lampCanvas.getContext('2d');
     if (lampCtx) {
       const glow = lampCtx.createRadialGradient(36, 36, 0, 36, 36, 36);
-      glow.addColorStop(0, 'rgba(215,255,252,.98)'); glow.addColorStop(.08, 'rgba(123,255,243,.92)');
-      glow.addColorStop(.26, 'rgba(39,226,211,.54)'); glow.addColorStop(1, 'rgba(0,191,177,0)');
+      glow.addColorStop(0, colorWithAlpha(palette.smoke, .98)); glow.addColorStop(.08, colorWithAlpha(palette.rise, .92));
+      glow.addColorStop(.26, colorWithAlpha(palette.line, .54)); glow.addColorStop(1, 'rgba(0,0,0,0)');
       lampCtx.fillStyle = glow; lampCtx.fillRect(0, 0, 72, 72);
     }
     let width = 0, height = 0, dpr = 1, raf = 0, last = 0, time = 0, flickerBucket = 0;
@@ -213,7 +221,7 @@ export default function MadridDistrictMap() {
       const dt = Math.min(.05, last ? (stamp - last) / 1000 : .016); last = stamp; time += dt;
       const scale = Math.min(width, height) / 1000, ox = (width - 1000 * scale) / 2, oy = (height - 1000 * scale) / 2;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      const bg = ctx.createLinearGradient(0, 0, 0, height); bg.addColorStop(0, '#022f2b'); bg.addColorStop(1, '#011715'); ctx.fillStyle = bg; ctx.fillRect(0, 0, width, height);
+      ctx.fillStyle = palette.night; ctx.fillRect(0, 0, width, height);
       const pointer = activePointer.current;
       if (!pauseRef.current && !reducedMotion.current) {
         pilotTime += dt;
@@ -236,7 +244,7 @@ export default function MadridDistrictMap() {
       if (cursor) {
         const radius = Math.max(60, width * (width < 650 ? .11 : .07));
         const gradient = ctx.createRadialGradient(cursor.x, cursor.y, 0, cursor.x, cursor.y, radius);
-        gradient.addColorStop(0, 'rgba(30,224,205,.14)'); gradient.addColorStop(.46, 'rgba(0,191,177,.07)'); gradient.addColorStop(1, 'rgba(0,191,177,0)');
+        gradient.addColorStop(0, colorWithAlpha(palette.rise, .14)); gradient.addColorStop(.46, colorWithAlpha(palette.line, .07)); gradient.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = gradient; ctx.fillRect(0, 0, width, height);
         const mx = (cursor.x - ox) / scale, my = (cursor.y - oy) / scale;
         for (let i = 0; i < points.length; i++) {
@@ -262,7 +270,7 @@ export default function MadridDistrictMap() {
           ctx.drawImage(lampCanvas, px - glowSize / 2, py - glowSize / 2, glowSize, glowSize);
         }
         ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = alpha;
-        ctx.fillStyle = active ? '#b7fff8' : border ? '#50d4cb' : norm > .66 ? '#4edfd1' : '#309c96';
+        ctx.fillStyle = active ? palette.coral : border ? palette.smoke : palette.rise;
         ctx.beginPath(); ctx.arc(px, py, Math.max(.65, radius), 0, Math.PI * 2); ctx.fill();
       }
       ctx.globalAlpha = 1; ctx.globalCompositeOperation = 'source-over';

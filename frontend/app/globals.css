@@ -1,38 +1,59 @@
+@import "tailwindcss";
+
 :root {
-  color-scheme: light;
-  --mui-blue-950: #07182e;
-  --mui-blue-900: #0b2b50;
-  --mui-blue-800: #124a82;
-  --mui-iris: #1676df;
-  --mui-sky: #0099ff;
-  --mui-iris-gradient: linear-gradient(135deg, #0f5eaa 0%, #0b58ad 48%, #0754b7 100%);
-  --mui-sand: #d5cec0;
-  --mui-paper: #f5f2eb;
-  --mui-paper-raised: #fffefa;
-  --mui-coral: #f04923;
-  --mui-coral-deep: #b93519;
-  --mui-ink: #13243a;
-  --mui-muted: #4b5b70;
-  --mui-line: rgba(12, 43, 80, .14);
-  --mui-shadow: 0 12px 32px rgba(7, 24, 46, .08);
+  color-scheme: dark;
+  --azul-noche: #0E2238;
+  --azul-noche-2: #16304D;
+  --azul-linea: #2A4766;
+  --blanco-humo: #F2F0EC;
+  --humo-2: #E4E1DB;
+  --coral: #FF6B5B;
+  --coral-texto: #D8483A;
+  --texto-sobre-azul: var(--blanco-humo);
+  --texto-sobre-humo: var(--azul-noche);
+  --texto-secundario-azul: #9FB2C6;
+  --precio-subida: #5FA8D3;
+
+  /* Compatibility aliases keep existing component styles on the same palette. */
+  --mui-blue-950: var(--azul-noche);
+  --mui-blue-900: var(--azul-noche-2);
+  --mui-blue-800: var(--azul-linea);
+  --mui-iris: var(--coral);
+  --mui-sky: var(--precio-subida);
+  --mui-iris-gradient: var(--coral);
+  --mui-sand: var(--humo-2);
+  --mui-paper: var(--azul-noche);
+  --mui-paper-raised: var(--blanco-humo);
+  --mui-coral: var(--coral);
+  --mui-coral-deep: var(--coral-texto);
+  --mui-ink: var(--texto-sobre-azul);
+  --mui-muted: var(--texto-secundario-azul);
+  --mui-line: color-mix(in srgb, var(--azul-linea) 60%, transparent);
+  --mui-shadow: 0 12px 32px color-mix(in srgb, var(--azul-noche) 20%, transparent);
   --mui-radius-card: 16px;
   --mui-radius-control: 10px;
 }
 
+@theme inline {
+  --color-azul-noche: var(--azul-noche);
+  --color-azul-noche-2: var(--azul-noche-2);
+  --color-azul-linea: var(--azul-linea);
+  --color-blanco-humo: var(--blanco-humo);
+  --color-humo-2: var(--humo-2);
+  --color-coral: var(--coral);
+  --color-coral-texto: var(--coral-texto);
+  --color-texto-secundario-azul: var(--texto-secundario-azul);
+}
+
+* { box-sizing: border-box; }
+html { min-height: 100%; background: var(--azul-noche); }
 body {
+  min-height: 100vh;
   margin: 0;
-  padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  color: var(--texto-sobre-azul);
+  background: var(--azul-noche);
+  font-family: Arial, Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
-
-* {
-  box-sizing: border-box;
-}
-
-html { scroll-behavior: smooth; }
-body { color: var(--mui-ink); background: var(--mui-paper); }
-::selection { color: #fff; background: var(--mui-blue-800); }
-:focus-visible { outline-color: var(--mui-iris); }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+::selection { color: var(--azul-noche); background: var(--coral); }
+:focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }

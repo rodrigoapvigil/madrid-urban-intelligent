@@ -2,11 +2,11 @@
   position: relative;
   z-index: 1200;
   width: 100%;
-  color: #fff;
+  color: var(--blanco-humo);
   background:
-    radial-gradient(ellipse at 24% -60%, rgba(0, 153, 255, .3), transparent 54%),
+    radial-gradient(ellipse at 24% -60%, color-mix(in srgb, var(--precio-subida) 30%, transparent), transparent 54%),
     linear-gradient(110deg, var(--mui-blue-950), var(--mui-blue-900));
-  border-bottom: 1px solid rgba(213, 206, 192, .2);
+  border-bottom: 1px solid color-mix(in srgb, var(--humo-2) 20%, transparent);
 }
 
 .site-header-main {
@@ -22,7 +22,7 @@
 
 .site-brand {
   flex: 0 0 auto;
-  color: #fff;
+  color: var(--blanco-humo);
   text-decoration: none;
   font-size: 19px;
   line-height: 1.2;
@@ -52,7 +52,7 @@
   padding: 9px 12px;
   display: inline-flex;
   align-items: center;
-  color: rgba(255, 254, 250, .78);
+  color: color-mix(in srgb, var(--blanco-humo) 78%, transparent);
   text-decoration: none;
   font-size: 13px;
   font-weight: 600;
@@ -62,8 +62,8 @@
 
 .site-navigation a:hover,
 .site-navigation a.active {
-  color: #fff;
-  background: rgba(0, 153, 255, .2);
+  color: var(--blanco-humo);
+  background: color-mix(in srgb, var(--precio-subida) 20%, transparent);
 }
 
 .site-navigation a.active::after {
@@ -87,11 +87,11 @@
   flex: 0 0 auto;
   width: 100%;
   padding: 30px 20px;
-  color: rgba(255, 254, 250, .82);
+  color: color-mix(in srgb, var(--blanco-humo) 82%, transparent);
   background:
-    radial-gradient(ellipse at 80% 120%, rgba(0, 153, 255, .2), transparent 44%),
+    radial-gradient(ellipse at 80% 120%, color-mix(in srgb, var(--precio-subida) 20%, transparent), transparent 44%),
     var(--mui-blue-950);
-  border-top: 1px solid rgba(213, 206, 192, .18);
+  border-top: 1px solid color-mix(in srgb, var(--humo-2) 18%, transparent);
   text-align: center;
 }
 
@@ -107,8 +107,8 @@
   text-align: left;
 }
 
-.site-footer-inner strong { color: #fffefa; font-size: 14px; }
-.site-footer-inner small { grid-column: 1 / -1; color: rgba(213, 206, 192, .82); }
+.site-footer-inner strong { color: var(--blanco-humo); font-size: 14px; }
+.site-footer-inner small { grid-column: 1 / -1; color: color-mix(in srgb, var(--humo-2) 82%, transparent); }
 
 @media (max-width: 900px) {
   .site-header-main { flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; }
