@@ -295,7 +295,7 @@
   .mi-hero__lead { max-width: 420px; margin-top: 19px; font-size: 14px; }
   .mi-hero__content .mi-button { margin-top: 23px; }
   .mi-button { min-height: 46px; padding-inline: 15px; font-size: 10px; }
-  .mi-hero-artwork__canvas { bottom: 88px; left: -45%; right: auto; width: 190%; height: 48%; max-height: none; transform: none; }
+  .mi-hero-artwork__canvas { bottom: clamp(150px,19svh,190px); left: -45%; right: auto; width: 190%; height: 48%; max-height: none; transform: none; }
   .mi-hero__skyline { max-height: 100%; }
   .mi-hero-artwork__glow { display: none; }
   .mi-hero__meta { right: 18px; bottom: 18px; gap: 7px; font-size: 7px; }
