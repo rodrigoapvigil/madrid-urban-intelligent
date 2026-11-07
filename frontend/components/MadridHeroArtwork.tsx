@@ -1,20 +1,14 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, type RefObject } from 'react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 
 const skyline = '/madrid-skyline-transparent.png';
 
-export default function MadridHeroArtwork() {
-  const artworkRef = useRef<HTMLDivElement>(null);
-  const edgeLightRef = useRef<HTMLImageElement>(null);
+function DesktopAnimatedSkyline({ target }: { target: RefObject<HTMLDivElement> }) {
   const reducedMotion = useReducedMotion();
-  const { scrollYProgress } = useScroll({
-    target: artworkRef,
-    offset: ['start start', 'end start'],
-  });
-
+  const { scrollYProgress } = useScroll({ target, offset: ['start start', 'end start'] });
   const scatter = useTransform(scrollYProgress, [0, 0.2, 0.42, 0.63, 0.86, 1], [0, 0.12, 1, 0.38, 0, 0]);
   const baseOpacity = useTransform(scatter, [0, 1], [0.94, 0.62]);
   const baseScale = useTransform(scrollYProgress, [0, 0.5, 1], [1, 1.025, 0.98]);
@@ -24,13 +18,38 @@ export default function MadridHeroArtwork() {
   const leftY = useTransform(scatter, [0, 1], [0, -13]);
   const rightX = useTransform(scatter, [0, 1], [0, 34]);
   const rightY = useTransform(scatter, [0, 1], [0, 16]);
+  const animate = !reducedMotion;
+
+  return <>
+    <motion.img className="mi-hero__skyline mi-hero__skyline--base" src={skyline} alt="" style={animate ? { opacity: baseOpacity, scale: baseScale, y: baseY } : undefined} draggable={false} />
+    {animate && <>
+      <motion.img className="mi-hero__skyline mi-hero__skyline--fragment mi-hero__skyline--west" src={skyline} alt="" style={{ opacity: fragmentOpacity, x: leftX, y: leftY }} draggable={false} />
+      <motion.img className="mi-hero__skyline mi-hero__skyline--fragment mi-hero__skyline--east" src={skyline} alt="" style={{ opacity: fragmentOpacity, x: rightX, y: rightY }} draggable={false} />
+    </>}
+  </>;
+}
+
+export default function MadridHeroArtwork() {
+  const artworkRef = useRef<HTMLDivElement>(null);
+  const edgeLightRef = useRef<HTMLImageElement>(null);
+  const [desktopEffects, setDesktopEffects] = useState(false);
+
+  useEffect(() => {
+    // Keep the mobile hero to one raster layer. The desktop reconstruction and
+    // cursor glow add large composited surfaces that are unnecessary on touch.
+    const media = window.matchMedia('(min-width: 900px) and (hover: hover) and (pointer: fine)');
+    const update = () => setDesktopEffects(media.matches);
+    update();
+    media.addEventListener?.('change', update);
+    return () => media.removeEventListener?.('change', update);
+  }, []);
 
   useEffect(() => {
     const artwork = artworkRef.current;
     const edgeLight = edgeLightRef.current;
     const hero = artwork?.closest('.mi-hero');
     const canvas = artwork?.querySelector('.mi-hero-artwork__canvas');
-    if (!artwork || !edgeLight || !canvas || !hero) return;
+    if (!desktopEffects || !artwork || !edgeLight || !canvas || !hero) return;
 
     let frame = 0;
     let clientX = 0;
@@ -59,25 +78,15 @@ export default function MadridHeroArtwork() {
       hero.removeEventListener('pointerleave', onPointerLeave);
       if (frame) window.cancelAnimationFrame(frame);
     };
-  }, []);
-
-  const animate = !reducedMotion;
+  }, [desktopEffects]);
 
   return (
     <div className="mi-hero-artwork" ref={artworkRef} aria-hidden="true">
       <div className="mi-hero-artwork__canvas">
-        <motion.img
-          className="mi-hero__skyline mi-hero__skyline--base"
-          src={skyline}
-          alt=""
-          style={animate ? { opacity: baseOpacity, scale: baseScale, y: baseY } : undefined}
-          draggable={false}
-        />
-        {animate && <>
-          <motion.img className="mi-hero__skyline mi-hero__skyline--fragment mi-hero__skyline--west" src={skyline} alt="" style={{ opacity: fragmentOpacity, x: leftX, y: leftY }} draggable={false} />
-          <motion.img className="mi-hero__skyline mi-hero__skyline--fragment mi-hero__skyline--east" src={skyline} alt="" style={{ opacity: fragmentOpacity, x: rightX, y: rightY }} draggable={false} />
-        </>}
-        <Image className="mi-hero__skyline mi-hero-artwork__edge-light" src="/madrid-skyline-buildings.svg" alt="" width={2200} height={760} draggable={false} ref={edgeLightRef} />
+        {desktopEffects
+          ? <DesktopAnimatedSkyline target={artworkRef} />
+          : <img className="mi-hero__skyline mi-hero__skyline--base" src={skyline} alt="" draggable={false} />}
+        {desktopEffects && <Image className="mi-hero__skyline mi-hero-artwork__edge-light" src="/madrid-skyline-buildings.svg" alt="" width={2200} height={760} draggable={false} ref={edgeLightRef} />}
       </div>
     </div>
   );

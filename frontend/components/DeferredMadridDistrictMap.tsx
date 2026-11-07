@@ -1,7 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import MadridDistrictMap from './MadridDistrictMap';
+import dynamic from 'next/dynamic';
+
+const MadridDistrictMap = dynamic(() => import('./MadridDistrictMap'), {
+  ssr: false,
+  loading: () => <div className="mi-district-map-deferred__placeholder" aria-hidden="true" />,
+});
 
 export default function DeferredMadridDistrictMap() {
   const containerRef = useRef<HTMLDivElement>(null);

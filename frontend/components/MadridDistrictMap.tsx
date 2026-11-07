@@ -15,6 +15,7 @@ type ProjectedPolygon = { rings: { x: number; y: number }[][] };
 type District = {
   name: string;
   area: number;
+  renderArea: number;
   centroid: { x: number; y: number };
   polygons: ProjectedPolygon[];
   bounds: { minX: number; minY: number; maxX: number; maxY: number };
@@ -120,7 +121,7 @@ export default function MadridDistrictMap() {
             totalArea += area; cx += center.x * area; cy += center.y * area;
             polygons.push({ rings });
           }
-          projected.push({ name: normalizeName(feature.properties.name ?? feature.properties.NAME_2 ?? feature.properties.district ?? feature.properties.nom), area: totalArea, centroid: totalArea ? { x: cx / totalArea, y: cy / totalArea } : { x: 0, y: 0 }, polygons, bounds });
+          projected.push({ name: normalizeName(feature.properties.name ?? feature.properties.NAME_2 ?? feature.properties.district ?? feature.properties.nom), area: totalArea, renderArea: 0, centroid: totalArea ? { x: cx / totalArea, y: cy / totalArea } : { x: 0, y: 0 }, polygons, bounds });
         }
         const bounds = projected.reduce((b, d) => ({ minX: Math.min(b.minX, d.bounds.minX), minY: Math.min(b.minY, d.bounds.minY), maxX: Math.max(b.maxX, d.bounds.maxX), maxY: Math.max(b.maxY, d.bounds.maxY) }), { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity });
         const scale = 940 / Math.max(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY);
@@ -129,6 +130,7 @@ export default function MadridDistrictMap() {
         for (const district of projected) {
           for (const polygon of district.polygons) for (const ring of polygon.rings) for (const p of ring) { p.x = p.x * scale + offsetX; p.y = p.y * scale + offsetY; }
           district.centroid = { x: district.centroid.x * scale + offsetX, y: district.centroid.y * scale + offsetY };
+          district.renderArea = district.area * scale * scale;
           district.bounds = { minX: district.bounds.minX * scale + offsetX, minY: district.bounds.minY * scale + offsetY, maxX: district.bounds.maxX * scale + offsetX, maxY: district.bounds.maxY * scale + offsetY };
         }
         setDistricts(projected); setError(false);
@@ -146,17 +148,21 @@ export default function MadridDistrictMap() {
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) return;
     const rand = seeded(20261107);
+    const isSmallScreen = window.matchMedia('(max-width: 700px)').matches;
     const points: { x: number; y: number; district: number; border: boolean; lamp: boolean; intensity: number }[] = [];
     districts.forEach((district, districtIndex) => {
-      const target = Math.max(90, Math.round(38 * Math.pow(Math.max(district.area, 1), .55)));
-      const step = Math.max(.012, Math.sqrt(Math.max(district.area, .01) / target));
+      // Geometry is normalized to a 1000×1000 canvas. Use that same visual
+      // coordinate space to size the sampling grid; mixing km² with canvas
+      // units previously produced hundreds of thousands of unnecessary dots.
+      const target = Math.max(100, Math.min(isSmallScreen ? 420 : 1200, Math.round(district.renderArea * (isSmallScreen ? .006 : .014))));
+      const step = Math.max(2.4, Math.sqrt(Math.max(district.renderArea, 1) / target));
       for (const polygon of district.polygons) {
         const outer = polygon.rings[0] ?? [];
         for (const ring of polygon.rings) {
           for (let i = 0; i < ring.length; i++) {
             const a = ring[i], b = ring[(i + 1) % ring.length];
             const len = Math.hypot(b.x - a.x, b.y - a.y);
-            const count = Math.max(1, Math.ceil(len / .25));
+            const count = Math.max(1, Math.ceil(len / (isSmallScreen ? 4 : 2.8)));
             for (let j = 0; j < count; j++) {
               const t = j / count;
               points.push({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, district: districtIndex, border: true, lamp: rand() < .2, intensity: rand() });
@@ -191,7 +197,7 @@ export default function MadridDistrictMap() {
     let visible = true, pilotIndex = 0, pilotTime = 0, pilotX = districts[0].centroid.x, pilotY = districts[0].centroid.y;
     let cursorCanvas: { x: number; y: number; until: number } | null = null;
     const resize = () => {
-      const rect = wrapper.getBoundingClientRect(); dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = wrapper.getBoundingClientRect(); dpr = Math.min(window.devicePixelRatio || 1, isSmallScreen ? 1.25 : 1.7);
       width = Math.max(1, rect.width); height = Math.max(1, rect.height);
       canvas.width = Math.round(width * dpr); canvas.height = Math.round(height * dpr);
       canvas.style.width = `${width}px`; canvas.style.height = `${height}px`;
