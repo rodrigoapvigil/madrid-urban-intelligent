@@ -122,11 +122,6 @@ export default function MadridLanding() {
                   <span>antes de que cambie el mercado.</span>
                 </h2>
               </div>
-              <div className="mi-insight__intro-copy">
-                <p>
-                  Visualiza la trayectoria mensual de precios desde 2023 y compárala con modelos de machine learning calibrados. Distingue en un solo vistazo el dato oficial registrado de la proyección estadística.
-                </p>
-              </div>
             </div>
 
             <div className="mi-insight__grid">
@@ -140,9 +135,15 @@ export default function MadridLanding() {
                     </span>
                   </span>
                 </Link>
+                <div className="mi-insight__card mi-insight__card--highlight">
+                  <span className="mi-insight__card-copy">
+                    <strong>Machine Learning calibrado</strong>
+                    <small>Visualiza la trayectoria de precios y compárala con modelos predictivos. Distingue en un solo vistazo el dato oficial registrado de la proyección estadística.</small>
+                  </span>
+                </div>
                 <Link href="/metodologia" className="mi-insight__card">
                   <span className="mi-insight__card-copy">
-                    <strong>Modelos predictivos calibrados</strong>
+                    <strong>Rigor metodológico y fuentes</strong>
                     <small>Proyecciones estadísticas sin sesgo comercial ni estimaciones infladas de portales.</small>
                     <span className="mi-insight__card-cta">
                       Metodología y fuentes oficiales <ArrowRight aria-hidden="true" />
