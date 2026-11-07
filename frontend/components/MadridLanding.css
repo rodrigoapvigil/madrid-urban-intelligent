@@ -105,7 +105,7 @@
 .mi-hero h1 span { color: var(--mi-mist); }
 .mi-hero__lead { max-width: 580px; margin: 26px auto 0; color: var(--mi-silver); font-size: 16px; line-height: 1.5; text-wrap: balance; }
 .mi-hero__content .mi-button { margin-top: 28px; }
-.mi-hero__skyline { position: absolute; z-index: 1; right: 0; bottom: 48px; left: 0; width: 100%; height: auto; max-height: 64%; object-fit: contain; object-position: center bottom; opacity: .9; pointer-events: none; user-select: none; }
+.mi-hero__skyline { position: absolute; z-index: 1; right: 0; bottom: 48px; left: 0; width: 100%; height: auto; max-height: 64%; object-fit: contain; object-position: center bottom; opacity: .92; pointer-events: none; user-select: none; mask-image: linear-gradient(to bottom, transparent 0%, #000 12%, #000 92%, transparent 100%); }
 .mi-hero__meta { position: absolute; z-index: 2; right: max(64px,calc((100vw - 1480px)/2)); bottom: 32px; display: flex; align-items: center; gap: 12px; color: var(--mi-silver); font-size: 9px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; }
 .mi-hero__meta i { width: 22px; height: 1px; background: var(--mi-teal); }
 .mi-scroll { position: absolute; z-index: 2; bottom: 25px; left: max(64px,calc((100vw - 1480px)/2)); min-height: 44px; display: inline-flex; align-items: center; gap: 11px; color: var(--mi-silver) !important; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
@@ -285,7 +285,7 @@
   .mi-hero__lead { max-width: 420px; margin-top: 19px; font-size: 14px; }
   .mi-hero__content .mi-button { margin-top: 23px; }
   .mi-button { min-height: 46px; padding-inline: 15px; font-size: 10px; }
-  .mi-hero__skyline { bottom: 58px; width: 190%; max-width: none; max-height: 45%; opacity: .76; }
+  .mi-hero__skyline { bottom: 58px; width: 190%; max-width: none; max-height: 45%; opacity: .82; }
   .mi-hero__meta { right: 18px; bottom: 18px; gap: 7px; font-size: 7px; }
   .mi-hero__meta i { width: 13px; }
   .mi-scroll { bottom: 15px; left: 17px; max-width: 46%; gap: 7px; font-size: 7px; letter-spacing: .06em; }

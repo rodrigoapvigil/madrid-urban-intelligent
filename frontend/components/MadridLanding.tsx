@@ -51,7 +51,7 @@ export default function MadridLanding() {
             <p className="mi-hero__lead">Alquiler, compra, venta e inversión. Una lectura del mercado con datos oficiales y contexto por zona.</p>
             <Link href="/madrid" className="mi-button">Explorar el mercado <ArrowUpRight aria-hidden="true"/></Link>
           </div>
-          <img className="mi-hero__skyline" src="/madrid-skyline.svg" alt="Ilustración panorámica de Madrid con el edificio Metrópolis, el Palacio de Cibeles y su fuente, la Puerta de Alcalá y el Oso y el Madroño." />
+          <img className="mi-hero__skyline" src="/madrid-skyline-transparent.png" alt="Ilustración panorámica de Madrid con el edificio Metrópolis, el Palacio de Cibeles y su fuente, la Puerta de Alcalá y el Oso y el Madroño." />
           <div className="mi-hero__meta"><span>21 distritos</span><i/><span>131 barrios</span></div>
           <a className="mi-scroll" href="#lectura"><span>Desplázate para explorar</span><ArrowDown aria-hidden="true"/></a>
         </section>
