@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { ArrowDown, ArrowRight, ArrowUpRight, BarChart3 } from 'lucide-react';
 import MadridDistrictMap from './MadridDistrictMap';
 import MadridHeroArtwork from './MadridHeroArtwork';
+import LandingTrend from './LandingTrend';
 import './MadridLanding.css';
 
 const profiles = [
@@ -17,23 +18,6 @@ const audiences = [
   ['Analizo el mercado', 'Lee indicadores por periodo, distrito y barrio con su contexto.'],
   ['Evalúo una inversión', 'Explora rentabilidad estimada y señala qué cifras son proyecciones.'],
 ];
-
-function TrendVisual() {
-  return (
-    <div className="mi-trend" aria-label="Ilustración conceptual de una tendencia mensual comparada con la media de Madrid">
-      <div className="mi-trend__top"><span><i className="mi-dot mi-dot--blue"/> Zona seleccionada</span><span><i className="mi-dot mi-dot--sand"/> Media Madrid</span></div>
-      <svg viewBox="0 0 620 300" role="img" aria-label="Dos líneas muestran la evolución mensual de una zona y la media de Madrid">
-        <defs><linearGradient id="trendFill" x1="0" x2="0" y1="0" y2="1"><stop stopColor="#00827c" stopOpacity=".22"/><stop offset="1" stopColor="#00827c" stopOpacity="0"/></linearGradient></defs>
-        {[54,112,170,228].map(y=><line key={y} x1="44" x2="602" y1={y} y2={y} stroke="rgba(187,199,198,.14)"/>)}
-        <path d="M46 209 C92 201 99 165 145 171 S205 184 246 152 S302 129 341 140 S401 156 440 107 S506 116 545 81 S579 77 601 48 L601 228 L46 228Z" fill="url(#trendFill)"/>
-        <path d="M46 209 C92 201 99 165 145 171 S205 184 246 152 S302 129 341 140 S401 156 440 107 S506 116 545 81 S579 77 601 48" fill="none" stroke="#00bfb1" strokeWidth="3" strokeLinecap="round"/>
-        <path d="M46 223 C100 216 104 202 145 207 S203 205 246 196 S302 186 341 191 S401 190 440 181 S506 184 545 170 S582 169 601 162" fill="none" stroke="#bbc7c6" strokeWidth="2" strokeLinecap="round"/>
-        <text x="46" y="260">Ene</text><text x="145" y="260">Mar</text><text x="245" y="260">May</text><text x="342" y="260">Jul</text><text x="441" y="260">Sep</text><text x="540" y="260">Nov</text>
-      </svg>
-      <div className="mi-trend__caption"><span>Evolución mensual</span><span>Dato real y proyección identificados</span></div>
-    </div>
-  );
-}
 
 export default function MadridLanding() {
   return (
@@ -82,7 +66,7 @@ export default function MadridLanding() {
         <p className="mi-bridge" aria-label="El precio cambia de una zona a otra.">El precio cambia <span>de una zona a otra.</span></p>
 
         <section className="mi-insight" aria-labelledby="mi-insight-title">
-          <div className="mi-wrap mi-insight__layout"><div className="mi-insight__copy"><p className="mi-kicker mi-kicker--muted">El pulso de cada zona</p><h2 id="mi-insight-title">De la tendencia<br/>a <span>la perspectiva.</span></h2><p>Observa la evolución mes a mes y pon cada barrio en contexto frente al conjunto de Madrid. Los valores estimados se distinguen de los datos observados.</p><Link href="/madrid" className="mi-inline-link">Ver evolución del mercado <ArrowRight aria-hidden="true"/></Link></div><TrendVisual/></div>
+          <div className="mi-wrap mi-insight__layout"><div className="mi-insight__copy"><p className="mi-kicker mi-kicker--muted">El pulso de cada zona</p><h2 id="mi-insight-title">De la tendencia<br/>a <span>la perspectiva.</span></h2><p>Observa la evolución mes a mes y pon cada barrio en contexto frente al conjunto de Madrid. Los valores estimados se distinguen de los datos observados.</p><Link href="/madrid" className="mi-inline-link">Ver evolución del mercado <ArrowRight aria-hidden="true"/></Link><Link href="/metodologia" className="mi-inline-link mi-inline-link--secondary">Cómo se calculan los datos <ArrowRight aria-hidden="true"/></Link></div><LandingTrend/></div>
         </section>
 
         <p className="mi-bridge" aria-label="Una ciudad, cientos de lecturas locales.">Una ciudad, <span>cientos de lecturas locales.</span></p>
@@ -105,14 +89,14 @@ export default function MadridLanding() {
 
         <p className="mi-bridge" aria-label="Cada indicador necesita una fuente clara.">Cada indicador necesita <span>una fuente clara.</span></p>
 
-        <section className="mi-method" aria-labelledby="mi-method-title"><div className="mi-wrap mi-method__layout"><div className="mi-method__intro"><p className="mi-kicker mi-kicker--muted">Transparencia en cada indicador</p><h2 id="mi-method-title">Dato real.<br/><span>Estimación visible.</span></h2><p>La fuente y la naturaleza de cada cifra forman parte de la lectura. Así puedes interpretar los datos con su contexto.</p></div><div className="mi-method__steps"><article><div><strong>Operaciones oficiales</strong><p>Series históricas basadas en datos públicos de cierre del Ayuntamiento de Madrid.</p></div><span className="mi-method__tag">Dato real</span></article><article><div><strong>Comparación por zona</strong><p>Consulta barrios y distritos junto a referencias del conjunto de Madrid.</p></div><span className="mi-method__tag">Contexto</span></article><article><div><strong>Proyecciones identificadas</strong><p>Las estimaciones se señalan para distinguirlas de los valores observados.</p></div><span className="mi-method__tag mi-method__tag--forecast">Estimación</span></article></div></div></section>
+        <section className="mi-method" aria-labelledby="mi-method-title"><div className="mi-wrap mi-method__layout"><div className="mi-method__intro"><p className="mi-kicker mi-kicker--muted">Transparencia en cada indicador</p><h2 id="mi-method-title">Dato real.<br/><span>Estimación visible.</span></h2><p>La fuente y la naturaleza de cada cifra forman parte de la lectura. Así puedes interpretar los datos con su contexto.</p><Link href="/metodologia" className="mi-inline-link">Consultar metodología y validación <ArrowRight aria-hidden="true"/></Link></div><div className="mi-method__steps"><article><div><strong>Operaciones oficiales</strong><p>Series históricas basadas en datos públicos de cierre del Ayuntamiento de Madrid.</p></div><span className="mi-method__tag">Dato real</span></article><article><div><strong>Comparación por zona</strong><p>Consulta barrios y distritos junto a referencias del conjunto de Madrid.</p></div><span className="mi-method__tag">Contexto</span></article><article><div><strong>Proyecciones identificadas</strong><p>Las estimaciones se señalan para distinguirlas de los valores observados.</p></div><span className="mi-method__tag mi-method__tag--forecast">Estimación</span></article></div></div></section>
 
         <p className="mi-bridge" aria-label="Entender primero. Decidir después.">Entender primero. <span>Decidir después.</span></p>
 
-        <section className="mi-closing" aria-labelledby="mi-closing-title"><div className="mi-closing__glow" aria-hidden="true"/><div className="mi-wrap mi-closing__inner"><p className="mi-kicker">Madrid, con contexto</p><h2 id="mi-closing-title">Empieza por<br/><span>tu pregunta.</span></h2><p>Explora los datos y encuentra una lectura más clara del mercado residencial.</p><Link href="/madrid" className="mi-button">Abrir el dashboard <ArrowUpRight aria-hidden="true"/></Link></div></section>
+        <section className="mi-closing" aria-labelledby="mi-closing-title"><div className="mi-closing__glow" aria-hidden="true"/><div className="mi-wrap mi-closing__inner"><p className="mi-kicker">Madrid, con contexto</p><h2 id="mi-closing-title">Empieza por<br/><span>tu pregunta.</span></h2><p>Explora los datos y encuentra una lectura más clara del mercado residencial.</p><Link href="/madrid" className="mi-button">Explorar el mercado <ArrowUpRight aria-hidden="true"/></Link></div></section>
       </main>
 
-      <footer className="mi-footer"><div className="mi-wrap mi-footer__top"><Link href="/" className="mi-brand"><span className="mi-brand__mark"><BarChart3 aria-hidden="true"/></span><span>Madrid Urban Intelligence</span></Link><p>Inteligencia residencial para entender Madrid.</p><nav aria-label="Enlaces del pie"><Link href="/madrid">Dashboard</Link><Link href="/madrid/chat">AMBI</Link><Link href="/madrid/veredicto">El Veredicto</Link></nav></div><div className="mi-wrap mi-footer__bottom"><span>© Madrid Urban Intelligence</span><span>Las estimaciones son estadísticas y no sustituyen una tasación pericial oficial.</span></div></footer>
+      <footer className="mi-footer"><div className="mi-wrap mi-footer__top"><Link href="/" className="mi-brand"><span className="mi-brand__mark"><BarChart3 aria-hidden="true"/></span><span>Madrid Urban Intelligence</span></Link><p>Inteligencia del mercado residencial de Madrid.</p><nav aria-label="Enlaces del pie"><Link href="/madrid">Explorar el mercado</Link><Link href="/sobre-el-proyecto">Sobre el proyecto</Link><Link href="/metodologia">Metodología</Link><Link href="/madrid/chat">AMBI</Link><Link href="/madrid/veredicto">El Veredicto</Link></nav></div><div className="mi-wrap mi-footer__bottom"><span>© Madrid Urban Intelligence</span><span>Las estimaciones son estadísticas y no sustituyen una tasación pericial oficial.</span></div></footer>
     </div>
   );
 }

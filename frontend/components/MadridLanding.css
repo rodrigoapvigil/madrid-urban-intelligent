@@ -197,13 +197,36 @@
 .mi-inline-link svg { width: 16px; height: 16px; color: var(--mi-teal); transition: transform .2s ease; }
 .mi-inline-link:hover svg { transform: translateX(4px); }
 .mi-trend { min-width: 0; padding: clamp(24px,3.5vw,46px); border-radius: 16px; background: #003734; }
-.mi-trend__top { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 18px; color: var(--mi-silver); font-size: 11px; }
-.mi-trend__top span { display: inline-flex; align-items: center; gap: 7px; }
-.mi-dot { width: 8px; height: 8px; display: inline-block; border-radius: 50%; }
-.mi-dot--blue { background: var(--mi-teal); } .mi-dot--sand { background: var(--mi-lavender); }
-.mi-trend svg { width: 100%; margin-top: 22px; overflow: visible; }
-.mi-trend svg text { fill: rgba(237,255,254,.78); font: 11px var(--mi-font); }
-.mi-trend__caption { padding-top: 13px; display: flex; justify-content: space-between; gap: 12px; color: rgba(237,255,254,.7); font-size: 10px; }
+.mi-trend__heading { display: flex; justify-content: space-between; align-items: end; gap: 20px; }
+.mi-trend__heading .mi-kicker { margin: 0 0 8px; }
+.mi-trend__heading h3 { margin: 0; color: var(--mi-white); font-size: clamp(22px,2vw,30px); font-weight: 500; letter-spacing: -.035em; }
+.mi-trend__select-label { display: grid; gap: 6px; color: var(--mi-silver); font-size: 12px; }
+.mi-trend__select-label select { min-height: 42px; min-width: 132px; padding: 0 32px 0 12px; border: 1px solid rgba(203,255,252,.22); border-radius: 6px; color: var(--mi-white); background: #012624; font: inherit; }
+.mi-trend__legend { display: flex; justify-content: flex-end; gap: 18px; margin-top: 24px; color: var(--mi-silver); font-size: 13px; }
+.mi-trend__legend span { display: inline-flex; align-items: center; gap: 8px; }
+.mi-dot { width: 9px; height: 9px; display: inline-block; border-radius: 50%; }
+.mi-dot--blue { background: var(--mi-teal); } .mi-dot--forecast { background: var(--mi-lavender); }
+.mi-trend__chart { width: 100%; height: auto; margin-top: 14px; overflow: visible; }
+.mi-trend__gridline { stroke: rgba(187,199,198,.18); stroke-width: 1; }
+.mi-trend__chart text { fill: rgba(237,255,254,.78); font: 12px var(--mi-font); }
+.mi-trend__chart .mi-trend__y-label { fill: var(--mi-silver); font-size: 11px; }
+.mi-trend__chart .mi-trend__x-label { font-size: 11px; }
+.mi-trend__real-line, .mi-trend__prediction-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.mi-trend__real-line { stroke: var(--mi-teal); }
+.mi-trend__prediction-line { stroke: var(--mi-lavender); stroke-dasharray: 7 6; }
+.mi-trend__real-point { fill: var(--mi-teal); stroke: #003734; stroke-width: 2; }
+.mi-trend__forecast-point { fill: var(--mi-lavender); stroke: #003734; stroke-width: 2; }
+.mi-trend__caption { padding-top: 10px; display: flex; justify-content: space-between; gap: 12px; color: rgba(237,255,254,.78); font-size: 13px; }
+.mi-trend__message { min-height: 180px; display: flex; align-items: center; justify-content: center; gap: 12px; color: var(--mi-silver); text-align: center; font-size: 16px; }
+.mi-trend__message button { min-height: 42px; padding-inline: 15px; border: 1px solid rgba(203,255,252,.28); border-radius: 6px; color: var(--mi-mist); background: transparent; font: inherit; cursor: pointer; }
+.mi-trend__table-details { margin-top: 22px; border-top: 1px solid rgba(203,255,252,.16); color: var(--mi-mist); }
+.mi-trend__table-details summary { min-height: 48px; display: flex; align-items: center; cursor: pointer; font-size: 14px; }
+.mi-trend__table-wrap { max-height: 280px; overflow: auto; }
+.mi-trend__table-wrap table { width: 100%; border-collapse: collapse; color: var(--mi-silver); font-size: 14px; text-align: left; }
+.mi-trend__table-wrap caption { padding: 8px; text-align: left; }
+.mi-trend__table-wrap th, .mi-trend__table-wrap td { padding: 10px 8px; border-bottom: 1px solid rgba(203,255,252,.12); }
+.mi-trend__table-wrap th { color: var(--mi-white); font-weight: 500; }
+.mi-inline-link--secondary { margin-left: 18px; }
 
 /* Place scale data in one deliberate contrast tile and two supporting fields. */
 .mi-scale__heading { max-width: 850px; }
@@ -327,9 +350,14 @@
   .mi-insight__layout { gap: 28px; }
   .mi-insight__copy > p:not(.mi-kicker), .mi-audience__intro > p:not(.mi-kicker), .mi-method__intro > p:not(.mi-kicker) { margin-top: 18px; font-size: 20px; }
   .mi-trend { padding: 19px 13px 15px; border-radius: 14px; }
-  .mi-trend__top { justify-content: flex-start; gap: 12px; font-size: 9px; }
-  .mi-trend svg { margin-top: 14px; }
-  .mi-trend__caption { font-size: 8px; }
+  .mi-trend__heading { align-items: flex-start; flex-direction: column; }
+  .mi-trend__select-label { grid-template-columns: auto 1fr; align-items: center; width: 100%; }
+  .mi-trend__select-label select { width: 100%; }
+  .mi-trend__legend { justify-content: flex-start; gap: 15px; margin-top: 18px; font-size: 12px; }
+  .mi-trend__chart { margin-top: 12px; }
+  .mi-trend__chart .mi-trend__x-label { font-size: 9px; }
+  .mi-trend__caption { font-size: 11px; }
+  .mi-inline-link--secondary { margin-left: 0; }
   .mi-scale__stats { margin-top: 32px; grid-template-columns: 1fr 1fr; gap: 9px; }
   .mi-scale__stats article { min-height: 174px; padding: 18px; border-radius: 12px; }
   .mi-scale__stats article:first-child { grid-row: span 2; min-height: 357px; }

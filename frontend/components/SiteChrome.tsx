@@ -40,7 +40,7 @@ export function SiteFooter() {
     <footer className="site-footer">
       <div className="site-footer-inner">
         <strong>Madrid Urban Intelligence</strong>
-        <span>Plataforma analítica de precios inmobiliarios y series oficiales de Madrid.</span>
+        <span>Inteligencia del mercado residencial de Madrid.</span>
         <small>Las estimaciones son estadísticas y no sustituyen una tasación pericial oficial.</small>
       </div>
     </footer>

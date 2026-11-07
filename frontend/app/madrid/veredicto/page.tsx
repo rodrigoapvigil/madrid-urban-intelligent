@@ -1,10 +1,10 @@
 import React, { Suspense } from 'react';
 import { Metadata } from 'next';
 import MadridVeredicto from '../../../components/MadridVeredicto';
-
 export const metadata: Metadata = {
-  title: 'El Veredicto — ¿Está caro o barato este piso en Madrid? | Madrid Urban Intelligence',
-  description: 'Comprueba al instante si un piso en Madrid tiene sobreprecio o es una oportunidad frente a los datos oficiales de cierre del Ayuntamiento de Madrid.',
+  title: 'Veredicto inmobiliario: compara el precio de una vivienda',
+  description: 'Contrasta el precio de compra o alquiler con referencias estadísticas de tu barrio y distrito en Madrid y consulta los datos oficiales de cierre.',
+  alternates: { canonical: '/madrid/veredicto' },
 };
 
 export default function VeredictoPage() {

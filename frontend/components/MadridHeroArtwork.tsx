@@ -2,9 +2,9 @@
 
 import { useEffect, useRef } from 'react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
+import Image from 'next/image';
 
-const skyline = '/madrid-skyline-transparent.png';
-const description = 'Ilustración panorámica de Madrid con el edificio Metrópolis, el Palacio de Cibeles y su fuente, la Puerta de Alcalá y el Oso y el Madroño.';
+const skyline = '/madrid-skyline.svg';
 
 export default function MadridHeroArtwork() {
   const artworkRef = useRef<HTMLDivElement>(null);
@@ -69,7 +69,7 @@ export default function MadridHeroArtwork() {
         <motion.img
           className="mi-hero__skyline mi-hero__skyline--base"
           src={skyline}
-          alt={description}
+          alt=""
           style={animate ? { opacity: baseOpacity, scale: baseScale, y: baseY } : undefined}
           draggable={false}
         />
@@ -77,7 +77,7 @@ export default function MadridHeroArtwork() {
           <motion.img className="mi-hero__skyline mi-hero__skyline--fragment mi-hero__skyline--west" src={skyline} alt="" style={{ opacity: fragmentOpacity, x: leftX, y: leftY }} draggable={false} />
           <motion.img className="mi-hero__skyline mi-hero__skyline--fragment mi-hero__skyline--east" src={skyline} alt="" style={{ opacity: fragmentOpacity, x: rightX, y: rightY }} draggable={false} />
         </>}
-        <img className="mi-hero__skyline mi-hero-artwork__edge-light" src="/madrid-skyline-buildings.svg" alt="" draggable={false} ref={edgeLightRef} />
+        <Image className="mi-hero__skyline mi-hero-artwork__edge-light" src="/madrid-skyline-buildings.svg" alt="" width={2200} height={760} draggable={false} ref={edgeLightRef} />
       </div>
     </div>
   );
