@@ -9,20 +9,20 @@ export const metadata: Metadata = {
     default: 'Decide Madrid: Invierte y Compra | Precios por barrio',
     template: '%s | Decide Madrid: Invierte Y Compra',
   },
-  description: 'Consulta precios de alquiler, compra y venta por barrio en Madrid. Compara distritos, analiza la evolución mensual y distingue datos oficiales de estimaciones.',
+  description: 'Precios de cierre oficial de alquiler, compra e inversión en los 131 barrios de Madrid. Compara distritos, analiza tendencias reales y negocia con datos sin sobreprecios.',
   applicationName: 'Decide Madrid: Invierte Y Compra',
   icons: { icon: '/icon.png', shortcut: '/icon.png', apple: '/icon.png' },
   robots: { index: true, follow: true },
   openGraph: {
     type: 'website', locale: 'es_ES', url: 'https://dmiyc.com/', siteName: 'Decide Madrid: Invierte Y Compra',
     title: 'Decide Madrid: Invierte y Compra | Precios por barrio',
-    description: 'Consulta precios de alquiler, compra y venta por barrio en Madrid. Compara distritos y sigue la evolución del mercado.',
+    description: 'Precios de cierre oficial y rentabilidad en los 131 barrios de Madrid. Negocia con datos reales, no ofertas infladas.',
     images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Decide Madrid: Invierte Y Compra, precios de vivienda por barrio' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Decide Madrid: Invierte y Compra | Precios por barrio',
-    description: 'Compara precios de alquiler, compra y venta por distrito y barrio en Madrid.',
+    description: 'Precios de cierre oficial y rentabilidad en 131 barrios de Madrid. Negocia con datos reales.',
     images: ['/opengraph-image'],
   },
 }
