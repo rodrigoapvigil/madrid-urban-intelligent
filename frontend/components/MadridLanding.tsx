@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { ArrowDown, ArrowRight, ArrowUpRight, BarChart3 } from 'lucide-react';
-import ParticleField from './ParticleField';
 import MadridDistrictMap from './MadridDistrictMap';
 import './MadridLanding.css';
 
@@ -47,13 +46,12 @@ export default function MadridLanding() {
 
       <main>
         <section className="mi-hero" aria-labelledby="mi-title">
-          <div className="mi-hero__wash" aria-hidden="true"/>
           <div className="mi-hero__content">
             <h1 id="mi-title">El mercado de Madrid,<br/><span>en perspectiva.</span></h1>
             <p className="mi-hero__lead">Alquiler, compra, venta e inversión. Una lectura del mercado con datos oficiales y contexto por zona.</p>
             <Link href="/madrid" className="mi-button">Explorar el mercado <ArrowUpRight aria-hidden="true"/></Link>
           </div>
-          <div className="mi-hero__field"><ParticleField/></div>
+          <img className="mi-hero__skyline" src="/madrid-skyline.svg" alt="Ilustración panorámica de Madrid con el edificio Metrópolis, el Palacio de Cibeles y su fuente, la Puerta de Alcalá y el Oso y el Madroño." />
           <div className="mi-hero__meta"><span>21 distritos</span><i/><span>131 barrios</span></div>
           <a className="mi-scroll" href="#lectura"><span>Desplázate para explorar</span><ArrowDown aria-hidden="true"/></a>
         </section>

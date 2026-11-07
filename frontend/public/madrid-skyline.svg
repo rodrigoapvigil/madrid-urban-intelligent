@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2200 760" fill="none">
+  <defs>
+    <linearGradient id="line" x1="0" y1="0" x2="0" y2="1">
+      <stop stop-color="#CBFFFC" stop-opacity=".82"/>
+      <stop offset=".58" stop-color="#8BE4DD" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#00BFB1" stop-opacity=".2"/>
+    </linearGradient>
+    <linearGradient id="ground" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#CBFFFC" stop-opacity="0"/>
+      <stop offset=".15" stop-color="#CBFFFC" stop-opacity=".48"/>
+      <stop offset=".5" stop-color="#CBFFFC" stop-opacity=".68"/>
+      <stop offset=".85" stop-color="#CBFFFC" stop-opacity=".48"/>
+      <stop offset="1" stop-color="#CBFFFC" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="windows" width="28" height="34" patternUnits="userSpaceOnUse">
+      <path d="M7 7v16m14-16v16M3 25h8m6 0h8" stroke="#CBFFFC" stroke-opacity=".28" stroke-width="1.4"/>
+    </pattern>
+    <pattern id="fine-windows" width="22" height="28" patternUnits="userSpaceOnUse">
+      <path d="M6 6v13m10-13v13M3 21h16" stroke="#CBFFFC" stroke-opacity=".25" stroke-width="1.2"/>
+    </pattern>
+  </defs>
+
+  <g stroke="url(#line)" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Low city silhouette and trees -->
+    <path d="M18 674h2164" stroke="url(#ground)" stroke-width="2"/>
+    <g stroke-opacity=".38" stroke-width="2">
+      <path d="M35 674v-62h32v62m-24-48h16m-16 14h16m-16 14h16M80 674v-94h42v94m-32-80h22m-22 15h22m-22 15h22m-22 15h22"/>
+      <path d="M2050 674v-78h34v78m-24-62h14m-14 14h14m-14 14h14M2094 674v-105h50v105m-38-89h26m-26 16h26m-26 16h26m-26 16h26"/>
+      <path d="M132 674c-3-30 2-48 18-62-3-22 11-38 31-38 3-24 20-39 40-32 14-17 40-12 46 8 25 1 37 20 30 41 17 12 22 36 16 83M2033 674c-7-26-1-47 17-58-1-23 13-38 33-38 7-21 26-31 45-20 20-15 42-7 47 14 23 3 34 22 24 42 15 15 18 37 11 60"/>
+      <path d="M175 616l2 58m30-80-3 80m40-76 7 76M2081 620l-3 54m34-86-4 86m43-72 7 72"/>
+    </g>
+
+    <!-- Edificio Metrópolis, Gran Vía -->
+    <g stroke-width="2.2">
+      <path d="M125 674v-95l32-12v-30l27-14v-26l24-16v-27l20-12v-30l23-12v-21l24-14v-22l26-13v-34l24-8v-44l21-12v-51l15-12 16 12v51l23 12v44l25 8v34l24 13v22l25 14v21l22 12v30l21 12v27l24 16v26l27 14v30l30 12v95"/>
+      <path d="M327 365h206M345 338h170m-149-26h128m-111-27h94m-80-28h66m-55-25h44m-36-25h28" stroke-width="3"/>
+      <path d="M362 365v-51q0-31 28-31t28 31v51m-58 0v-39q0-20 15-20t15 20v39m14 0v-39q0-20 15-20t15 20v39"/>
+      <path d="M300 405h281v269H300z" fill="url(#windows)" stroke-width="1.5"/>
+      <path d="M278 450h324v224H278zm-63 78h63v146h-63zm387 0h61v146h-61z" fill="url(#fine-windows)" stroke-width="1.6"/>
+      <path d="M300 405h281M278 450h324M215 528h63m387 0h61M299 674h283M155 580h123m448 0h122" stroke-width="3"/>
+      <path d="M376 674v-73q0-34 39-34t39 34v73m-78 0v-50q0-21 19-21t20 21v50m17 0v-50q0-21 19-21t20 21v50"/>
+      <path d="M358 598h113m-103-15h93m-76-29h58m-51-19h44" stroke-width="1.4"/>
+      <!-- Winged statue silhouette -->
+      <path d="M374 127q10-18 20-4l7 14 8-16q9-12 17 1l-6 19 14 5-9 8-14-4-7 20-7-20-16 5-8-8 14-6zM390 169h31m-15 0v18m-18 0h36" stroke-width="2.4"/>
+    </g>
+
+    <!-- Palacio de Cibeles, broad central civic building -->
+    <g stroke-width="2.2">
+      <path d="M590 674V470h83v-48h63v-59h78v-57h78v-54h89v-70h33v-42h14v42h33v70h89v54h78v57h78v59h63v48h83v204"/>
+      <path d="M850 363h500m-422-57h342m-265-54h188m-132-54h78m-99-55h120" stroke-width="3"/>
+      <path d="M1006 182v-54h28V97h20V72h20v25h28v31h28v54m-124-28h124m-90-27h56m-39-25h22" stroke-width="2.4"/>
+      <path d="M1068 97v-24m-7 0h14m-10-10h6m-2-12v12" stroke-width="2"/>
+      <circle cx="1084" cy="151" r="13" stroke-width="2"/><path d="M1084 140v11l8 5m-27-5h38" stroke-width="1.5"/>
+      <path d="M786 423h597v251H786z" fill="url(#windows)" stroke-width="1.5"/>
+      <path d="M674 470h83v204h-83zm708 0h83v204h-83z" fill="url(#fine-windows)" stroke-width="1.5"/>
+      <path d="M590 470h83m-83 31h83m-83 22h83m-83 22h83m-83 22h83m-83 22h83m-83 22h83m-83 22h83m-83 22h83m-83 22h83m-83 22h83" stroke-width="2.4"/>
+      <path d="M1464 470h83m-83 31h83m-83 22h83m-83 22h83m-83 22h83m-83 22h83m-83 22h83m-83 22h83m-83 22h83m-83 22h83m-83 22h83" stroke-width="2.4"/>
+      <path d="M820 435h530M786 674h597m-597-251h597" stroke-width="3.2"/>
+      <path d="M1017 674v-118q0-70 67-70t67 70v118m-125-1v-86q0-37 27-37t27 37v86m14 0v-86q0-37 27-37t27 37v86" stroke-width="3"/>
+      <path d="M1056 518h56m-67-18h78m-70-18h62m-64 123h68m-68 20h68" stroke-width="1.5"/>
+      <!-- rooftop pinnacles -->
+      <path d="M786 363v-29l14-15 14 15v29m-28-12h28m-14-32v-19m-8 0h16m-16 0 8-14 8 14m245-132v-24m-10 0h20m145 201v-29l14-15 14 15v29m-28-12h28m-14-32v-19m-8 0h16m-16 0 8-14 8 14m-442 75v-22l12-12 12 12v22m387 0v-22l12-12 12 12v22"/>
+      <path d="M623 500h20v20h-20zm0 44h20v20h-20zm0 44h20v20h-20zm0 44h20v20h-20zm20-132h20v20h-20zm0 44h20v20h-20zm0 44h20v20h-20zm0 44h20v20h-20zM1490 500h20v20h-20zm0 44h20v20h-20zm0 44h20v20h-20zm0 44h20v20h-20zm-20-132h20v20h-20zm0 44h20v20h-20zm0 44h20v20h-20zm0 44h20v20h-20z" fill="url(#fine-windows)" stroke-width="1.3"/>
+    </g>
+
+    <!-- Fuente de Cibeles in front of the palace -->
+    <g stroke-width="2.3">
+      <path d="M865 697q216-24 433 0l-20 18H885zM830 721q252-28 503 0l-20 16H850zM804 741h551"/>
+      <path d="M1035 693q-4-29 22-44l-7-20 20-13 20 13-7 20q27 15 22 44m-77-34h76m-63 19h51"/>
+      <!-- chariot and two stylised lions -->
+      <path d="M1041 649q-31-14-37-43l-19-7 8-15 24 7 18 22m126 36q31-14 37-43l19-7-8-15-24 7-18 22"/>
+      <path d="M992 601l-10-18 16-9 17 10m155 17 10-18-16-9-17 10m-173 31h29m119 0h29"/>
+      <path d="M1083 621v-28m-16 7 16-15 16 15m-30 12h28m-22-10v-15m16 15v-15m-11-3q-1-14 6-23 7 9 6 23m-15 42h18"/>
+      <path d="M1083 598q-18-11-18-22 0-7 7-7 8 0 11 10 4-10 11-10 8 0 8 7 0 11-19 22z"/>
+    </g>
+
+    <!-- Puerta de Alcalá -->
+    <g stroke-width="2.3">
+      <path d="M1514 674V475l28-18v-31l31-14v-35l30-15v-42l34-22v-35h113v35l34 22v42l30 15v35l31 14v31l28 18v199"/>
+      <path d="M1514 475h359m-331-18h303m-272-31h241m-211-35h181m-151-37h120m-86-56h53" stroke-width="3"/>
+      <path d="M1514 498h359v176h-359z" fill="url(#fine-windows)" stroke-width="1.5"/>
+      <path d="M1544 674v-78q0-20 16-20t16 20v78m25 0V570q0-25 20-25t20 25v104m42 0V560q0-37 32-37t32 37v114m42 0V570q0-25 20-25t20 25v104m25 0v-78q0-20 16-20t16 20v78" stroke-width="3"/>
+      <path d="M1544 591h32m29-21h40m42-11h64m42 11h40m29 21h32m-318-93h30m19-18h34m17-22h44m60-18h55m29 40h44m18 18h34m18 22h30" stroke-width="2"/>
+      <path d="M1622 414v-28l20-17 20 17v28m-40-9h40m-20-36v-21m-10 0h20m-10-21 10 21m53-23h73m-73 13h73m-73 13h73m-58-13-12-20h67l-12 20" stroke-width="2.2"/>
+      <path d="M1692 356v-42l18-25 18 25v42m-36-21h36m-18-46v-19m-11 0h22m-19-11 8-17 8 17" stroke-width="2.5"/>
+      <path d="M1630 465v-24m-8 0h16m-8-14 8 14m118 24v-24m-8 0h16m-8-14 8 14m70 34v-24m-8 0h16m-8-14 8 14"/>
+    </g>
+
+    <!-- Bear and strawberry tree, Madrid emblem -->
+    <g stroke-width="2.8">
+      <path d="M1960 674q8-52 44-89 4-48 33-61 12-35 39-32 22 2 29 27 27 12 19 43 27 25 15 51 25 25 10 61"/>
+      <path d="M2015 570q18-19 39-11 14 5 17 22l-6 26 18 22-7 17-21-4-19 20-26-5-9-22 9-23-7-23z"/>
+      <path d="M2034 578q10-10 21 0m-4 2 1 6m-19 12q13 9 25 0m-12 33 3 27m-23-21-13 37m45-35 14 34"/>
+      <path d="M2034 552q-5-20 9-33 13-14 28-5 14-23 33-12 20 11 10 34 19 16 7 33-15 17-33 7-13 17-31 7-17 12-23-5"/>
+      <path d="M2041 536q-6-12 3-19m20 4q0-14 12-17m14 17q12-8 22 1m-30 29q-9-7-16 0m27 3q-8-7-15 0"/>
+      <circle cx="2048" cy="533" r="3"/><circle cx="2080" cy="533" r="3"/><circle cx="2063" cy="544" r="3"/>
+      <path d="M1958 674v-45h20v45m-20-34h20m-14-11v-14m-7 0h14m-7-16 7 16" stroke-width="2"/>
+    </g>
+
+    <!-- faint urban connective lines -->
+    <g stroke-opacity=".24" stroke-width="1.5">
+      <path d="M0 650h120m490 0h98m837 0h100m390 0h165M75 630h46m481-18h67m840-5h59m392 19h60"/>
+      <path d="M0 694h2200M0 710h2200M0 726h2200" stroke="url(#ground)"/>
+    </g>
+  </g>
+</svg>

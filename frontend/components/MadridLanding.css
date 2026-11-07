@@ -86,7 +86,7 @@
 .mi-header__cta:hover, .mi-button:hover { filter: brightness(1.06); transform: translateY(-2px); }
 .mi-header__cta svg, .mi-button svg { width: 16px; height: 16px; }
 
-/* Hero: one message, one action, one living data sphere. */
+/* Hero: one message, one action, and a fine-line Madrid panorama. */
 .mi-hero {
   position: relative;
   min-height: max(760px, calc(100svh - 88px));
@@ -97,7 +97,6 @@
   align-items: center;
   background: transparent;
 }
-.mi-hero__wash { position: absolute; z-index: -1; top: 6%; left: 50%; width: min(900px,90vw); aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle,rgba(0,130,124,.15),transparent 68%); transform: translateX(-50%); }
 .mi-hero__content { position: relative; z-index: 2; width: min(1000px,calc(100% - 48px)); padding-top: clamp(105px,15vh,190px); text-align: center; }
 .mi-kicker { margin: 0 0 24px; display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--mi-silver); font-size: 10px; font-weight: 500; letter-spacing: .14em; line-height: 1.4; text-transform: uppercase; }
 .mi-kicker > span { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--mi-teal); box-shadow: 0 0 12px rgba(0,191,177,.5); }
@@ -106,12 +105,7 @@
 .mi-hero h1 span { color: var(--mi-mist); }
 .mi-hero__lead { max-width: 580px; margin: 26px auto 0; color: var(--mi-silver); font-size: 16px; line-height: 1.5; text-wrap: balance; }
 .mi-hero__content .mi-button { margin-top: 28px; }
-.mi-hero__field { position: absolute; z-index: 0; right: 0; bottom: -30%; left: 0; width: 100%; height: min(70vw,900px); min-height: 540px; pointer-events: none; }
-.mi-particle-field { position: relative; width: 100%; height: 100%; }
-.mi-particle-field canvas { display: block; width: 100%; height: 100%; }
-.mi-particle-field button { position: absolute; right: max(32px,calc((100vw - 1480px)/2)); bottom: 30%; min-height: 42px; padding: 0 12px; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(203,255,252,.22); border-radius: 6px; color: var(--mi-mist); background: rgba(1,29,28,.62); font: 11px var(--mi-font); cursor: pointer; pointer-events: auto; opacity: .8; transition: opacity .2s ease,background .2s ease; }
-.mi-particle-field button:hover { opacity: 1; background: #003734; }
-.mi-particle-field button svg { width: 14px; height: 14px; }
+.mi-hero__skyline { position: absolute; z-index: 1; right: 0; bottom: 48px; left: 0; width: 100%; height: auto; max-height: 64%; object-fit: contain; object-position: center bottom; opacity: .9; pointer-events: none; user-select: none; }
 .mi-hero__meta { position: absolute; z-index: 2; right: max(64px,calc((100vw - 1480px)/2)); bottom: 32px; display: flex; align-items: center; gap: 12px; color: var(--mi-silver); font-size: 9px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; }
 .mi-hero__meta i { width: 22px; height: 1px; background: var(--mi-teal); }
 .mi-scroll { position: absolute; z-index: 2; bottom: 25px; left: max(64px,calc((100vw - 1480px)/2)); min-height: 44px; display: inline-flex; align-items: center; gap: 11px; color: var(--mi-silver) !important; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
@@ -247,7 +241,7 @@
   .mi-nav { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; gap: clamp(20px,4vw,42px); }
   .mi-header__cta { grid-column: 2; grid-row: 1; }
   .mi-hero { min-height: max(760px,calc(100svh - 80px)); }
-  .mi-hero__field { height: min(92vw,760px); min-height: 500px; bottom: -26%; }
+  .mi-hero__skyline { bottom: 52px; width: 118%; max-width: none; left: 50%; transform: translateX(-50%); }
   .mi-statement__inner { top: 112px; min-height: calc(100svh - 112px); }
   .mi-kinetic { font-size: clamp(132px,19vw,240px); }
   .mi-platform__grid { gap: 22px; }
@@ -277,8 +271,7 @@
   .mi-hero__lead { max-width: 420px; margin-top: 19px; font-size: 14px; }
   .mi-hero__content .mi-button { margin-top: 23px; }
   .mi-button { min-height: 46px; padding-inline: 15px; font-size: 10px; }
-  .mi-hero__field { right: -12%; bottom: -10%; left: -12%; width: 124%; height: 510px; min-height: 0; }
-  .mi-particle-field button { right: 20px; bottom: 20%; min-height: 40px; font-size: 9px; }
+  .mi-hero__skyline { bottom: 58px; width: 190%; max-width: none; max-height: 45%; opacity: .76; }
   .mi-hero__meta { right: 18px; bottom: 18px; gap: 7px; font-size: 7px; }
   .mi-hero__meta i { width: 13px; }
   .mi-scroll { bottom: 15px; left: 17px; max-width: 46%; gap: 7px; font-size: 7px; letter-spacing: .06em; }
