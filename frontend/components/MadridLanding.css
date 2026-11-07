@@ -170,6 +170,9 @@
 .mi-verdict > svg { width: 17px; height: 17px; color: var(--mi-mist); }
 .mi-city-visual { position: relative; min-height: 550px; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; border-radius: 12px; color: var(--mi-mist); background: radial-gradient(ellipse 60% 58% at 50% 49%,rgba(0,130,124,.2),transparent 100%),#011d1c; }
 .mi-city-visual__label { position: absolute; z-index: 2; top: 24px; left: 28px; color: var(--mi-silver); font-size: 14px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; }
+.mi-district-map-deferred { position: relative; z-index: 1; width: min(100%,650px); margin: 32px auto 10px; }
+.mi-district-map-deferred__placeholder { width: 100%; aspect-ratio: 1; border-radius: 10px; background: radial-gradient(circle,rgba(0,130,124,.16),transparent 68%); }
+.mi-district-map-deferred .mi-district-map { margin: 0 auto; }
 .mi-district-map { position: relative; z-index: 1; width: min(100%,650px); margin: 32px auto 10px; }
 .mi-district-map__toolbar { position: absolute; z-index: 4; top: 0; left: 50%; display: flex; align-items: center; gap: 6px; max-width: calc(100% - 28px); padding: 6px; border: 1px solid rgba(139,244,235,.13); border-radius: 8px; background: rgba(1,29,28,.84); transform: translateX(-50%); backdrop-filter: blur(14px); }
 .mi-district-map__toolbar button { min-height: 34px; padding: 0 12px; border: 0; border-radius: 5px; color: var(--mi-silver); background: transparent; font: inherit; font-size: 13px; cursor: pointer; transition: color .2s,background .2s; }

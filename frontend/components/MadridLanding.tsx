@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { ArrowDown, ArrowRight, ArrowUpRight, BarChart3 } from 'lucide-react';
-import MadridDistrictMap from './MadridDistrictMap';
+import DeferredMadridDistrictMap from './DeferredMadridDistrictMap';
 import MadridHeroArtwork from './MadridHeroArtwork';
 import LandingTrend from './LandingTrend';
 import './MadridLanding.css';
@@ -58,7 +58,7 @@ export default function MadridLanding() {
             <div className="mi-platform__intro"><div><p className="mi-kicker mi-kicker--muted">Una ciudad, cuatro perspectivas</p><h2 id="mi-platform-title">Explora el mercado.<br/><span>Encuentra tu lectura.</span></h2></div><p>Elige el perfil que responde a tu pregunta. Compara zonas, consulta tendencias y sigue la evolución mensual.</p></div>
             <div className="mi-platform__frame"><div className="mi-platform__grid">
               <div className="mi-profile-list">{profiles.map(({title,text,href})=><Link className="mi-profile" href={href} key={title}><span className="mi-profile__copy"><strong>{title}</strong><small>{text}</small></span><span className="mi-profile__arrow"><ArrowUpRight aria-hidden="true"/></span></Link>)}<Link href="/madrid/veredicto" className="mi-verdict"><span><strong>El Veredicto</strong><small>Contrasta el precio de una vivienda con su zona.</small></span><ArrowUpRight aria-hidden="true"/></Link></div>
-              <aside className="mi-city-visual"><div className="mi-city-visual__label">El mapa de Madrid</div><MadridDistrictMap/></aside>
+              <aside className="mi-city-visual"><div className="mi-city-visual__label">El mapa de Madrid</div><DeferredMadridDistrictMap/></aside>
             </div></div>
           </div>
         </section>

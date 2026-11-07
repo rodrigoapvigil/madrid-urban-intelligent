@@ -148,7 +148,7 @@ export default function MadridDistrictMap() {
     const rand = seeded(20261107);
     const points: { x: number; y: number; district: number; border: boolean; lamp: boolean; intensity: number }[] = [];
     districts.forEach((district, districtIndex) => {
-      const target = Math.max(100, Math.round(85 * Math.pow(Math.max(district.area, 1), .55)));
+      const target = Math.max(90, Math.round(38 * Math.pow(Math.max(district.area, 1), .55)));
       const step = Math.max(.012, Math.sqrt(Math.max(district.area, .01) / target));
       for (const polygon of district.polygons) {
         const outer = polygon.rings[0] ?? [];
@@ -156,7 +156,7 @@ export default function MadridDistrictMap() {
           for (let i = 0; i < ring.length; i++) {
             const a = ring[i], b = ring[(i + 1) % ring.length];
             const len = Math.hypot(b.x - a.x, b.y - a.y);
-            const count = Math.max(1, Math.ceil(len / .17));
+            const count = Math.max(1, Math.ceil(len / .25));
             for (let j = 0; j < count; j++) {
               const t = j / count;
               points.push({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, district: districtIndex, border: true, lamp: rand() < .2, intensity: rand() });
@@ -203,6 +203,7 @@ export default function MadridDistrictMap() {
     const draw = (stamp: number) => {
       raf = 0;
       if (!visible) return;
+      if (last && stamp - last < 40) { raf = requestAnimationFrame(draw); return; }
       const dt = Math.min(.05, last ? (stamp - last) / 1000 : .016); last = stamp; time += dt;
       const scale = Math.min(width, height) / 1000, ox = (width - 1000 * scale) / 2, oy = (height - 1000 * scale) / 2;
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);

@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { motion, useReducedMotion, useScroll, useTransform } from 'framer-motion';
 import Image from 'next/image';
 
-const skyline = '/madrid-skyline.svg';
+const skyline = '/madrid-skyline-transparent.png';
 
 export default function MadridHeroArtwork() {
   const artworkRef = useRef<HTMLDivElement>(null);

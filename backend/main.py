@@ -7,8 +7,14 @@ import sys
 import re
 from typing import Any, Dict
 
-# Añadir el directorio actual al path para importar data.py
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+# Render puede arrancar `main:app` con `backend/` como directorio de trabajo.
+# Añadir la raíz del repositorio permite resolver tanto `backend.services` como `data/`.
+BACKEND_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(BACKEND_DIR)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+if BACKEND_DIR not in sys.path:
+    sys.path.insert(0, BACKEND_DIR)
 import data
 
 app = FastAPI(title="Madrid Urban Intelligence API")
