@@ -160,19 +160,28 @@
 .mi-verdict strong { font-size: 22px; font-weight: 500; }
 .mi-verdict small { color: var(--mi-silver); font-size: 17px; line-height: 1.4; }
 .mi-verdict > svg { width: 17px; height: 17px; color: var(--mi-mist); }
-.mi-city-visual { position: relative; min-height: 550px; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; border-radius: 12px; color: var(--mi-deep); background: var(--mi-mist); }
-.mi-city-visual__label { position: absolute; z-index: 2; top: 24px; left: 28px; color: #315b58; font-size: 14px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; }
-.mi-district-map { position: relative; z-index: 1; width: min(100%,520px); margin: 32px auto 10px; }
+.mi-city-visual { position: relative; min-height: 550px; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; border-radius: 12px; color: var(--mi-mist); background: radial-gradient(ellipse 60% 58% at 50% 49%,rgba(0,130,124,.2),transparent 100%),#011d1c; }
+.mi-city-visual__label { position: absolute; z-index: 2; top: 24px; left: 28px; color: var(--mi-silver); font-size: 14px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; }
+.mi-district-map { position: relative; z-index: 1; width: min(100%,590px); margin: 32px auto 10px; }
 .mi-district-map svg { display: block; width: 100%; height: auto; overflow: visible; }
-.mi-district-map__district { fill: #fff; stroke: #76aaa6; stroke-width: 1.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
-.mi-district-map__district--accent { fill: #b7eae4; }
-.mi-district-map__beacon { transform-box: fill-box; transform-origin: center; animation: mi-map-beacon 3.6s ease-in-out infinite; }
-.mi-district-map__pulse { fill: rgba(0,130,124,.14); stroke: rgba(0,130,124,.46); stroke-width: 1; }
-.mi-district-map__point { fill: #007a73; stroke: var(--mi-mist); stroke-width: 1.5; }
-.mi-district-map__caption { display: flex; justify-content: space-between; padding: 0 26px; color: #315b58; font-size: 14px; font-weight: 500; letter-spacing: .13em; text-transform: uppercase; }
-.mi-district-map__loading { width: 65%; aspect-ratio: 1; margin: 50px auto; border: 1px solid #8cbab6; border-radius: 50%; background: radial-gradient(circle,rgba(0,130,124,.16),transparent 65%); animation: mi-map-loading 1.8s ease-in-out infinite alternate; }
-@keyframes mi-map-beacon { 0%,100% { opacity: .64; transform: scale(.88); } 50% { opacity: 1; transform: scale(1.22); } }
+.mi-district-map__district { fill: rgba(0,130,124,.018); stroke: rgba(111,211,205,.38); stroke-width: 1; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.mi-district-map__outlines { pointer-events: none; }
+.mi-district-map__particle-group { fill: #55e1d7; animation: mi-map-twinkle 4.8s ease-in-out infinite alternate; }
+.mi-district-map__particle-group--1 { animation-delay: -1.1s; }
+.mi-district-map__particle-group--2 { animation-delay: -2.3s; }
+.mi-district-map__particle-group--3 { animation-delay: -3.4s; }
+.mi-district-map__particle-group--4 { animation-delay: -4.1s; }
+.mi-district-map__core { transform-box: fill-box; transform-origin: center; animation: mi-map-core 4s ease-in-out infinite; }
+.mi-district-map__core-ring { fill: none; stroke: rgba(203,255,252,.28); stroke-width: .8; transform-box: fill-box; transform-origin: center; animation: mi-map-core 4s ease-in-out infinite; }
+.mi-district-map__core-point { fill: #edfffe; filter: drop-shadow(0 0 5px #55e1d7); }
+.mi-district-map__caption { display: flex; justify-content: space-between; padding: 0 26px; color: var(--mi-silver); font-size: 14px; font-weight: 500; letter-spacing: .13em; text-transform: uppercase; }
+.mi-district-map__loading { width: 65%; aspect-ratio: 1; margin: 50px auto; border: 1px solid rgba(111,211,205,.3); border-radius: 50%; background: radial-gradient(circle,rgba(0,130,124,.18),transparent 65%); animation: mi-map-loading 1.8s ease-in-out infinite alternate; }
+@keyframes mi-map-twinkle { from { opacity: .3; } to { opacity: .92; } }
+@keyframes mi-map-core { 0%,100% { opacity: .45; transform: scale(.86); } 50% { opacity: 1; transform: scale(1.12); } }
 @keyframes mi-map-loading { to { opacity: .45; transform: scale(.94); } }
+@media (prefers-reduced-motion: reduce) {
+  .mi-district-map__particle-group, .mi-district-map__core, .mi-district-map__core-ring, .mi-district-map__loading { animation: none; }
+}
 
 /* Trend: a legible chart inside a single calm panel. */
 .mi-insight__layout { display: grid; grid-template-columns: minmax(300px,.72fr) minmax(0,1.28fr); align-items: center; gap: clamp(48px,8vw,112px); }
