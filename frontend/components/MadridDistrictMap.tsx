@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, type PointerEvent } from 'react';
+import { useEffect, useRef, useState, type PointerEvent } from 'react';
 
 type Point = [number, number];
 type DistrictFeature = {
@@ -18,7 +18,7 @@ type ProjectedDistrict = {
   points: Point[];
 };
 
-type MapParticle = { x: number; y: number; r: number; opacity: number; group: number };
+type MapParticle = { x: number; y: number; r: number; opacity: number; group: number; district: number };
 
 const containsPoint = (point: Point, polygon: Point[]) => {
   const [x, y] = point;
@@ -106,6 +106,7 @@ const createParticles = (districts: ProjectedDistrict[]) => {
           r: 0.65 + variation * 0.65 + core * 0.35,
           opacity: Math.min(0.88, 0.12 + core * 0.58 + variation * 0.16),
           group: Math.floor(variation * 5),
+          district: index,
         });
       }
     }
@@ -115,15 +116,28 @@ const createParticles = (districts: ProjectedDistrict[]) => {
 
 export default function MadridDistrictMap() {
   const [districts, setDistricts] = useState<ProjectedDistrict[]>([]);
+  const [activeDistrict, setActiveDistrict] = useState<number | null>(null);
+  const activeDistrictRef = useRef<number | null>(null);
 
   const handleMapPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const svg = event.currentTarget.querySelector('svg');
     if (!svg) return;
     const bounds = svg.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((event.clientX - bounds.left) / bounds.width) * 100));
-    const y = Math.max(0, Math.min(100, ((event.clientY - bounds.top) / bounds.height) * 100));
+    const mapX = Math.max(0, Math.min(520, ((event.clientX - bounds.left) / bounds.width) * 520));
+    const mapY = Math.max(0, Math.min(520, ((event.clientY - bounds.top) / bounds.height) * 520));
+    const x = (mapX / 520) * 100;
+    const y = (mapY / 520) * 100;
     event.currentTarget.style.setProperty('--mi-map-cursor-x', `${x}%`);
     event.currentTarget.style.setProperty('--mi-map-cursor-y', `${y}%`);
+    const hoveredIndex = districts.findIndex(({ points }) => containsPoint([mapX, mapY], points));
+    const nextDistrict = hoveredIndex < 0 ? null : hoveredIndex;
+    if (activeDistrictRef.current !== nextDistrict) {
+      activeDistrictRef.current = nextDistrict;
+      setActiveDistrict(nextDistrict);
+      const active = hoveredIndex < 0 ? null : districts[hoveredIndex];
+      const zone = active?.points.map(([px, py]) => `${(px / 520) * 100}% ${(py / 520) * 100}%`).join(', ') ?? '';
+      event.currentTarget.style.setProperty('--mi-map-active-zone', zone);
+    }
   };
 
   const handleMapPointerEnter = (event: PointerEvent<HTMLDivElement>) => {
@@ -132,6 +146,9 @@ export default function MadridDistrictMap() {
 
   const handleMapPointerLeave = (event: PointerEvent<HTMLDivElement>) => {
     event.currentTarget.classList.remove('is-cursor-active');
+    event.currentTarget.style.removeProperty('--mi-map-active-zone');
+    activeDistrictRef.current = null;
+    setActiveDistrict(null);
   };
 
   useEffect(() => {
@@ -170,14 +187,14 @@ export default function MadridDistrictMap() {
             <g className="mi-district-map__particles">
               {[0, 1, 2, 3, 4].map((group) => (
                 <g key={group} className={`mi-district-map__particle-group mi-district-map__particle-group--${group}`}>
-                  {particles.filter((particle) => particle.group === group).map(({ x, y, r, opacity }, index) => (
-                    <circle key={index} cx={x} cy={y} r={r} style={{ opacity }} />
+                  {particles.filter((particle) => particle.group === group).map(({ x, y, r, opacity, district }, index) => (
+                    <circle key={index} cx={x} cy={y} r={activeDistrict === district ? r * 1.65 : r} className={activeDistrict === district ? 'is-district-active' : undefined} style={{ opacity: activeDistrict === district ? Math.min(1, opacity + 0.3) : opacity }} />
                   ))}
                 </g>
               ))}
             </g>
             <g className="mi-district-map__outlines">
-              {districts.map(({ name, index, d }) => <path key={`${name}-${index}`} d={d} className="mi-district-map__district" />)}
+              {districts.map(({ name, index, d }) => <path key={`${name}-${index}`} d={d} className={`mi-district-map__district${activeDistrict === index ? ' is-active' : ''}`} />)}
             </g>
             <circle className="mi-district-map__core-ring" cx="260" cy="260" r="25" />
             <circle className="mi-district-map__core-point" cx="260" cy="260" r="3" />
@@ -185,7 +202,7 @@ export default function MadridDistrictMap() {
           <div className="mi-district-map__cursor-light" aria-hidden="true" />
         </div>
       ) : <div className="mi-district-map__loading" aria-label="Cargando el mapa de Madrid" />}
-      <div className="mi-district-map__caption"><span>Madrid · Red urbana</span><span>21 distritos</span></div>
+      <div className="mi-district-map__caption"><span>{activeDistrict === null ? 'Madrid · Red urbana' : districts[activeDistrict]?.name}</span><span>21 distritos</span></div>
     </div>
   );
 }
