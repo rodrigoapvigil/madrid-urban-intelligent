@@ -89,7 +89,13 @@ export default function MadridLanding() {
         <p className="mi-bridge" aria-label="Una ciudad, cientos de lecturas locales.">Una ciudad, <span>cientos de lecturas locales.</span></p>
 
         <section className="mi-scale" id="impacto" aria-labelledby="mi-scale-title">
-          <div className="mi-wrap"><div className="mi-scale__heading"><p className="mi-kicker mi-kicker--muted">Madrid, hasta el detalle</p><h2 id="mi-scale-title">Una ciudad.<br/><span>Muchas perspectivas.</span></h2></div><div className="mi-scale__stats"><article><strong>4</strong><span>Perfiles de mercado</span><small>Alquiler · Compra · Venta · Inversión</small></article><article><strong>21</strong><span>Distritos</span><small>Una lectura completa de la ciudad</small></article><article><strong>131</strong><span>Barrios</span><small>El detalle detrás de cada tendencia</small></article></div></div>
+          <div className="mi-wrap"><div className="mi-scale__heading"><p className="mi-kicker mi-kicker--muted">Madrid, hasta el detalle</p><h2 id="mi-scale-title">Una ciudad.<br/><span>Muchas perspectivas.</span></h2></div><div className="mi-scale__stats">
+            <article className="mi-scale__stat--volume"><strong>16.779</strong><span>Registros analíticos</span><small>10.794 operaciones reales y 5.985 predicciones en la base de datos.</small></article>
+            <article><strong>21</strong><span>Distritos</span><small>Una lectura completa de la ciudad</small></article>
+            <article><strong>131</strong><span>Barrios</span><small>El detalle detrás de cada tendencia</small></article>
+            <article className="mi-scale__stat--population"><strong>3,49<span className="mi-scale__unit">M</span></strong><span>Habitantes</span><small><a href="https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Notas-de-prensa/Los-nacimientos-superaron-a-las-defunciones-en-564-personas-en-2025-un-crecimiento-vegetativo-que-no-se-producia-en-Madrid-desde-hacia-seis-anos/?vgnextchannel=6091317d3d2a7010VgnVCM100000dc0ca8c0RCRD&amp;vgnextfmt=default&amp;vgnextoid=81bdd56de9ddd910VgnVCM100000891ecb1aRCRD" target="_blank" rel="noreferrer">3.497.277 en el padrón a 1 ene 2026 ↗</a></small></article>
+            <article><strong>4</strong><span>Perfiles de mercado</span><small>Alquiler · Compra · Venta · Inversión</small></article>
+          </div></div>
         </section>
 
         <p className="mi-bridge" aria-label="La mejor decisión empieza con una buena pregunta.">La mejor decisión empieza <span>con una buena pregunta.</span></p>
