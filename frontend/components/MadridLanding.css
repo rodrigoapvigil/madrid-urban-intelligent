@@ -208,29 +208,93 @@
 .mi-verdict strong { font-size: 22px; font-weight: 500; }
 .mi-verdict small { color: var(--mi-silver); font-size: 17px; line-height: 1.4; }
 .mi-verdict > svg { width: 17px; height: 17px; color: var(--mi-mist); }
-.mi-city-visual { position: relative; min-height: 550px; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; border-radius: 12px; color: var(--mi-mist); background: radial-gradient(ellipse 60% 58% at 50% 49%,color-mix(in srgb, var(--azul-linea) 20%, transparent),transparent 100%),var(--azul-noche); }
-.mi-city-visual__label { position: absolute; z-index: 2; top: 24px; left: 28px; color: var(--mi-silver); font-size: 14px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; }
-.mi-district-map-deferred { position: relative; z-index: 1; width: min(100%,650px); margin: 32px auto 10px; }
-.mi-district-map-deferred__placeholder { width: 100%; aspect-ratio: 1; border-radius: 10px; background: radial-gradient(circle,color-mix(in srgb, var(--azul-linea) 16%, transparent),transparent 68%); }
-.mi-district-map-deferred .mi-district-map { margin: 0 auto; }
-.mi-district-map { position: relative; z-index: 1; width: min(100%,650px); margin: 32px auto 10px; }
-.mi-district-map__toolbar { position: absolute; z-index: 4; top: 0; left: 50%; display: flex; align-items: center; gap: 6px; max-width: calc(100% - 28px); padding: 6px; border: 1px solid color-mix(in srgb, var(--texto-secundario-azul) 13%, transparent); border-radius: 8px; background: color-mix(in srgb, var(--azul-noche) 84%, transparent); transform: translateX(-50%); backdrop-filter: blur(14px); }
-.mi-district-map__toolbar button { min-height: 34px; padding: 0 12px; border: 0; border-radius: 5px; color: var(--mi-silver); background: transparent; font: inherit; font-size: 13px; cursor: pointer; transition: color .2s,background .2s; }
-.mi-district-map__toolbar button:hover, .mi-district-map__toolbar button.is-active { color: var(--blanco-humo); background: color-mix(in srgb, var(--precio-subida) 24%, transparent); }
-.mi-district-map__sample-badge { margin-left: 4px; padding: 5px 8px; border: 1px solid color-mix(in srgb, var(--blanco-humo) 20%, transparent); border-radius: 4px; color: var(--texto-secundario-azul); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; }
-.mi-district-map__canvas-wrap { position: relative; width: 100%; aspect-ratio: 1; margin-top: 42px; overflow: hidden; border-radius: 10px; touch-action: pan-y; }
-.mi-district-map__canvas-wrap canvas { position: absolute; inset: 0; display: block; width: 100%; height: 100%; cursor: crosshair; }
-.mi-district-map__caption { display: flex; justify-content: space-between; padding: 10px 26px 0; color: var(--mi-silver); font-size: 13px; font-weight: 500; letter-spacing: .13em; text-transform: uppercase; }
-.mi-district-map__legend { display: flex; align-items: center; justify-content: flex-end; gap: 5px; margin: 8px 26px 0; color: var(--texto-secundario-azul); font-size: 10px; }
-.mi-district-map__legend i { width: 9px; height: 9px; border-radius: 50%; background: var(--azul-linea); }
-.mi-district-map__legend i:nth-of-type(2) { background: var(--azul-linea); }.mi-district-map__legend i:nth-of-type(3) { background: var(--precio-subida); }.mi-district-map__legend i:nth-of-type(4) { background: var(--precio-subida); }.mi-district-map__legend i:nth-of-type(5) { background: var(--humo-2); }
-.mi-district-map__pause { position: absolute; z-index: 3; right: 14px; bottom: 14px; min-height: 34px; padding: 0 12px; border: 1px solid color-mix(in srgb, var(--blanco-humo) 24%, transparent); border-radius: 6px; color: var(--humo-2); background: color-mix(in srgb, var(--azul-noche) 80%, transparent); font: inherit; font-size: 11px; cursor: pointer; backdrop-filter: blur(10px); }
-.mi-district-map__tooltip { position: absolute; z-index: 5; display: grid; gap: 5px; min-width: 176px; max-width: 230px; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--texto-secundario-azul) 36%, transparent); border-radius: 8px; color: var(--blanco-humo); background: color-mix(in srgb, var(--azul-noche) 94%, transparent); pointer-events: none; transform: translate(-50%,0); backdrop-filter: blur(12px); }
-.mi-district-map__tooltip strong { font-size: 15px; font-weight: 500; }.mi-district-map__tooltip span,.mi-district-map__tooltip small { color: var(--texto-secundario-azul); font-size: 10px; }.mi-district-map__tooltip b { color: var(--humo-2); font-size: 16px; font-weight: 500; }
-.mi-district-map__loading { width: 64%; aspect-ratio: 1; margin: 50px auto; border: 1px solid color-mix(in srgb, var(--precio-subida) 30%, transparent); border-radius: 50%; background: radial-gradient(circle,color-mix(in srgb, var(--azul-linea) 18%, transparent),transparent 65%); animation: mi-map-loading 1.8s ease-in-out infinite alternate; }
-.mi-district-map__error { position: absolute; inset: 45% 12px auto; color: var(--texto-secundario-azul); text-align: center; font-size: 13px; }
-@keyframes mi-map-loading { to { opacity: .45; transform: scale(.94); } }
-@media (prefers-reduced-motion: reduce) { .mi-district-map__loading { animation: none; } }
+.mi-city-visual {
+  position: relative;
+  min-height: 560px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 12px;
+  color: var(--mi-mist);
+  background: radial-gradient(ellipse 65% 65% at 50% 50%, color-mix(in srgb, var(--azul-linea) 20%, transparent), transparent 100%), var(--azul-noche);
+}
+.mi-district-map-deferred {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mi-district-map-deferred__placeholder {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 10px;
+  background: radial-gradient(circle, color-mix(in srgb, var(--azul-linea) 16%, transparent), transparent 68%);
+}
+.mi-district-map-deferred .mi-district-map {
+  margin: 0 auto;
+}
+.mi-district-map {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+}
+.mi-district-map__canvas-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  margin-top: 0;
+  overflow: hidden;
+  border-radius: 10px;
+  touch-action: pan-y;
+}
+.mi-district-map__canvas-wrap canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+.mi-district-map__caption {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 14px 0;
+  color: var(--mi-silver);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+}
+.mi-district-map__loading {
+  width: 64%;
+  aspect-ratio: 1;
+  margin: 50px auto;
+  border: 1px solid color-mix(in srgb, var(--precio-subida) 30%, transparent);
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--azul-linea) 18%, transparent), transparent 65%);
+  animation: mi-map-loading 1.8s ease-in-out infinite alternate;
+}
+.mi-district-map__error {
+  position: absolute;
+  inset: 45% 12px auto;
+  color: var(--texto-secundario-azul);
+  text-align: center;
+  font-size: 13px;
+}
+@keyframes mi-map-loading {
+  to { opacity: .45; transform: scale(.94); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mi-district-map__loading { animation: none; }
+}
 
 /* Trend: a legible chart inside a single calm panel. */
 .mi-insight__layout { display: grid; grid-template-columns: minmax(300px,.72fr) minmax(0,1.28fr); align-items: center; gap: clamp(48px,8vw,112px); }
@@ -239,37 +303,119 @@
 .mi-inline-link { min-height: 48px; margin-top: 18px; display: inline-flex; align-items: center; gap: 11px; color: var(--mi-mist) !important; font-size: 18px; }
 .mi-inline-link svg { width: 16px; height: 16px; color: var(--mi-sky); transition: transform .2s ease; }
 .mi-inline-link:hover svg { transform: translateX(4px); }
-.mi-trend { min-width: 0; padding: clamp(24px,3.5vw,46px); border-radius: 16px; background: var(--azul-noche); }
-.mi-trend__heading { display: flex; justify-content: space-between; align-items: end; gap: 20px; }
-.mi-trend__heading .mi-kicker { margin: 0 0 8px; }
-.mi-trend__heading h3 { margin: 0; color: var(--mi-white); font-size: clamp(22px,2vw,30px); font-weight: 500; letter-spacing: -.035em; }
-.mi-trend__select-label { display: grid; gap: 6px; color: var(--mi-silver); font-size: 12px; }
-.mi-trend__select-label select { min-height: 42px; min-width: 132px; padding: 0 32px 0 12px; border: 1px solid color-mix(in srgb, var(--blanco-humo) 22%, transparent); border-radius: 6px; color: var(--mi-white); background: var(--azul-noche); font: inherit; }
-.mi-trend__legend { display: flex; justify-content: flex-end; gap: 18px; margin-top: 24px; color: var(--mi-silver); font-size: 13px; }
-.mi-trend__legend span { display: inline-flex; align-items: center; gap: 8px; }
-.mi-dot { width: 9px; height: 9px; display: inline-block; border-radius: 50%; }
-.mi-dot--blue { background: var(--mi-sky); } .mi-dot--forecast { background: var(--mi-lavender); }
-.mi-trend__chart { width: 100%; height: auto; margin-top: 14px; overflow: visible; }
-.mi-trend__gridline { stroke: color-mix(in srgb, var(--texto-secundario-azul) 18%, transparent); stroke-width: 1; }
-.mi-trend__chart text { fill: color-mix(in srgb, var(--blanco-humo) 78%, transparent); font: 12px var(--mi-font); }
-.mi-trend__chart .mi-trend__y-label { fill: var(--mi-silver); font-size: 11px; }
-.mi-trend__chart .mi-trend__x-label { font-size: 11px; }
-.mi-trend__real-line, .mi-trend__prediction-line { fill: none; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-.mi-trend__real-line { stroke: var(--mi-sky); }
-.mi-trend__prediction-line { stroke: var(--mi-lavender); stroke-dasharray: 7 6; }
-.mi-trend__real-point { fill: var(--mi-sky); stroke: var(--azul-noche); stroke-width: 2; }
-.mi-trend__forecast-point { fill: var(--mi-lavender); stroke: var(--azul-noche); stroke-width: 2; }
-.mi-trend__caption { padding-top: 10px; display: flex; justify-content: space-between; gap: 12px; color: color-mix(in srgb, var(--blanco-humo) 78%, transparent); font-size: 13px; }
-.mi-trend__message { min-height: 180px; display: flex; align-items: center; justify-content: center; gap: 12px; color: var(--mi-silver); text-align: center; font-size: 16px; }
-.mi-trend__message button { min-height: 42px; padding-inline: 15px; border: 1px solid color-mix(in srgb, var(--blanco-humo) 28%, transparent); border-radius: 6px; color: var(--mi-mist); background: transparent; font: inherit; cursor: pointer; }
-.mi-trend__table-details { margin-top: 22px; border-top: 1px solid color-mix(in srgb, var(--blanco-humo) 16%, transparent); color: var(--mi-mist); }
-.mi-trend__table-details summary { min-height: 48px; display: flex; align-items: center; cursor: pointer; font-size: 14px; }
-.mi-trend__table-wrap { max-height: 280px; overflow: auto; }
-.mi-trend__table-wrap table { width: 100%; border-collapse: collapse; color: var(--mi-silver); font-size: 14px; text-align: left; }
-.mi-trend__table-wrap caption { padding: 8px; text-align: left; }
-.mi-trend__table-wrap th, .mi-trend__table-wrap td { padding: 10px 8px; border-bottom: 1px solid color-mix(in srgb, var(--blanco-humo) 12%, transparent); }
-.mi-trend__table-wrap th { color: var(--mi-white); font-weight: 500; }
-.mi-inline-link--secondary { margin-left: 18px; }
+.mi-trend {
+  min-width: 0;
+  padding: clamp(24px, 3.5vw, 46px);
+  border-radius: 16px;
+  background: var(--azul-noche);
+}
+.mi-trend__heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
+}
+.mi-trend__heading .mi-kicker {
+  margin: 0 0 8px;
+}
+.mi-trend__heading h3 {
+  margin: 0;
+  color: var(--mi-white);
+  font-size: clamp(22px, 2vw, 30px);
+  font-weight: 500;
+  letter-spacing: -.035em;
+}
+.mi-trend__badge {
+  padding: 6px 12px;
+  border: 1px solid color-mix(in srgb, var(--blanco-humo) 20%, transparent);
+  border-radius: 6px;
+  color: var(--mi-silver);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.mi-trend__legend {
+  display: flex;
+  justify-content: flex-end;
+  gap: 18px;
+  margin-top: 24px;
+  color: var(--mi-silver);
+  font-size: 13px;
+}
+.mi-trend__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.mi-dot {
+  width: 9px;
+  height: 9px;
+  display: inline-block;
+  border-radius: 50%;
+}
+.mi-dot--blue {
+  background: var(--mi-sky);
+}
+.mi-dot--forecast {
+  background: var(--mi-lavender);
+}
+.mi-trend__chart {
+  width: 100%;
+  height: auto;
+  margin-top: 14px;
+  overflow: visible;
+}
+.mi-trend__gridline {
+  stroke: color-mix(in srgb, var(--texto-secundario-azul) 18%, transparent);
+  stroke-width: 1;
+}
+.mi-trend__chart text {
+  fill: color-mix(in srgb, var(--blanco-humo) 78%, transparent);
+  font: 12px var(--mi-font);
+}
+.mi-trend__chart .mi-trend__y-label {
+  fill: var(--mi-silver);
+  font-size: 11px;
+}
+.mi-trend__chart .mi-trend__x-label {
+  font-size: 11px;
+}
+.mi-trend__real-line, .mi-trend__prediction-line {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mi-trend__real-line {
+  stroke: var(--mi-sky);
+}
+.mi-trend__prediction-line {
+  stroke: var(--mi-lavender);
+  stroke-dasharray: 7 6;
+}
+.mi-trend__real-point {
+  fill: var(--mi-sky);
+  stroke: var(--azul-noche);
+  stroke-width: 2;
+}
+.mi-trend__forecast-point {
+  fill: var(--mi-lavender);
+  stroke: var(--azul-noche);
+  stroke-width: 2;
+}
+.mi-trend__caption {
+  padding-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: color-mix(in srgb, var(--blanco-humo) 78%, transparent);
+  font-size: 13px;
+}
+.mi-inline-link--secondary {
+  margin-left: 18px;
+}
 
 /* Place scale data in one deliberate contrast tile and two supporting fields. */
 .mi-scale__heading { max-width: 850px; }
@@ -382,20 +528,13 @@
   .mi-verdict strong { font-size: 20px; }
   .mi-verdict small { font-size: 15px; }
   .mi-city-visual { min-height: 340px; padding: 18px; }
-  .mi-city-visual__label { top: 17px; left: 18px; font-size: 11px; }
-  .mi-district-map { margin: 27px auto 8px; }
-  .mi-district-map__canvas-wrap { margin-top: 48px; }
-  .mi-district-map__toolbar { gap: 2px; padding: 4px; }
-  .mi-district-map__toolbar button { min-height: 31px; padding-inline: 8px; font-size: 11px; }
-  .mi-district-map__sample-badge { font-size: 8px; padding: 4px 5px; }
+  .mi-district-map { margin: 0 auto; }
+  .mi-district-map__canvas-wrap { margin-top: 0; }
   .mi-district-map__caption { padding-inline: 10px; font-size: 10px; }
-  .mi-district-map__legend { margin-inline: 10px; }
   .mi-insight__layout { gap: 28px; }
   .mi-insight__copy > p:not(.mi-kicker), .mi-audience__intro > p:not(.mi-kicker), .mi-method__intro > p:not(.mi-kicker) { margin-top: 18px; font-size: 20px; }
   .mi-trend { padding: 19px 13px 15px; border-radius: 14px; }
-  .mi-trend__heading { align-items: flex-start; flex-direction: column; }
-  .mi-trend__select-label { grid-template-columns: auto 1fr; align-items: center; width: 100%; }
-  .mi-trend__select-label select { width: 100%; }
+  .mi-trend__heading { align-items: flex-start; flex-direction: column; gap: 10px; }
   .mi-trend__legend { justify-content: flex-start; gap: 15px; margin-top: 18px; font-size: 12px; }
   .mi-trend__chart { margin-top: 12px; }
   .mi-trend__chart .mi-trend__x-label { font-size: 9px; }

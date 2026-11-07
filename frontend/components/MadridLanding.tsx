@@ -101,7 +101,6 @@ export default function MadridLanding() {
                   </Link>
                 </div>
                 <aside className="mi-city-visual">
-                  <div className="mi-city-visual__label">Mapa analítico de Madrid</div>
                   <DeferredMadridDistrictMap/>
                 </aside>
               </div>
