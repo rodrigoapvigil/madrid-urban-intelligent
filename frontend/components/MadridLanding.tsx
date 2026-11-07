@@ -45,7 +45,7 @@ export default function MadridLanding() {
       <main>
         <section className="mi-hero" aria-labelledby="mi-title">
           <div className="mi-hero__content">
-            <p className="mi-hero__kicker">DECIDE MADRID</p>
+            <p className="mi-hero__kicker">DMIYC</p>
             <h1 id="mi-title">No adivines.<br/><span>Decide con datos.</span></h1>
             <p className="mi-hero__lead">Compra o alquila con precios de cierre oficial en los 131 barrios de Madrid, sin caer en precios inflados.</p>
             <Link href="/madrid" className="mi-hero__cta-main">Explorar precios de cierre <ArrowUpRight aria-hidden="true"/></Link>

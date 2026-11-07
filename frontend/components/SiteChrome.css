@@ -33,7 +33,7 @@
   align-items: center;
   gap: 10px;
 }
-.site-brand img { width: 34px; height: 34px; object-fit: contain; }
+.site-brand img { width: 34px; height: 34px; object-fit: contain; filter: brightness(0) invert(1) drop-shadow(0 0 2px rgba(255,255,255,0.4)); }
 
 .site-header-context {
   flex: 1 1 auto;
