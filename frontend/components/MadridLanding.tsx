@@ -113,15 +113,47 @@ export default function MadridLanding() {
         </p>
 
         <section className="mi-insight" aria-labelledby="mi-insight-title">
-          <div className="mi-wrap mi-insight__layout">
-            <div className="mi-insight__copy">
-              <p className="mi-kicker mi-kicker--muted">Evolución histórica y proyecciones</p>
-              <h2 id="mi-insight-title">Sabe hacia dónde va el precio<br/><span>antes de que cambie el mercado.</span></h2>
-              <p>Visualiza la trayectoria mensual de precios desde 2023 y compárala con modelos de machine learning calibrados. Distingue en un solo vistazo el dato oficial registrado de la proyección estadística.</p>
-              <Link href="/madrid" className="mi-inline-link">Ver evolución del mercado <ArrowRight aria-hidden="true"/></Link>
-              <Link href="/metodologia" className="mi-inline-link mi-inline-link--secondary">Metodología y fuentes oficiales <ArrowRight aria-hidden="true"/></Link>
+          <div className="mi-wrap">
+            <div className="mi-insight__intro">
+              <div className="mi-insight__intro-heading">
+                <p className="mi-kicker mi-kicker--muted">Evolución histórica y proyecciones</p>
+                <h2 id="mi-insight-title">
+                  Sabe hacia dónde va el precio<br />
+                  <span>antes de que cambie el mercado.</span>
+                </h2>
+              </div>
+              <div className="mi-insight__intro-copy">
+                <p>
+                  Visualiza la trayectoria mensual de precios desde 2023 y compárala con modelos de machine learning calibrados. Distingue en un solo vistazo el dato oficial registrado de la proyección estadística.
+                </p>
+              </div>
             </div>
-            <LandingTrend/>
+
+            <div className="mi-insight__grid">
+              <div className="mi-insight__cards">
+                <Link href="/madrid" className="mi-insight__card">
+                  <span className="mi-insight__card-copy">
+                    <strong>Datos de cierre oficiales</strong>
+                    <small>Trayectoria consolidada de transacciones reales mes a mes desde 2023.</small>
+                    <span className="mi-insight__card-cta">
+                      Ver evolución del mercado <ArrowRight aria-hidden="true" />
+                    </span>
+                  </span>
+                </Link>
+                <Link href="/metodologia" className="mi-insight__card">
+                  <span className="mi-insight__card-copy">
+                    <strong>Modelos predictivos calibrados</strong>
+                    <small>Proyecciones estadísticas sin sesgo comercial ni estimaciones infladas de portales.</small>
+                    <span className="mi-insight__card-cta">
+                      Metodología y fuentes oficiales <ArrowRight aria-hidden="true" />
+                    </span>
+                  </span>
+                </Link>
+              </div>
+              <div className="mi-insight__chart-wrap">
+                <LandingTrend />
+              </div>
+            </div>
           </div>
         </section>
 

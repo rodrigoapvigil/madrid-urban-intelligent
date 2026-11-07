@@ -296,10 +296,108 @@
   .mi-district-map__loading { animation: none; }
 }
 
-/* Trend: a legible chart inside a single calm panel. */
-.mi-insight__layout { display: grid; grid-template-columns: minmax(300px,.72fr) minmax(0,1.28fr); align-items: center; gap: clamp(48px,8vw,112px); }
-.mi-insight__copy .mi-kicker, .mi-audience__intro .mi-kicker, .mi-method__intro .mi-kicker, .mi-scale__heading .mi-kicker { margin-bottom: 22px; }
-.mi-insight__copy > p:not(.mi-kicker), .mi-audience__intro > p:not(.mi-kicker), .mi-method__intro > p:not(.mi-kicker) { max-width: 520px; margin: 23px 0 0; color: var(--mi-silver); font-size: 21px; line-height: 1.45; }
+/* Insight: 4-quadrant structured grid (Intro Header + Action Cards & Trend Chart) */
+.mi-insight__intro {
+  margin-bottom: clamp(40px, 5.5vw, 68px);
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  align-items: flex-end;
+  gap: clamp(36px, 5vw, 68px);
+}
+.mi-insight__intro-heading .mi-kicker {
+  margin-bottom: 18px;
+}
+.mi-insight__intro-heading h2 {
+  margin: 0;
+  color: var(--mi-white);
+  font-size: clamp(34px, 4.2vw, 56px) !important;
+  font-weight: 500;
+  letter-spacing: -0.04em !important;
+  line-height: 1.05 !important;
+  text-wrap: balance;
+}
+.mi-insight__intro-heading h2 span {
+  color: var(--mi-mist);
+}
+.mi-insight__intro-copy p {
+  margin: 0;
+  color: var(--mi-silver);
+  font-size: clamp(16px, 1.3vw, 20px);
+  line-height: 1.5;
+}
+.mi-insight__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+  gap: clamp(24px, 3.5vw, 40px);
+  align-items: stretch;
+}
+.mi-insight__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  justify-content: space-between;
+}
+.mi-insight__card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(24px, 2.8vw, 34px);
+  border-radius: 16px;
+  background: var(--azul-noche);
+  border: 1px solid color-mix(in srgb, var(--texto-secundario-azul) 16%, transparent);
+  color: var(--mi-mist);
+  text-decoration: none;
+  transition: border-color .2s, background .2s, transform .2s;
+}
+.mi-insight__card:hover {
+  background: color-mix(in srgb, var(--azul-noche) 82%, var(--azul-linea));
+  border-color: color-mix(in srgb, var(--precio-subida) 45%, transparent);
+  transform: translateY(-2px);
+}
+.mi-insight__card-copy strong {
+  display: block;
+  font-size: clamp(18px, 1.6vw, 22px);
+  font-weight: 500;
+  color: var(--mi-white);
+  margin-bottom: 10px;
+}
+.mi-insight__card-copy small {
+  display: block;
+  color: var(--mi-silver);
+  font-size: 15px;
+  line-height: 1.45;
+  margin-bottom: 20px;
+}
+.mi-insight__card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--mi-mist);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: .02em;
+}
+.mi-insight__card-cta svg {
+  width: 15px;
+  height: 15px;
+  color: var(--mi-sky);
+  transition: transform .2s ease;
+}
+.mi-insight__card:hover .mi-insight__card-cta svg {
+  transform: translateX(4px);
+}
+.mi-insight__chart-wrap {
+  display: flex;
+  flex-direction: column;
+}
+.mi-insight__chart-wrap .mi-trend {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.mi-audience__intro .mi-kicker, .mi-method__intro .mi-kicker, .mi-scale__heading .mi-kicker { margin-bottom: 22px; }
+.mi-audience__intro > p:not(.mi-kicker), .mi-method__intro > p:not(.mi-kicker) { max-width: 520px; margin: 23px 0 0; color: var(--mi-silver); font-size: 21px; line-height: 1.45; }
 .mi-inline-link { min-height: 48px; margin-top: 18px; display: inline-flex; align-items: center; gap: 11px; color: var(--mi-mist) !important; font-size: 18px; }
 .mi-inline-link svg { width: 16px; height: 16px; color: var(--mi-sky); transition: transform .2s ease; }
 .mi-inline-link:hover svg { transform: translateX(4px); }
@@ -476,7 +574,8 @@
   .mi-kinetic { font-size: clamp(132px,19vw,240px); }
   .mi-platform__grid { gap: 22px; }
   .mi-city-visual { min-height: 460px; }
-  .mi-insight__layout { grid-template-columns: 1fr; gap: 40px; }
+  .mi-insight__intro { grid-template-columns: 1fr; gap: 24px; margin-bottom: 36px; }
+  .mi-insight__grid { grid-template-columns: 1fr; gap: 24px; }
   .mi-trend { max-width: none; }
   .mi-scale__stats article { min-height: 220px; }
   .mi-scale__stats article:first-child { min-height: 454px; }
@@ -531,8 +630,11 @@
   .mi-district-map { margin: 0 auto; }
   .mi-district-map__canvas-wrap { margin-top: 0; }
   .mi-district-map__caption { padding-inline: 10px; font-size: 10px; }
-  .mi-insight__layout { gap: 28px; }
-  .mi-insight__copy > p:not(.mi-kicker), .mi-audience__intro > p:not(.mi-kicker), .mi-method__intro > p:not(.mi-kicker) { margin-top: 18px; font-size: 20px; }
+  .mi-insight__intro { gap: 18px; margin-bottom: 28px; }
+  .mi-insight__intro-heading h2 { font-size: 30px !important; }
+  .mi-insight__cards { gap: 14px; }
+  .mi-insight__card { padding: 20px; }
+  .mi-audience__intro > p:not(.mi-kicker), .mi-method__intro > p:not(.mi-kicker) { margin-top: 18px; font-size: 20px; }
   .mi-trend { padding: 19px 13px 15px; border-radius: 14px; }
   .mi-trend__heading { align-items: flex-start; flex-direction: column; gap: 10px; }
   .mi-trend__legend { justify-content: flex-start; gap: 15px; margin-top: 18px; font-size: 12px; }
