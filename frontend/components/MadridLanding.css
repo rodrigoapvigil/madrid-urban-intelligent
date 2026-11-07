@@ -163,7 +163,11 @@
 .mi-city-visual { position: relative; min-height: 550px; padding: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; border-radius: 12px; color: var(--mi-mist); background: radial-gradient(ellipse 60% 58% at 50% 49%,rgba(0,130,124,.2),transparent 100%),#011d1c; }
 .mi-city-visual__label { position: absolute; z-index: 2; top: 24px; left: 28px; color: var(--mi-silver); font-size: 14px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; }
 .mi-district-map { position: relative; z-index: 1; width: min(100%,590px); margin: 32px auto 10px; }
-.mi-district-map svg { display: block; width: 100%; height: auto; overflow: visible; }
+.mi-district-map__visual { position: relative; width: 100%; }
+.mi-district-map__visual svg { position: relative; z-index: 1; display: block; width: 100%; height: auto; overflow: visible; }
+.mi-district-map__cursor-light { position: absolute; z-index: 2; inset: 0; overflow: hidden; pointer-events: none; opacity: 0; background: radial-gradient(ellipse 22% 22% at var(--mi-map-cursor-x,50%) var(--mi-map-cursor-y,50%),rgba(85,225,215,.36) 0%,rgba(0,191,177,.18) 34%,transparent 100%); mix-blend-mode: screen; transition: opacity .24s ease; }
+.mi-district-map__cursor-light::after { position: absolute; top: var(--mi-map-cursor-y,50%); left: var(--mi-map-cursor-x,50%); width: 68px; aspect-ratio: 1; border: 1px solid rgba(203,255,252,.34); border-radius: 50%; background: radial-gradient(circle,rgba(203,255,252,.2),rgba(0,191,177,.06) 54%,transparent 72%); content: ""; transform: translate(-50%,-50%); }
+.mi-district-map__visual.is-cursor-active .mi-district-map__cursor-light { opacity: 1; }
 .mi-district-map__district { fill: rgba(0,130,124,.018); stroke: rgba(111,211,205,.38); stroke-width: 1; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .mi-district-map__outlines { pointer-events: none; }
 .mi-district-map__particle-group { fill: #55e1d7; animation: mi-map-twinkle 4.8s ease-in-out infinite alternate; }
@@ -181,6 +185,7 @@
 @keyframes mi-map-loading { to { opacity: .45; transform: scale(.94); } }
 @media (prefers-reduced-motion: reduce) {
   .mi-district-map__particle-group, .mi-district-map__core, .mi-district-map__core-ring, .mi-district-map__loading { animation: none; }
+  .mi-district-map__cursor-light { transition: none; }
 }
 
 /* Trend: a legible chart inside a single calm panel. */

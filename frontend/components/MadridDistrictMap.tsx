@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type PointerEvent } from 'react';
 
 type Point = [number, number];
 type DistrictFeature = {
@@ -116,6 +116,24 @@ const createParticles = (districts: ProjectedDistrict[]) => {
 export default function MadridDistrictMap() {
   const [districts, setDistricts] = useState<ProjectedDistrict[]>([]);
 
+  const handleMapPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const svg = event.currentTarget.querySelector('svg');
+    if (!svg) return;
+    const bounds = svg.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((event.clientX - bounds.left) / bounds.width) * 100));
+    const y = Math.max(0, Math.min(100, ((event.clientY - bounds.top) / bounds.height) * 100));
+    event.currentTarget.style.setProperty('--mi-map-cursor-x', `${x}%`);
+    event.currentTarget.style.setProperty('--mi-map-cursor-y', `${y}%`);
+  };
+
+  const handleMapPointerEnter = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'touch') event.currentTarget.classList.add('is-cursor-active');
+  };
+
+  const handleMapPointerLeave = (event: PointerEvent<HTMLDivElement>) => {
+    event.currentTarget.classList.remove('is-cursor-active');
+  };
+
   useEffect(() => {
     let active = true;
     fetch('/madrid_distritos.geojson')
@@ -137,32 +155,35 @@ export default function MadridDistrictMap() {
   return (
     <div className="mi-district-map mi-district-map--network">
       {districts.length ? (
-        <svg viewBox="0 0 520 520" role="img" aria-label="Mapa de los 21 distritos de Madrid">
-          <title>Los 21 distritos de Madrid</title>
-          <desc>Los límites oficiales de los distritos forman una red de puntos luminosos, más intensa en el centro de Madrid.</desc>
-          <defs>
-            <radialGradient id="madrid-map-core">
-              <stop stopColor="#CBFFFC" stopOpacity=".2"/>
-              <stop offset=".45" stopColor="#00BFB1" stopOpacity=".08"/>
-              <stop offset="1" stopColor="#00BFB1" stopOpacity="0"/>
-            </radialGradient>
-          </defs>
-          <circle className="mi-district-map__core" cx="260" cy="260" r="112" fill="url(#madrid-map-core)" />
-          <g className="mi-district-map__particles">
-            {[0, 1, 2, 3, 4].map((group) => (
-              <g key={group} className={`mi-district-map__particle-group mi-district-map__particle-group--${group}`}>
-                {particles.filter((particle) => particle.group === group).map(({ x, y, r, opacity }, index) => (
-                  <circle key={index} cx={x} cy={y} r={r} style={{ opacity }} />
-                ))}
-              </g>
-            ))}
-          </g>
-          <g className="mi-district-map__outlines">
-            {districts.map(({ name, index, d }) => <path key={`${name}-${index}`} d={d} className="mi-district-map__district" />)}
-          </g>
-          <circle className="mi-district-map__core-ring" cx="260" cy="260" r="25" />
-          <circle className="mi-district-map__core-point" cx="260" cy="260" r="3" />
-        </svg>
+        <div className="mi-district-map__visual" onPointerEnter={handleMapPointerEnter} onPointerMove={handleMapPointerMove} onPointerLeave={handleMapPointerLeave}>
+          <svg viewBox="0 0 520 520" role="img" aria-label="Mapa de los 21 distritos de Madrid">
+            <title>Los 21 distritos de Madrid</title>
+            <desc>Los límites oficiales de los distritos forman una red de puntos luminosos, más intensa en el centro de Madrid. Mueve el cursor para iluminar cada zona.</desc>
+            <defs>
+              <radialGradient id="madrid-map-core">
+                <stop stopColor="#CBFFFC" stopOpacity=".2"/>
+                <stop offset=".45" stopColor="#00BFB1" stopOpacity=".08"/>
+                <stop offset="1" stopColor="#00BFB1" stopOpacity="0"/>
+              </radialGradient>
+            </defs>
+            <circle className="mi-district-map__core" cx="260" cy="260" r="112" fill="url(#madrid-map-core)" />
+            <g className="mi-district-map__particles">
+              {[0, 1, 2, 3, 4].map((group) => (
+                <g key={group} className={`mi-district-map__particle-group mi-district-map__particle-group--${group}`}>
+                  {particles.filter((particle) => particle.group === group).map(({ x, y, r, opacity }, index) => (
+                    <circle key={index} cx={x} cy={y} r={r} style={{ opacity }} />
+                  ))}
+                </g>
+              ))}
+            </g>
+            <g className="mi-district-map__outlines">
+              {districts.map(({ name, index, d }) => <path key={`${name}-${index}`} d={d} className="mi-district-map__district" />)}
+            </g>
+            <circle className="mi-district-map__core-ring" cx="260" cy="260" r="25" />
+            <circle className="mi-district-map__core-point" cx="260" cy="260" r="3" />
+          </svg>
+          <div className="mi-district-map__cursor-light" aria-hidden="true" />
+        </div>
       ) : <div className="mi-district-map__loading" aria-label="Cargando el mapa de Madrid" />}
       <div className="mi-district-map__caption"><span>Madrid · Red urbana</span><span>21 distritos</span></div>
     </div>
