@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { ArrowDown, ArrowRight, ArrowUpRight, BarChart3 } from 'lucide-react';
+import Image from 'next/image';
+import { ArrowDown, ArrowRight, ArrowUpRight } from 'lucide-react';
 import DeferredMadridDistrictMap from './DeferredMadridDistrictMap';
 import MadridHeroArtwork from './MadridHeroArtwork';
 import LandingTrend from './LandingTrend';
@@ -24,7 +25,7 @@ export default function MadridLanding() {
     <div className="mi-home" id="inicio">
       <div className="mi-atmosphere" aria-hidden="true"/>
       <header className="mi-header">
-        <Link href="/" className="mi-brand" aria-label="Decide Madrid: Invierte Y Compra, inicio"><span className="mi-brand__mark"><BarChart3 aria-hidden="true"/></span><span>Decide Madrid: Invierte Y Compra</span></Link>
+        <Link href="/" className="mi-brand" aria-label="Decide Madrid: Invierte Y Compra, inicio"><span className="mi-brand__mark"><Image src="/decide-madrid-mark.webp" alt="" width={34} height={34} priority /></span><span>Decide Madrid: Invierte Y Compra</span></Link>
         <nav className="mi-nav" aria-label="Navegación principal"><a href="#plataforma">Plataforma</a><a href="#impacto">A quién ayuda</a><Link href="/madrid/chat">AMBI</Link><Link href="/madrid/veredicto">El Veredicto</Link></nav>
         <Link href="/madrid" className="mi-header__cta">Explorar el mercado <ArrowUpRight aria-hidden="true"/></Link>
       </header>
@@ -96,7 +97,7 @@ export default function MadridLanding() {
         <section className="mi-closing" aria-labelledby="mi-closing-title"><div className="mi-closing__glow" aria-hidden="true"/><div className="mi-wrap mi-closing__inner"><p className="mi-kicker">Madrid, con contexto</p><h2 id="mi-closing-title">Empieza por<br/><span>tu pregunta.</span></h2><p>Explora los datos y encuentra una lectura más clara del mercado residencial.</p><Link href="/madrid" className="mi-button">Explorar el mercado <ArrowUpRight aria-hidden="true"/></Link></div></section>
       </main>
 
-      <footer className="mi-footer"><div className="mi-wrap mi-footer__top"><Link href="/" className="mi-brand"><span className="mi-brand__mark"><BarChart3 aria-hidden="true"/></span><span>Decide Madrid: Invierte Y Compra</span></Link><p>Inteligencia del mercado residencial de Madrid.</p><nav aria-label="Enlaces del pie"><Link href="/madrid">Explorar el mercado</Link><Link href="/sobre-el-proyecto">Sobre el proyecto</Link><Link href="/metodologia">Metodología</Link><Link href="/madrid/chat">AMBI</Link><Link href="/madrid/veredicto">El Veredicto</Link></nav></div><div className="mi-wrap mi-footer__bottom"><span>© Decide Madrid: Invierte Y Compra</span><span>Las estimaciones son estadísticas y no sustituyen una tasación pericial oficial.</span></div></footer>
+      <footer className="mi-footer"><div className="mi-wrap mi-footer__top"><div className="mi-footer__identity"><Link href="/" className="mi-brand"><span className="mi-brand__mark"><Image src="/decide-madrid-mark.webp" alt="" width={34} height={34} /></span><span>Decide Madrid: Invierte Y Compra</span></Link><p>Proyecto académico independiente y sin ánimo de lucro. Inteligencia del mercado residencial de Madrid.</p></div><div className="mi-footer__links"><div><strong>Explorar</strong><nav aria-label="Explorar"><Link href="/madrid">Mercado</Link><Link href="/madrid/chat">AMBI</Link><Link href="/madrid/veredicto">El Veredicto</Link></nav></div><div><strong>Proyecto</strong><nav aria-label="Información del proyecto"><Link href="/sobre-el-proyecto">Sobre nosotros</Link><Link href="/metodologia">Metodología</Link><Link href="/contacto">Contacto</Link></nav></div></div></div><div className="mi-wrap mi-footer__bottom"><span>© Decide Madrid: Invierte Y Compra</span><span>Las estimaciones son estadísticas y no sustituyen una tasación pericial oficial.</span></div></footer>
     </div>
   );
 }

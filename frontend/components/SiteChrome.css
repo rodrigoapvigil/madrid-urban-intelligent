@@ -29,7 +29,11 @@
   font-weight: 650;
   letter-spacing: -.045em;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
 }
+.site-brand img { width: 34px; height: 34px; object-fit: contain; }
 
 .site-header-context {
   flex: 1 1 auto;
@@ -99,15 +103,22 @@
   width: min(100%, 1100px);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: center;
-  gap: 6px 28px;
+  grid-template-columns: minmax(220px,.8fr) 1.2fr;
+  align-items: start;
+  gap: 24px 40px;
   font-size: 13px;
   line-height: 1.5;
   text-align: left;
 }
 
+.site-footer-brand { display: flex; align-items: center; gap: 12px; }
+.site-footer-brand img { width: 38px; height: 38px; object-fit: contain; }
+.site-footer-brand div { display: grid; gap: 5px; }
 .site-footer-inner strong { color: var(--blanco-humo); font-size: 14px; }
+.site-footer-brand span { color: var(--texto-secundario-azul); font-size: 12px; }
+.site-footer-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px 20px; }
+.site-footer-links a { min-height: 36px; display: inline-flex; align-items: center; color: var(--blanco-humo); font-size: 12px; text-underline-offset: 3px; }
+.site-footer-links a:hover { color: var(--coral); }
 .site-footer-inner small { grid-column: 1 / -1; color: color-mix(in srgb, var(--humo-2) 82%, transparent); }
 
 @media (max-width: 900px) {
@@ -117,11 +128,14 @@
 
 @media (max-width: 540px) {
   .site-header-main { gap: 6px 10px; padding: 10px 14px; }
-  .site-brand { width: 100%; text-align: center; font-size: 17px; }
+  .site-brand { width: 100%; justify-content: center; text-align: center; font-size: 17px; }
   .site-header-context { order: 2; }
   .site-navigation { width: 100%; justify-content: center; gap: 2px; }
   .site-navigation a { min-height: 40px; padding: 8px 9px; font-size: 12px; }
   .site-footer { padding: 24px 18px; }
-  .site-footer-inner { grid-template-columns: 1fr; text-align: center; gap: 5px; }
+  .site-footer-inner { grid-template-columns: 1fr; text-align: center; gap: 16px; }
+  .site-footer-brand { justify-content: center; }
+  .site-footer-links { justify-content: center; gap: 4px 14px; }
+  .site-footer-links a { font-size: 12px; }
   .site-footer-inner small { grid-column: auto; }
 }

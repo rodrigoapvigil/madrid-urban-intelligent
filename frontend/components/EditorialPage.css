@@ -8,5 +8,8 @@
 .editorial-page__section p, .editorial-page__section li { max-width: 780px; color: var(--azul-linea); font-size: 17px; line-height: 1.65; }
 .editorial-page__section a { color: var(--azul-linea); text-underline-offset: 3px; }
 .editorial-page__note { padding: 20px 22px; border-left: 4px solid var(--precio-subida); background: var(--blanco-humo); }
+.editorial-page__notice { margin: 28px 0; padding: 20px 22px; border-left: 4px solid var(--coral); background: var(--humo-2); color: var(--texto-sobre-humo); }
+.editorial-page__notice strong { display: block; margin-bottom: 8px; }
+.editorial-page__notice p { margin: 0; color: var(--texto-sobre-humo); line-height: 1.6; }
 .editorial-page__actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 36px; }
 .editorial-page__button { min-height: 48px; padding: 0 18px; display: inline-flex; align-items: center; border-radius: 8px; color: var(--blanco-humo); background: var(--azul-linea); font-weight: 600; text-decoration: none; }

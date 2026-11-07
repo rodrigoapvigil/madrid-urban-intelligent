@@ -6,21 +6,22 @@ import '../components/SiteChrome.css'
 export const metadata: Metadata = {
   metadataBase: new URL('https://dmiyc.com'),
   title: {
-    default: 'Precios de vivienda en Madrid: alquiler y compra por barrio',
+    default: 'Decide Madrid: Invierte y Compra | Precios por barrio',
     template: '%s | Decide Madrid: Invierte Y Compra',
   },
   description: 'Consulta precios de alquiler, compra y venta por barrio en Madrid. Compara distritos, analiza la evolución mensual y distingue datos oficiales de estimaciones.',
   applicationName: 'Decide Madrid: Invierte Y Compra',
+  icons: { icon: '/icon.png', shortcut: '/icon.png', apple: '/icon.png' },
   robots: { index: true, follow: true },
   openGraph: {
     type: 'website', locale: 'es_ES', url: 'https://dmiyc.com/', siteName: 'Decide Madrid: Invierte Y Compra',
-    title: 'Precios de vivienda en Madrid: alquiler y compra por barrio',
+    title: 'Decide Madrid: Invierte y Compra | Precios por barrio',
     description: 'Consulta precios de alquiler, compra y venta por barrio en Madrid. Compara distritos y sigue la evolución del mercado.',
     images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Decide Madrid: Invierte Y Compra, precios de vivienda por barrio' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Precios de vivienda en Madrid: alquiler y compra por barrio',
+    title: 'Decide Madrid: Invierte y Compra | Precios por barrio',
     description: 'Compara precios de alquiler, compra y venta por distrito y barrio en Madrid.',
     images: ['/opengraph-image'],
   },
