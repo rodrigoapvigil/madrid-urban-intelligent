@@ -24,10 +24,10 @@ export default function LandingTrend() {
   const chart = useMemo(() => {
     const min = 17;
     const max = 24;
-    const width = 560;
-    const height = 180;
-    const padX = 40;
-    const padY = 25;
+    const width = 640;
+    const height = 210;
+    const padX = 46;
+    const padY = 28;
 
     const coords = FLOW_DATA.map((pt, i) => {
       const x = padX + (i / (FLOW_DATA.length - 1)) * (width - padX * 2);
@@ -66,25 +66,25 @@ export default function LandingTrend() {
 
       <svg
         className="mi-trend__chart"
-        viewBox="0 0 560 210"
+        viewBox="0 0 640 235"
         role="img"
         aria-label="Evolución y proyección del mercado inmobiliario en Madrid"
       >
         <defs>
           <linearGradient id="trendGlow" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--precio-subida)" stopOpacity="0.25" />
+            <stop offset="0%" stopColor="var(--precio-subida)" stopOpacity="0.28" />
             <stop offset="100%" stopColor="var(--precio-subida)" stopOpacity="0.0" />
           </linearGradient>
         </defs>
 
         {/* Horizontal gridlines */}
         {[0, 1, 2, 3].map((index) => {
-          const y = 25 + index * 43;
+          const y = 28 + index * 46;
           const value = 24 - index * 2;
           return (
             <g key={index}>
-              <line x1="36" x2="524" y1={y} y2={y} className="mi-trend__gridline" />
-              <text x="30" y={y + 4} textAnchor="end" className="mi-trend__y-label">
+              <line x1="40" x2="600" y1={y} y2={y} className="mi-trend__gridline" />
+              <text x="34" y={y + 4} textAnchor="end" className="mi-trend__y-label">
                 {value} €/m²
               </text>
             </g>
@@ -106,16 +106,16 @@ export default function LandingTrend() {
             key={pt.mes}
             cx={pt.x}
             cy={pt.y}
-            r={pt.isPrediction ? 3.5 : 4}
+            r={pt.isPrediction ? 4 : 4.5}
             className={pt.isPrediction ? 'mi-trend__forecast-point' : 'mi-trend__real-point'}
           />
         ))}
 
         {/* Month labels */}
         {FLOW_DATA.map((pt, i) => {
-          const x = 40 + (i / (FLOW_DATA.length - 1)) * 480;
+          const x = 46 + (i / (FLOW_DATA.length - 1)) * 548;
           return (
-            <text key={pt.mes} x={x} y="196" textAnchor="middle" className="mi-trend__x-label">
+            <text key={pt.mes} x={x} y="218" textAnchor="middle" className="mi-trend__x-label">
               {pt.mes}
             </text>
           );

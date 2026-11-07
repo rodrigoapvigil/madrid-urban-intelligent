@@ -296,107 +296,164 @@
   .mi-district-map__loading { animation: none; }
 }
 
-/* Insight: Balanced 3-card stack + Trend Flow */
-.mi-insight__intro {
-  margin-bottom: clamp(32px, 4.5vw, 56px);
+/* Auros Explore Style Frame for Insight / Predictions */
+.mi-auros-frame {
+  position: relative;
+  border-radius: 20px;
+  padding: clamp(28px, 3.8vw, 52px);
+  background: radial-gradient(circle 750px at 85% 30%, rgba(0, 130, 124, 0.38) 0%, rgba(1, 38, 36, 0.6) 45%, transparent 85%), var(--surface-liquid-deep, #011d1c);
+  border: 1px solid color-mix(in srgb, var(--texto-secundario-azul) 20%, transparent);
+  box-shadow: 0 0 60px color-mix(in srgb, var(--azul-linea) 10%, transparent);
+  overflow: hidden;
 }
-.mi-insight__intro-heading .mi-kicker {
-  margin-bottom: 18px;
-}
-.mi-insight__intro-heading h2 {
-  max-width: 900px;
-  margin: 0;
-  color: var(--mi-white);
-  font-size: clamp(36px, 4.5vw, 60px) !important;
-  font-weight: 500;
-  letter-spacing: -0.04em !important;
-  line-height: 1.05 !important;
-  text-wrap: balance;
-}
-.mi-insight__intro-heading h2 span {
-  color: var(--mi-mist);
-}
-.mi-insight__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
-  gap: clamp(24px, 3.5vw, 40px);
-  align-items: stretch;
-}
-.mi-insight__cards {
+.mi-auros-frame__header {
   display: flex;
-  flex-direction: column;
-  gap: 14px;
   justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: clamp(24px, 3vw, 36px);
 }
-.mi-insight__card {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: clamp(16px, 2vw, 22px) clamp(20px, 2.4vw, 28px);
-  border-radius: 14px;
-  background: var(--azul-noche);
-  border: 1px solid color-mix(in srgb, var(--texto-secundario-azul) 16%, transparent);
-  color: var(--mi-mist);
-  text-decoration: none;
-  transition: border-color .2s, background .2s, transform .2s;
-}
-.mi-insight__card:hover {
-  background: color-mix(in srgb, var(--azul-noche) 82%, var(--azul-linea));
-  border-color: color-mix(in srgb, var(--precio-subida) 45%, transparent);
-  transform: translateY(-2px);
-}
-.mi-insight__card--highlight {
-  background: color-mix(in srgb, var(--azul-noche) 88%, var(--azul-linea));
-  border-color: color-mix(in srgb, var(--precio-subida) 28%, transparent);
-}
-.mi-insight__card--highlight:hover {
-  transform: none;
-}
-.mi-insight__card-copy strong {
-  display: block;
-  font-size: clamp(16px, 1.4vw, 19px);
+.mi-auros-frame__tag {
+  color: var(--mi-sky);
+  font-size: 11px;
   font-weight: 500;
-  color: var(--mi-white);
-  margin-bottom: 6px;
+  letter-spacing: .15em;
+  text-transform: uppercase;
 }
-.mi-insight__card-copy small {
-  display: block;
-  color: var(--mi-silver);
-  font-size: 14px;
-  line-height: 1.42;
-  margin-bottom: 8px;
-}
-.mi-insight__card--highlight .mi-insight__card-copy small {
-  margin-bottom: 0;
-  color: var(--mi-mist);
-}
-.mi-insight__card-cta {
+.mi-auros-frame__cta {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: var(--mi-mist);
+  min-height: 42px;
+  padding: 0 20px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--surface-liquid-kelp, #003734) 85%, transparent);
+  border: 1px solid color-mix(in srgb, var(--precio-subida) 36%, transparent);
+  color: var(--mi-mist) !important;
   font-size: 13px;
   font-weight: 500;
-  letter-spacing: .02em;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  transition: all .2s ease;
 }
-.mi-insight__card-cta svg {
+.mi-auros-frame__cta:hover {
+  background: linear-gradient(90deg, rgb(0, 130, 124) 0%, rgb(203, 255, 252) 100%);
+  color: #012624 !important;
+  border-color: transparent;
+}
+.mi-auros-frame__cta svg {
   width: 14px;
   height: 14px;
-  color: var(--mi-sky);
-  transition: transform .2s ease;
 }
-.mi-insight__card:hover .mi-insight__card-cta svg {
-  transform: translateX(4px);
+.mi-auros-frame__body {
+  display: grid;
+  grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
+  gap: clamp(24px, 3.5vw, 44px);
+  align-items: stretch;
 }
-.mi-insight__chart-wrap {
+.mi-auros-card {
+  border-radius: 16px;
+  padding: clamp(32px, 3.8vw, 48px);
+  background: var(--surface-liquid-kelp, #003734);
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  gap: 28px;
 }
-.mi-insight__chart-wrap .mi-trend {
+.mi-auros-card__head .mi-kicker {
+  margin: 0 0 16px;
+  justify-content: flex-start;
+}
+.mi-auros-card__title {
+  margin: 0;
+  color: var(--mi-white);
+  font-size: clamp(30px, 3.2vw, 44px) !important;
+  font-weight: 500;
+  letter-spacing: -0.04em !important;
+  line-height: 1.08 !important;
+  text-wrap: balance;
+}
+.mi-auros-card__title span {
+  color: var(--mi-mist);
+}
+.mi-auros-features {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.mi-auros-feature {
+  padding: 18px 20px;
+  border-radius: 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  text-decoration: none;
+  color: inherit;
+  transition: background .2s, border-color .2s;
+  display: block;
+}
+.mi-auros-feature:hover {
+  background: color-mix(in srgb, var(--surface-liquid-abyss, #012624) 60%, transparent);
+  border-color: color-mix(in srgb, var(--texto-secundario-azul) 20%, transparent);
+}
+.mi-auros-feature--active {
+  background: var(--surface-liquid-abyss, #012624);
+  border-color: color-mix(in srgb, var(--precio-subida) 28%, transparent);
+}
+.mi-auros-feature__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.mi-auros-feature__header h3 {
+  margin: 0;
+  color: var(--mi-white);
+  font-size: clamp(17px, 1.4vw, 20px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+.mi-auros-arrow {
+  width: 32px;
+  height: 32px;
+  flex: 0 0 32px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--azul-linea) 40%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mi-white);
+  transition: background .2s, transform .2s;
+}
+.mi-auros-arrow svg {
+  width: 15px;
+  height: 15px;
+}
+.mi-auros-feature:hover .mi-auros-arrow {
+  background: var(--mi-sky);
+  color: #012624;
+  transform: translate(2px, -2px);
+}
+.mi-auros-feature p {
+  margin: 0;
+  color: var(--mi-silver);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.mi-auros-visual {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.mi-auros-visual .mi-trend {
   height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  background: color-mix(in srgb, var(--surface-liquid-abyss, #012624) 80%, transparent);
+  border: 1px solid color-mix(in srgb, var(--texto-secundario-azul) 18%, transparent);
+  border-radius: 16px;
+  padding: clamp(28px, 3.5vw, 44px);
 }
 .mi-audience__intro .mi-kicker, .mi-method__intro .mi-kicker, .mi-scale__heading .mi-kicker { margin-bottom: 22px; }
 .mi-audience__intro > p:not(.mi-kicker), .mi-method__intro > p:not(.mi-kicker) { max-width: 520px; margin: 23px 0 0; color: var(--mi-silver); font-size: 21px; line-height: 1.45; }
@@ -576,8 +633,7 @@
   .mi-kinetic { font-size: clamp(132px,19vw,240px); }
   .mi-platform__grid { gap: 22px; }
   .mi-city-visual { min-height: 460px; }
-  .mi-insight__intro { margin-bottom: 28px; }
-  .mi-insight__grid { grid-template-columns: 1fr; gap: 24px; }
+  .mi-auros-frame__body { grid-template-columns: 1fr; gap: 32px; }
   .mi-trend { max-width: none; }
   .mi-scale__stats article { min-height: 220px; }
   .mi-scale__stats article:first-child { min-height: 454px; }
@@ -632,10 +688,10 @@
   .mi-district-map { margin: 0 auto; }
   .mi-district-map__canvas-wrap { margin-top: 0; }
   .mi-district-map__caption { padding-inline: 10px; font-size: 10px; }
-  .mi-insight__intro { margin-bottom: 22px; }
-  .mi-insight__intro-heading h2 { font-size: 28px !important; }
-  .mi-insight__cards { gap: 14px; }
-  .mi-insight__card { padding: 20px; }
+  .mi-auros-frame { padding: 18px; border-radius: 14px; }
+  .mi-auros-card { padding: 22px 18px; border-radius: 12px; }
+  .mi-auros-card__title { font-size: 26px !important; }
+  .mi-auros-frame__header { flex-direction: column; align-items: flex-start; gap: 12px; }
   .mi-audience__intro > p:not(.mi-kicker), .mi-method__intro > p:not(.mi-kicker) { margin-top: 18px; font-size: 20px; }
   .mi-trend { padding: 19px 13px 15px; border-radius: 14px; }
   .mi-trend__heading { align-items: flex-start; flex-direction: column; gap: 10px; }

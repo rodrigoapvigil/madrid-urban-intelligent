@@ -112,47 +112,58 @@ export default function MadridLanding() {
           Para comprar, alquilar o invertir con criterio: <span>la información es tu mejor regateo.</span>
         </p>
 
-        <section className="mi-insight" aria-labelledby="mi-insight-title">
+        <section className="mi-insight" id="predicciones" aria-labelledby="mi-insight-title">
           <div className="mi-wrap">
-            <div className="mi-insight__intro">
-              <div className="mi-insight__intro-heading">
-                <p className="mi-kicker mi-kicker--muted">Evolución histórica y proyecciones</p>
-                <h2 id="mi-insight-title">
-                  Sabe hacia dónde va el precio<br />
-                  <span>antes de que cambie el mercado.</span>
-                </h2>
+            <div className="mi-auros-frame">
+              <div className="mi-auros-frame__header">
+                <span className="mi-auros-frame__tag">MERCADO EN TIEMPO REAL</span>
+                <Link href="/madrid" className="mi-auros-frame__cta">
+                  Ver evolución completa <ArrowUpRight aria-hidden="true" />
+                </Link>
               </div>
-            </div>
 
-            <div className="mi-insight__grid">
-              <div className="mi-insight__cards">
-                <Link href="/madrid" className="mi-insight__card">
-                  <span className="mi-insight__card-copy">
-                    <strong>Datos de cierre oficiales</strong>
-                    <small>Trayectoria consolidada de transacciones reales mes a mes desde 2023.</small>
-                    <span className="mi-insight__card-cta">
-                      Ver evolución del mercado <ArrowRight aria-hidden="true" />
-                    </span>
-                  </span>
-                </Link>
-                <div className="mi-insight__card mi-insight__card--highlight">
-                  <span className="mi-insight__card-copy">
-                    <strong>Machine Learning calibrado</strong>
-                    <small>Visualiza la trayectoria de precios y compárala con modelos predictivos. Distingue en un solo vistazo el dato oficial registrado de la proyección estadística.</small>
-                  </span>
+              <div className="mi-auros-frame__body">
+                {/* Surface Card (Liquid Kelp #003734 matching Auros Explore) */}
+                <div className="mi-auros-card">
+                  <div className="mi-auros-card__head">
+                    <p className="mi-kicker mi-kicker--muted">PREDICCIÓN Y TENDENCIA</p>
+                    <h2 id="mi-insight-title" className="mi-auros-card__title">
+                      Sabe hacia dónde va el precio<br />
+                      <span>antes de que cambie el mercado.</span>
+                    </h2>
+                  </div>
+
+                  <div className="mi-auros-features">
+                    <Link href="/madrid" className="mi-auros-feature">
+                      <div className="mi-auros-feature__header">
+                        <h3>Datos de cierre oficiales</h3>
+                        <span className="mi-auros-arrow" aria-hidden="true"><ArrowUpRight /></span>
+                      </div>
+                      <p>Trayectoria consolidada de transacciones reales mes a mes desde 2023, sin distorsión de anuncios inflados.</p>
+                    </Link>
+
+                    <div className="mi-auros-feature">
+                      <div className="mi-auros-feature__header">
+                        <h3>Machine Learning calibrado</h3>
+                        <span className="mi-auros-arrow" aria-hidden="true"><ArrowUpRight /></span>
+                      </div>
+                      <p>Modelos predictivos que proyectan la curva de precios de cada distrito distinguiendo el dato real de la estimación.</p>
+                    </div>
+
+                    <Link href="/metodologia" className="mi-auros-feature mi-auros-feature--active">
+                      <div className="mi-auros-feature__header">
+                        <h3>Rigor metodológico y fuentes</h3>
+                        <span className="mi-auros-arrow" aria-hidden="true"><ArrowUpRight /></span>
+                      </div>
+                      <p>Auditoría constante contra registros públicos y compraventas oficiales para garantizar máxima certidumbre.</p>
+                    </Link>
+                  </div>
                 </div>
-                <Link href="/metodologia" className="mi-insight__card">
-                  <span className="mi-insight__card-copy">
-                    <strong>Rigor metodológico y fuentes</strong>
-                    <small>Proyecciones estadísticas sin sesgo comercial ni estimaciones infladas de portales.</small>
-                    <span className="mi-insight__card-cta">
-                      Metodología y fuentes oficiales <ArrowRight aria-hidden="true" />
-                    </span>
-                  </span>
-                </Link>
-              </div>
-              <div className="mi-insight__chart-wrap">
-                <LandingTrend />
+
+                {/* Right side: Grand Visual Pane with the Trend Chart */}
+                <div className="mi-auros-visual">
+                  <LandingTrend />
+                </div>
               </div>
             </div>
           </div>
