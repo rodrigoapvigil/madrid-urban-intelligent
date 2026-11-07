@@ -4,6 +4,9 @@ import { ArrowDown, ArrowRight, ArrowUpRight } from 'lucide-react';
 import DeferredMadridDistrictMap from './DeferredMadridDistrictMap';
 import MadridHeroArtwork from './MadridHeroArtwork';
 import LandingTrend from './LandingTrend';
+import MadridMarquee from './MadridMarquee';
+import MadridInsights from './MadridInsights';
+import { StatCounter } from './MadridStatsCounter';
 import './MadridLanding.css';
 
 const profiles = [
@@ -169,6 +172,9 @@ export default function MadridLanding() {
           </div>
         </section>
 
+        {/* Infinite Marquee of verified public sources (Auros Brand Band pattern) */}
+        <MadridMarquee />
+
         <p className="mi-bridge" aria-label="Más de 16.000 operaciones y proyecciones para que nunca decidas a ciegas.">
           Más de 16.000 operaciones y proyecciones <span>para que nunca decidas a ciegas.</span>
         </p>
@@ -181,22 +187,22 @@ export default function MadridLanding() {
             </div>
             <div className="mi-scale__stats">
               <article className="mi-scale__stat--volume">
-                <strong>16.779</strong>
+                <strong><StatCounter end={16779} /></strong>
                 <span>Registros analíticos</span>
                 <small>10.794 transacciones oficiales de cierre y 5.985 estimaciones auditadas.</small>
               </article>
               <article>
-                <strong>21</strong>
+                <strong><StatCounter end={21} /></strong>
                 <span>Distritos</span>
                 <small>Cobertura total de la capital de punta a punta</small>
               </article>
               <article>
-                <strong>131</strong>
+                <strong><StatCounter end={131} /></strong>
                 <span>Barrios</span>
                 <small>El detalle quirúrgico detrás de cada tendencia</small>
               </article>
               <article className="mi-scale__stat--population">
-                <strong>3,49<span className="mi-scale__unit">M</span></strong>
+                <strong><StatCounter end={3.49} decimals={2} unit="M" /></strong>
                 <span>Habitantes</span>
                 <small>
                   <a href="https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Notas-de-prensa/Los-nacimientos-superaron-a-las-defunciones-en-564-personas-en-2025-un-crecimiento-vegetativo-que-no-se-producia-en-Madrid-desde-hacia-seis-anos/?vgnextchannel=6091317d3d2a7010VgnVCM100000dc0ca8c0RCRD&amp;vgnextfmt=default&amp;vgnextoid=81bdd56de9ddd910VgnVCM100000891ecb1aRCRD" target="_blank" rel="noreferrer">
@@ -205,7 +211,7 @@ export default function MadridLanding() {
                 </small>
               </article>
               <article>
-                <strong>4</strong>
+                <strong><StatCounter end={4} /></strong>
                 <span>Perfiles especializados</span>
                 <small>Alquiler · Compra · Venta · Inversión</small>
               </article>
@@ -275,6 +281,9 @@ export default function MadridLanding() {
           </div>
         </section>
 
+        {/* Insights Section (Auros Research Grid pattern) */}
+        <MadridInsights />
+
         <p className="mi-bridge" aria-label="Los datos oficiales en la mano. La sartén por el mango al decidir.">
           Los datos oficiales en la mano. <span>La sartén por el mango al decidir.</span>
         </p>
@@ -285,7 +294,7 @@ export default function MadridLanding() {
             <p className="mi-kicker">Toma el control con Decide Madrid</p>
             <h2 id="mi-closing-title">No compres ni alquiles a ciegas.<br/><span>Decide con datos.</span></h2>
             <p>Consulta las cifras reales de cierre de tu barrio, esquiva el sobreprecio y negocia con la certeza que dan los datos oficiales.</p>
-            <Link href="/madrid" className="mi-button">Explorar precios por barrio <ArrowUpRight aria-hidden="true"/></Link>
+            <Link href="/madrid" className="mi-button mi-button--aurora">Explorar precios por barrio <ArrowUpRight aria-hidden="true"/></Link>
           </div>
         </section>
       </main>

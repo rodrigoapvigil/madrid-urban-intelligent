@@ -1,14 +1,27 @@
 .mi-home {
-  --mi-deep: var(--azul-noche);
-  --mi-surface: var(--azul-noche);
-  --mi-raised: var(--azul-noche);
-  --mi-raised-2: var(--azul-noche-2);
-  --mi-sky: var(--precio-subida);
-  --mi-mist: var(--blanco-humo);
-  --mi-white: var(--blanco-humo);
-  --mi-silver: var(--texto-secundario-azul);
-  --mi-lavender: var(--blanco-humo);
-  --mi-wrap: min(1480px, calc(100% - 112px));
+  /* Auros Core Palette Tokens */
+  --surface-liquid-abyss: #012624;
+  --surface-liquid-deep: #011d1c;
+  --surface-liquid-kelp: #003734;
+  --surface-slate-deep: #707777;
+  --color-platinum: #ffffff;
+  --color-liquid-mist: #edfffe;
+  --color-silver-mist: #bbc7c6;
+  --color-ash: #f2f2f2;
+  --color-lavender-phosphor: #fde9ff;
+  --gradient-bioluminescent: linear-gradient(90deg, rgb(0, 130, 124) 0%, rgb(203, 255, 252) 100%);
+  --gradient-aurora: linear-gradient(90deg, rgb(203, 255, 252) 0%, rgb(237, 255, 254) 26.25%, rgb(255, 253, 250) 47.57%, rgb(250, 209, 255) 88.96%);
+
+  --mi-deep: var(--surface-liquid-deep);
+  --mi-surface: var(--surface-liquid-abyss);
+  --mi-raised: var(--surface-liquid-kelp);
+  --mi-raised-2: #012f2c;
+  --mi-sky: #39c9bd;
+  --mi-mist: var(--color-liquid-mist);
+  --mi-white: var(--color-platinum);
+  --mi-silver: var(--color-silver-mist);
+  --mi-lavender: var(--color-lavender-phosphor);
+  --mi-wrap: min(1440px, calc(100% - 112px));
   --mi-font: var(--font-matter, 'Matter', 'Inter', 'DM Sans', Satoshi, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   min-height: 100vh;
   position: relative;
@@ -735,4 +748,235 @@
   .mi-home *, .mi-home *::before, .mi-home *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .mi-kinetic span { transform: none !important; }
   .mi-hero__skyline--fragment { display: none; }
+}
+
+.mi-button--aurora {
+  background: var(--gradient-aurora) !important;
+  color: #012624 !important;
+  border: 1px solid rgba(255, 255, 255, 0.8) !important;
+  font-weight: 500 !important;
+  box-shadow: 0 4px 24px rgba(203, 255, 252, 0.4) !important;
+}
+.mi-button--aurora:hover {
+  filter: brightness(1.08);
+  box-shadow: 0 6px 30px rgba(250, 209, 255, 0.55) !important;
+}
+.mi-scale__stats article strong, .mi-stat-counter {
+  color: var(--color-lavender-phosphor, #fde9ff) !important;
+  font-family: var(--mi-font);
+  font-size: clamp(48px, 5.5vw, 76px);
+  font-weight: 500;
+  line-height: 1.0;
+  letter-spacing: -0.04em;
+  display: block;
+}
+
+/* ==========================================================================
+   AUROS TWIN: MARQUEE INFINITO DE FUENTES OFICIALES
+   ========================================================================== */
+.mi-marquee-section {
+  padding-block: clamp(36px, 5vw, 64px);
+  overflow: hidden;
+  position: relative;
+  border-top: 1px solid color-mix(in srgb, var(--color-silver-mist) 10%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-silver-mist) 10%, transparent);
+  background: color-mix(in srgb, var(--surface-liquid-deep) 65%, transparent);
+}
+.mi-marquee-label {
+  margin: 0 0 20px;
+  text-align: center;
+  color: var(--color-silver-mist);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  opacity: .85;
+}
+.mi-marquee-track-wrap {
+  width: 100%;
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+}
+.mi-marquee-track {
+  display: flex;
+  align-items: center;
+  gap: clamp(32px, 5vw, 64px);
+  width: max-content;
+  animation: mi-marquee-scroll 32s linear infinite;
+  will-change: transform;
+}
+.mi-marquee-track:hover {
+  animation-play-state: paused;
+}
+@keyframes mi-marquee-scroll {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.mi-marquee-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--surface-liquid-kelp) 45%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-silver-mist) 12%, transparent);
+  white-space: nowrap;
+  transition: border-color .2s, background .2s;
+}
+.mi-marquee-item:hover {
+  background: var(--surface-liquid-kelp);
+  border-color: color-mix(in srgb, var(--color-liquid-mist) 30%, transparent);
+}
+.mi-marquee-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--color-liquid-mist);
+  box-shadow: 0 0 10px var(--color-liquid-mist);
+}
+.mi-marquee-name {
+  color: var(--color-platinum);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: .01em;
+}
+.mi-marquee-detail {
+  color: var(--color-silver-mist);
+  font-size: 12px;
+  padding-left: 6px;
+  border-left: 1px solid color-mix(in srgb, var(--color-silver-mist) 25%, transparent);
+}
+
+/* ==========================================================================
+   AUROS TWIN: SECCIÓN INSIGHTS (RESEARCH GRID)
+   ========================================================================== */
+.mi-insights-section {
+  padding-block: clamp(88px, 11vw, 150px);
+}
+.mi-insights-heading {
+  margin-bottom: clamp(40px, 5.5vw, 68px);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 48px;
+}
+.mi-insights-heading .mi-kicker {
+  margin-bottom: 18px;
+  justify-content: flex-start;
+}
+.mi-insights-heading h2 {
+  margin: 0;
+  color: var(--color-platinum);
+  font-size: clamp(34px, 4.4vw, 58px);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+.mi-insights-heading h2 span {
+  color: var(--color-liquid-mist);
+}
+.mi-insights-lead {
+  max-width: 440px;
+  margin: 0;
+  color: var(--color-silver-mist);
+  font-size: clamp(16px, 1.3vw, 19px);
+  line-height: 1.5;
+}
+.mi-insights-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(20px, 2.5vw, 32px);
+}
+.mi-insight-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: clamp(28px, 3.2vw, 40px);
+  border-radius: 16px;
+  background: var(--surface-liquid-kelp, #003734);
+  border: 1px solid color-mix(in srgb, var(--color-silver-mist) 14%, transparent);
+  text-decoration: none;
+  color: inherit;
+  transition: transform .25s ease, border-color .25s ease, background .25s ease;
+  min-height: 340px;
+}
+.mi-insight-card:hover {
+  transform: translateY(-4px);
+  background: color-mix(in srgb, var(--surface-liquid-kelp) 85%, var(--surface-liquid-abyss));
+  border-color: color-mix(in srgb, var(--color-liquid-mist) 40%, transparent);
+  box-shadow: 0 12px 36px rgba(0, 130, 124, 0.18);
+}
+.mi-insight-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.mi-insight-card__tag {
+  padding: 5px 10px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--surface-liquid-abyss) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-silver-mist) 20%, transparent);
+  color: var(--color-liquid-mist);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.mi-insight-card__arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--surface-liquid-abyss) 60%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-platinum);
+  transition: background .2s, transform .2s;
+}
+.mi-insight-card__arrow svg {
+  width: 15px;
+  height: 15px;
+}
+.mi-insight-card:hover .mi-insight-card__arrow {
+  background: #00827c;
+  transform: translate(2px, -2px);
+}
+.mi-insight-card__kicker {
+  margin: 0 0 10px;
+  color: var(--color-silver-mist);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.mi-insight-card__title {
+  margin: 0 0 14px;
+  color: var(--color-platinum);
+  font-size: clamp(19px, 1.6vw, 23px);
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1.25;
+}
+.mi-insight-card__excerpt {
+  margin: 0;
+  color: var(--color-silver-mist);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.mi-insight-card__footer {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid color-mix(in srgb, var(--color-silver-mist) 12%, transparent);
+  display: flex;
+  justify-content: space-between;
+  color: color-mix(in srgb, var(--color-silver-mist) 80%, transparent);
+  font-size: 11px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+@media (max-width: 1050px) {
+  .mi-insights-heading { flex-direction: column; align-items: flex-start; gap: 20px; }
+  .mi-insights-grid { grid-template-columns: 1fr; }
 }
