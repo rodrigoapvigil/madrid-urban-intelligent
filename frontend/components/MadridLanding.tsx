@@ -45,9 +45,10 @@ export default function MadridLanding() {
       <main>
         <section className="mi-hero" aria-labelledby="mi-title">
           <div className="mi-hero__content">
-            <h1 id="mi-title">En el mercado de Madrid,<br/><span>no adivines: decide con datos.</span></h1>
-            <p className="mi-hero__lead">Decide Madrid te da acceso a los precios reales de cierre oficial en los 131 barrios de la ciudad. Compara compra, alquiler e inversión sin caer en los precios inflados de los portales.</p>
-            <Link href="/madrid" className="mi-button">Explorar precios por barrio <ArrowUpRight aria-hidden="true"/></Link>
+            <p className="mi-hero__kicker">DECIDE MADRID</p>
+            <h1 id="mi-title">No adivines.<br/><span>Decide con datos.</span></h1>
+            <p className="mi-hero__lead">Compra o alquila con precios de cierre oficial en los 131 barrios de Madrid, sin caer en precios inflados.</p>
+            <Link href="/madrid" className="mi-hero__cta-main">Explorar precios de cierre <ArrowUpRight aria-hidden="true"/></Link>
           </div>
           <MadridHeroArtwork />
           <div className="mi-hero__meta"><span>21 distritos</span><i/><span>131 barrios auditados</span></div>
