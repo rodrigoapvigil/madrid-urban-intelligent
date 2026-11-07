@@ -9,7 +9,7 @@
   --mi-silver: var(--texto-secundario-azul);
   --mi-lavender: var(--blanco-humo);
   --mi-wrap: min(1480px, calc(100% - 112px));
-  --mi-font: Matter, Inter, "DM Sans", Satoshi, Arial, sans-serif;
+  --mi-font: var(--font-matter, 'Matter', 'Inter', 'DM Sans', Satoshi, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   min-height: 100vh;
   position: relative;
   isolation: isolate;
@@ -78,8 +78,8 @@
   background: linear-gradient(135deg, #e6f9f6 0%, #ffffff 50%, #d8f5ee 100%);
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), 0 0 14px rgba(230, 249, 246, 0.35);
   font-family: var(--mi-font);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 500;
   letter-spacing: .06em;
   text-transform: uppercase;
   transition: all .2s ease;
@@ -108,9 +108,9 @@
   background: linear-gradient(135deg, #e6f9f6 0%, #ffffff 50%, #d8f5ee 100%);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 0 18px rgba(230, 249, 246, 0.35);
   font-family: var(--mi-font);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .07em;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: .08em;
   text-transform: uppercase;
   transition: all .2s ease;
 }
@@ -137,13 +137,13 @@
   background: transparent;
 }
 .mi-hero__content { position: relative; z-index: 2; width: min(860px,calc(100% - 48px)); padding-top: clamp(75px,10vh,120px); text-align: center; }
-.mi-hero__kicker { display: inline-block; margin: 0 auto 16px; color: #a5f3fc; font-size: 13px; font-weight: 600; letter-spacing: 0.24em; text-transform: uppercase; opacity: .95; }
+.mi-hero__kicker { display: inline-block; margin: 0 auto 16px; color: #a5f3fc; font-size: 12px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; opacity: .95; }
 .mi-kicker { margin: 0 0 24px; display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--mi-silver); font-size: 10px; font-weight: 500; letter-spacing: .14em; line-height: 1.4; text-transform: uppercase; }
 .mi-kicker > span { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--mi-sky); box-shadow: 0 0 12px color-mix(in srgb, var(--precio-subida) 50%, transparent); }
 .mi-kicker > i { width: 20px; height: 1px; background: var(--mi-sky); }
-.mi-hero h1 { max-width: 820px; margin: 0 auto; color: var(--mi-white); font-size: clamp(38px,4.8vw,62px); font-weight: 600; letter-spacing: -.035em; line-height: 1.1; text-wrap: balance; }
+.mi-hero h1 { max-width: 820px; margin: 0 auto; color: var(--mi-white); font-size: clamp(38px,4.8vw,62px); font-weight: 500; letter-spacing: -.04em; line-height: 1.0; text-wrap: balance; }
 .mi-hero h1 span { color: var(--mi-mist); }
-.mi-hero__lead { max-width: 620px; margin: 18px auto 0; color: var(--mi-silver); font-size: clamp(15px,1.5vw,17px); line-height: 1.55; text-wrap: balance; }
+.mi-hero__lead { max-width: 620px; margin: 18px auto 0; color: var(--mi-silver); font-size: 16px; font-weight: 400; line-height: 1.4; text-wrap: balance; }
 .mi-hero__content .mi-hero__cta-main, .mi-hero__content .mi-button { margin-top: 26px; }
 .mi-hero-artwork { position: absolute; z-index: 1; inset: 0; overflow: hidden; pointer-events: none; }
 .mi-hero-artwork__canvas { position: absolute; right: 0; bottom: 48px; left: 0; height: 64%; display: flex; align-items: flex-end; justify-content: center; mask-image: linear-gradient(to bottom, transparent 0%, var(--azul-noche) 12%, var(--azul-noche) 92%, transparent 100%); }
@@ -160,7 +160,7 @@
 .mi-scroll svg { width: 15px; height: 15px; color: var(--mi-sky); }
 
 /* Short floating statements replace divider rules between major chapters. */
-.mi-bridge { position: relative; z-index: 1; width: min(1220px,calc(100% - 64px)); margin: 0 auto; padding: clamp(100px,13vh,170px) 0; color: var(--mi-white); font-size: clamp(54px,8.5vw,124px); font-weight: 500; letter-spacing: -.065em; line-height: .98; text-align: center; text-wrap: balance; }
+.mi-bridge { position: relative; z-index: 1; width: min(1220px,calc(100% - 64px)); margin: 0 auto; padding: clamp(100px,13vh,170px) 0; color: var(--mi-white); font-size: clamp(54px,8.5vw,124px); font-weight: 500; letter-spacing: -.065em; line-height: 1.0; text-align: center; text-wrap: balance; }
 .mi-bridge span { color: var(--mi-mist); }
 
 /* Scroll-linked type remains in motion across the full section and exits laterally. */
@@ -168,7 +168,7 @@
 .mi-statement::before { position: absolute; inset: 10% 0; z-index: 0; content: ""; pointer-events: none; background: radial-gradient(ellipse 66% 60% at 50% 50%,color-mix(in srgb, var(--azul-linea) 25%, transparent),transparent 75%); }
 .mi-statement__inner { position: sticky; z-index: 1; top: 88px; min-height: calc(100svh - 88px); display: grid; grid-template-rows: auto 1fr auto; align-content: center; gap: clamp(30px,6vh,80px); padding-block: clamp(34px,6vh,70px); }
 .mi-kicker--muted { justify-content: flex-start; margin-bottom: 0; }
-.mi-kinetic { width: 100%; align-self: center; margin: 0; overflow: visible; font-size: clamp(160px,21vw,340px); font-weight: 500; letter-spacing: -.065em; line-height: .88; }
+.mi-kinetic { width: 100%; align-self: center; margin: 0; overflow: visible; font-size: clamp(160px,21vw,340px); font-weight: 500; letter-spacing: -.065em; line-height: 1.0; }
 .mi-kinetic span { display: block; width: max-content; max-width: none; white-space: nowrap; will-change: transform; }
 .mi-kinetic span:first-child { margin-left: 5%; }
 .mi-kinetic span + span { margin-left: auto; margin-right: 3%; color: var(--mi-mist); }

@@ -1,8 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700&family=Inter:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
+  /* Typography — Font Families (Matter / Inter / DM Sans) */
+  --font-matter: 'Matter', 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-arial: 'Arial', ui-sans-serif, system-ui, -apple-system, sans-serif;
+
+  /* Typography — Scale */
+  --text-caption: 10px;
+  --leading-caption: 1.4;
+  --tracking-caption: 1.5px;
+  --text-body: 16px;
+  --leading-body: 1.4;
+  --tracking-body: 0px;
+  --text-subheading: 24px;
+  --leading-subheading: 1.3;
+  --tracking-subheading: -0.48px;
+  --text-heading: 36px;
+  --leading-heading: 1;
+  --tracking-heading: 0px;
+  --text-heading-lg: 61px;
+  --leading-heading-lg: 1;
+  --tracking-heading-lg: -2.44px;
+  --text-display: 96px;
+  --leading-display: 1;
+  --tracking-display: -3.84px;
+
+  /* Typography — Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+
   color-scheme: dark;
   --azul-noche: #0E2238;
   --azul-noche-2: #16304D;
@@ -54,7 +84,7 @@ body {
   margin: 0;
   color: var(--texto-sobre-azul);
   background: var(--azul-noche);
-  font-family: Arial, Inter, system-ui, sans-serif;
+  font-family: var(--font-matter);
   -webkit-font-smoothing: antialiased;
 }
 ::selection { color: var(--azul-noche); background: var(--coral); }
