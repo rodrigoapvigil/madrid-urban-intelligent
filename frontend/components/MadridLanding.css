@@ -1394,7 +1394,7 @@
 }
 
 .mi-trust-col__logo-wrap {
-  height: clamp(74px, 7.5vw, 96px);
+  min-height: clamp(88px, 9vw, 120px);
   width: 100%;
   display: flex;
   align-items: center;
@@ -1405,10 +1405,15 @@
 .mi-trust-col__logo {
   object-fit: contain;
   object-position: left center;
-  height: clamp(62px, 6.2vw, 84px);
+  height: clamp(64px, 6.6vw, 88px);
   width: auto;
   max-width: min(100%, 310px);
   filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.55));
+}
+
+.mi-trust-col__logo--upm {
+  height: clamp(86px, 9vw, 118px);
+  max-width: min(100%, 320px);
 }
 
 @media (max-width: 900px) {

@@ -287,7 +287,7 @@ export default function MadridLanding() {
                     <span>Universidad Politécnica de Madrid · UPM</span>
                   </div>
                   <div className="mi-trust-col__logo-wrap">
-                    <Image src="/logo-upm-official.png" alt="Universidad Politécnica de Madrid" width={872} height={356} unoptimized priority className="mi-trust-col__logo" />
+                    <Image src="/logo-upm-official.png" alt="Universidad Politécnica de Madrid" width={872} height={356} unoptimized priority className="mi-trust-col__logo mi-trust-col__logo--upm" />
                   </div>
                 </article>
               </div>
