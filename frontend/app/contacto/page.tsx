@@ -4,8 +4,8 @@ import { SiteFooter, SiteHeader } from '../../components/SiteChrome';
 import '../editorial.css';
 
 export const metadata: Metadata = {
-  title: 'Contacto',
-  description: 'Contacta con el equipo del proyecto académico Decide Madrid: Invierte Y Compra.',
+  title: 'Contacto | Decide Madrid: Invierte Y Compra (DMIYC)',
+  description: 'Canales oficiales de contacto, soporte técnico e institucional de Decide Madrid: Invierte Y Compra.',
   alternates: { canonical: '/contacto' },
 };
 
@@ -15,36 +15,40 @@ export default function ContactPage() {
       <SiteHeader />
       <main className="editorial-page">
         <div className="editorial-page__inner">
-          <p className="editorial-page__eyebrow">Contacto</p>
-          <h1>Hablemos del proyecto.</h1>
+          <p className="editorial-page__eyebrow">Contacto Institucional y Técnico</p>
+          <h1>Conecta con Decide Madrid (DMIYC).</h1>
           <p className="editorial-page__lead">
-            Decide Madrid: Invierte Y Compra es un proyecto analítico independiente para consultar referencias estadísticas verificadas del mercado residencial de Madrid.
+            Estamos comprometidos con la transparencia, el rigor metodológico y la democratización de los datos inmobiliarios de Madrid. Si tienes dudas, propuestas o deseas reportar alguna sugerencia técnica, ponemos a tu disposición nuestros canales oficiales.
           </p>
+
           <section className="editorial-page__section">
-            <h2>Consultas e incidencias</h2>
+            <h2>Soporte Técnico e Incidencias</h2>
             <p>
-              El canal principal disponible para reportar dudas técnicas, mejoras o incidencias es el repositorio del proyecto en GitHub.
+              El canal preferente para formular consultas técnicas, sugerencias de nuevas funcionalidades o notificar incidencias relativas a los conjuntos de datos es nuestro repositorio oficial de código abierto:
             </p>
             <p>
-              <a href="https://github.com/rodrigoapvigil/madrid-urban-intelligent/issues" target="_blank" rel="noreferrer">
+              <a href="https://github.com/rodrigoapvigil/madrid-urban-intelligent/issues" target="_blank" rel="noopener noreferrer">
                 Abrir consulta en GitHub Issues ↗
               </a>
             </p>
           </section>
+
           <section className="editorial-page__section">
-            <h2>Conexión profesional</h2>
+            <h2>Colaboraciones Profesionales e Institucionales</h2>
             <p>
-              Para consultas académicas, colaboraciones institucionales o propuestas de investigación:
+              Para consultas institucionales, propuestas de análisis sectorial, integración de fuentes de datos o contacto directo con el creador del proyecto:
             </p>
             <p>
-              <a href="https://www.linkedin.com/in/rodrigo-vigil/" target="_blank" rel="noreferrer">
+              <a href="https://www.linkedin.com/in/rodrigo-vigil/" target="_blank" rel="noopener noreferrer">
                 Contactar en LinkedIn con Rodrigo Vigil ↗
               </a>
             </p>
           </section>
+
           <p className="editorial-page__note">
-            Para proteger tu privacidad, no incluyas números de teléfono, direcciones personales ni datos confidenciales en los canales públicos.
+            Por motivos de seguridad y privacidad (RGPD), te rogamos no remitir datos sensibles, información bancaria ni documentación personal confidencial a través de los canales públicos de consulta.
           </p>
+
           <div className="editorial-page__actions">
             <Link className="editorial-page__button" href="/madrid">Entrar al cuadro de mando</Link>
             <Link href="/sobre-el-proyecto">Sobre el proyecto</Link>
