@@ -224,11 +224,7 @@ export default function MadridLanding() {
                 <span className="mi-scale__stat-label">HABITANTES</span>
                 <div className="mi-scale__stat-bottom">
                   <strong className="mi-scale__stat-number"><StatCounter end={3.49} decimals={2} unit="M" /></strong>
-                  <small className="mi-scale__stat-desc">
-                    <a href="https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Notas-de-prensa/Los-nacimientos-superaron-a-las-defunciones-en-564-personas-en-2025-un-crecimiento-vegetativo-que-no-se-producia-en-Madrid-desde-hacia-seis-anos/?vgnextchannel=6091317d3d2a7010VgnVCM100000dc0ca8c0RCRD&amp;vgnextfmt=default&amp;vgnextoid=81bdd56de9ddd910VgnVCM100000891ecb1aRCRD" target="_blank" rel="noreferrer">
-                      Padrón oficial a 1 de enero de 2026 ↗
-                    </a>
-                  </small>
+                  <small className="mi-scale__stat-desc">Padrón oficial a 1 de enero de 2026</small>
                 </div>
               </article>
 
