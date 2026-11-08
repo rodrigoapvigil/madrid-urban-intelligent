@@ -1,5 +1,7 @@
 'use client';
 
+import { SiteFooter } from './SiteChrome';
+
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -309,41 +311,7 @@ export default function MadridLanding() {
         </section>
       </main>
 
-      <footer className="mi-footer">
-        <div className="mi-wrap mi-footer__top">
-          <div className="mi-footer__identity">
-            <Link href="/" className="mi-brand">
-              <span className="mi-brand__mark">
-                <Image src="/decide-madrid-mark.webp" alt="" width={34} height={34} />
-              </span>
-              <span>Decide Madrid: Invierte Y Compra</span>
-            </Link>
-            <p>Proyecto académico independiente y sin ánimo de lucro. Inteligencia del mercado residencial de Madrid.</p>
-          </div>
-          <div className="mi-footer__links">
-            <div>
-              <strong>Explorar</strong>
-              <nav aria-label="Explorar">
-                <Link href="/madrid">Mercado</Link>
-                <Link href="/madrid/chat">AMBI</Link>
-                <Link href="/madrid/veredicto">El Veredicto</Link>
-              </nav>
-            </div>
-            <div>
-              <strong>Proyecto</strong>
-              <nav aria-label="Información del proyecto">
-                <Link href="/sobre-el-proyecto">Sobre nosotros</Link>
-                <Link href="/metodologia">Metodología</Link>
-                <Link href="/contacto">Contacto</Link>
-              </nav>
-            </div>
-          </div>
-        </div>
-        <div className="mi-wrap mi-footer__bottom">
-          <span>© Decide Madrid: Invierte Y Compra</span>
-          <span>Las estimaciones son estadísticas y no sustituyen una tasación pericial oficial.</span>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
