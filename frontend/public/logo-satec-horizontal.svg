@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80" fill="none">
+  <g fill="#FFFFFF">
+    <!-- square colon dots on left -->
+    <rect x="12" y="22" width="7" height="7" rx="1.5"/>
+    <rect x="12" y="36" width="7" height="7" rx="1.5"/>
+    <rect x="12" y="50" width="7" height="7" rx="1.5"/>
+    <!-- satec_ text -->
+    <text x="32" y="57" fill="#FFFFFF" font-family="'Matter', 'Inter', -apple-system, sans-serif" font-size="44" font-weight="700" letter-spacing="-1">satec_</text>
+  </g>
+</svg>

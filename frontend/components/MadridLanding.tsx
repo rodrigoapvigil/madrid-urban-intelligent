@@ -252,7 +252,7 @@ export default function MadridLanding() {
                 {/* Columna 1: Ayuntamiento de Madrid */}
                 <article className="mi-trust-col">
                   <blockquote className="mi-trust-col__quote">
-                    “Premio del Ayuntamiento de Madrid a la innovación en datos abiertos por su capacidad para transparentar los precios reales del mercado inmobiliario en los 131 barrios con datos de cierre.”
+                    “Premio a la innovación por transparentar los precios reales de cierre en los 131 barrios de Madrid con datos abiertos.”
                   </blockquote>
                   <div className="mi-trust-col__author">
                     <strong>2026</strong>
@@ -260,10 +260,11 @@ export default function MadridLanding() {
                   </div>
                   <div className="mi-trust-col__logo-wrap">
                     <Image
-                      src="/logo-ayuntamiento-madrid-transparent.png"
+                      src="/logo-ayuntamiento-horizontal.svg"
                       alt="Ayuntamiento de Madrid"
-                      width={160}
-                      height={48}
+                      width={220}
+                      height={52}
+                      unoptimized
                       className="mi-trust-col__logo"
                     />
                   </div>
@@ -272,7 +273,7 @@ export default function MadridLanding() {
                 {/* Columna 2: Grupo SATEC */}
                 <article className="mi-trust-col">
                   <blockquote className="mi-trust-col__quote">
-                    “Galardón concedido por Grupo SATEC al mejor proyecto con impacto en desarrollo sostenible, democratizando el acceso a estimaciones auditadas y reduciendo asimetrías de mercado.”
+                    “Galardón al mejor proyecto de impacto sostenible por democratizar la información inmobiliaria y erradicar asimetrías.”
                   </blockquote>
                   <div className="mi-trust-col__author">
                     <strong>2025</strong>
@@ -280,10 +281,11 @@ export default function MadridLanding() {
                   </div>
                   <div className="mi-trust-col__logo-wrap">
                     <Image
-                      src="/logo-satec-transparent.png"
+                      src="/logo-satec-horizontal.svg"
                       alt="Grupo SATEC"
-                      width={150}
-                      height={44}
+                      width={200}
+                      height={50}
+                      unoptimized
                       className="mi-trust-col__logo"
                     />
                   </div>
@@ -292,7 +294,7 @@ export default function MadridLanding() {
                 {/* Columna 3: Universidad Politécnica de Madrid (UPM) */}
                 <article className="mi-trust-col">
                   <blockquote className="mi-trust-col__quote">
-                    “Reconocimiento institucional y académico al modelado predictivo, arquitectura analítica y rigor en ingeniería de datos para la evaluación objetiva del mercado madrileño.”
+                    “Reconocimiento al rigor analítico y modelado predictivo avanzado aplicados a la toma de decisiones ciudadana.”
                   </blockquote>
                   <div className="mi-trust-col__author">
                     <strong>2025</strong>
@@ -300,28 +302,15 @@ export default function MadridLanding() {
                   </div>
                   <div className="mi-trust-col__logo-wrap">
                     <Image
-                      src="/logo-upm-transparent.svg"
+                      src="/logo-upm-horizontal.svg"
                       alt="Universidad Politécnica de Madrid"
-                      width={160}
-                      height={46}
+                      width={240}
+                      height={50}
                       unoptimized
                       className="mi-trust-col__logo"
                     />
                   </div>
                 </article>
-              </div>
-
-              {/* Tira inferior de entidades (Estilo Auros Trust Bottom Bar) */}
-              <div className="mi-trust-footer">
-                <div className="mi-trust-footer__item">
-                  <Image src="/logo-ayuntamiento-madrid-transparent.png" alt="Ayuntamiento de Madrid" width={130} height={36} className="mi-trust-footer__logo" />
-                </div>
-                <div className="mi-trust-footer__item">
-                  <Image src="/logo-satec-transparent.png" alt="Grupo SATEC" width={115} height={30} className="mi-trust-footer__logo" />
-                </div>
-                <div className="mi-trust-footer__item">
-                  <Image src="/logo-upm-transparent.svg" alt="Universidad Politécnica de Madrid" width={140} height={36} unoptimized className="mi-trust-footer__logo" />
-                </div>
               </div>
             </div>
           </div>
