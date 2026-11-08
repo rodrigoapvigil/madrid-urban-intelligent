@@ -28,11 +28,14 @@ export default function MadridLanding() {
     <div className="mi-home" id="inicio">
       <div className="mi-atmosphere" aria-hidden="true"/>
       <header className="mi-header">
-        <Link href="/" className="mi-brand" aria-label="Decide Madrid: Invierte Y Compra, inicio">
+        <Link href="/" className="mi-brand" aria-label="DMIYC - Decide Madrid: Invierte Y Compra">
           <span className="mi-brand__mark">
-            <Image src="/decide-madrid-mark.webp" alt="" width={34} height={34} priority />
+            <Image src="/decide-madrid-mark.webp" alt="DMIYC" width={38} height={38} priority />
           </span>
-          <span>Decide Madrid: Invierte Y Compra</span>
+          <span className="mi-brand__text">
+            <strong className="mi-brand__acronym">DMIYC</strong>
+            <small className="mi-brand__subtitle">Decide Madrid · Invierte y Compra</small>
+          </span>
         </Link>
         <nav className="mi-nav" aria-label="Navegación principal">
           <a href="#plataforma">Plataforma</a>
@@ -41,7 +44,7 @@ export default function MadridLanding() {
           <Link href="/madrid/veredicto">El Veredicto</Link>
         </nav>
         <Link href="/madrid" className="mi-header__cta">
-          Ver Precios de Cierre <ArrowUpRight aria-hidden="true"/>
+          Ver precios <ArrowUpRight aria-hidden="true"/>
         </Link>
       </header>
 

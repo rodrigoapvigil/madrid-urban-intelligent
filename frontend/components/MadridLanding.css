@@ -1496,3 +1496,58 @@
     border-bottom: none;
   }
 }
+
+/* ==========================================================================
+   DMIYC BRAND (Logo rotado en sentido horario + tipografía jerárquica)
+   ========================================================================== */
+.mi-brand {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  text-decoration: none !important;
+}
+
+.mi-brand__mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+}
+
+.mi-brand__mark img {
+  width: 36px !important;
+  height: 36px !important;
+  object-fit: contain;
+  transform: rotate(90deg) !important;
+  transition: transform 0.28s ease, filter 0.28s ease;
+  filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.45));
+}
+
+.mi-brand:hover .mi-brand__mark img {
+  transform: rotate(90deg) scale(1.08) !important;
+  filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.75));
+}
+
+.mi-brand__text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  gap: 2px;
+}
+
+.mi-brand__acronym {
+  font-size: 20px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  color: #FFFFFF;
+}
+
+.mi-brand__subtitle {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-silver-mist, #BACCD6);
+}

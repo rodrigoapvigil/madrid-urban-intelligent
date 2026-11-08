@@ -18,9 +18,14 @@ export function SiteHeader({ activePath, children }: SiteHeaderProps) {
   return (
     <header className="site-header">
       <div className="site-header-main">
-        <Link href="/" className="site-brand">
-          <Image src="/decide-madrid-mark.webp" alt="Decide Madrid" width={34} height={34} />
-          <span>Decide Madrid: Invierte Y Compra</span>
+        <Link href="/" className="site-brand" aria-label="DMIYC - Decide Madrid: Invierte Y Compra">
+          <span className="mi-brand__mark">
+            <Image src="/decide-madrid-mark.webp" alt="DMIYC" width={38} height={38} />
+          </span>
+          <span className="mi-brand__text">
+            <strong className="mi-brand__acronym">DMIYC</strong>
+            <small className="mi-brand__subtitle">Decide Madrid · Invierte y Compra</small>
+          </span>
         </Link>
         {children && <div className="site-header-context">{children}</div>}
         <nav className="site-navigation" aria-label="Navegación principal">
