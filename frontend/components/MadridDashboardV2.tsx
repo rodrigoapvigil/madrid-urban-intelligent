@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
@@ -843,7 +842,7 @@ const MadridDashboardV2: React.FC = () => {
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
-      if (!target.closest('.v2-dropdown-container, .v2-dropdown-menu, .v2-dropdown-backdrop')) {
+      if (!target.closest('.v2-dropdown-container, .v2-dropdown-menu')) {
         setActiveDropdown(null);
       }
     };
@@ -857,27 +856,6 @@ const MadridDashboardV2: React.FC = () => {
       document.removeEventListener('keydown', handleEscape);
     };
   }, []);
-
-  // En móvil, el selector es una capa modal independiente: bloquea el fondo y
-  // permite desplazar solo la lista, sin mover la página que queda detrás.
-  useEffect(() => {
-    const isMobileFilter = typeof window !== 'undefined'
-      && window.matchMedia('(max-width: 768px)').matches
-      && ['year', 'month', 'dist', 'barrio', 'zoneA', 'zoneB'].includes(activeDropdown || '');
-    if (!isMobileFilter) return;
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-
-    const preventBackgroundTouch = (event: TouchEvent) => {
-      if (!(event.target as HTMLElement).closest('.v2-dropdown-menu')) event.preventDefault();
-    };
-    document.addEventListener('touchmove', preventBackgroundTouch, { passive: false });
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      document.removeEventListener('touchmove', preventBackgroundTouch);
-    };
-  }, [activeDropdown]);
 
   // Inicialización de Gráficas (Chart.js)
   useEffect(() => {
@@ -1879,79 +1857,70 @@ const MadridDashboardV2: React.FC = () => {
         </div>
       </SiteHeader>
 
-      {activeDropdown && ['year', 'month', 'dist', 'barrio', 'zoneA', 'zoneB'].includes(activeDropdown) && (
-        createPortal(<button
-          type="button"
-          className="v2-dropdown-backdrop"
-          aria-label="Cerrar opciones"
-          onClick={() => setActiveDropdown(null)}
-        />, document.body)
-      )}
 
       {/* 2. FILTROS REFINADOS (CUSTOM APPLE DROPDOWNS) */}
       <div className={`v2-filters ${['year', 'month', 'dist', 'barrio'].includes(activeDropdown || '') ? 'v2-filters-open' : ''}`}>
         <div className="v2-filter-group">
 
           {/* AÑO */}
-          <div className="v2-dropdown-container">
+          <div className={`v2-dropdown-container ${activeDropdown === 'year' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Año</span>
             <button type="button" className={`v2-custom-select ${activeDropdown === 'year' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'year'} onClick={() => setActiveDropdown(activeDropdown === 'year' ? null : 'year')}>
               {selectedYear}
             </button>
             {activeDropdown === 'year' && (
-                createPortal(<div className="v2-dropdown-menu" role="listbox" aria-label="Año">
-                  {availableYears.map(y => (
-                    <button type="button" key={y} className="v2-dropdown-item" role="option" aria-selected={selectedYear === y} onClick={(e) => { e.stopPropagation(); setSelectedYear(y); const months = monthsByYear[y] || []; setSelectedMonth(months[months.length - 1] || 'Diciembre'); setActiveDropdown(null); }}>{y}</button>
-                  ))}
-                </div>, document.body)
-              )}
+              <div className="v2-dropdown-menu" role="listbox" aria-label="Año">
+                {availableYears.map(y => (
+                  <button type="button" key={y} className="v2-dropdown-item" role="option" aria-selected={selectedYear === y} onClick={(e) => { e.stopPropagation(); setSelectedYear(y); const months = monthsByYear[y] || []; setSelectedMonth(months[months.length - 1] || 'Diciembre'); setActiveDropdown(null); }}>{y}</button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* MES */}
-          <div className="v2-dropdown-container">
+          <div className={`v2-dropdown-container ${activeDropdown === 'month' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Mes</span>
             <button type="button" className={`v2-custom-select ${activeDropdown === 'month' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'month'} onClick={() => setActiveDropdown(activeDropdown === 'month' ? null : 'month')}>
               {selectedMonth}
             </button>
             {activeDropdown === 'month' && (
-                createPortal(<div className="v2-dropdown-menu" role="listbox" aria-label="Mes">
-                  {(monthsByYear[selectedYear] || ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']).map(m => (
-                    <button type="button" key={m} className="v2-dropdown-item" role="option" aria-selected={selectedMonth === m} onClick={(e) => { e.stopPropagation(); setSelectedMonth(m); setActiveDropdown(null); }}>{m}</button>
-                  ))}
-                </div>, document.body)
-              )}
+              <div className="v2-dropdown-menu" role="listbox" aria-label="Mes">
+                {(monthsByYear[selectedYear] || ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']).map(m => (
+                  <button type="button" key={m} className="v2-dropdown-item" role="option" aria-selected={selectedMonth === m} onClick={(e) => { e.stopPropagation(); setSelectedMonth(m); setActiveDropdown(null); }}>{m}</button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* DISTRITO */}
-          <div className="v2-dropdown-container">
+          <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Distrito</span>
             <button type="button" className={`v2-custom-select ${activeDropdown === 'dist' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'dist'} onClick={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')}>
               {selectedDistrict}
             </button>
             {activeDropdown === 'dist' && (
-                createPortal(<div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
-                  {availableDistricts.map(d => (
-                    <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={selectedDistrict === d} onClick={(e) => { e.stopPropagation(); setSelectedDistrict(d); setActiveDropdown(null); }}>{d}</button>
-                  ))}
-                </div>, document.body)
-              )}
+              <div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
+                {availableDistricts.map(d => (
+                  <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={selectedDistrict === d} onClick={(e) => { e.stopPropagation(); setSelectedDistrict(d); setActiveDropdown(null); }}>{d}</button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* BARRIO */}
-          <div className="v2-dropdown-container">
+          <div className={`v2-dropdown-container ${activeDropdown === 'barrio' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Barrio</span>
             <button type="button" className={`v2-custom-select ${activeDropdown === 'barrio' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'barrio'} onClick={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')}>
               {selectedBarrio}
             </button>
             {activeDropdown === 'barrio' && (
-                createPortal(<div className="v2-dropdown-menu" role="listbox" aria-label="Barrio">
-                  {availableBarrios.map(b => (
-                    <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={selectedBarrio === b} onClick={(e) => { e.stopPropagation(); setSelectedBarrio(b); setActiveDropdown(null); }}>{b}</button>
-                  ))}
-                </div>, document.body)
-              )}
+              <div className="v2-dropdown-menu" role="listbox" aria-label="Barrio">
+                {availableBarrios.map(b => (
+                  <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={selectedBarrio === b} onClick={(e) => { e.stopPropagation(); setSelectedBarrio(b); setActiveDropdown(null); }}>{b}</button>
+                ))}
+              </div>
+            )}
           </div>
-
           {/* BOTÓN GUÍA DE PRECIOS PARA EL CIUDADANO */}
           <div className="v2-filter-actions">
             <button
@@ -3260,13 +3229,12 @@ const MadridDashboardV2: React.FC = () => {
                   <button type="button" className={`v2-custom-select ${activeDropdown === 'zoneA' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'zoneA'} onClick={() => setActiveDropdown(activeDropdown === 'zoneA' ? null : 'zoneA')}>
                     {selectedZoneA}
                   </button>
-                  {activeDropdown === 'zoneA' && createPortal(
+                  {activeDropdown === 'zoneA' && (
                     <div className="v2-dropdown-menu" role="listbox" aria-label="Seleccionar Zona A">
                       {(compareLevel === 'Distritos' ? availableDistricts : availableBarrios).map(z => (
                         <button type="button" key={z} className="v2-dropdown-item" role="option" aria-selected={selectedZoneA === z} onClick={() => { setSelectedZoneA(z); setActiveDropdown(null); }}>{z}</button>
                       ))}
-                    </div>,
-                    document.body
+                    </div>
                   )}
                 </div>
                 <div className={`v2-dropdown-container v2-compare-zone-select ${activeDropdown === 'zoneB' ? 'v2-z-up' : ''}`}>
@@ -3274,13 +3242,12 @@ const MadridDashboardV2: React.FC = () => {
                   <button type="button" className={`v2-custom-select ${activeDropdown === 'zoneB' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'zoneB'} onClick={() => setActiveDropdown(activeDropdown === 'zoneB' ? null : 'zoneB')}>
                     {selectedZoneB}
                   </button>
-                  {activeDropdown === 'zoneB' && createPortal(
+                  {activeDropdown === 'zoneB' && (
                     <div className="v2-dropdown-menu" role="listbox" aria-label="Seleccionar Zona B">
                       {(compareLevel === 'Distritos' ? availableDistricts : availableBarrios).map(z => (
                         <button type="button" key={z} className="v2-dropdown-item" role="option" aria-selected={selectedZoneB === z} onClick={() => { setSelectedZoneB(z); setActiveDropdown(null); }}>{z}</button>
                       ))}
-                    </div>,
-                    document.body
+                    </div>
                   )}
                 </div>
               </div>

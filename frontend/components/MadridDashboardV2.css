@@ -188,21 +188,25 @@
 
 .v2-dropdown-menu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 6px);
   left: 0;
-  min-width: 160px;
-  background: var(--blanco-humo); /* Sólido para evitar que se vea el contenido de atrás */
+  min-width: 180px;
+  max-width: 320px;
+  max-height: 280px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: #011024 !important;
   border-radius: 12px;
-  border: 1px solid var(--humo-2);
-  box-shadow: 0 12px 40px color-mix(in srgb, var(--azul-noche) 20%, transparent);
-  padding: 8px;
-  z-index: 2000; /* Prioridad máxima absoluta */
+  border: 1px solid rgba(186, 204, 214, 0.25) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7) !important;
+  padding: 6px;
+  z-index: 3600 !important;
   animation: v2FadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Forzar que el contenedor del dropdown abierto suba de capa */
 .v2-z-up {
-  z-index: 1500 !important;
+  z-index: 3500 !important;
 }
 
 .v2-dropdown-item {
@@ -213,18 +217,25 @@
   display: block;
   text-align: left;
   width: 100%;
-  min-height: 44px;
+  min-height: 38px;
   padding: 8px 12px;
   font-size: 13px;
   font-weight: 500;
   border-radius: 8px;
-  transition: background 0.2s, color 0.2s;
-  color: var(--v2-text-main);
+  transition: background 0.15s, color 0.15s;
+  color: #BACCDE !important;
 }
 
 .v2-dropdown-item:hover {
-  background: var(--v2-profile-color);
-  color: var(--blanco-humo);
+  background: var(--v2-profile-color, #00F0FF) !important;
+  color: #011024 !important;
+  font-weight: 600;
+}
+
+.v2-dropdown-item[aria-selected="true"] {
+  background: rgba(0, 240, 255, 0.16) !important;
+  color: #00F0FF !important;
+  font-weight: 600;
 }
 
 @keyframes v2FadeIn {
@@ -1945,9 +1956,9 @@
 .v2-root .v2-filters { background: var(--mui-paper); border-color: var(--mui-line); }
 .v2-root .v2-filter-label { color: var(--azul-linea); }
 .v2-root .v2-custom-select { color: var(--mui-ink); }
-.v2-root .v2-dropdown-menu { background: var(--mui-paper-raised); border-color: var(--mui-line); }
-.v2-root .v2-dropdown-item { color: var(--mui-ink); }
-.v2-root .v2-dropdown-item:hover { background: var(--mui-iris-gradient); color: var(--blanco-humo); }
+.v2-root .v2-dropdown-menu { background: #011024 !important; border-color: rgba(186, 204, 214, 0.25) !important; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7) !important; }
+.v2-root .v2-dropdown-item { color: #BACCDE !important; }
+.v2-root .v2-dropdown-item:hover { background: var(--v2-profile-color, #00F0FF) !important; color: #011024 !important; font-weight: 600; }
 .v2-root .v2-kpi-card,
 .v2-root .v2-map-card,
 .v2-root .v2-chart-card,
@@ -1970,7 +1981,7 @@
 .v2-root .v2-rank-mini-card,
 .v2-root .v2-connectivity-item,
 .v2-root .v2-connectivity-summary,
-.v2-root .v2-map-placeholder { background: var(--blanco-humo); border-color: var(--mui-line); }
+.v2-root .v2-map-placeholder { background: #011024 !important; border-color: rgba(186, 204, 214, 0.15) !important; }
 .v2-root .v2-connectivity-item:hover { background: var(--humo-2); }
 .v2-root .v2-heatmap-table th { background: var(--humo-2); color: var(--mui-ink); }
 .v2-root .v2-heatmap-table .zona-name { background: var(--mui-paper); }
@@ -1991,4 +2002,36 @@
 @media (max-width: 768px) {
   .v2-root .v2-filters { background: var(--mui-paper); }
   .v2-root .v2-dropdown-menu { background: var(--mui-paper-raised); }
+}
+
+
+/* LEAFLET DARK MAP & POPUP (SAME DESIGN AS LANDING) */
+.v2-map-placeholder {
+  flex: 1;
+  background: #011024 !important;
+  border-radius: 12px;
+  border: 1px solid rgba(186, 204, 214, 0.15) !important;
+  overflow: hidden;
+}
+
+.leaflet-container {
+  background: #011024 !important;
+  font-family: inherit;
+  outline: none;
+}
+
+.apple-popup .leaflet-popup-content-wrapper {
+  background: rgba(1, 16, 36, 0.95) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(186, 204, 214, 0.25) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6) !important;
+  color: #FFFFFF !important;
+  padding: 4px 6px;
+}
+
+.apple-popup .leaflet-popup-tip {
+  background: rgba(1, 16, 36, 0.95) !important;
+  border: 1px solid rgba(186, 204, 214, 0.25) !important;
 }
