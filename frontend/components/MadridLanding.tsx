@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowDown, ArrowRight, ArrowUpRight } from 'lucide-react';
+import { ArrowDown, ArrowUpRight } from 'lucide-react';
 import DeferredMadridDistrictMap from './DeferredMadridDistrictMap';
 import MadridHeroArtwork from './MadridHeroArtwork';
 import LandingTrend from './LandingTrend';
@@ -19,12 +19,6 @@ const profiles = [
   { title: 'Inversión', text: 'Localiza barrios con rentabilidad bruta superior al 6% y previsiones a 2026-2027.', href: '/madrid?profile=inversion' },
 ];
 
-const audiences = [
-  ['Busco piso para vivir', 'Encuentra barrios acordes a tu presupuesto real y evita pagar sobreprecios absurdos por desconocer la zona.'],
-  ['Quiero vender o alquilar', 'Fija un precio competitivo basado en escrituras y registros oficiales recientes para cerrar antes tu operación.'],
-  ['Analizo el mercado', 'Accede a series históricas completas, ratios de liquidez, evolución trimestral y conectividad urbana.'],
-  ['Evalúo una inversión', 'Filtra las zonas con mayor rentabilidad bruta por alquiler y detecta oportunidades con rigor analítico.'],
-];
 
 export default function MadridLanding() {
   const [trendHighlight, setTrendHighlight] = useState<'real' | 'prediction' | 'all'>('all');
@@ -49,7 +43,8 @@ export default function MadridLanding() {
         </Link>
       </header>
 
-      <main>
+      <main id="contenido-principal">
+        {/* 0. HERO: Claridad en 3 segundos */}
         <section className="mi-hero" aria-labelledby="mi-title">
           <div className="mi-hero__content">
             <p className="mi-hero__kicker">DMIYC</p>
@@ -62,60 +57,12 @@ export default function MadridLanding() {
           <a className="mi-scroll" href="#lectura"><span>Desplázate para descubrir tu barrio</span><ArrowDown aria-hidden="true"/></a>
         </section>
 
+        {/* 1. EL DOLOR: Desfase entre el precio anunciado y el precio de cierre oficial */}
         <p className="mi-bridge" aria-label="El precio que pide el anuncio casi nunca es el precio por el que se firma.">
           El precio que pide el anuncio <span>casi nunca es el precio por el que se firma.</span>
         </p>
 
-        <section className="mi-statement" id="lectura" aria-labelledby="mi-statement-title">
-          <div className="mi-wrap mi-statement__inner">
-            <p className="mi-kicker mi-kicker--muted">Transparencia analítica radical</p>
-            <h2 id="mi-statement-title" className="mi-kinetic"><span>Información</span><span>al alcance</span></h2>
-            <div className="mi-statement__coordinates" aria-hidden="true"><span>21 DISTRITOS</span><span>131 BARRIOS</span><span>MADRID · DATOS ABIERTOS</span></div>
-          </div>
-        </section>
-
-        <p className="mi-bridge" aria-label="Cruzar una sola calle en Madrid puede cambiar el metro cuadrado en 800 euros.">
-          Cruzar una sola calle en Madrid <span>puede cambiar el metro cuadrado en 800 €.</span>
-        </p>
-
-        <section className="mi-platform" id="plataforma" aria-labelledby="mi-platform-title">
-          <div className="mi-wrap">
-            <div className="mi-platform__intro">
-              <p className="mi-kicker mi-kicker--muted">Un motor para cada decisión</p>
-              <h2 id="mi-platform-title">Elige tu objetivo.<br/><span>Domina los números.</span></h2>
-            </div>
-            <div className="mi-platform__frame">
-              <div className="mi-platform__grid">
-                <div className="mi-profile-list">
-                  {profiles.map(({title,text,href}) => (
-                    <Link className="mi-profile" href={href} key={title}>
-                      <span className="mi-profile__copy">
-                        <strong>{title}</strong>
-                        <small>{text}</small>
-                      </span>
-                      <span className="mi-profile__arrow"><ArrowUpRight aria-hidden="true"/></span>
-                    </Link>
-                  ))}
-                  <Link href="/madrid/veredicto" className="mi-verdict">
-                    <span>
-                      <strong>El Veredicto</strong>
-                      <small>Pega el enlace de un piso y audita si te cobran de más con datos de cierre de su zona.</small>
-                    </span>
-                    <ArrowUpRight aria-hidden="true"/>
-                  </Link>
-                </div>
-                <aside className="mi-city-visual">
-                  <DeferredMadridDistrictMap/>
-                </aside>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <p className="mi-bridge" aria-label="Para comprar, alquilar o invertir con criterio: la información es tu mejor regateo.">
-          Para comprar, alquilar o invertir con criterio: <span>la información es tu mejor regateo.</span>
-        </p>
-
+        {/* MÓDULO 1: Mercado en tiempo real y proyección predictiva ML */}
         <section className="mi-insight" id="predicciones" aria-labelledby="mi-insight-title">
           <div className="mi-wrap">
             <div className="mi-auros-frame">
@@ -187,13 +134,52 @@ export default function MadridLanding() {
           </div>
         </section>
 
-        {/* Infinite Marquee of verified public sources (Auros Brand Band pattern) */}
-        <MadridMarquee />
-
-        <p className="mi-bridge" aria-label="Más de 16.000 operaciones y proyecciones para que nunca decidas a ciegas.">
-          Más de 16.000 operaciones y proyecciones <span>para que nunca decidas a ciegas.</span>
+        {/* 2. LA BRECHA TERRITORIAL: Concreción física del sobreprecio */}
+        <p className="mi-bridge" aria-label="Cruzar una sola calle en Madrid puede cambiar el metro cuadrado en 800 euros.">
+          Cruzar una sola calle en Madrid <span>puede cambiar el metro cuadrado en 800 €.</span>
         </p>
 
+        {/* MÓDULO 2: Elige tu objetivo (4 perfiles operativos) + Mapa interactivo de distritos */}
+        <section className="mi-platform" id="plataforma" aria-labelledby="mi-platform-title">
+          <div className="mi-wrap">
+            <div className="mi-platform__intro">
+              <p className="mi-kicker mi-kicker--muted">Un motor para cada decisión</p>
+              <h2 id="mi-platform-title">Elige tu objetivo.<br/><span>Domina los números.</span></h2>
+            </div>
+            <div className="mi-platform__frame">
+              <div className="mi-platform__grid">
+                <div className="mi-profile-list">
+                  {profiles.map(({title,text,href}) => (
+                    <Link className="mi-profile" href={href} key={title}>
+                      <span className="mi-profile__copy">
+                        <strong>{title}</strong>
+                        <small>{text}</small>
+                      </span>
+                      <span className="mi-profile__arrow"><ArrowUpRight aria-hidden="true"/></span>
+                    </Link>
+                  ))}
+                  <Link href="/madrid/veredicto" className="mi-verdict">
+                    <span>
+                      <strong>El Veredicto</strong>
+                      <small>Pega el enlace de un piso y audita si te cobran de más con datos de cierre de su zona.</small>
+                    </span>
+                    <ArrowUpRight aria-hidden="true"/>
+                  </Link>
+                </div>
+                <aside className="mi-city-visual">
+                  <DeferredMadridDistrictMap/>
+                </aside>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 3. FIABILIDAD TOTAL: Cifras oficiales y aval institucional */}
+        <p className="mi-bridge" aria-label="¿De dónde sale cada cifra? Datos oficiales de cierre, cero especulación.">
+          ¿De dónde sale cada cifra? <span>Datos oficiales de cierre, cero especulación.</span>
+        </p>
+
+        {/* MÓDULO 3A: Escala y rigor analítico (16.779 transacciones oficiales) */}
         <section className="mi-scale" id="impacto" aria-labelledby="mi-scale-title">
           <div className="mi-wrap">
             <div className="mi-scale__heading">
@@ -253,7 +239,7 @@ export default function MadridLanding() {
           </div>
         </section>
 
-        {/* Sección de Confianza y Reconocimiento Institucional (Estilo Auros Trust) */}
+        {/* MÓDULO 3B: Respaldo institucional Auros Trust (Ayuntamiento, SATEC, UPM) */}
         <section className="mi-trust" id="premios" aria-labelledby="mi-trust-title">
           <div className="mi-wrap">
             <div className="mi-trust-frame">
@@ -341,83 +327,17 @@ export default function MadridLanding() {
           </div>
         </section>
 
-
-        <p className="mi-bridge" aria-label="La mayor decisión financiera de tu vida merece datos comprobados.">
-          La mayor decisión financiera de tu vida <span>merece datos comprobados.</span>
-        </p>
-
-        <section className="mi-audience" aria-labelledby="mi-audience-title">
-          <div className="mi-wrap mi-audience__layout">
-            <div className="mi-audience__intro">
-              <p className="mi-kicker mi-kicker--muted">Hecho para decisiones cruciales</p>
-              <h2 id="mi-audience-title">Un mismo Madrid.<br/><span>Tu propia respuesta.</span></h2>
-              <p>Una herramienta independiente para que conozcas la realidad de la vivienda y negocies con la fuerza de los datos públicos.</p>
-            </div>
-            <div className="mi-audience__list">
-              {audiences.map(([title,text]) => (
-                <article key={title}>
-                  <div>
-                    <h3>{title}</h3>
-                    <p>{text}</p>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <p className="mi-bridge" aria-label="Cero especulación: fuentes públicas municipales y rigor metodológico.">
-          Cero especulación: <span>fuentes públicas municipales y rigor metodológico.</span>
-        </p>
-
-        <section className="mi-method" aria-labelledby="mi-method-title">
-          <div className="mi-wrap mi-method__layout">
-            <div className="mi-method__intro">
-              <p className="mi-kicker mi-kicker--muted">Honestidad metodológica radical</p>
-              <h2 id="mi-method-title">Dato oficial real.<br/><span>Estimación visible.</span></h2>
-              <p>Aquí nunca te presentaremos una suposición como un hecho. Cada cifra expone su fuente y su grado de certidumbre para que interpretes el mercado con total seguridad.</p>
-              <Link href="/metodologia" className="mi-inline-link">Consultar metodología y validación <ArrowRight aria-hidden="true"/></Link>
-            </div>
-            <div className="mi-method__steps">
-              <article>
-                <div>
-                  <strong>Precios oficiales de cierre</strong>
-                  <p>Series históricas basadas en transacciones reales registradas por el Ayuntamiento de Madrid, no en ofertas aspiracionales de anuncios.</p>
-                </div>
-                <span className="mi-method__tag">Dato real</span>
-              </article>
-              <article>
-                <div>
-                  <strong>Comparación relativa por zona</strong>
-                  <p>Comprueba al instante si un barrio está un 15% por encima o por debajo de la media de su distrito o de Madrid capital.</p>
-                </div>
-                <span className="mi-method__tag">Contexto</span>
-              </article>
-              <article>
-                <div>
-                  <strong>Predicciones claramente rotuladas</strong>
-                  <p>Nuestras proyecciones estadísticas se diferencian visualmente para que sepas exactamente qué es dato histórico y qué es estimación.</p>
-                </div>
-                <span className="mi-method__tag mi-method__tag--forecast">Estimación</span>
-              </article>
-            </div>
-          </div>
-        </section>
-
-        {/* Insights Section (Auros Research Grid pattern) */}
+        {/* 4. INSIGHTS: Análisis vivo y autoridad editorial */}
         <MadridInsights />
 
-        <p className="mi-bridge" aria-label="Los datos oficiales en la mano. La sartén por el mango al decidir.">
-          Los datos oficiales en la mano. <span>La sartén por el mango al decidir.</span>
-        </p>
-
+        {/* 5. CIERRE: Acción inequívoca sin puntos de fuga */}
         <section className="mi-closing" aria-labelledby="mi-closing-title">
           <div className="mi-closing__glow" aria-hidden="true"/>
           <div className="mi-wrap mi-closing__inner">
             <p className="mi-kicker">Toma el control con Decide Madrid</p>
-            <h2 id="mi-closing-title">No compres ni alquiles a ciegas.<br/><span>Decide con datos.</span></h2>
-            <p>Consulta las cifras reales de cierre de tu barrio, esquiva el sobreprecio y negocia con la certeza que dan los datos oficiales.</p>
-            <Link href="/madrid" className="mi-button mi-button--aurora">Explorar precios por barrio <ArrowUpRight aria-hidden="true"/></Link>
+            <h2 id="mi-closing-title">Tu mayor decisión financiera<br/><span>merece datos comprobados.</span></h2>
+            <p>No compres, alquiles ni vendas a ciegas. Consulta los precios reales de cierre de tu barrio, esquiva el sobreprecio y negocia con certeza oficial.</p>
+            <Link href="/madrid" className="mi-button mi-button--aurora">Entrar al cuadro de mando <ArrowUpRight aria-hidden="true"/></Link>
           </div>
         </section>
       </main>

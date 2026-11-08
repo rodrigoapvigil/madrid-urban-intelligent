@@ -1287,8 +1287,14 @@
 /* ========================================================
    SECCIÓN DE CONFIANZA Y RECONOCIMIENTO (ESTILO AUROS TRUST)
    ======================================================== */
+.mi-scale {
+  padding-top: clamp(60px, 8vw, 110px) !important;
+  padding-bottom: clamp(20px, 2.5vw, 36px) !important;
+}
+
 .mi-trust {
-  padding-block: clamp(80px, 10vw, 140px);
+  padding-top: clamp(16px, 2vw, 32px) !important;
+  padding-bottom: clamp(80px, 10vw, 140px);
   background: transparent;
   position: relative;
   z-index: 1;
