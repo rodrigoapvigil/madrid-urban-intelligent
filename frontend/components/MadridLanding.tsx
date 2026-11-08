@@ -256,6 +256,68 @@ export default function MadridLanding() {
           </div>
         </section>
 
+        {/* Reconocimientos y Premios Oficiales */}
+        <section className="mi-awards" id="premios" aria-labelledby="mi-awards-title">
+          <div className="mi-wrap">
+            <div className="mi-awards__intro">
+              <p className="mi-kicker mi-kicker--muted">RECONOCIMIENTO Y AUTORIDAD PÚBLICA</p>
+              <h2 id="mi-awards-title">Premios de innovación.<br/><span>Avalados por instituciones.</span></h2>
+              <p className="mi-awards__lead">La metodología, el rigor analítico y la transparencia de Decide Madrid han sido distinguidos oficialmente por entidades públicas y líderes tecnológicos.</p>
+            </div>
+
+            <div className="mi-awards__grid">
+              {/* Premio 1: Ayuntamiento de Madrid (2026) */}
+              <article className="mi-award-card">
+                <div className="mi-award-card__header">
+                  <div className="mi-award-card__logo-badge">
+                    <Image
+                      src="/logo-ayuntamiento-madrid.png"
+                      alt="Ayuntamiento de Madrid"
+                      width={160}
+                      height={50}
+                      className="mi-award-card__logo"
+                    />
+                  </div>
+                  <span className="mi-award-card__year">2026</span>
+                </div>
+                <div className="mi-award-card__body">
+                  <span className="mi-award-card__badge">GALARDÓN OFICIAL DE INNOVACIÓN</span>
+                  <h3>Concurso de Reutilización de Datos Abiertos</h3>
+                  <p className="mi-award-card__entity">Ayuntamiento de Madrid · Categoría Estudios e Investigaciones</p>
+                  <p className="mi-award-card__desc">
+                    Segundo premio concedido por el Ayuntamiento de Madrid al proyecto de análisis inteligente del mercado inmobiliario y cuadro de mando analítico basado en datos abiertos municipales para los 131 barrios de la capital.
+                  </p>
+                </div>
+              </article>
+
+              {/* Premio 2: Grupo SATEC & Universidad Politécnica de Madrid (2025) */}
+              <article className="mi-award-card">
+                <div className="mi-award-card__header">
+                  <div className="mi-award-card__logo-badge">
+                    <Image
+                      src="/logo-satec.png"
+                      alt="Grupo SATEC"
+                      width={150}
+                      height={40}
+                      className="mi-award-card__logo"
+                    />
+                  </div>
+                  <span className="mi-award-card__year">2025</span>
+                </div>
+                <div className="mi-award-card__body">
+                  <span className="mi-award-card__badge">PREMIO TECNOLOGÍA & SOSTENIBILIDAD</span>
+                  <h3>Premio SATEC al Impacto en Desarrollo Sostenible</h3>
+                  <p className="mi-award-card__entity">Grupo SATEC & Universidad Politécnica de Madrid (UPM)</p>
+                  <p className="mi-award-card__desc">
+                    Reconocimiento otorgado por la multinacional de integración tecnológica SATEC y la UPM por el valor transformador del proyecto en sostenibilidad urbana, transparencia de precios y accesibilidad a la información pública.
+                  </p>
+                </div>
+              </article>
+            </div>
+          </div>
+        </section>
+
+
         <p className="mi-bridge" aria-label="La mayor decisión financiera de tu vida merece datos comprobados.">
           La mayor decisión financiera de tu vida <span>merece datos comprobados.</span>
         </p>

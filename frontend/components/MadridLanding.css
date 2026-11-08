@@ -1247,3 +1247,157 @@
 .mi-trend__real-line, .mi-trend__prediction-line, .mi-trend__real-point, .mi-trend__forecast-point {
   transition: opacity 0.25s ease, stroke-width 0.25s ease, filter 0.25s ease;
 }
+
+/* ========================================================
+   SECCIÓN DE PREMIOS Y RECONOCIMIENTOS INSTITUCIONALES
+   ======================================================== */
+.mi-awards {
+  padding-block: clamp(80px, 10vw, 140px);
+  background: transparent;
+  position: relative;
+  z-index: 1;
+}
+
+.mi-awards__intro {
+  max-width: 820px;
+  margin-bottom: clamp(40px, 5vw, 64px);
+}
+
+.mi-awards__intro h2 {
+  margin: 0;
+  color: var(--mi-white);
+  font-size: clamp(48px, 6vw, 84px);
+  font-weight: 500;
+  letter-spacing: -.055em;
+  line-height: .98;
+  text-wrap: balance;
+}
+
+.mi-awards__intro h2 span {
+  color: var(--mi-mist);
+}
+
+.mi-awards__lead {
+  margin-top: 20px;
+  color: var(--mi-silver);
+  font-size: clamp(17px, 1.4vw, 20px);
+  line-height: 1.48;
+  text-wrap: balance;
+  max-width: 680px;
+}
+
+.mi-awards__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: clamp(24px, 3vw, 36px);
+  align-items: stretch;
+}
+
+.mi-award-card {
+  position: relative;
+  background: var(--surface-navy-card);
+  border: 1px solid rgba(186, 204, 214, 0.14);
+  border-radius: 18px;
+  padding: clamp(28px, 3.5vw, 40px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 24px;
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
+  overflow: hidden;
+}
+
+.mi-award-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #00F0FF 0%, #7928CA 60%, transparent 100%);
+  opacity: 0;
+  transition: opacity .3s ease;
+}
+
+.mi-award-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(0, 240, 255, 0.38);
+  box-shadow: 0 16px 40px rgba(0, 16, 36, 0.45), 0 0 28px rgba(0, 240, 255, 0.12);
+}
+
+.mi-award-card:hover::before {
+  opacity: 1;
+}
+
+.mi-award-card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.mi-award-card__logo-badge {
+  background: rgba(255, 255, 255, 0.96);
+  padding: 10px 18px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  height: 52px;
+}
+
+.mi-award-card__logo {
+  object-fit: contain;
+  max-height: 34px;
+  width: auto;
+}
+
+.mi-award-card__year {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  color: var(--color-cyan-neon, #00F0FF);
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(0, 240, 255, 0.08);
+  border: 1px solid rgba(0, 240, 255, 0.25);
+}
+
+.mi-award-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.mi-award-card__badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--color-cyan-neon, #00F0FF);
+}
+
+.mi-award-card h3 {
+  margin: 0;
+  font-size: clamp(21px, 2vw, 26px);
+  font-weight: 500;
+  letter-spacing: -.03em;
+  line-height: 1.22;
+  color: var(--mi-white);
+}
+
+.mi-award-card__entity {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-arctic-mist, #E6F0FA);
+  opacity: .9;
+}
+
+.mi-award-card__desc {
+  margin: 6px 0 0;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--mi-silver);
+}
