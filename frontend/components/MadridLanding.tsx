@@ -8,7 +8,7 @@ import DeferredMadridDistrictMap from './DeferredMadridDistrictMap';
 import MadridHeroArtwork from './MadridHeroArtwork';
 import LandingTrend from './LandingTrend';
 import MadridMarquee from './MadridMarquee';
-import MadridInsights from './MadridInsights';
+import MadridDataGlobe from './MadridDataGlobe';
 import { StatCounter } from './MadridStatsCounter';
 import './MadridLanding.css';
 
@@ -295,12 +295,11 @@ export default function MadridLanding() {
           </div>
         </section>
 
-        {/* 4. INSIGHTS: Análisis vivo y autoridad editorial */}
-        <MadridInsights />
-
-        {/* 5. CIERRE: Acción inequívoca sin puntos de fuga */}
+        {/* 4. CIERRE: Acción inequívoca sin puntos de fuga */}
         <section className="mi-closing" aria-labelledby="mi-closing-title">
-          <div className="mi-closing__glow" aria-hidden="true"/>
+          <div className="mi-closing__glow" aria-hidden="true">
+            <MadridDataGlobe />
+          </div>
           <div className="mi-wrap mi-closing__inner">
             <p className="mi-kicker">Toma el control con Decide Madrid</p>
             <h2 id="mi-closing-title">Tu mayor decisión financiera<br/><span>merece datos comprobados.</span></h2>
