@@ -366,14 +366,8 @@ export default function MadridDistrictMap() {
 
   return (
     <div className="mi-district-map">
-      <div className="mi-district-map__canvas-wrap" ref={wrapRef}>
-        <canvas ref={canvasRef} aria-label="Mapa interactivo de distritos de Madrid" role="img" />
-        {hovered !== null && districts[hovered] && (
-          <div className="mi-district-map__pill" aria-live="polite">
-            <span className="mi-district-map__pill-dot" />
-            <strong className="mi-district-map__pill-name">{districts[hovered].name}</strong>
-          </div>
-        )}
+      <div className="mi-district-map__canvas-wrap" ref={wrapRef} style={{ cursor: "default" }}>
+        <canvas ref={canvasRef} aria-label="Mapa interactivo de distritos de Madrid" role="img" style={{ cursor: "default" }} />
         {!districts.length && !error && <div className="mi-district-map__loading" aria-label="Cargando mapa" />}
         {error && <div className="mi-district-map__error">No se pudo cargar el mapa de distritos.</div>}
       </div>
