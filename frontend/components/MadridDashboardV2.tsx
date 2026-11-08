@@ -2121,21 +2121,22 @@ const MadridDashboardV2: React.FC = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '7px',
                 background: 'rgba(1, 16, 36, 0.92)',
                 border: '1.5px solid #00F0FF',
                 borderRadius: '20px',
                 padding: '6px 14px',
-                fontSize: '12px',
-                fontWeight: '600',
+                fontSize: '11px',
+                fontWeight: '700',
                 color: '#FFFFFF',
                 cursor: 'pointer',
-                transition: 'all 0.2s',
-                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)'
+                transition: 'all 0.2s ease',
+                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
+                whiteSpace: 'nowrap'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(0, 240, 255, 0.16)';
-                e.currentTarget.style.boxShadow = '0 0 14px rgba(0, 240, 255, 0.4)';
+                e.currentTarget.style.backgroundColor = 'rgba(0, 240, 255, 0.18)';
+                e.currentTarget.style.boxShadow = '0 0 14px rgba(0, 240, 255, 0.45)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = 'rgba(1, 16, 36, 0.92)';
@@ -2152,11 +2153,11 @@ const MadridDashboardV2: React.FC = () => {
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                fontSize: '11px',
-                fontWeight: '800',
+                fontSize: '10px',
+                fontWeight: '900',
                 fontFamily: 'sans-serif'
               }}>i</span>
-              <span>¿Cómo entender estos precios?</span>
+              <span style={{ color: '#FFFFFF', fontWeight: '700' }}>¿Cómo entender estos precios?</span>
             </button>
 
             <a
@@ -2164,30 +2165,31 @@ const MadridDashboardV2: React.FC = () => {
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                background: '#00F0FF',
-                border: '1.5px solid #00F0FF',
+                gap: '7px',
+                background: 'linear-gradient(135deg, #00F0FF 0%, #7928CA 100%)',
+                border: '1px solid rgba(255, 255, 255, 0.4)',
                 borderRadius: '20px',
-                padding: '6px 16px',
+                padding: '6px 18px',
                 fontSize: '12px',
                 fontWeight: '800',
-                color: '#011024',
+                color: '#FFFFFF',
                 textDecoration: 'none',
-                transition: 'all 0.2s',
-                boxShadow: '0 2px 12px rgba(0, 240, 255, 0.45)'
+                transition: 'all 0.2s ease',
+                boxShadow: '0 3px 14px rgba(0, 240, 255, 0.45)',
+                whiteSpace: 'nowrap'
               }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.04)';
-                e.currentTarget.style.boxShadow = '0 0 16px rgba(0, 240, 255, 0.7)';
+                e.currentTarget.style.transform = 'scale(1.05)';
+                e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 240, 255, 0.7)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = '0 2px 12px rgba(0, 240, 255, 0.45)';
+                e.currentTarget.style.boxShadow = '0 3px 14px rgba(0, 240, 255, 0.45)';
               }}
               title="Comprueba si un piso en Idealista o Fotocasa está caro con El Veredicto"
             >
-              <span>El Veredicto</span>
-              <span style={{ fontSize: '13px', fontWeight: '800' }}>→</span>
+              <span style={{ color: '#FFFFFF', fontWeight: '800', letterSpacing: '0.02em' }}>El Veredicto</span>
+              <span style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: '900' }}>→</span>
             </a>
           </div>
 
@@ -2348,16 +2350,16 @@ const MadridDashboardV2: React.FC = () => {
                         </span>
                       </div>
 
-                      <div style={{ fontSize: '11px', color: 'var(--azul-noche)', display: 'flex', flexDirection: 'column', gap: '4px', borderTop: '0.5px solid color-mix(in srgb, var(--azul-noche) 6%, transparent)', paddingTop: '6px' }}>
+                      <div style={{ fontSize: '11px', color: '#BACCD6', display: 'flex', flexDirection: 'column', gap: '4px', borderTop: '1px solid rgba(186, 204, 214, 0.16)', paddingTop: '6px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ color: 'var(--azul-linea)' }}>Hipoteca Estimada:</span>
-                          <span style={{ fontWeight: '600' }}>
+                          <span style={{ color: '#BACCD6' }}>Hipoteca Estimada:</span>
+                          <span style={{ fontWeight: '700', color: '#FFFFFF' }}>
                             {new Intl.NumberFormat('es-ES').format(Math.round((kpiData.p_vivienda || 0) * (ltvPercent / 100)))}€
                           </span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ color: 'var(--azul-linea)' }}>Aportación Comprador:</span>
-                          <span style={{ fontWeight: '600' }}>
+                          <span style={{ color: '#BACCD6' }}>Aportación Comprador:</span>
+                          <span style={{ fontWeight: '700', color: '#FFFFFF' }}>
                             {new Intl.NumberFormat('es-ES').format(Math.round((kpiData.p_vivienda || 0) * ((100 - ltvPercent) / 100)))}€
                           </span>
                         </div>
@@ -2371,13 +2373,13 @@ const MadridDashboardV2: React.FC = () => {
                               onClick={() => setLtvPercent(val)}
                               style={{
                                 flex: 1,
-                                padding: '3px 0',
+                                padding: '4px 0',
                                 fontSize: '10px',
-                                fontWeight: '600',
+                                fontWeight: '700',
                                 border: 'none',
                                 borderRadius: '4px',
-                                backgroundColor: ltvPercent === val ? activeProfile.color : 'color-mix(in srgb, var(--azul-noche) 5%, transparent)',
-                                color: ltvPercent === val ? 'var(--blanco-humo)' : 'var(--azul-noche)',
+                                backgroundColor: ltvPercent === val ? activeProfile.color : 'rgba(255, 255, 255, 0.08)',
+                                color: ltvPercent === val ? '#FFFFFF' : '#BACCD6',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s'
                               }}
@@ -2387,9 +2389,9 @@ const MadridDashboardV2: React.FC = () => {
                           ))}
                         </div>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', borderTop: '0.5px solid color-mix(in srgb, var(--azul-noche) 6%, transparent)', paddingTop: '6px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', borderTop: '1px solid rgba(186, 204, 214, 0.16)', paddingTop: '6px' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '9px', fontWeight: 'bold', color: 'var(--azul-linea)' }}>AJUSTE MANUAL LTV:</span>
+                            <span style={{ fontSize: '9px', fontWeight: 'bold', color: '#BACCD6' }}>AJUSTE MANUAL LTV:</span>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
                               <input
                                 type="number"
@@ -2401,18 +2403,19 @@ const MadridDashboardV2: React.FC = () => {
                                   setLtvPercent(val);
                                 }}
                                 style={{
-                                  width: '38px',
-                                  border: '0.5px solid var(--humo-2)',
+                                  width: '42px',
+                                  border: '1px solid rgba(0, 240, 255, 0.4)',
                                   borderRadius: '4px',
-                                  padding: '1px 3px',
-                                  fontSize: '10px',
+                                  padding: '2px 4px',
+                                  fontSize: '11px',
                                   fontWeight: '700',
                                   textAlign: 'center',
-                                  color: 'var(--azul-noche)',
+                                  background: '#011024',
+                                  color: '#FFFFFF',
                                   outline: 'none'
                                 }}
                               />
-                              <span style={{ fontSize: '10px', fontWeight: '700', color: 'var(--azul-noche)' }}>%</span>
+                              <span style={{ fontSize: '11px', fontWeight: '700', color: '#00F0FF' }}>%</span>
                             </div>
                           </div>
 
@@ -2428,7 +2431,7 @@ const MadridDashboardV2: React.FC = () => {
                               accentColor: activeProfile.color,
                               height: '4px',
                               borderRadius: '2px',
-                              background: 'var(--humo-2)',
+                              background: 'rgba(186, 204, 214, 0.2)',
                               outline: 'none',
                               margin: '2px 0'
                             }}
@@ -2436,13 +2439,13 @@ const MadridDashboardV2: React.FC = () => {
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', fontSize: '10px', color: 'var(--azul-linea)', fontWeight: '500', gap: '4px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', fontSize: '10px', color: '#BACCD6', fontWeight: '500', gap: '4px' }}>
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--coral)', flexShrink: 0 }}>
                           <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A5.5 5.5 0 0 0 7.5 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5" />
                           <path d="M9 18h6" />
                           <path d="M10 22h4" />
                         </svg>
-                        <span style={{ color: 'var(--azul-noche)', fontWeight: '600' }}>
+                        <span style={{ color: '#00F0FF', fontWeight: '600' }}>
                           {ltvPercent <= 65 ? 'Alto ahorro = Zona premium' : ltvPercent <= 75 ? 'Ahorro medio = Zona de estabilidad' : 'Financiación estándar'}
                         </span>
                       </div>
@@ -2603,66 +2606,67 @@ const MadridDashboardV2: React.FC = () => {
                           </div>
                           {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                         </div>
-                        <div style={{ fontSize: '12px', color: 'var(--azul-noche)' }}>
-                          Precio medio vivienda: <strong style={{ display: 'block', fontSize: '14px', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(precioMedio)}€</strong>
+                        <div style={{ fontSize: '12px', color: '#BACCD6' }}>
+                          Precio medio vivienda: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(precioMedio)}€</strong>
                         </div>
-                        <div style={{ fontSize: '12px', color: 'var(--azul-noche)' }}>
-                          Renta media {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ display: 'block', fontSize: '14px', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(rentaAnual)}€/año</strong>
+                        <div style={{ fontSize: '12px', color: '#BACCD6' }}>
+                          Renta media {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(rentaAnual)}€/año</strong>
                         </div>
-                        <div style={{ fontSize: '12px', color: 'var(--azul-noche)' }}>
-                          Años de renta media: <strong style={{ fontSize: '14px' }}>{aniosRenta > 0 ? aniosRenta.toFixed(1) : '-'} años</strong>
+                        <div style={{ fontSize: '12px', color: '#BACCD6', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span>Años de renta media:</span>
+                          <strong style={{ fontSize: '18px', color: '#00F0FF', fontWeight: '800' }}>{aniosRenta > 0 ? aniosRenta.toFixed(1) : '-'} años</strong>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '600', color: statusColor }}>
                           <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: statusColor }} />
                           <span>{statusText}</span>
                         </div>
 
-                        <div style={{ marginTop: '6px', paddingTop: '8px', borderTop: '1px solid var(--blanco-humo)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--azul-noche)' }}>¿Tu situación es diferente?</span>
+                        <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: '1px solid rgba(186, 204, 214, 0.16)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <span style={{ fontSize: '11px', fontWeight: '700', color: '#FFFFFF' }}>¿Tu situación es diferente?</span>
 
                           <div>
-                            <label style={{ fontSize: '10px', color: 'var(--azul-linea)' }}>Ingresos anuales (€)</label>
+                            <label style={{ fontSize: '10px', color: '#BACCD6' }}>Ingresos anuales (€)</label>
                             <input
                               type="number"
                               value={userPurchaseIncome}
                               onChange={(e) => { setUserPurchaseIncome(e.target.value); setShowPurchaseSim(false); }}
                               placeholder="Ej: 80000"
-                              style={{ width: '100%', padding: '5px 8px', borderRadius: '6px', border: '1px solid var(--humo-2)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
+                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
                             />
                           </div>
 
                           <div>
-                            <label style={{ fontSize: '10px', color: 'var(--azul-linea)' }}>Ahorros disponibles (€)</label>
+                            <label style={{ fontSize: '10px', color: '#BACCD6' }}>Ahorros disponibles (€)</label>
                             <input
                               type="number"
                               value={userPurchaseSavings}
                               onChange={(e) => { setUserPurchaseSavings(e.target.value); setShowPurchaseSim(false); }}
                               placeholder="Ej: 150000"
-                              style={{ width: '100%', padding: '5px 8px', borderRadius: '6px', border: '1px solid var(--humo-2)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
+                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
                             />
                           </div>
 
                           <button
                             onClick={() => setShowPurchaseSim(true)}
-                            style={{ width: '100%', background: activeProfile.color, color: activeProfile.color === 'var(--coral)' ? 'var(--texto-sobre-humo)' : 'var(--texto-sobre-azul)', border: 'none', padding: '6px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', transition: 'opacity 0.2s', marginTop: '4px' }}
+                            style={{ width: '100%', background: activeProfile.color, color: '#FFFFFF', border: 'none', padding: '7px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', transition: 'opacity 0.2s', marginTop: '4px' }}
                           >
                             Calcular MI caso
                           </button>
                         </div>
 
                         {hasUserSim && (
-                          <div style={{ marginTop: '6px', padding: '10px', background: 'var(--blanco-humo)', borderRadius: '8px', fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '6px', animation: 'v2FadeIn 0.2s ease' }}>
+                          <div style={{ marginTop: '6px', padding: '10px', background: 'rgba(0, 240, 255, 0.12)', border: '1px solid rgba(0, 240, 255, 0.35)', borderRadius: '8px', fontSize: '12px', color: '#FFFFFF', display: 'flex', flexDirection: 'column', gap: '6px', animation: 'v2FadeIn 0.2s ease' }}>
                             <div>
-                              <span style={{ color: 'var(--azul-linea)' }}>Con tus ingresos ({new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(parsedIncome)}€/año):</span>
+                              <span style={{ color: '#BACCD6' }}>Con tus ingresos ({new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(parsedIncome)}€/año):</span>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                                <span>Serían <strong>{userAnios.toFixed(1)} años</strong> → <strong style={{ color: userAniosColor }}>{userAniosStatus}</strong></span>
+                                <span>Serían <strong style={{ color: '#00F0FF' }}>{userAnios.toFixed(1)} años</strong> → <strong style={{ color: userAniosColor }}>{userAniosStatus}</strong></span>
                                 <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: userAniosColor }} />
                               </div>
                             </div>
                             <div>
-                              <span style={{ color: 'var(--azul-linea)' }}>Con tus ahorros ({new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(parsedSavings)}€):</span>
+                              <span style={{ color: '#BACCD6' }}>Con tus ahorros ({new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(parsedSavings)}€):</span>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                                <span>Entrada: <strong>{userEntradaPct.toFixed(0)}%</strong> → <strong style={{ color: userEntradaColor }}>{userEntradaStatus}</strong></span>
+                                <span>Entrada: <strong style={{ color: '#00F0FF' }}>{userEntradaPct.toFixed(0)}%</strong> → <strong style={{ color: userEntradaColor }}>{userEntradaStatus}</strong></span>
                                 <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: userEntradaColor }} />
                               </div>
                             </div>
@@ -2710,36 +2714,37 @@ const MadridDashboardV2: React.FC = () => {
                           </div>
                           {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                         </div>
-                        <div style={{ fontSize: '12px', color: 'var(--azul-noche)' }}>
-                          Alquiler medio {selectedBarrio !== 'Todos' ? 'en el barrio' : (selectedDistrict !== 'Todos' ? 'en el distrito' : 'en Madrid')}: <strong style={{ display: 'block', fontSize: '14px', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(alquiler)}€/mes</strong>
+                        <div style={{ fontSize: '12px', color: '#BACCD6' }}>
+                          Alquiler medio {selectedBarrio !== 'Todos' ? 'en el barrio' : (selectedDistrict !== 'Todos' ? 'en el distrito' : 'en Madrid')}: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(alquiler)}€/mes</strong>
                         </div>
-                        <div style={{ fontSize: '12px', color: 'var(--azul-noche)' }}>
-                          Renta media {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ display: 'block', fontSize: '14px', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(rentaMediaMensual)}€/mes <span style={{ fontSize: '10px', color: 'var(--azul-linea)', fontWeight: 'normal' }}>(dato INE)</span></strong>
+                        <div style={{ fontSize: '12px', color: '#BACCD6' }}>
+                          Renta media {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(rentaMediaMensual)}€/mes <span style={{ fontSize: '11px', color: '#00F0FF', fontWeight: 'bold' }}>(dato INE)</span></strong>
                         </div>
-                        <div style={{ fontSize: '12px', color: 'var(--azul-noche)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          Esfuerzo {selectedBarrio !== 'Todos' ? 'en este barrio' : (selectedDistrict !== 'Todos' ? 'en este distrito' : 'en Madrid')}: <strong style={{ fontSize: '14px' }}>{dedicar > 0 ? dedicar.toFixed(0) + '%' : '-'}</strong>
-                          <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: statusColor }} />
+                        <div style={{ fontSize: '12px', color: '#BACCD6', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span>Esfuerzo {selectedBarrio !== 'Todos' ? 'en este barrio' : (selectedDistrict !== 'Todos' ? 'en este distrito' : 'en Madrid')}:</span>
+                          <strong style={{ fontSize: '18px', color: '#00F0FF', fontWeight: '800' }}>{dedicar > 0 ? dedicar.toFixed(0) + '%' : '-'}</strong>
+                          <span style={{ display: 'inline-block', width: '9px', height: '9px', borderRadius: '50%', backgroundColor: statusColor, boxShadow: `0 0 8px ${statusColor}` }} />
                         </div>
 
-                        <div style={{ marginTop: '6px', paddingTop: '8px', borderTop: '1px solid var(--blanco-humo)' }}>
-                          <label style={{ fontSize: '10px', fontWeight: '600', color: 'var(--azul-linea)' }}>¿Cuál es TU renta?</label>
+                        <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: '1px solid rgba(186, 204, 214, 0.16)' }}>
+                          <label style={{ fontSize: '11px', fontWeight: '700', color: '#FFFFFF' }}>¿Cuál es TU renta?</label>
                           <input
                             type="number"
                             value={userRentSalary}
                             onChange={(e) => setUserRentSalary(e.target.value)}
                             placeholder="Sueldo neto mensual (€)"
-                            style={{ width: '100%', padding: '6px 10px', borderRadius: '8px', border: '1px solid var(--humo-2)', fontSize: '11px', marginTop: '4px', outline: 'none' }}
+                            style={{ width: '100%', padding: '7px 10px', borderRadius: '8px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '12px', marginTop: '4px', outline: 'none' }}
                           />
-                          <span style={{ fontSize: '9px', color: 'var(--azul-linea)', display: 'block', marginTop: '2px' }}>(Opcional, para comparar)</span>
+                          <span style={{ fontSize: '10px', color: '#BACCD6', display: 'block', marginTop: '3px' }}>(Opcional, para comparar)</span>
                         </div>
 
                         {hasUserSalary && (
-                          <div style={{ marginTop: '4px', padding: '8px', background: 'var(--blanco-humo)', borderRadius: '8px', fontSize: '11px', animation: 'v2FadeIn 0.2s ease' }}>
+                          <div style={{ marginTop: '6px', padding: '10px', background: 'rgba(0, 240, 255, 0.12)', border: '1px solid rgba(0, 240, 255, 0.35)', borderRadius: '8px', fontSize: '12px', color: '#FFFFFF', animation: 'v2FadeIn 0.2s ease' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                              <span>Tu esfuerzo real sería: <strong>{userEffort.toFixed(0)}%</strong></span>
-                              <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: userStatusColor }} />
+                              <span>Tu esfuerzo real sería: <strong style={{ color: '#00F0FF', fontSize: '14px' }}>{userEffort.toFixed(0)}%</strong></span>
+                              <span style={{ display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%', backgroundColor: userStatusColor }} />
                             </div>
-                            <span style={{ color: 'var(--azul-linea)', fontSize: '10px' }}>
+                            <span style={{ color: '#BACCD6', fontSize: '11px' }}>
                               ({userEffort < dedicar ? 'mucho mejor que la media' : 'peor que la media local'})
                             </span>
                           </div>
@@ -2801,48 +2806,48 @@ const MadridDashboardV2: React.FC = () => {
                           </div>
                           {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                         </div>
-                        <div style={{ fontSize: '12px', color: 'var(--azul-noche)' }}>
-                          GRM {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ fontSize: '14px', display: 'block', marginTop: '2px' }}>{grm > 0 ? grm.toFixed(1) : '-'} años <span style={{ fontSize: '10px', fontWeight: 'normal', color: 'var(--azul-linea)' }}>(recuperación)</span></strong>
+                        <div style={{ fontSize: '12px', color: '#BACCD6' }}>
+                          GRM {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ fontSize: '15px', color: '#FFFFFF', display: 'block', marginTop: '2px' }}>{grm > 0 ? grm.toFixed(1) : '-'} años <span style={{ fontSize: '10px', fontWeight: 'normal', color: '#00F0FF' }}>(recuperación)</span></strong>
                         </div>
-                        <div style={{ fontSize: '12px', color: 'var(--azul-noche)' }}>
-                          ROI Neto esperado: <strong style={{ fontSize: '14px', display: 'block', color: 'var(--azul-linea)', marginTop: '2px' }}>{roiNeto > 0 ? roiNeto.toFixed(1) : '-'}%/año</strong>
+                        <div style={{ fontSize: '12px', color: '#BACCD6' }}>
+                          ROI Neto esperado: <strong style={{ fontSize: '16px', display: 'block', color: '#00F0FF', fontWeight: '800', marginTop: '2px' }}>{roiNeto > 0 ? roiNeto.toFixed(1) : '-'}%/año</strong>
                         </div>
-                        <div style={{ fontSize: '12px', color: 'var(--azul-noche)' }}>
-                          Volumen de transacciones: <strong style={{ fontSize: '14px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(transacciones)}/año</strong>
+                        <div style={{ fontSize: '12px', color: '#BACCD6' }}>
+                          Volumen de transacciones: <strong style={{ fontSize: '15px', color: '#FFFFFF' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(transacciones)}/año</strong>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '600', color: liquidezColor }}>
                           <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: liquidezColor }} />
                           <span>{liquidezText}</span>
                         </div>
 
-                        <div style={{ marginTop: '6px', paddingTop: '8px', borderTop: '1px solid var(--blanco-humo)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <span style={{ fontSize: '11px', fontWeight: '700', color: 'var(--azul-noche)' }}>¿Quieres simular tu inversión?</span>
+                        <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: '1px solid rgba(186, 204, 214, 0.16)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          <span style={{ fontSize: '11px', fontWeight: '700', color: '#FFFFFF' }}>¿Quieres simular tu inversión?</span>
 
                           <div>
-                            <label style={{ fontSize: '10px', color: 'var(--azul-linea)' }}>Capital inicial (€)</label>
+                            <label style={{ fontSize: '10px', color: '#BACCD6' }}>Capital inicial (€)</label>
                             <input
                               type="number"
                               value={userInvCapital}
                               onChange={(e) => { setUserInvCapital(e.target.value); setShowInvSim(false); }}
                               placeholder="Ej: 300000"
-                              style={{ width: '100%', padding: '5px 8px', borderRadius: '6px', border: '1px solid var(--humo-2)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
+                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
                             />
                           </div>
 
                           <div>
-                            <label style={{ fontSize: '10px', color: 'var(--azul-linea)' }}>Duración (años)</label>
+                            <label style={{ fontSize: '10px', color: '#BACCD6' }}>Duración (años)</label>
                             <input
                               type="number"
                               value={userInvDuration}
                               onChange={(e) => { setUserInvDuration(e.target.value); setShowInvSim(false); }}
                               placeholder="Ej: 5"
-                              style={{ width: '100%', padding: '5px 8px', borderRadius: '6px', border: '1px solid var(--humo-2)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
+                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
                             />
                           </div>
 
                           <button
                             onClick={() => setShowInvSim(true)}
-                            style={{ width: '100%', background: activeProfile.color, color: activeProfile.color === 'var(--coral)' ? 'var(--texto-sobre-humo)' : 'var(--texto-sobre-azul)', border: 'none', padding: '6px', borderRadius: '6px', fontSize: '11px', fontWeight: '600', cursor: 'pointer', transition: 'opacity 0.2s', marginTop: '4px' }}
+                            style={{ width: '100%', background: activeProfile.color, color: '#FFFFFF', border: 'none', padding: '7px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', transition: 'opacity 0.2s', marginTop: '4px' }}
                           >
                             Ver proyección
                           </button>
@@ -3094,28 +3099,28 @@ const MadridDashboardV2: React.FC = () => {
               {/* COL 2: AFFORDABILITY / RENTABILITY / DEMAND RANKINGS */}
               <div className="v2-explorer-col v2-rankings-stack" style={{ minWidth: '260px' }}>
                 {activeProfile.id === 'venta' ? (
-                  <div className="v2-rank-mini-card" style={{ background: 'var(--blanco-humo)', padding: '16px', borderRadius: '16px', border: '0.5px solid var(--v2-border)', width: '100%' }}>
+                  <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
                     <div className="v2-rank-head" style={{ marginBottom: '16px' }}>
-                      <span style={{ fontSize: '14px', fontWeight: '700' }}>
+                      <span style={{ fontSize: '15px', fontWeight: '700', color: '#FFFFFF' }}>
                         {rankingLevel === 'Distritos' ? 'Distritos con mayor demanda' : 'Barrios con mayor demanda'}
                       </span>
-                      <span className="v2-rank-sub">Top 10 zonas con mayor volumen de transacciones</span>
+                      <span className="v2-rank-sub" style={{ color: '#BACCD6', fontSize: '11px' }}>Top 10 zonas con mayor volumen de transacciones</span>
                     </div>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                       <thead>
-                        <tr style={{ borderBottom: '1px solid var(--humo-2)', textAlign: 'left', color: 'var(--azul-linea)' }}>
-                          <th style={{ paddingBottom: '8px', fontWeight: '500' }}>{rankingLevel === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th>
-                          <th style={{ paddingBottom: '8px', fontWeight: '500', textAlign: 'right' }}>DEMANDA</th>
+                        <tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}>
+                          <th style={{ paddingBottom: '8px', fontWeight: '600' }}>{rankingLevel === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th>
+                          <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>DEMANDA</th>
                         </tr>
                       </thead>
                       <tbody>
                         {(rankingLevel === 'Distritos' ? rankings.topDist : rankings.topBarr).map((item, i) => {
                           return (
-                            <tr key={i} style={{ borderBottom: '1px solid var(--blanco-humo)' }}>
-                              <td style={{ padding: '8px 0', color: 'var(--azul-noche)', fontWeight: '600' }}>
+                            <tr key={i} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
+                              <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
                                 {i+1}. {item.name}
                               </td>
-                              <td style={{ padding: '8px 0', textAlign: 'right', color: 'var(--coral)', fontWeight: '600' }}>
+                              <td style={{ padding: '8px 0', textAlign: 'right', color: '#FF5C5C', fontWeight: '700' }}>
                                 {new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(item.value)} trans.
                               </td>
                             </tr>
@@ -3125,18 +3130,18 @@ const MadridDashboardV2: React.FC = () => {
                     </table>
                   </div>
                 ) : activeProfile.id !== 'inversion' ? (
-                  <div className="v2-rank-mini-card" style={{ background: 'var(--blanco-humo)', padding: '16px', borderRadius: '16px', border: '0.5px solid var(--v2-border)', width: '100%' }}>
+                  <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
                     <div className="v2-rank-head" style={{ marginBottom: '16px' }}>
-                      <span style={{ fontSize: '14px', fontWeight: '700' }}>
+                      <span style={{ fontSize: '15px', fontWeight: '700', color: '#FFFFFF' }}>
                         {rankingLevel === 'Distritos' ? 'Distritos más asequibles' : 'Barrios más asequibles'}
                       </span>
-                      <span className="v2-rank-sub">Top 10 zonas con menor carga financiera</span>
+                      <span className="v2-rank-sub" style={{ color: '#BACCD6', fontSize: '11px' }}>Top 10 zonas con menor carga financiera</span>
                     </div>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                       <thead>
-                        <tr style={{ borderBottom: '1px solid var(--humo-2)', textAlign: 'left', color: 'var(--azul-linea)' }}>
-                          <th style={{ paddingBottom: '8px', fontWeight: '500' }}>{rankingLevel === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th>
-                          <th style={{ paddingBottom: '8px', fontWeight: '500', textAlign: 'right' }}>PRECIO</th>
+                        <tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}>
+                          <th style={{ paddingBottom: '8px', fontWeight: '600' }}>{rankingLevel === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th>
+                          <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>PRECIO</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -3144,11 +3149,11 @@ const MadridDashboardV2: React.FC = () => {
                           const price = item.value || 0;
 
                           return (
-                            <tr key={i} style={{ borderBottom: '1px solid var(--blanco-humo)' }}>
-                              <td style={{ padding: '8px 0', color: 'var(--azul-noche)', fontWeight: '600' }}>
+                            <tr key={i} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
+                              <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
                                 {i+1}. {item.name}
                               </td>
-                              <td style={{ padding: '8px 0', textAlign: 'right', color: 'var(--azul-noche)', fontWeight: '500' }}>
+                              <td style={{ padding: '8px 0', textAlign: 'right', color: '#00F0FF', fontWeight: '700' }}>
                                 {new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(price)}€
                               </td>
                             </tr>
@@ -3158,29 +3163,29 @@ const MadridDashboardV2: React.FC = () => {
                     </table>
                   </div>
                 ) : (
-                  <div className="v2-rank-mini-card" style={{ background: 'var(--blanco-humo)', padding: '16px', borderRadius: '16px', border: '0.5px solid var(--v2-border)', width: '100%' }}>
+                  <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
                     <div className="v2-rank-head" style={{ marginBottom: '16px' }}>
-                      <span style={{ fontSize: '14px', fontWeight: '700' }}>
+                      <span style={{ fontSize: '15px', fontWeight: '700', color: '#FFFFFF' }}>
                         {rankingLevel === 'Distritos' ? 'Amortización por Distrito' : 'Amortización por Barrio'}
                       </span>
-                      <span className="v2-rank-sub">Menor tiempo de recuperación (GRM)</span>
+                      <span className="v2-rank-sub" style={{ color: '#BACCD6', fontSize: '11px' }}>Menor tiempo de recuperación (GRM)</span>
                     </div>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                       <thead>
-                        <tr style={{ borderBottom: '1px solid var(--humo-2)', textAlign: 'left', color: 'var(--azul-linea)' }}>
-                          <th style={{ paddingBottom: '8px', fontWeight: '500' }}>{rankingLevel === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th>
-                          <th style={{ paddingBottom: '8px', fontWeight: '500', textAlign: 'right' }}>AÑOS</th>
+                        <tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}>
+                          <th style={{ paddingBottom: '8px', fontWeight: '600' }}>{rankingLevel === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th>
+                          <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>AÑOS</th>
                         </tr>
                       </thead>
                       <tbody>
                         {(rankingLevel === 'Distritos' ? rankings.topDist : rankings.topBarr).map((item, i) => {
                           const yearsVal = item.value > 0 ? (1 / item.value).toFixed(1) + ' años' : '-';
                           return (
-                            <tr key={i} style={{ borderBottom: '1px solid var(--blanco-humo)' }}>
-                              <td style={{ padding: '8px 0', color: 'var(--azul-noche)', fontWeight: '600' }}>
+                            <tr key={i} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
+                              <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
                                 {i+1}. {item.name}
                               </td>
-                              <td style={{ padding: '8px 0', textAlign: 'right', color: 'var(--azul-linea)', fontWeight: '600' }}>
+                              <td style={{ padding: '8px 0', textAlign: 'right', color: '#00F0FF', fontWeight: '700' }}>
                                 {yearsVal}
                               </td>
                             </tr>
@@ -3200,22 +3205,29 @@ const MadridDashboardV2: React.FC = () => {
                     <button
                       onClick={() => setShowHeatmapHelpModal(true)}
                       style={{
-                        background: 'var(--blanco-humo)',
-                        border: '0.5px solid var(--humo-2)',
-                        borderRadius: '16px',
-                        padding: '4px 12px',
+                        background: 'rgba(1, 16, 36, 0.92)',
+                        border: '1.5px solid #00F0FF',
+                        borderRadius: '20px',
+                        padding: '5px 14px',
                         fontSize: '11px',
-                        fontWeight: '600',
-                        color: 'var(--azul-noche)',
+                        fontWeight: '700',
+                        color: '#FFFFFF',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '6px',
-                        transition: 'all 0.2s',
+                        gap: '7px',
+                        transition: 'all 0.2s ease',
+                        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
                         whiteSpace: 'nowrap'
                       }}
-                      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--humo-2)')}
-                      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--blanco-humo)')}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(0, 240, 255, 0.18)';
+                        e.currentTarget.style.boxShadow = '0 0 14px rgba(0, 240, 255, 0.45)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(1, 16, 36, 0.92)';
+                        e.currentTarget.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.5)';
+                      }}
                     >
                       <span style={{
                         display: 'inline-flex',
@@ -3224,14 +3236,13 @@ const MadridDashboardV2: React.FC = () => {
                         width: '15px',
                         height: '15px',
                         borderRadius: '50%',
-                        background: 'var(--precio-subida)',
-                        color: 'var(--blanco-humo)',
+                        backgroundColor: '#00F0FF',
+                        color: '#011024',
                         fontSize: '10px',
-                        fontWeight: 'bold',
-                        fontStyle: 'italic',
-                        fontFamily: 'serif'
+                        fontWeight: '900',
+                        fontFamily: 'sans-serif'
                       }}>i</span>
-                      <span>¿Cómo usar el mapa de calor?</span>
+                      <span style={{ color: '#FFFFFF', fontWeight: '700' }}>¿Cómo usar el mapa de calor?</span>
                     </button>
                   </div>
                   {Number(selectedYear) === 2026 && (
@@ -3301,7 +3312,7 @@ const MadridDashboardV2: React.FC = () => {
                   {/* COLUMNA IZQUIERDA: LIQUIDEZ */}
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: 'var(--azul-noche)' }}>
+                      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>
                         Liquidez por {liquidityLevel === 'distrito' ? 'Distrito' : 'Barrio'}
                       </h3>
                       <div className="v2-tabs-bg small">
@@ -3310,27 +3321,27 @@ const MadridDashboardV2: React.FC = () => {
                         <button className={`v2-tab-btn ${liquidityLevel === 'barrio' ? 'active' : ''}`} style={{ minWidth: '80px' }} onClick={() => setLiquidityLevel('barrio')}>Barrios</button>
                       </div>
                     </div>
-                    <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--azul-linea)', marginBottom: '20px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#BACCD6', marginBottom: '20px' }}>
                       Responde: ¿Si necesito vender, cuánto tardo?
                     </div>
 
                     <div className="v2-connectivity-list">
                       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                         <thead>
-                          <tr style={{ borderBottom: '1px solid var(--humo-2)', textAlign: 'left', color: 'var(--azul-linea)' }}>
-                            <th style={{ paddingBottom: '8px', fontWeight: '500' }}>{liquidityLevel === 'distrito' ? 'DISTRITO' : 'BARRIO'}</th>
-                            <th style={{ paddingBottom: '8px', fontWeight: '500', textAlign: 'center' }}>TRANSACCIONES/AÑO</th>
-                            <th style={{ paddingBottom: '8px', fontWeight: '500', textAlign: 'right' }}>¿PUEDO VENDER RÁPIDO?</th>
+                          <tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}>
+                            <th style={{ paddingBottom: '8px', fontWeight: '600' }}>{liquidityLevel === 'distrito' ? 'DISTRITO' : 'BARRIO'}</th>
+                            <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'center' }}>TRANSACCIONES/AÑO</th>
+                            <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>¿PUEDO VENDER RÁPIDO?</th>
                           </tr>
                         </thead>
                         <tbody>
                           {Array.isArray(liquidityData) && liquidityData.length > 0 ? (
                             liquidityData.map((item, idx) => (
-                              <tr key={idx} style={{ borderBottom: '1px solid var(--blanco-humo)' }}>
-                                <td style={{ padding: '12px 0', color: 'var(--azul-noche)', fontWeight: '600' }}>
+                              <tr key={idx} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
+                                <td style={{ padding: '12px 0', color: '#FFFFFF', fontWeight: '600' }}>
                                   {idx + 1}. {item.name}
                                 </td>
-                                <td style={{ padding: '12px 0', textAlign: 'center', color: 'var(--azul-noche)', fontWeight: '500' }}>
+                                <td style={{ padding: '12px 0', textAlign: 'center', color: '#00F0FF', fontWeight: '700' }}>
                                   {item.transactions}
                                 </td>
                                 <td style={{ padding: '12px 0', textAlign: 'right' }}>
@@ -3340,7 +3351,7 @@ const MadridDashboardV2: React.FC = () => {
                             ))
                           ) : (
                             <tr>
-                              <td colSpan={3} style={{ padding: '24px', textAlign: 'center', color: 'var(--azul-linea)' }}>
+                              <td colSpan={3} style={{ padding: '24px', textAlign: 'center', color: '#BACCD6' }}>
                                 No hay datos de liquidez disponibles.
                               </td>
                             </tr>
@@ -3351,12 +3362,12 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
 
                   {/* COLUMNA DERECHA: IMPACTO DE TIPOS DE INTERES */}
-                  <div className="v2-connectivity-selectors" style={{ borderLeft: '0.5px solid var(--v2-border)', paddingLeft: '40px', display: 'flex', flexDirection: 'column', width: '100%' }}>
+                  <div className="v2-connectivity-selectors" style={{ borderLeft: '1px solid rgba(186, 204, 214, 0.16)', paddingLeft: '40px', display: 'flex', flexDirection: 'column', width: '100%' }}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '16px' }}>
-                      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: 'var(--azul-noche)' }}>
+                      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>
                         Impacto de Tipos de Interés (Euríbor Trend)
                       </h3>
-                      <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--azul-linea)' }}>
+                      <span style={{ fontSize: '12px', fontWeight: '500', color: '#BACCD6' }}>
                         Relación entre Euríbor y Precio m² de compraventa
                       </span>
                     </div>
@@ -3367,8 +3378,8 @@ const MadridDashboardV2: React.FC = () => {
                     </div>
 
                     {/* Matriz Riesgo-Retorno */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '16px', paddingTop: '16px', borderTop: '0.5px solid var(--v2-border)' }}>
-                      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: 'var(--azul-noche)' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(186, 204, 214, 0.16)' }}>
+                      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>
                         Matriz Riesgo-Retorno
                       </h3>
                       <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--azul-linea)', marginBottom: '8px' }}>
@@ -3391,22 +3402,29 @@ const MadridDashboardV2: React.FC = () => {
                   <button
                     onClick={() => setShowCompareHelpModal(true)}
                     style={{
-                      background: 'var(--blanco-humo)',
-                      border: '0.5px solid var(--humo-2)',
-                      borderRadius: '16px',
-                      padding: '4px 12px',
+                      background: 'rgba(1, 16, 36, 0.92)',
+                      border: '1.5px solid #00F0FF',
+                      borderRadius: '20px',
+                      padding: '5px 14px',
                       fontSize: '11px',
-                      fontWeight: '600',
-                      color: 'var(--azul-noche)',
+                      fontWeight: '700',
+                      color: '#FFFFFF',
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px',
-                      transition: 'all 0.2s',
+                      gap: '7px',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
                       whiteSpace: 'nowrap'
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--humo-2)')}
-                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--blanco-humo)')}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(0, 240, 255, 0.18)';
+                      e.currentTarget.style.boxShadow = '0 0 14px rgba(0, 240, 255, 0.45)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = 'rgba(1, 16, 36, 0.92)';
+                      e.currentTarget.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.5)';
+                    }}
                   >
                     <span style={{
                       display: 'inline-flex',
@@ -3415,14 +3433,13 @@ const MadridDashboardV2: React.FC = () => {
                       width: '15px',
                       height: '15px',
                       borderRadius: '50%',
-                      background: 'var(--precio-subida)',
-                      color: 'var(--blanco-humo)',
+                      backgroundColor: '#00F0FF',
+                      color: '#011024',
                       fontSize: '10px',
-                      fontWeight: 'bold',
-                      fontStyle: 'italic',
-                      fontFamily: 'serif'
+                      fontWeight: '900',
+                      fontFamily: 'sans-serif'
                     }}>i</span>
-                    <span>¿Cómo usar la comparación?</span>
+                    <span style={{ color: '#FFFFFF', fontWeight: '700' }}>¿Cómo usar la comparación?</span>
                   </button>
                 </div>
                 <div className="v2-tabs-container" style={{ flex: 'none' }}>
