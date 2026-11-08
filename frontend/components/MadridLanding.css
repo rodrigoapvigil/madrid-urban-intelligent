@@ -1394,19 +1394,21 @@
 }
 
 .mi-trust-col__logo-wrap {
-  height: 64px;
+  height: clamp(74px, 7.5vw, 96px);
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  margin-top: 14px;
+  margin-top: clamp(16px, 2vw, 24px);
 }
 
 .mi-trust-col__logo {
   object-fit: contain;
-  height: clamp(44px, 4.5vw, 56px);
+  object-position: left center;
+  height: clamp(62px, 6.2vw, 84px);
   width: auto;
-  max-width: min(100%, 260px);
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.45));
+  max-width: min(100%, 310px);
+  filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.55));
 }
 
 @media (max-width: 900px) {

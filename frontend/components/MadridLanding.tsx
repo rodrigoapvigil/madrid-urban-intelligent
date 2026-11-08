@@ -259,14 +259,7 @@ export default function MadridLanding() {
                     <span>Ayuntamiento de Madrid · Datos Abiertos</span>
                   </div>
                   <div className="mi-trust-col__logo-wrap">
-                    <Image
-                      src="/logo-ayuntamiento-horizontal.svg"
-                      alt="Ayuntamiento de Madrid"
-                      width={220}
-                      height={52}
-                      unoptimized
-                      className="mi-trust-col__logo"
-                    />
+                    <Image src="/logo-ayuntamiento-official.png" alt="Ayuntamiento de Madrid" width={600} height={160} unoptimized priority className="mi-trust-col__logo" />
                   </div>
                 </article>
 
@@ -280,14 +273,7 @@ export default function MadridLanding() {
                     <span>Grupo SATEC · Sostenibilidad e Innovación</span>
                   </div>
                   <div className="mi-trust-col__logo-wrap">
-                    <Image
-                      src="/logo-satec-horizontal.svg"
-                      alt="Grupo SATEC"
-                      width={200}
-                      height={50}
-                      unoptimized
-                      className="mi-trust-col__logo"
-                    />
+                    <Image src="/logo-satec-official.png" alt="Grupo SATEC" width={800} height={201} unoptimized priority className="mi-trust-col__logo" />
                   </div>
                 </article>
 
@@ -301,14 +287,7 @@ export default function MadridLanding() {
                     <span>Universidad Politécnica de Madrid · UPM</span>
                   </div>
                   <div className="mi-trust-col__logo-wrap">
-                    <Image
-                      src="/logo-upm-horizontal.svg"
-                      alt="Universidad Politécnica de Madrid"
-                      width={240}
-                      height={50}
-                      unoptimized
-                      className="mi-trust-col__logo"
-                    />
+                    <Image src="/logo-upm-official.png" alt="Universidad Politécnica de Madrid" width={872} height={356} unoptimized priority className="mi-trust-col__logo" />
                   </div>
                 </article>
               </div>
