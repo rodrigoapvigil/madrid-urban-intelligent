@@ -9,37 +9,31 @@ type SiteHeaderProps = {
 };
 
 export function SiteHeader({ activePath, children }: SiteHeaderProps) {
-  const links = [
-    { href: '/madrid', label: 'Dashboard' },
-    { href: '/madrid/chat', label: 'AMBI' },
-    { href: '/madrid/veredicto', label: 'El Veredicto' },
-  ];
-
   return (
-    <header className="site-header">
+    <header className="site-header" role="banner">
       <div className="site-header-main">
         <Link href="/" className="site-brand" aria-label="DMIYC - Decide Madrid: Invierte Y Compra">
           <span className="mi-brand__mark">
-            <Image src="/decide-madrid-mark.webp" alt="DMIYC" width={38} height={38} />
+            <Image src="/decide-madrid-mark.webp" alt="DMIYC" width={38} height={38} priority />
           </span>
           <span className="mi-brand__text">
             <strong className="mi-brand__acronym">DMIYC</strong>
             <small className="mi-brand__subtitle">Decide Madrid · Invierte y Compra</small>
           </span>
         </Link>
+
         {children && <div className="site-header-context">{children}</div>}
+
         <nav className="site-navigation" aria-label="Navegación principal">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={activePath === link.href ? 'active' : ''}
-              aria-current={activePath === link.href ? 'page' : undefined}
-            >
-              {link.label}
-            </Link>
-          ))}
+          <Link href="/#plataforma">Plataforma</Link>
+          <Link href="/#impacto">A quién ayuda</Link>
+          <Link href="/madrid/chat" className={activePath === '/madrid/chat' ? 'active' : ''}>AMBI</Link>
+          <Link href="/madrid/veredicto" className={activePath === '/madrid/veredicto' ? 'active' : ''}>El Veredicto</Link>
         </nav>
+
+        <Link href="/madrid" className="mi-header__cta">
+          Ver precios <ArrowUpRight size={16} aria-hidden="true" />
+        </Link>
       </div>
     </header>
   );
@@ -59,7 +53,7 @@ export function SiteFooter() {
           <div className="auros-footer__cta-wrap">
             <span className="auros-footer__cta-label">Conecta con el proyecto</span>
             <Link href="/contacto" className="auros-footer__cta-button">
-              Contactar <ArrowUpRight size={17} aria-hidden="true" />
+              CONTACTAR <ArrowUpRight size={16} aria-hidden="true" />
             </Link>
           </div>
         </div>
@@ -67,15 +61,15 @@ export function SiteFooter() {
         {/* Fila central: Enlaces horizontales + Redes sociales */}
         <div className="auros-footer__mid">
           <nav className="auros-footer__nav" aria-label="Enlaces institucionales y legales">
-            <Link href="/madrid">Cuadro de mando</Link>
+            <Link href="/madrid">CUADRO DE MANDO</Link>
             <Link href="/madrid/chat">AMBI</Link>
-            <Link href="/madrid/veredicto">El Veredicto</Link>
-            <Link href="/metodologia">Metodología</Link>
-            <Link href="/sobre-el-proyecto">Sobre el proyecto</Link>
-            <Link href="/contacto">Contacto</Link>
-            <Link href="/privacidad">Privacidad</Link>
-            <Link href="/aviso-legal">Aviso legal</Link>
-            <Link href="/cookies">Cookies</Link>
+            <Link href="/madrid/veredicto">EL VEREDICTO</Link>
+            <Link href="/metodologia">METODOLOGÍA</Link>
+            <Link href="/sobre-el-proyecto">SOBRE EL PROYECTO</Link>
+            <Link href="/contacto">CONTACTO</Link>
+            <Link href="/privacidad">PRIVACIDAD</Link>
+            <Link href="/aviso-legal">AVISO LEGAL</Link>
+            <Link href="/cookies">COOKIES</Link>
           </nav>
 
           <div className="auros-footer__socials">
@@ -100,11 +94,8 @@ export function SiteFooter() {
           </div>
         </div>
 
-        {/* Fila inferior: Crédito institucional + Copyright */}
+        {/* Fila inferior: Copyright */}
         <div className="auros-footer__bottom">
-          <span className="auros-footer__credit">
-            PROYECTO ACADÉMICO INDEPENDIENTE · TRABAJO FIN DE MÁSTER (UPM)
-          </span>
           <span className="auros-footer__copyright">
             © 2026 DMIYC
           </span>

@@ -1,13 +1,19 @@
+/* ==========================================================================
+   EDITORIAL PAGE (Auros Privacy Policy Style con cuadro blanco y fondo degradado)
+   ========================================================================== */
 .editorial-page {
   min-height: 100vh;
   padding: clamp(40px, 5vw, 68px) clamp(16px, 3.5vw, 32px) clamp(80px, 8vw, 120px);
   color: #011024;
-  background:
-    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(0, 45, 84, 0.45), transparent 70%),
-    radial-gradient(circle at 85% 35%, rgba(0, 240, 255, 0.08), transparent 50%),
-    #02142B;
   position: relative;
   overflow: hidden;
+  /* Mismo fondo y degradados atmosféricos que la Landing Page */
+  background:
+    radial-gradient(ellipse 75% 85% at 12% 30%, rgba(22, 132, 167, 0.38) 0%, rgba(14, 110, 142, 0.24) 40%, rgba(2, 20, 43, 0.08) 72%, transparent 88%),
+    radial-gradient(circle 600px at 6% 14%, rgba(36, 160, 199, 0.28) 0%, rgba(14, 110, 142, 0.12) 50%, transparent 75%),
+    radial-gradient(ellipse 65% 75% at 92% 78%, rgba(14, 95, 128, 0.22) 0%, rgba(2, 20, 43, 0.15) 55%, transparent 80%),
+    radial-gradient(ellipse 100% 120% at 50% 50%, #02142B 0%, #011024 100%);
+  background-color: #02142B;
 }
 
 .editorial-page__inner {
@@ -24,19 +30,20 @@
 
 .editorial-page__eyebrow {
   margin: 0 0 16px;
-  color: #002D54;
+  color: #1684A7;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: .16em;
   text-transform: uppercase;
 }
 
+/* Títulos en Azul Esmeralda profundo */
 .editorial-page h1 {
   max-width: 860px;
   margin: 0 0 24px;
-  color: #011024;
+  color: #0E6E8E;
   font-size: clamp(34px, 4.6vw, 56px);
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.05;
   letter-spacing: -.045em;
   text-wrap: balance;
@@ -54,14 +61,15 @@
 
 .editorial-page__section {
   padding: 32px 0;
-  border-top: 1px solid rgba(0, 45, 84, 0.1);
+  border-top: 1px solid rgba(14, 110, 142, 0.15);
 }
 
+/* Subtítulos de sección en Azul Esmeralda */
 .editorial-page__section h2 {
   margin: 0 0 12px;
   font-size: clamp(22px, 2.2vw, 30px);
   font-weight: 600;
-  color: #011024;
+  color: #0E6E8E;
   letter-spacing: -.03em;
 }
 
@@ -74,7 +82,7 @@
 }
 
 .editorial-page__section a {
-  color: #002D54;
+  color: #0E6E8E;
   font-weight: 500;
   text-underline-offset: 3px;
   transition: color .2s ease;
@@ -87,7 +95,7 @@
 .editorial-page__note {
   margin: 32px 0 0;
   padding: 20px 24px;
-  border-left: 4px solid #002D54;
+  border-left: 4px solid #0E6E8E;
   border-radius: 8px;
   background: #F8FAFC;
   color: #334155;
@@ -98,7 +106,7 @@
 .editorial-page__notice {
   margin: 28px 0;
   padding: 20px 24px;
-  border-left: 4px solid #002D54;
+  border-left: 4px solid #0E6E8E;
   border-radius: 8px;
   background: #F1F5F9;
   color: #1E293B;
@@ -107,7 +115,7 @@
 .editorial-page__notice strong {
   display: block;
   margin-bottom: 8px;
-  color: #011024;
+  color: #0E6E8E;
 }
 
 .editorial-page__notice p {
@@ -123,7 +131,7 @@
   gap: 16px;
   margin-top: 40px;
   padding-top: 28px;
-  border-top: 1px solid rgba(0, 45, 84, 0.1);
+  border-top: 1px solid rgba(14, 110, 142, 0.15);
 }
 
 .editorial-page__button {
@@ -141,12 +149,12 @@
 }
 
 .editorial-page__button:hover {
-  background: #002D54;
+  background: #0E6E8E;
   transform: translateY(-1px);
 }
 
 .editorial-page__actions a:not(.editorial-page__button) {
-  color: #002D54;
+  color: #0E6E8E;
   font-weight: 600;
   font-size: 14px;
   text-underline-offset: 3px;
