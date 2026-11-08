@@ -81,11 +81,13 @@ export default function MadridLanding() {
         <section className="mi-platform" id="plataforma" aria-labelledby="mi-platform-title">
           <div className="mi-wrap">
             <div className="mi-platform__intro">
-              <div>
+              <div className="mi-platform__heading">
                 <p className="mi-kicker mi-kicker--muted">Un motor para cada decisión</p>
                 <h2 id="mi-platform-title">Elige tu objetivo.<br/><span>Domina los números.</span></h2>
               </div>
-              <p>Tanto si vas a firmar una hipoteca, fijar el alquiler de tu piso o rentabilizar tu capital, aquí tienes los datos exactos que necesitas antes de comprometerte.</p>
+              <div className="mi-platform__callout">
+                <p className="mi-platform__lead">Tanto si vas a firmar una hipoteca, fijar el alquiler de tu piso o rentabilizar tu capital, <strong>aquí tienes los datos exactos que necesitas antes de comprometerte.</strong></p>
+              </div>
             </div>
             <div className="mi-platform__frame">
               <div className="mi-platform__grid">

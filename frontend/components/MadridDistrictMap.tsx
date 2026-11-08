@@ -314,7 +314,7 @@ export default function MadridDistrictMap() {
         }
         ctx.globalCompositeOperation = 'source-over';
         ctx.globalAlpha = alpha;
-        ctx.fillStyle = active ? palette.coral : border ? palette.smoke : palette.rise;
+        ctx.fillStyle = active ? '#00F0FF' : border ? palette.smoke : palette.rise;
         ctx.beginPath();
         ctx.arc(px, py, Math.max(.7, radius), 0, Math.PI * 2);
         ctx.fill();

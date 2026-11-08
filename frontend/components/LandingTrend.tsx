@@ -76,8 +76,9 @@ export default function LandingTrend({ highlightMode = 'all' }: LandingTrendProp
       >
         <defs>
           <linearGradient id="trendGlow" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--color-coral-500, #FF6B5B)" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="var(--color-coral-500, #FF6B5B)" stopOpacity="0.0" />
+            <stop offset="0%" stopColor="#00F0FF" stopOpacity="0.32" />
+            <stop offset="65%" stopColor="#7928CA" stopOpacity="0.12" />
+            <stop offset="100%" stopColor="#011024" stopOpacity="0.0" />
           </linearGradient>
         </defs>
 
