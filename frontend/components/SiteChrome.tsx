@@ -6,12 +6,25 @@ import { ArrowUpRight, Linkedin, Github } from 'lucide-react';
 type SiteHeaderProps = {
   activePath?: string;
   children?: ReactNode;
+  profileTabs?: { id: string; label: string }[];
+  activeProfileId?: string;
+  onSelectProfile?: (id: string) => void;
+  ctaText?: string;
+  ctaHref?: string;
 };
 
-export function SiteHeader({ activePath }: SiteHeaderProps) {
+export function SiteHeader({
+  activePath,
+  children,
+  profileTabs,
+  activeProfileId,
+  onSelectProfile,
+  ctaText,
+  ctaHref,
+}: SiteHeaderProps) {
   return (
     <header className="mi-header site-header" role="banner">
-            <Link href="/" className="mi-brand site-brand" aria-label="DMIYC - Decide Madrid: Invierte Y Compra">
+      <Link href="/" className="mi-brand site-brand" aria-label="DMIYC - Decide Madrid: Invierte Y Compra">
         <span className="mi-brand__mark">
           <Image src="/decide-madrid-mark.svg" alt="DMIYC" width={40} height={40} priority unoptimized />
         </span>
@@ -21,15 +34,38 @@ export function SiteHeader({ activePath }: SiteHeaderProps) {
         </span>
       </Link>
 
-      <nav className="mi-nav site-navigation" aria-label="Navegación principal">
-        <Link href="/#plataforma">Plataforma</Link>
-        <Link href="/#impacto">A quién ayuda</Link>
-        <Link href="/madrid/chat" className={activePath === '/madrid/chat' ? 'active' : ''}>AMBI</Link>
-        <Link href="/madrid/veredicto" className={activePath === '/madrid/veredicto' ? 'active' : ''}>El Veredicto</Link>
-      </nav>
+      {profileTabs && profileTabs.length > 0 ? (
+        <nav className="mi-nav site-navigation mi-nav--profiles" aria-label="Perfiles de mercado">
+          <div className="mi-nav__profile-pill-group">
+            {profileTabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                className={`mi-nav__profile-pill ${activeProfileId === tab.id ? 'active' : ''}`}
+                onClick={() => onSelectProfile?.(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </nav>
+      ) : children ? (
+        <nav className="mi-nav site-navigation" aria-label="Navegación">{children}</nav>
+      ) : (
+        <nav className="mi-nav site-navigation" aria-label="Navegación principal">
+          <Link href="/#plataforma">Plataforma</Link>
+          <Link href="/#impacto">A quién ayuda</Link>
+          <Link href="/madrid/chat" className={activePath === '/madrid/chat' ? 'active' : ''}>AMBI</Link>
+          <Link href="/madrid/veredicto" className={activePath === '/madrid/veredicto' ? 'active' : ''}>El Veredicto</Link>
+        </nav>
+      )}
 
-      <Link href="/madrid" className="mi-header__cta">
-        Ver precios <ArrowUpRight size={14} aria-hidden="true" />
+      <Link
+        href={ctaHref || (activePath === '/madrid' ? '/madrid/veredicto' : '/madrid')}
+        className="mi-header__cta"
+      >
+        {ctaText || (activePath === '/madrid' ? 'El Veredicto' : 'Ver precios')}{' '}
+        <ArrowUpRight size={14} aria-hidden="true" />
       </Link>
     </header>
   );

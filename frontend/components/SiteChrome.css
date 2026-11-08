@@ -366,3 +366,57 @@
     radial-gradient(ellipse 120% 105% at 50% 50%, transparent 58%, rgba(0, 6, 14, 0.65) 100%),
     #02142B;
 }
+
+/* ==========================================================================
+   PERFILES DE MERCADO EN EL HEADER (Alquiler | Compra | Venta | Inversión)
+   ========================================================================== */
+.mi-nav--profiles {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mi-nav__profile-pill-group {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(1, 16, 36, 0.85);
+  border: 1px solid rgba(186, 204, 214, 0.18);
+  border-radius: 9999px;
+  padding: 4px;
+  gap: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+}
+
+.mi-nav__profile-pill {
+  border: none;
+  background: transparent;
+  padding: 8px 20px;
+  font-size: 13px;
+  font-weight: 550;
+  letter-spacing: -0.01em;
+  color: #BACCD6;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  white-space: nowrap;
+  outline: none;
+}
+
+.mi-nav__profile-pill:hover {
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.mi-nav__profile-pill.active {
+  color: #011024 !important;
+  background: #00F0FF !important;
+  font-weight: 750 !important;
+  box-shadow: 0 2px 14px rgba(0, 240, 255, 0.55) !important;
+}
+
+@media (max-width: 900px) {
+  .mi-nav__profile-pill {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+}

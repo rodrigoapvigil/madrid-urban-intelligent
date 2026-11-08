@@ -879,7 +879,7 @@ def get_comparison_kpis(anio: int, mes: str, op: str,
         if p_vivienda == 0 and anio >= 2026:
             dist_val = zona_nombre if zona_tipo == "distrito" else "Todos"
             barr_val = zona_nombre if zona_tipo == "barrio" else "Todos"
-            kpi_p_m2, kpi_p_vivienda, _, kpi_v_t, _, _, kpi_sup, _, _, _, _, _ = get_kpi_data(
+            kpi_p_m2, kpi_p_vivienda, _, kpi_v_t, _, _, kpi_sup, *rest = get_kpi_data(
                 anio, mes, op, dist_val, barr_val
             )
             p_vivienda = kpi_p_vivienda
@@ -894,7 +894,7 @@ def get_comparison_kpis(anio: int, mes: str, op: str,
             # Buscar precio venta para la misma zona y periodo
             dist_val = zona_nombre if zona_tipo == "distrito" else "Todos"
             barr_val = zona_nombre if zona_tipo == "barrio" else "Todos"
-            v_kpi_p_m2, v_kpi_p_vivienda, _, _, _, _, _, _, _, _, _, _ = get_kpi_data(
+            v_kpi_p_m2, v_kpi_p_vivienda, *rest = get_kpi_data(
                 anio, mes, "Venta", dist_val, barr_val
             )
             p_venta = v_kpi_p_vivienda
@@ -905,7 +905,7 @@ def get_comparison_kpis(anio: int, mes: str, op: str,
             # Si estamos en modo venta, buscar precio alquiler
             dist_val = zona_nombre if zona_tipo == "distrito" else "Todos"
             barr_val = zona_nombre if zona_tipo == "barrio" else "Todos"
-            a_kpi_p_m2, _, _, _, _, _, a_kpi_sup, _, _, _, _, _ = get_kpi_data(
+            a_kpi_p_m2, _, _, _, _, _, a_kpi_sup, *rest = get_kpi_data(
                 anio, mes, "Alquiler", dist_val, barr_val
             )
             p_alq = a_kpi_p_m2
