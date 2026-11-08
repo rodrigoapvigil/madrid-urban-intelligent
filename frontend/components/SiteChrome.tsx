@@ -11,13 +11,13 @@ type SiteHeaderProps = {
 export function SiteHeader({ activePath }: SiteHeaderProps) {
   return (
     <header className="mi-header site-header" role="banner">
-      <Link href="/" className="mi-brand site-brand" aria-label="DMIYC - Decide Madrid: Invierte Y Compra">
+            <Link href="/" className="mi-brand site-brand" aria-label="DMIYC - Decide Madrid: Invierte Y Compra">
         <span className="mi-brand__mark">
-          <Image src="/decide-madrid-mark.webp" alt="DMIYC" width={38} height={38} priority />
+          <Image src="/decide-madrid-mark.svg" alt="DMIYC" width={40} height={40} priority unoptimized />
         </span>
         <span className="mi-brand__text">
           <strong className="mi-brand__acronym">DMIYC</strong>
-          <small className="mi-brand__subtitle">Decide Madrid · Invierte y Compra</small>
+          <small className="mi-brand__subtitle">DECIDE MADRID · INVIERTE Y COMPRA</small>
         </span>
       </Link>
 

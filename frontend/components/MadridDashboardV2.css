@@ -2598,18 +2598,28 @@
   color: #FFFFFF !important;
 }
 
-/* 7. Zero dividing line between content and footer */
+/* 7. Zero dividing line between content and footer across all elements */
 .v2-root,
 .v2-viewport,
 .v2-panel,
 .v2-compare-section,
 .v2-overlay-wrapper,
-.auros-footer {
+.v2-overlay-body,
+.v2-overlay-header,
+.auros-footer,
+.auros-footer__inner,
+.auros-footer__top,
+.auros-footer__mid,
+.auros-footer__bottom {
   border-top: none !important;
   border-bottom: none !important;
+  outline: none !important;
 }
 
 .auros-footer {
   background: transparent !important;
+  background-color: transparent !important;
   border: none !important;
+  box-shadow: none !important;
+  margin-top: 0 !important;
 }
