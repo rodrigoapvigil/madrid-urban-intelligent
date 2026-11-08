@@ -869,7 +869,7 @@
 .mi-method__tag { padding: 9px 12px; border: 1px solid color-mix(in srgb, var(--blanco-humo) 25%, transparent); border-radius: 6px; color: var(--mi-mist); font-size: 13px; font-weight: 500; letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; }
 .mi-method__tag--forecast { border-color: color-mix(in srgb, var(--blanco-humo) 50%, transparent); color: var(--mi-lavender); }
 
-.mi-closing { position: relative; min-height: 600px; display: flex; align-items: center; overflow: hidden; background: transparent; }
+.mi-closing { position: relative; min-height: 600px; display: flex; align-items: center; overflow: visible; background: transparent !important; border: none !important; border-bottom: none !important; }
 .mi-closing__glow {
   position: absolute;
   top: 50%;
@@ -908,7 +908,22 @@
 .mi-closing .mi-kicker { justify-content: flex-start; margin-bottom: 22px; }
 .mi-closing h2 { max-width: 900px; font-size: clamp(82px,11vw,156px); }
 .mi-closing__inner > p:not(.mi-kicker) { max-width: 490px; margin: 24px 0 28px; color: var(--mi-silver); font-size: 16px; line-height: 1.5; }
-.mi-footer { padding: 58px 0 25px; background: color-mix(in srgb, var(--azul-noche) 58%, transparent); }
+/* FOOTER TRANSPARENTE: CONTINUACIÓN ININTERRUMPIDA DEL FONDO DE LANDING PAGE */
+.mi-home footer,
+.mi-home .auros-footer,
+.auros-footer,
+footer.auros-footer,
+.mi-footer {
+  width: 100% !important;
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  position: relative !important;
+  overflow: visible !important;
+}
 .mi-footer__top { min-height: 150px; display: grid; grid-template-columns: minmax(220px,.8fr) 1.6fr; align-items: start; gap: clamp(30px,6vw,90px); }
 .mi-footer__identity > p { max-width: 340px; margin: 14px 0 0; color: var(--mi-silver); font-size: 14px; line-height: 1.5; }
 .mi-footer__links { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 20px; }
