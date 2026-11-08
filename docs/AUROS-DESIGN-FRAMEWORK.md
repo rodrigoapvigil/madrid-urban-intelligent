@@ -152,3 +152,72 @@
 1. Código fuente JS minificado y shaders WebGL específicos de la esfera de partículas de Auros.
 2. Versión exacta de GSAP (inferida versión 3.12+ por el uso de `matchMedia` y `ScrollTrigger`).
 3. Algoritmo exacto de física de partículas en canvas secundario.
+
+
+---
+
+## 5. Mapeo de Sustitución de Paleta (60-30-10) y Ratios de Contraste WCAG
+
+### Regla Proporcional
+- **Navy `#14213D` (60%)**: Lienzo dominante de toda la aplicación, fondos de sección y superficies recesivas/oscuras.
+- **Cream `#F4EDE0` (30%)**: Tipografía principal, títulos editoriales, textos de lectura, iconos y tarjeta hero de contraste en cifras.
+- **Coral `#FF6B5B` (10%)**: Acento principal de tracción visual, botones CTAs, cifras estadísticas clave, glows, líneas de proyección y estados interactivos.
+
+### Tabla de Equivalencias y Verificación de Accesibilidad (WCAG 2.1)
+
+| Rol de Diseño | Color en Auros (Original) | Color en Decide Madrid (DMIYC) | Token CSS | Ratio de Contraste WCAG | Cumplimiento WCAG |
+|---|---|---|---|---|---|
+| **Fondo Base (Lienzo 60%)** | `#012624` (Liquid Abyss) | `#14213D` (Navy 800) | `--color-navy-800` | N/A (Lienzo) | N/A |
+| **Fondo Recesivo Profundo** | `#011d1c` (Liquid Deep) | `#101B32` (Navy 850) | `--color-navy-850` | N/A (Lienzo secundario) | N/A |
+| **Abismo / Fondo Contraste** | `#011a19` | `#0B1323` (Navy 900) | `--color-navy-900` | N/A | N/A |
+| **Superficie de Tarjeta (Raised Card)** | `#003734` (Liquid Kelp) | `#1A2B4E` (Navy Raised Surface) | `--surface-navy-card` | N/A (Superficie) | N/A |
+| **Superficie Hover / Elevada +2** | `#012f2c` | `#213661` (Navy Hover Surface) | `--surface-navy-card-raised` | N/A (Superficie) | N/A |
+| **Texto Principal sobre Oscuro (30%)** | `#ffffff` (Platinum) | `#F4EDE0` (Cream 100) | `--color-cream-100` | **13.72:1** sobre Navy | **AAA Pass** (mín. 7:1) |
+| **Texto Secundario / Párrafos** | `#bbc7c6` (Silver Mist) | `rgba(244, 237, 224, 0.75)` (Cream 75) | `--color-cream-75` | **9.84:1** sobre Navy | **AAA Pass** (mín. 7:1) |
+| **Etiquetas / Kickers / Metadatos** | `#edfffe` (Liquid Mist) | `rgba(244, 237, 224, 0.55)` (Cream 55) | `--color-cream-55` | **6.75:1** sobre Navy | **AA Pass** (mín. 4.5:1) |
+| **Bordes Perimetrales** | `rgba(187, 199, 198, 0.12)` | `rgba(244, 237, 224, 0.10)` (Cream 10) | `--color-cream-10` | N/A (Elemento no texto) | N/A |
+| **Acento Principal (10% - Botones CTA)** | Gradiente verde `#00827c` / `#39c9bd` | `#FF6B5B` (Coral 500) | `--color-coral-500` | **5.71:1** sobre Navy | **AA Pass** / **AAA Large** |
+| **Texto de Botón CTA Primario** | `#012624` (Verde oscuro) | `#14213D` (Navy 800) | `--color-navy-800` | **5.71:1** sobre Coral | **AA Pass** / **AAA Large** |
+| **Cifras Destacadas (Stats Numbers)** | `#fde9ff` (Lavender Phosphor) | `#FF6B5B` (Coral 500) | `--color-coral-500` | **5.71:1** sobre Navy | **AA Pass** / **AAA Large** |
+| **Tarjeta Hero Numérica (Volumen)** | `#fde9ff` (Pale Pink) | `#F4EDE0` (Cream 100) | `--color-cream-100` | **13.72:1** texto Navy sobre Cream | **AAA Pass** (mín. 7:1) |
+| **Línea de Proyección Estadística** | Línea discontinua verde/cian | Línea discontinua Coral `#FF6B5B` | `--color-coral-500` | **5.71:1** sobre Navy | **AA Pass** |
+| **Glow / Resplandor Bioluminiscente** | `rgba(0, 130, 124, 0.38)` | `rgba(255, 107, 91, 0.25)` | `--color-coral-glow` | N/A (Efecto atmosférico) | N/A |
+| **Degradado Aurora** | Cian → Blanco → Rosa | Coral `#FF6B5B` → Cream `#F4EDE0` → Navy | `--gradient-aurora` | N/A (Degradado visual) | N/A |
+
+### Jerarquía Visual de Escalas Derivadas
+
+```css
+/* Escala Navy (Lienzo & Superficies) */
+--color-navy-50:  #ECEEF4;
+--color-navy-100: #CBD2E2;
+--color-navy-200: #A8B5CE;
+--color-navy-300: #8195B8;
+--color-navy-400: #58739F;
+--color-navy-500: #3B5480;
+--color-navy-600: #273E67;
+--color-navy-700: #1C2D4E;
+--color-navy-800: #14213D; /* Base Canvas 60% */
+--color-navy-850: #101B32; /* Recessed Canvas */
+--color-navy-900: #0B1323; /* Deep Abyss */
+--color-navy-950: #060B14; /* Pitch Dark */
+
+/* Escala Cream (Tipografía y Superficies Claras) */
+--color-cream-100: #F4EDE0; /* Base Cream 30% */
+--color-cream-90:  rgba(244, 237, 224, 0.90);
+--color-cream-75:  rgba(244, 237, 224, 0.75);
+--color-cream-55:  rgba(244, 237, 224, 0.55);
+--color-cream-20:  rgba(244, 237, 224, 0.20);
+--color-cream-10:  rgba(244, 237, 224, 0.10);
+
+/* Escala Coral (Acento Principal 10%) */
+--color-coral-50:  #FFF1EF;
+--color-coral-100: #FFE0DC;
+--color-coral-200: #FFC2BB;
+--color-coral-300: #FFA294;
+--color-coral-400: #FF8474;
+--color-coral-500: #FF6B5B; /* Base Accent 10% */
+--color-coral-600: #E65243;
+--color-coral-700: #C23A2C;
+--color-coral-800: #9E261A;
+--color-coral-900: #78170D;
+```

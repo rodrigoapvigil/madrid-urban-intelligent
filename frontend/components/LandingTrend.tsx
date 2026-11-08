@@ -72,8 +72,8 @@ export default function LandingTrend() {
       >
         <defs>
           <linearGradient id="trendGlow" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--precio-subida)" stopOpacity="0.28" />
-            <stop offset="100%" stopColor="var(--precio-subida)" stopOpacity="0.0" />
+            <stop offset="0%" stopColor="var(--color-coral-500, #FF6B5B)" stopOpacity="0.28" />
+            <stop offset="100%" stopColor="var(--color-coral-500, #FF6B5B)" stopOpacity="0.0" />
           </linearGradient>
         </defs>
 

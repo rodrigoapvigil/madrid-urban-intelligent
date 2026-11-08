@@ -126,7 +126,7 @@ export default function MadridLanding() {
               </div>
 
               <div className="mi-auros-frame__body">
-                {/* Surface Card (Liquid Kelp #003734 matching Auros Explore) */}
+                {/* Surface Card (Navy Raised Surface #1A2B4E) */}
                 <div className="mi-auros-card">
                   <div className="mi-auros-card__head">
                     <p className="mi-kicker mi-kicker--muted">PREDICCIÓN Y TENDENCIA</p>
@@ -186,34 +186,53 @@ export default function MadridLanding() {
               <h2 id="mi-scale-title">Una ciudad.<br/><span>Datos reales sin sesgo.</span></h2>
             </div>
             <div className="mi-scale__stats">
-              <article className="mi-scale__stat--volume">
-                <strong><StatCounter end={16779} /></strong>
-                <span>Registros analíticos</span>
-                <small>10.794 transacciones oficiales de cierre y 5.985 estimaciones auditadas.</small>
+              {/* Card 1: Light Cream Contrasting Volume Card (Auros In Numbers Volume Card) */}
+              <article className="mi-scale__stat mi-scale__stat--volume">
+                <span className="mi-scale__stat-label">REGISTROS ANALÍTICOS</span>
+                <div className="mi-scale__stat-bottom">
+                  <strong className="mi-scale__stat-number"><StatCounter end={16779} /></strong>
+                  <small className="mi-scale__stat-desc">10.794 transacciones oficiales de cierre y 5.985 estimaciones auditadas.</small>
+                </div>
               </article>
-              <article>
-                <strong><StatCounter end={21} /></strong>
-                <span>Distritos</span>
-                <small>Cobertura total de la capital de punta a punta</small>
+
+              {/* Card 2: Distritos */}
+              <article className="mi-scale__stat">
+                <span className="mi-scale__stat-label">DISTRITOS</span>
+                <div className="mi-scale__stat-bottom">
+                  <strong className="mi-scale__stat-number"><StatCounter end={21} /></strong>
+                  <small className="mi-scale__stat-desc">Cobertura total de la capital de punta a punta</small>
+                </div>
               </article>
-              <article>
-                <strong><StatCounter end={131} /></strong>
-                <span>Barrios</span>
-                <small>El detalle quirúrgico detrás de cada tendencia</small>
+
+              {/* Card 3: Barrios */}
+              <article className="mi-scale__stat">
+                <span className="mi-scale__stat-label">BARRIOS</span>
+                <div className="mi-scale__stat-bottom">
+                  <strong className="mi-scale__stat-number"><StatCounter end={131} /></strong>
+                  <small className="mi-scale__stat-desc">El detalle quirúrgico detrás de cada tendencia</small>
+                </div>
               </article>
-              <article className="mi-scale__stat--population">
-                <strong><StatCounter end={3.49} decimals={2} unit="M" /></strong>
-                <span>Habitantes</span>
-                <small>
-                  <a href="https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Notas-de-prensa/Los-nacimientos-superaron-a-las-defunciones-en-564-personas-en-2025-un-crecimiento-vegetativo-que-no-se-producia-en-Madrid-desde-hacia-seis-anos/?vgnextchannel=6091317d3d2a7010VgnVCM100000dc0ca8c0RCRD&amp;vgnextfmt=default&amp;vgnextoid=81bdd56de9ddd910VgnVCM100000891ecb1aRCRD" target="_blank" rel="noreferrer">
-                    Padrón oficial a 1 de enero de 2026 ↗
-                  </a>
-                </small>
+
+              {/* Card 4: Habitantes */}
+              <article className="mi-scale__stat mi-scale__stat--population">
+                <span className="mi-scale__stat-label">HABITANTES</span>
+                <div className="mi-scale__stat-bottom">
+                  <strong className="mi-scale__stat-number"><StatCounter end={3.49} decimals={2} unit="M" /></strong>
+                  <small className="mi-scale__stat-desc">
+                    <a href="https://www.madrid.es/portales/munimadrid/es/Inicio/El-Ayuntamiento/Notas-de-prensa/Los-nacimientos-superaron-a-las-defunciones-en-564-personas-en-2025-un-crecimiento-vegetativo-que-no-se-producia-en-Madrid-desde-hacia-seis-anos/?vgnextchannel=6091317d3d2a7010VgnVCM100000dc0ca8c0RCRD&amp;vgnextfmt=default&amp;vgnextoid=81bdd56de9ddd910VgnVCM100000891ecb1aRCRD" target="_blank" rel="noreferrer">
+                      Padrón oficial a 1 de enero de 2026 ↗
+                    </a>
+                  </small>
+                </div>
               </article>
-              <article>
-                <strong><StatCounter end={4} /></strong>
-                <span>Perfiles especializados</span>
-                <small>Alquiler · Compra · Venta · Inversión</small>
+
+              {/* Card 5: Perfiles Especializados */}
+              <article className="mi-scale__stat">
+                <span className="mi-scale__stat-label">PERFILES ESPECIALIZADOS</span>
+                <div className="mi-scale__stat-bottom">
+                  <strong className="mi-scale__stat-number"><StatCounter end={4} /></strong>
+                  <small className="mi-scale__stat-desc">Alquiler · Compra · Venta · Inversión</small>
+                </div>
               </article>
             </div>
           </div>

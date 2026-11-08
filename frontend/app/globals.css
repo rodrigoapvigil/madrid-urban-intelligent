@@ -33,18 +33,65 @@
   --font-weight-regular: 400;
   --font-weight-medium: 500;
 
+  /* ========================================================
+     AUROS TWIN — 60-30-10 PALETTE TOKENS
+     Base: Navy #14213D (60%) | Cream #F4EDE0 (30%) | Coral #FF6B5B (10%)
+     Zero green/teal residual. All roles mapped strictly.
+     ======================================================== */
+
+  /* Navy Scale (60% — Canvas & Surfaces) */
+  --color-navy-50:  #ECEEF4;
+  --color-navy-100: #CBD2E2;
+  --color-navy-200: #A8B5CE;
+  --color-navy-300: #8195B8;
+  --color-navy-400: #58739F;
+  --color-navy-500: #3B5480;
+  --color-navy-600: #273E67;
+  --color-navy-700: #1C2D4E;
+  --color-navy-800: #14213D; /* BASE CANVAS (60%) */
+  --color-navy-850: #101B32; /* Recessed Canvas */
+  --color-navy-900: #0B1323; /* Deep Abyss */
+  --color-navy-950: #060B14; /* Pitch Dark */
+
+  /* Raised Navy Surfaces for Cards & Floating Panels */
+  --surface-navy-card:        #1A2B4E; /* Step 1 raised card */
+  --surface-navy-card-raised: #213661; /* Step 2 raised/hover card */
+  --surface-navy-subtle:      #121D36; /* Step -1 inset surface */
+
+  /* Cream Scale & Opacities (30% — Typography & Light Surfaces) */
+  --color-cream-100: #F4EDE0; /* Base Cream (30%) */
+  --color-cream-90:  rgba(244, 237, 224, 0.90);
+  --color-cream-75:  rgba(244, 237, 224, 0.75);
+  --color-cream-55:  rgba(244, 237, 224, 0.55);
+  --color-cream-20:  rgba(244, 237, 224, 0.20);
+  --color-cream-10:  rgba(244, 237, 224, 0.10);
+  --color-cream-5:   rgba(244, 237, 224, 0.05);
+
+  /* Coral Scale (10% — Primary Accent, CTAs, Highlights & Glows) */
+  --color-coral-50:  #FFF1EF;
+  --color-coral-100: #FFE0DC;
+  --color-coral-200: #FFC2BB;
+  --color-coral-300: #FFA294;
+  --color-coral-400: #FF8474;
+  --color-coral-500: #FF6B5B; /* BASE ACCENT (10%) */
+  --color-coral-600: #E65243;
+  --color-coral-700: #C23A2C;
+  --color-coral-800: #9E261A;
+  --color-coral-900: #78170D;
+  --color-coral-glow: rgba(255, 107, 91, 0.35);
+
   color-scheme: dark;
-  --azul-noche: #0E2238;
-  --azul-noche-2: #16304D;
-  --azul-linea: #2A4766;
-  --blanco-humo: #F2F0EC;
-  --humo-2: #E4E1DB;
-  --coral: #FF6B5B;
-  --coral-texto: #D8483A;
-  --texto-sobre-azul: var(--blanco-humo);
-  --texto-sobre-humo: var(--azul-noche);
-  --texto-secundario-azul: #9FB2C6;
-  --precio-subida: #5FA8D3;
+  --azul-noche: var(--color-navy-800);
+  --azul-noche-2: var(--surface-navy-card);
+  --azul-linea: var(--color-navy-600);
+  --blanco-humo: var(--color-cream-100);
+  --humo-2: #E8DFCF;
+  --coral: var(--color-coral-500);
+  --coral-texto: var(--color-navy-800);
+  --texto-sobre-azul: var(--color-cream-100);
+  --texto-sobre-humo: var(--color-navy-800);
+  --texto-secundario-azul: var(--color-cream-75);
+  --precio-subida: var(--color-coral-400);
 
   /* Compatibility aliases keep existing component styles on the same palette. */
   --mui-blue-950: var(--azul-noche);
