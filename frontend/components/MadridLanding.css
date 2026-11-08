@@ -89,7 +89,7 @@
 .mi-home .mi-auros-feature:focus-visible,
 .mi-home .mi-insight-card:focus-visible,
 .mi-home .mi-scale__stat:focus-visible {
-  outline: 2px solid var(--color-coral-500) !important;
+  outline: 2px solid #00F0FF !important;
   outline-offset: 3px !important;
   border-radius: inherit;
 }
@@ -112,11 +112,11 @@
     radial-gradient(ellipse 75% 85% at 12% 30%, rgba(22, 132, 167, 0.38) 0%, rgba(14, 110, 142, 0.24) 40%, rgba(2, 20, 43, 0.08) 72%, transparent 88%),
     /* Núcleo luminoso difuso en cuadrante superior izquierdo */
     radial-gradient(circle 600px at 6% 14%, rgba(36, 160, 199, 0.28) 0%, rgba(14, 110, 142, 0.12) 50%, transparent 75%),
-    /* Acento coral de calidez en la penumbra inferior izquierda */
-    radial-gradient(circle 440px at 16% 76%, rgba(255, 107, 91, 0.06) 0%, transparent 70%),
-    /* 2. CAPA DERECHA CONTINUA OSCURA (Transición diagonal armónica hacia Midnight Blue / Void #011024) */
+    /* 2. DEGRADADO METICULOSO DERECHA INFERIOR (Toque sutil minucioso para realzar tarjetas de la derecha) */
+    radial-gradient(ellipse 55% 42% at 92% 78%, rgba(22, 132, 167, 0.16) 0%, rgba(121, 40, 202, 0.08) 38%, transparent 72%),
+    /* 3. CAPA DERECHA CONTINUA OSCURA (Transición diagonal armónica hacia Midnight Blue / Void #011024) */
     linear-gradient(108deg, transparent 28%, rgba(1, 16, 36, 0.45) 50%, rgba(1, 16, 36, 0.88) 74%, #010B19 96%),
-    /* 3. VIÑETA PERIMETRAL DE AUROS ENMARCANDO TODO EL VIEWPORT */
+    /* 4. VIÑETA PERIMETRAL DE AUROS ENMARCANDO TODO EL VIEWPORT */
     radial-gradient(ellipse 120% 105% at 50% 50%, transparent 58%, rgba(0, 6, 14, 0.65) 100%),
     /* Fondo base sólido Deep Navy #02142B */
     #02142B;
@@ -232,8 +232,8 @@
 .mi-hero__content { position: relative; z-index: 2; width: min(980px,calc(100% - 48px)); padding-top: clamp(48px,6.8vh,84px); text-align: center; }
 .mi-hero__kicker { display: inline-block; margin: 0 auto 18px; color: #00F0FF; font-size: 15px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; opacity: .95; text-shadow: 0 0 12px rgba(0, 240, 255, 0.4); }
 .mi-kicker { margin: 0 0 24px; display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--mi-silver); font-size: 10px; font-weight: 500; letter-spacing: .14em; line-height: 1.4; text-transform: uppercase; }
-.mi-kicker > span { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--mi-sky); box-shadow: 0 0 12px color-mix(in srgb, var(--precio-subida) 50%, transparent); }
-.mi-kicker > i { width: 20px; height: 1px; background: var(--mi-sky); }
+.mi-kicker > span { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #00F0FF; box-shadow: 0 0 12px rgba(0, 240, 255, 0.5); }
+.mi-kicker > i { width: 20px; height: 1px; background: #00F0FF; }
 .mi-hero h1 { max-width: 960px; margin: 0 auto; color: var(--mi-white); font-size: clamp(48px,6.1vw,80px); font-weight: 500; letter-spacing: -.045em; line-height: 1.04; text-wrap: balance; }
 .mi-hero h1 span { color: var(--mi-mist); }
 .mi-hero__lead { max-width: 760px; margin: 22px auto 0; color: var(--color-cream-75); font-size: clamp(18px,1.6vw,21px); font-weight: 400; line-height: 1.48; text-wrap: balance; }
@@ -735,27 +735,23 @@
   flex-direction: column;
   justify-content: space-between;
   border-radius: 16px;
-  background-color: var(--surface-navy-card);
-  background-image: radial-gradient(rgba(244, 237, 224, 0.08) 1.2px, transparent 1.2px);
-  background-size: 24px 24px;
-  border: 1px solid var(--color-cream-10);
+  background-color: #011024;
+  border: 1px solid rgba(186, 204, 214, 0.14);
   transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
 }
 .mi-scale__stat:hover {
   transform: translateY(-3px);
-  border-color: var(--color-cream-20);
-  box-shadow: 0 12px 32px rgba(11, 19, 35, 0.4);
+  border-color: rgba(0, 240, 255, 0.35);
+  box-shadow: 0 14px 36px rgba(0, 16, 36, 0.5), 0 0 20px rgba(0, 240, 255, 0.12);
 }
-/* Card 1: Cream Hero/Volume card (Auros In Numbers Volume Card) */
+/* Card 1: Platinum Pure White Volume card (Replacing beige with pure crisp white) */
 .mi-scale__stat--volume {
   grid-row: span 2;
   min-height: 540px;
-  background-color: var(--color-cream-100);
-  background-image: radial-gradient(rgba(20, 33, 61, 0.05) 1.2px, transparent 1.2px);
-  background-size: 24px 24px;
-  color: var(--color-navy-800);
-  border: 1px solid rgba(20, 33, 61, 0.12);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  background-color: #FFFFFF;
+  color: #011024;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 16px 48px rgba(0, 16, 36, 0.35), 0 0 32px rgba(255, 255, 255, 0.15);
 }
 .mi-scale__stat--volume:hover {
   box-shadow: 0 16px 48px rgba(0, 0, 0, 0.22);
@@ -783,18 +779,21 @@
   letter-spacing: -.055em;
   line-height: .95;
   font-variant-numeric: tabular-nums;
-  color: var(--color-coral-500) !important;
+  color: #00F0FF !important;
+  text-shadow: 0 0 24px rgba(0, 240, 255, 0.28);
 }
 .mi-scale__stat--volume .mi-scale__stat-number, .mi-scale__stat--volume strong {
   font-size: clamp(60px, 6.5vw, 98px);
   letter-spacing: -.065em;
-  color: var(--color-navy-800) !important;
+  color: #011024 !important;
+  text-shadow: none !important;
 }
 .mi-scale__stat--volume .mi-stat-counter {
-  color: var(--color-navy-800) !important;
+  color: #011024 !important;
+  text-shadow: none !important;
 }
 .mi-scale__stat .mi-stat-counter {
-  color: var(--color-coral-500) !important;
+  color: #00F0FF !important;
 }
 .mi-scale__unit {
   font-size: .52em;
@@ -1101,11 +1100,11 @@
   justify-content: space-between;
   padding: clamp(28px, 3.2vw, 40px);
   border-radius: 16px;
-  background: var(--surface-navy-card); border: 1px solid var(--color-cream-10);
-  border: 1px solid color-mix(in srgb, var(--color-silver-mist) 14%, transparent);
+  background: #011024;
+  border: 1px solid rgba(186, 204, 214, 0.14);
   text-decoration: none;
   color: inherit;
-  transition: transform .25s ease, border-color .25s ease, background .25s ease;
+  transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease;
   min-height: 340px;
 }
 .mi-insight-card:hover {
@@ -1147,7 +1146,8 @@
   height: 15px;
 }
 .mi-insight-card:hover .mi-insight-card__arrow {
-  background: var(--color-coral-500);
+  background: linear-gradient(135deg, #00F0FF 0%, #7928CA 100%);
+  color: #011024;
   transform: translate(2px, -2px);
 }
 .mi-insight-card__kicker {
@@ -1295,7 +1295,7 @@
 
 .mi-award-card {
   position: relative;
-  background: var(--surface-navy-card);
+  background: #011024;
   border: 1px solid rgba(186, 204, 214, 0.14);
   border-radius: 18px;
   padding: clamp(28px, 3.5vw, 40px);

@@ -64,8 +64,8 @@
   --color-navy-950: #00060E; /* Pitch Dark */
 
   /* Raised Navy Surfaces for Cards & Floating Panels */
-  --surface-navy-card:        #002D54; /* Cobalt Dusk / Royal Navy */
-  --surface-navy-card-raised: #003A6C; /* Step 2 raised/hover card */
+  --surface-navy-card: #011024; /* Cobalt Dusk / Royal Navy */
+  --surface-navy-card-raised: #011732; /* Step 2 raised/hover card */
   --surface-navy-subtle:      #011024; /* Step -1 inset surface */
 
   /* Atmospheric Metallic & Emerald Tones */
@@ -131,16 +131,16 @@
 
   color-scheme: dark;
   --azul-noche: var(--color-navy-800);
-  --azul-noche-2: var(--surface-navy-card);
+  --azul-noche-2: #011024;
   --azul-linea: var(--color-slate-blue);
   --blanco-humo: var(--color-platinum);
   --humo-2: #E8DFCF;
-  --coral: var(--color-coral-500);
+  --coral: var(--color-cyan-neon);
   --coral-texto: var(--color-navy-800);
   --texto-sobre-azul: var(--color-platinum);
   --texto-sobre-humo: var(--color-navy-800);
   --texto-secundario-azul: var(--color-ice-mist);
-  --precio-subida: var(--color-coral-400);
+  --precio-subida: var(--color-cyan-neon);
 
   /* Compatibility aliases keep existing component styles on the same palette. */
   --mui-blue-950: var(--azul-noche);
