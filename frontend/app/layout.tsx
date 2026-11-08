@@ -1,5 +1,6 @@
 import React from 'react'
 import type { Metadata, Viewport } from 'next'
+import SmoothScroll from '../components/SmoothScroll'
 import './globals.css'
 import '../components/SiteChrome.css'
 
@@ -31,7 +32,7 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#0E2238',
+  themeColor: '#14213D',
 }
 
 export default function RootLayout({
@@ -42,6 +43,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body>
+        <SmoothScroll />
         {children}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org', '@type': 'WebSite', name: 'Decide Madrid: Invierte Y Compra',

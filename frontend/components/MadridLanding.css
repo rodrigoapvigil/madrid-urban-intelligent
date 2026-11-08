@@ -84,7 +84,15 @@
 }
 .mi-home *, .mi-home *::before, .mi-home *::after { box-sizing: border-box; }
 .mi-home a { color: inherit; text-decoration: none; }
-.mi-home a:focus-visible, .mi-home button:focus-visible { outline: 2px solid var(--mi-mist); outline-offset: 4px; }
+.mi-home a:focus-visible,
+.mi-home button:focus-visible,
+.mi-home .mi-auros-feature:focus-visible,
+.mi-home .mi-insight-card:focus-visible,
+.mi-home .mi-scale__stat:focus-visible {
+  outline: 2px solid var(--color-coral-500) !important;
+  outline-offset: 3px !important;
+  border-radius: inherit;
+}
 .mi-wrap { width: var(--mi-wrap); margin-inline: auto; }
 .mi-home main, .mi-home footer { position: relative; z-index: 1; }
 

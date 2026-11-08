@@ -7,14 +7,79 @@ export const contentType = 'image/png';
 
 export default function OpenGraphImage() {
   return new ImageResponse(
-    <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', padding: '58px 68px', color: '#F2F0EC', background: 'radial-gradient(ellipse at 80% 75%, #16304D 0%, #0E2238 45%, #0E2238 100%)', fontFamily: 'Arial, sans-serif' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 18, color: '#F2F0EC', fontSize: 24, letterSpacing: 2 }}>▥ <span>DECIDE MADRID: INVIERTE Y COMPRA</span></div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        <div style={{ fontSize: 68, lineHeight: 1, fontWeight: 500 }}>El mercado de Madrid,</div>
-        <div style={{ fontSize: 68, lineHeight: 1, color: '#F2F0EC', fontWeight: 500 }}>en perspectiva.</div>
-        <div style={{ marginTop: 18, maxWidth: 850, fontSize: 26, lineHeight: 1.4, color: '#9FB2C6' }}>Precios de alquiler, compra y venta. Datos oficiales y tendencias por barrio.</div>
+    <div
+      style={{
+        width: '100%',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '58px 68px',
+        color: '#F4EDE0',
+        background: 'radial-gradient(ellipse at 80% 75%, #1A2B4E 0%, #14213D 55%, #0B1323 100%)',
+        fontFamily: 'system-ui, sans-serif',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 16,
+          color: '#FF6B5B',
+          fontSize: 22,
+          fontWeight: 600,
+          letterSpacing: 2,
+        }}
+      >
+        <div
+          style={{
+            width: 14,
+            height: 14,
+            borderRadius: '50%',
+            backgroundColor: '#FF6B5B',
+          }}
+        />
+        <span>DECIDE MADRID: INVIERTE Y COMPRA (DMIYC)</span>
       </div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', color: '#9FB2C6', fontSize: 18, letterSpacing: 2 }}><span>21 DISTRITOS</span><span>131 BARRIOS · MADRID</span></div>
-    </div>, size,
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ fontSize: 64, lineHeight: 1.05, fontWeight: 700, color: '#F4EDE0' }}>
+          El mercado de Madrid,
+        </div>
+        <div style={{ fontSize: 64, lineHeight: 1.05, fontWeight: 700, color: '#FF6B5B' }}>
+          con datos reales sin sesgo.
+        </div>
+        <div
+          style={{
+            marginTop: 16,
+            maxWidth: 900,
+            fontSize: 24,
+            lineHeight: 1.4,
+            color: 'rgba(244, 237, 224, 0.75)',
+          }}
+        >
+          Compra o alquila con precios de cierre oficial en los 131 barrios de Madrid. Sin caer en ofertas infladas.
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          paddingTop: 24,
+          borderTop: '1px solid rgba(244, 237, 224, 0.15)',
+          color: 'rgba(244, 237, 224, 0.75)',
+          fontSize: 16,
+          letterSpacing: 2,
+          textTransform: 'uppercase',
+        }}
+      >
+        <span>21 DISTRITOS AUDITADOS</span>
+        <span style={{ color: '#FF6B5B' }}>16.779 OPERACIONES CONSOLIDADAS</span>
+        <span>131 BARRIOS · MADRID</span>
+      </div>
+    </div>,
+    size,
   );
 }
