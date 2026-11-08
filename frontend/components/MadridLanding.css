@@ -1520,13 +1520,13 @@
   width: 36px !important;
   height: 36px !important;
   object-fit: contain;
-  transform: rotate(90deg) !important;
+  transform: none !important;
   transition: transform 0.28s ease, filter 0.28s ease;
   filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.45));
 }
 
 .mi-brand:hover .mi-brand__mark img {
-  transform: rotate(90deg) scale(1.08) !important;
+  transform: scale(1.08) !important;
   filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.75));
 }
 
