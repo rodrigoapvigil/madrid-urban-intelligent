@@ -493,12 +493,6 @@
   position: relative;
 }
 
-.v2-chart-wrap canvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-}
-
 .v2-chart-wrap.large {
   height: 520px;
 }

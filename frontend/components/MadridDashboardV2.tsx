@@ -1052,20 +1052,7 @@ const MadridDashboardV2: React.FC = () => {
 
           return new ChartJS(ctx, {
             type: 'line',
-            plugins: [
-              {
-                id: 'legendSpacing',
-                beforeInit(chart) {
-                  if (chart.legend) {
-                    const originalFit = chart.legend.fit;
-                    chart.legend.fit = function fit() {
-                      originalFit.bind(chart.legend)();
-                      this.height += 8;
-                    };
-                  }
-                }
-              }
-            ],
+            plugins: [],
             data: {
               labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
               datasets: [
@@ -1336,9 +1323,28 @@ const MadridDashboardV2: React.FC = () => {
           });
         };
 
-        if (ctxA) chartsRef.current.push(createLineChart(ctxA, selectedZoneA, seriesA, selectedZoneB, seriesB));
-        if (ctxB) chartsRef.current.push(createLineChart(ctxB, selectedZoneB, seriesB, selectedZoneA, seriesA, 'var(--azul-noche)'));
+        if (ctxA) {
+          try {
+            const prevA = ChartJS.getChart(ctxA);
+            if (prevA) prevA.destroy();
+            chartsRef.current.push(createLineChart(ctxA, selectedZoneA, seriesA, selectedZoneB, seriesB));
+          } catch (e) {
+            console.error('Error creating Chart A:', e);
+          }
+        }
+        if (ctxB) {
+          try {
+            const prevB = ChartJS.getChart(ctxB);
+            if (prevB) prevB.destroy();
+            chartsRef.current.push(createLineChart(ctxB, selectedZoneB, seriesB, selectedZoneA, seriesA, '#00F0FF'));
+          } catch (e) {
+            console.error('Error creating Chart B:', e);
+          }
+        }
         if (ctxOverlay) {
+          try {
+            const prevO = ChartJS.getChart(ctxOverlay);
+            if (prevO) prevO.destroy();
           const overlayMultiplier = activeProfile.id === 'inversion' ? 100 : 1;
           const effA = (seriesA && seriesA.length > 0 && seriesA.some(d => d && d.precio_m2 != null))
             ? seriesA
@@ -1356,20 +1362,7 @@ const MadridDashboardV2: React.FC = () => {
           const overlayScale = getNiceChartScale([overlayA, overlayB, overlayMadrid]);
           chartsRef.current.push(new ChartJS(ctxOverlay, {
             type: 'line',
-            plugins: [
-              {
-                id: 'legendSpacing',
-                beforeInit(chart) {
-                  if (chart.legend) {
-                    const originalFit = chart.legend.fit;
-                    chart.legend.fit = function fit() {
-                      originalFit.bind(chart.legend)();
-                      this.height += 8;
-                    };
-                  }
-                }
-              }
-            ],
+            plugins: [],
             data: {
               labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
               datasets: [
@@ -1647,6 +1640,9 @@ const MadridDashboardV2: React.FC = () => {
               }
             }
           }));
+          } catch (e) {
+            console.error('Error creating Overlay chart:', e);
+          }
         }
 
         // ── Scatter plot (Opportunity Chart) ──────────────────────────────────
