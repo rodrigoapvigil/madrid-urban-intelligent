@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowDown, ArrowRight, ArrowUpRight } from 'lucide-react';
@@ -24,6 +27,7 @@ const audiences = [
 ];
 
 export default function MadridLanding() {
+  const [trendHighlight, setTrendHighlight] = useState<'real' | 'prediction' | 'all'>('all');
   return (
     <div className="mi-home" id="inicio">
       <div className="mi-atmosphere" aria-hidden="true"/>
@@ -137,7 +141,12 @@ export default function MadridLanding() {
                   </div>
 
                   <div className="mi-auros-features">
-                    <Link href="/madrid" className="mi-auros-feature">
+                    <Link 
+                      href="/madrid" 
+                      className={`mi-auros-feature ${trendHighlight === 'real' ? 'mi-auros-feature--active' : ''}`}
+                      onMouseEnter={() => setTrendHighlight('real')}
+                      onMouseLeave={() => setTrendHighlight('all')}
+                    >
                       <div className="mi-auros-feature__header">
                         <h3>Datos de cierre oficiales</h3>
                         <span className="mi-auros-arrow" aria-hidden="true"><ArrowUpRight /></span>
@@ -145,7 +154,11 @@ export default function MadridLanding() {
                       <p>Trayectoria consolidada de transacciones reales mes a mes desde 2023, sin distorsión de anuncios inflados.</p>
                     </Link>
 
-                    <div className="mi-auros-feature">
+                    <div 
+                      className={`mi-auros-feature ${trendHighlight === 'prediction' ? 'mi-auros-feature--active' : ''}`}
+                      onMouseEnter={() => setTrendHighlight('prediction')}
+                      onMouseLeave={() => setTrendHighlight('all')}
+                    >
                       <div className="mi-auros-feature__header">
                         <h3>Machine Learning calibrado</h3>
                         <span className="mi-auros-arrow" aria-hidden="true"><ArrowUpRight /></span>
@@ -153,7 +166,12 @@ export default function MadridLanding() {
                       <p>Modelos predictivos que proyectan la curva de precios de cada distrito distinguiendo el dato real de la estimación.</p>
                     </div>
 
-                    <Link href="/metodologia" className="mi-auros-feature mi-auros-feature--active">
+                    <Link 
+                      href="/metodologia" 
+                      className={`mi-auros-feature ${trendHighlight === 'all' ? 'mi-auros-feature--active' : ''}`}
+                      onMouseEnter={() => setTrendHighlight('all')}
+                      onMouseLeave={() => setTrendHighlight('all')}
+                    >
                       <div className="mi-auros-feature__header">
                         <h3>Rigor metodológico y fuentes</h3>
                         <span className="mi-auros-arrow" aria-hidden="true"><ArrowUpRight /></span>
@@ -165,7 +183,7 @@ export default function MadridLanding() {
 
                 {/* Right side: Grand Visual Pane with the Trend Chart */}
                 <div className="mi-auros-visual">
-                  <LandingTrend />
+                  <LandingTrend highlightMode={trendHighlight} />
                 </div>
               </div>
             </div>

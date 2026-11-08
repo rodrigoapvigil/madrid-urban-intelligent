@@ -20,7 +20,11 @@ const FLOW_DATA: FlowPoint[] = [
   { mes: 'Dic', precio: 22.9, isPrediction: true },
 ];
 
-export default function LandingTrend() {
+type LandingTrendProps = {
+  highlightMode?: 'real' | 'prediction' | 'all';
+};
+
+export default function LandingTrend({ highlightMode = 'all' }: LandingTrendProps) {
   const chart = useMemo(() => {
     const min = 17;
     const max = 24;
