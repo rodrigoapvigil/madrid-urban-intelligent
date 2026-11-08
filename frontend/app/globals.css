@@ -94,17 +94,52 @@
   --color-coral-900: #78170D;
   --color-coral-glow: rgba(255, 107, 91, 0.35);
 
+    /* ========================================================
+     PALETA DE NEUTRALES ADAPTADA AL AZUL
+     - Platinum:    #FFFFFF (Encabezados y máximo contraste)
+     - Arctic Mist: #E6F0FA (Textos destacados y etiquetas)
+     - Alpine Ash:  #F0F4F8 (Citas y textos terciarios)
+     - Ice Mist:    #BACCD6 (Textos secundarios con subtono azul hielo)
+     - Slate Blue:  #5C6B73 (Líneas y elementos inactivos)
+     - Slate Deep:  #243342 (Fondos de menor elevación / insets)
+     ======================================================== */
+  --color-platinum:          #FFFFFF;
+  --color-arctic-mist:       #E6F0FA;
+  --color-alpine-ash:        #F0F4F8;
+  --color-ice-mist:          #BACCD6;
+  --color-slate-blue:        #5C6B73;
+  --surface-slate-deep:      #243342;
+
+  /* ========================================================
+     PALETA DE ACENTOS Y DEGRADADOS FUTURISTAS (Fondo Azul)
+     - Cian Neón:        #00F0FF (Color de Énfasis Individual)
+     - Magenta Neón:     #FF55BB (Énfasis de Alta Energía)
+     - Degradado Botón:  Azul Turquesa (#00F0FF) ➔ Violeta Vibrante (#7928CA)
+     - Degradado Secund: Rosa Eléctrico (#FF55BB) ➔ Azul Cobalto (#002D54)
+     ======================================================== */
+  --color-cyan-neon:         #00F0FF;
+  --color-magenta-neon:      #FF55BB;
+  --color-violet-vibrant:    #7928CA;
+  --color-lavender-phosphor: #00F0FF;
+
+  --gradient-button-primary:       linear-gradient(135deg, #00F0FF 0%, #7928CA 100%);
+  --gradient-button-primary-hover: linear-gradient(135deg, #33F3FF 0%, #8E3CE6 100%);
+  --gradient-secondary:            linear-gradient(135deg, #FF55BB 0%, #002D54 100%);
+  --gradient-bioluminescent:       linear-gradient(135deg, #00F0FF 0%, #FF55BB 100%);
+  --gradient-aurora:               linear-gradient(90deg, #00F0FF 0%, #7928CA 45%, #FF55BB 75%, #002D54 100%);
+  --button-text-on-gradient:       #011024;
+
   color-scheme: dark;
   --azul-noche: var(--color-navy-800);
   --azul-noche-2: var(--surface-navy-card);
-  --azul-linea: var(--color-navy-600);
-  --blanco-humo: var(--color-cream-100);
+  --azul-linea: var(--color-slate-blue);
+  --blanco-humo: var(--color-platinum);
   --humo-2: #E8DFCF;
   --coral: var(--color-coral-500);
   --coral-texto: var(--color-navy-800);
-  --texto-sobre-azul: var(--color-cream-100);
+  --texto-sobre-azul: var(--color-platinum);
   --texto-sobre-humo: var(--color-navy-800);
-  --texto-secundario-azul: var(--color-cream-75);
+  --texto-secundario-azul: var(--color-ice-mist);
   --precio-subida: var(--color-coral-400);
 
   /* Compatibility aliases keep existing component styles on the same palette. */

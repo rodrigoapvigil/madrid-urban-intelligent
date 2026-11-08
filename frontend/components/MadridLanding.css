@@ -46,30 +46,30 @@
   --color-coral-900: #78170D;
   --color-coral-glow: rgba(255, 107, 91, 0.35);
 
-  /* Semantic Role Aliases (Replacing Auros liquid green tokens) */
+  /* Semantic Role Aliases — Adaptados al Azul (Neutrales & Acentos de Alta Energía) */
   --surface-liquid-abyss: var(--color-navy-900);
   --surface-liquid-deep:  var(--color-navy-850);
   --surface-liquid-kelp:  var(--surface-navy-card);
-  --surface-slate-deep:   var(--color-navy-400);
+  --surface-slate-deep:   var(--surface-slate-deep, #243342);
 
-  --color-platinum:          var(--color-cream-100);
-  --color-liquid-mist:       var(--color-cream-100);
-  --color-silver-mist:       var(--color-cream-75);
-  --color-ash:               var(--color-cream-90);
-  --color-lavender-phosphor: var(--color-coral-500);
+  --color-platinum:          #FFFFFF;
+  --color-liquid-mist:       #E6F0FA; /* Arctic Mist */
+  --color-silver-mist:       #BACCD6; /* Ice Mist */
+  --color-ash:               #F0F4F8; /* Alpine Ash */
+  --color-lavender-phosphor: #00F0FF; /* Cian Neón */
 
-  --gradient-bioluminescent: linear-gradient(90deg, #FF6B5B 0%, #F4EDE0 100%);
-  --gradient-aurora: linear-gradient(90deg, #FF6B5B 0%, #FF9A8F 26.25%, #F4EDE0 47.57%, #3B5480 88.96%);
+  --gradient-bioluminescent: linear-gradient(135deg, #00F0FF 0%, #FF55BB 100%);
+  --gradient-aurora: linear-gradient(90deg, #00F0FF 0%, #7928CA 45%, #FF55BB 75%, #002D54 100%);
 
   --mi-deep: var(--color-navy-850);
   --mi-surface: var(--color-navy-800);
   --mi-raised: var(--surface-navy-card);
   --mi-raised-2: var(--surface-navy-card-raised);
-  --mi-sky: var(--color-coral-500);
-  --mi-mist: var(--color-cream-100);
-  --mi-white: var(--color-cream-100);
-  --mi-silver: var(--color-cream-75);
-  --mi-lavender: var(--color-coral-500);
+  --mi-sky: var(--color-cyan-neon, #00F0FF);
+  --mi-mist: var(--color-liquid-mist);
+  --mi-white: var(--color-platinum);
+  --mi-silver: var(--color-silver-mist);
+  --mi-lavender: var(--color-cyan-neon, #00F0FF);
   --mi-wrap: min(1440px, calc(100% - 112px));
   --mi-font: var(--font-matter, 'Matter', 'Inter', 'DM Sans', Satoshi, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
   min-height: 100vh;
@@ -151,23 +151,29 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid var(--color-coral-400);
+  border: 1px solid rgba(0, 240, 255, 0.45);
   border-radius: 8px;
-  color: var(--color-navy-800) !important;
-  background: var(--color-coral-500);
-  box-shadow: 0 4px 16px rgba(20, 33, 61, 0.35), 0 0 16px rgba(255, 107, 91, 0.35);
+  color: #011024 !important;
+  background: linear-gradient(135deg, #00F0FF 0%, #7928CA 100%);
+  box-shadow: 0 4px 16px rgba(0, 45, 84, 0.35), 0 0 16px rgba(0, 240, 255, 0.30);
   font-family: var(--mi-font);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: .06em;
   text-transform: uppercase;
   transition: all .2s ease;
 }
 .mi-header__cta:hover {
-  background: var(--color-coral-400);
+  background: linear-gradient(135deg, #33F3FF 0%, #8E3CE6 100%);
   filter: brightness(1.08);
   transform: translateY(-1px);
-  box-shadow: 0 6px 22px rgba(20, 33, 61, 0.45), 0 0 24px rgba(255, 107, 91, 0.55);
+  box-shadow: 0 6px 22px rgba(0, 45, 84, 0.45), 0 0 24px rgba(0, 240, 255, 0.50);
+}
+.mi-header__cta svg {
+  width: 14px;
+  height: 14px;
+  stroke: #011024;
+  stroke-width: 2.5;
 }
 .mi-header__cta svg {
   width: 14px;
@@ -175,16 +181,7 @@
   stroke: var(--color-navy-800);
   stroke-width: 2.5;
 }
-.mi-header__cta:hover {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 18px rgba(230, 249, 246, 0.5);
-}
-.mi-header__cta svg {
-  width: 14px;
-  height: 14px;
-  stroke-width: 2.5;
-}
+
 
 .mi-hero__cta-main, .mi-button {
   min-height: 48px;
@@ -193,40 +190,31 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  border: 1px solid var(--color-coral-400);
+  border: 1px solid rgba(0, 240, 255, 0.45);
   border-radius: 8px;
-  color: var(--color-navy-800) !important;
-  background: var(--color-coral-500);
-  box-shadow: 0 4px 20px rgba(20, 33, 61, 0.4), 0 0 20px rgba(255, 107, 91, 0.35);
+  color: #011024 !important;
+  background: linear-gradient(135deg, #00F0FF 0%, #7928CA 100%);
+  box-shadow: 0 4px 20px rgba(0, 45, 84, 0.4), 0 0 20px rgba(0, 240, 255, 0.35);
   font-family: var(--mi-font);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: .08em;
   text-transform: uppercase;
   transition: all .2s ease;
 }
 .mi-hero__cta-main:hover, .mi-button:hover {
-  background: var(--color-coral-400);
+  background: linear-gradient(135deg, #33F3FF 0%, #8E3CE6 100%);
   filter: brightness(1.08);
   transform: translateY(-2px);
-  box-shadow: 0 6px 26px rgba(20, 33, 61, 0.5), 0 0 28px rgba(255, 107, 91, 0.55);
+  box-shadow: 0 6px 26px rgba(0, 45, 84, 0.5), 0 0 28px rgba(0, 240, 255, 0.55);
 }
 .mi-hero__cta-main svg, .mi-button svg {
   width: 15px;
   height: 15px;
-  stroke: var(--color-navy-800);
+  stroke: #011024;
   stroke-width: 2.5;
 }
-.mi-hero__cta-main:hover, .mi-button:hover {
-  filter: brightness(1.06);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3), 0 0 24px rgba(230, 249, 246, 0.5);
-}
-.mi-hero__cta-main svg, .mi-button svg {
-  width: 15px;
-  height: 15px;
-  stroke-width: 2.5;
-}
+
 
 /* Hero: one message, one action, and clean fine-line Madrid panorama.
    Transparent background flowing seamlessly on the global unified atmosphere. */
@@ -242,7 +230,7 @@
 }
 
 .mi-hero__content { position: relative; z-index: 2; width: min(980px,calc(100% - 48px)); padding-top: clamp(48px,6.8vh,84px); text-align: center; }
-.mi-hero__kicker { display: inline-block; margin: 0 auto 18px; color: var(--color-coral-400); font-size: 15px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; opacity: .95; }
+.mi-hero__kicker { display: inline-block; margin: 0 auto 18px; color: #00F0FF; font-size: 15px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; opacity: .95; text-shadow: 0 0 12px rgba(0, 240, 255, 0.4); }
 .mi-kicker { margin: 0 0 24px; display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--mi-silver); font-size: 10px; font-weight: 500; letter-spacing: .14em; line-height: 1.4; text-transform: uppercase; }
 .mi-kicker > span { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: var(--mi-sky); box-shadow: 0 0 12px color-mix(in srgb, var(--precio-subida) 50%, transparent); }
 .mi-kicker > i { width: 20px; height: 1px; background: var(--mi-sky); }
@@ -255,7 +243,7 @@
   padding: 0 34px; 
   font-size: 15px; 
   border-radius: 10px;
-  box-shadow: 0 6px 24px rgba(20, 33, 61, 0.45), 0 0 24px rgba(255, 107, 91, 0.4);
+  box-shadow: 0 6px 24px rgba(0, 45, 84, 0.45), 0 0 24px rgba(0, 240, 255, 0.4);
 }
 .mi-hero__content .mi-hero__cta-main svg, .mi-hero__content .mi-button svg {
   width: 17px;
