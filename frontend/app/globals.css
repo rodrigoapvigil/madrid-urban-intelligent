@@ -39,24 +39,38 @@
      Zero green/teal residual. All roles mapped strictly.
      ======================================================== */
 
-  /* Navy Scale (60% — Canvas & Surfaces) */
-  --color-navy-50:  #ECEEF4;
-  --color-navy-100: #CBD2E2;
-  --color-navy-200: #A8B5CE;
-  --color-navy-300: #8195B8;
-  --color-navy-400: #58739F;
-  --color-navy-500: #3B5480;
-  --color-navy-600: #273E67;
-  --color-navy-700: #1C2D4E;
-  --color-navy-800: #14213D; /* BASE CANVAS (60%) */
-  --color-navy-850: #101B32; /* Recessed Canvas */
-  --color-navy-900: #0B1323; /* Deep Abyss */
-  --color-navy-950: #060B14; /* Pitch Dark */
+    /* ========================================================
+     AUROS TWIN — PALETA CONTINUA UNIFICADA
+     Fondo primario & atmósfera: #02142B (Azul Marino Abisal)
+     Capa hundida / medio tono:  #011024 (Midnight Blue / Void)
+     Superficie elevada & cards:  #002D54 (Cobalt Dusk / Royal Navy)
+     Luz / Acento atmosférico:   #1684A7 / #0E6E8E (Azul Metálico & Esmeralda)
+     Cream tipografía:           #F4EDE0 | Coral acento: #FF6B5B
+     ======================================================== */
+
+  /* Deep Navy Scale (Canvas & Surfaces Unificados) */
+  --color-navy-50:  #E6EFF7;
+  --color-navy-100: #C2D8EC;
+  --color-navy-200: #96BDE0;
+  --color-navy-300: #5C9ACD;
+  --color-navy-400: #2974B0;
+  --color-navy-500: #1684A7; /* Azul Metálico / Cyan */
+  --color-navy-600: #0E6E8E; /* Azul Esmeralda Abisal */
+  --color-navy-700: #003666;
+  --color-navy-750: #002D54; /* SUPERFICIE ELEVADA / COBALT DUSK / ROYAL NAVY */
+  --color-navy-800: #02142B; /* FONDO PRIMARIO Y ATMÓSFERA BASE / OCEAN ABYSS */
+  --color-navy-850: #011024; /* CAPA HUNDIDA / MIDNIGHT BLUE / VOID */
+  --color-navy-900: #010B19; /* Deep Void */
+  --color-navy-950: #00060E; /* Pitch Dark */
 
   /* Raised Navy Surfaces for Cards & Floating Panels */
-  --surface-navy-card:        #1A2B4E; /* Step 1 raised card */
-  --surface-navy-card-raised: #213661; /* Step 2 raised/hover card */
-  --surface-navy-subtle:      #121D36; /* Step -1 inset surface */
+  --surface-navy-card:        #002D54; /* Cobalt Dusk / Royal Navy */
+  --surface-navy-card-raised: #003A6C; /* Step 2 raised/hover card */
+  --surface-navy-subtle:      #011024; /* Step -1 inset surface */
+
+  /* Atmospheric Metallic & Emerald Tones */
+  --color-metallic-glow:     rgba(22, 132, 167, 0.42);
+  --color-metallic-emerald:  rgba(14, 110, 142, 0.35);
 
   /* Cream Scale & Opacities (30% — Typography & Light Surfaces) */
   --color-cream-100: #F4EDE0; /* Base Cream (30%) */

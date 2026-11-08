@@ -96,21 +96,30 @@
 .mi-wrap { width: var(--mi-wrap); margin-inline: auto; }
 .mi-home main, .mi-home footer { position: relative; z-index: 1; }
 
-/* Shared, uninterrupted blue atmosphere. The three light fields drift with page scroll. */
+/* Shared, continuous unified chiaroscuro atmosphere.
+   Un solo fondo idéntico para toda la página:
+   - Izquierda: aura volumétrica azul claro / azul metálico y esmeralda (#1684A7 / #0E6E8E)
+   - Derecha: penumbra continua azul medianoche profundo (#011024)
+   - Base global: Deep Navy / Ocean Abyss (#02142B)
+   - Viñeta perimetral suave de Auros en los bordes. */
 .mi-atmosphere {
   position: fixed;
   z-index: 0;
-  inset: -30vh 0;
+  inset: 0;
   pointer-events: none;
   background:
-    radial-gradient(ellipse 38% 24% at 4% 24%, rgba(255, 107, 91, 0.12), transparent 100%),
-    radial-gradient(ellipse 30% 23% at 92% 18%, rgba(29, 46, 84, 0.45), transparent 100%),
-    radial-gradient(ellipse 48% 28% at 55% 83%, rgba(20, 33, 61, 0.65), transparent 100%);
-  will-change: transform;
-}
-@supports (animation-timeline: scroll(root block)) {
-  .mi-atmosphere { animation: mi-atmosphere-drift linear both; animation-timeline: scroll(root block); animation-range: 0% 100%; }
-  @keyframes mi-atmosphere-drift { to { transform: translate3d(0, 54vh, 0); } }
+    /* 1. LUZ AZUL CLARO / AZUL METÁLICO & ESMERALDA (Izquierda superior y media) */
+    radial-gradient(ellipse 75% 85% at 12% 30%, rgba(22, 132, 167, 0.38) 0%, rgba(14, 110, 142, 0.24) 40%, rgba(2, 20, 43, 0.08) 72%, transparent 88%),
+    /* Núcleo luminoso difuso en cuadrante superior izquierdo */
+    radial-gradient(circle 600px at 6% 14%, rgba(36, 160, 199, 0.28) 0%, rgba(14, 110, 142, 0.12) 50%, transparent 75%),
+    /* Acento coral de calidez en la penumbra inferior izquierda */
+    radial-gradient(circle 440px at 16% 76%, rgba(255, 107, 91, 0.06) 0%, transparent 70%),
+    /* 2. CAPA DERECHA CONTINUA OSCURA (Transición diagonal armónica hacia Midnight Blue / Void #011024) */
+    linear-gradient(108deg, transparent 28%, rgba(1, 16, 36, 0.45) 50%, rgba(1, 16, 36, 0.88) 74%, #010B19 96%),
+    /* 3. VIÑETA PERIMETRAL DE AUROS ENMARCANDO TODO EL VIEWPORT */
+    radial-gradient(ellipse 120% 105% at 50% 50%, transparent 58%, rgba(0, 6, 14, 0.65) 100%),
+    /* Fondo base sólido Deep Navy #02142B */
+    #02142B;
 }
 
 /* Wide three-part navigation, translucent over the same canvas. */
@@ -124,7 +133,7 @@
   grid-template-columns: minmax(260px,1fr) minmax(480px,1.6fr) minmax(210px,1fr);
   align-items: center;
   gap: 32px;
-  background: rgba(20, 33, 61, 0.88); border-bottom: 1px solid var(--color-cream-10);
+  background: rgba(2, 20, 43, 0.88); border-bottom: 1px solid var(--color-cream-10);
   backdrop-filter: blur(18px) saturate(130%);
   -webkit-backdrop-filter: blur(18px) saturate(130%);
 }
@@ -219,9 +228,8 @@
   stroke-width: 2.5;
 }
 
-/* Hero: one message, one action, and a fine-line Madrid panorama.
-   Atmospheric chiaroscuro matching Auros: intense volumetric blue light on the left,
-   deep dark abyss on the right, soft perimeter vignette, and living skyline telemetry. */
+/* Hero: one message, one action, and clean fine-line Madrid panorama.
+   Transparent background flowing seamlessly on the global unified atmosphere. */
 .mi-hero {
   position: relative;
   min-height: max(660px, calc(100svh - 88px));
@@ -230,41 +238,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: var(--color-navy-900);
+  background: transparent;
 }
 
-/* 1. Asymmetrical Chiaroscuro Gradient (Luz izquierda envolvente + Oscuridad derecha profunda) */
-.mi-hero::before {
-  content: "";
-  position: absolute;
-  inset: -15% -10%;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    /* EFECTO AZUL CLARO IZQUIERDA (Fulgor volumetrico primario) */
-    radial-gradient(ellipse 72% 82% at 14% 36%, rgba(68, 126, 210, 0.54) 0%, rgba(36, 74, 138, 0.38) 36%, rgba(18, 38, 76, 0.14) 66%, transparent 84%),
-    /* Nucleo celeste luminoso superior izquierdo */
-    radial-gradient(circle 580px at 6% 16%, rgba(98, 166, 248, 0.38) 0%, rgba(42, 92, 178, 0.18) 48%, transparent 76%),
-    /* Acento de calidez coral difusa inferior izquierda */
-    radial-gradient(circle 420px at 18% 74%, rgba(255, 107, 91, 0.09) 0%, transparent 68%),
-    /* EFECTO OSCURO DERECHA (Diagonal de contraste abismal hacia negro-navy) */
-    linear-gradient(108deg, transparent 26%, rgba(11, 20, 38, 0.52) 48%, rgba(6, 12, 24, 0.94) 74%, #02050a 96%);
-  will-change: transform, opacity;
-}
-
-/* 2. Vineta perimetral de Auros enmarcando todo el viewport */
-.mi-hero::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    /* Vineteado perimetral */
-    radial-gradient(ellipse 115% 100% at 50% 50%, transparent 56%, rgba(3, 6, 12, 0.74) 100%),
-    /* Anclaje vertical sutil para la barra superior e integracion de salida */
-    linear-gradient(to bottom, rgba(6, 11, 22, 0.45) 0%, transparent 16%, transparent 84%, rgba(5, 10, 20, 0.96) 100%);
-}
 .mi-hero__content { position: relative; z-index: 2; width: min(980px,calc(100% - 48px)); padding-top: clamp(48px,6.8vh,84px); text-align: center; }
 .mi-hero__kicker { display: inline-block; margin: 0 auto 18px; color: var(--color-coral-400); font-size: 15px; font-weight: 500; letter-spacing: 0.18em; text-transform: uppercase; opacity: .95; }
 .mi-kicker { margin: 0 0 24px; display: flex; align-items: center; justify-content: center; gap: 10px; color: var(--mi-silver); font-size: 10px; font-weight: 500; letter-spacing: .14em; line-height: 1.4; text-transform: uppercase; }
@@ -285,7 +261,7 @@
   width: 17px;
   height: 17px;
 }
-/* Madrid Skyline Artwork with Living Kinetic Telemetry & Breathing Horizon */
+/* Madrid Skyline Artwork — Clean, architectural, resting cleanly on the dark canvas */
 .mi-hero-artwork {
   position: absolute;
   z-index: 1;
@@ -294,37 +270,15 @@
   pointer-events: none;
 }
 
-/* Resplandor de horizonte que respira suavemente detras del skyline */
-.mi-hero-artwork__horizon {
-  position: absolute;
-  left: 5%;
-  right: 5%;
-  bottom: clamp(60px, 11vh, 140px);
-  height: 38%;
-  pointer-events: none;
-  background: radial-gradient(ellipse 70% 60% at 50% 100%, rgba(68, 126, 210, 0.32) 0%, rgba(255, 107, 91, 0.12) 34%, rgba(20, 33, 61, 0.05) 70%, transparent 100%);
-  filter: blur(28px);
-  animation: mi-horizon-pulse 7.5s ease-in-out infinite alternate;
-  will-change: opacity, transform;
-}
-
-@keyframes mi-horizon-pulse {
-  0%   { opacity: 0.55; transform: scaleY(0.92); }
-  50%  { opacity: 0.90; transform: scaleY(1.05); }
-  100% { opacity: 0.65; transform: scaleY(0.96); }
-}
-
 .mi-hero-artwork__canvas {
   position: absolute;
   right: 0;
-  bottom: clamp(90px, 13vh, 170px);
+  bottom: clamp(60px, 10vh, 120px);
   left: 0;
-  height: 66%;
+  height: 68%;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  mask-image: linear-gradient(to bottom, transparent 0%, var(--azul-noche) 8%, var(--azul-noche) 92%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, var(--azul-noche) 8%, var(--azul-noche) 92%, transparent 100%);
 }
 
 .mi-hero__skyline {
@@ -346,63 +300,17 @@
 .mi-hero__skyline--west { clip-path: polygon(0 0,58% 0,52% 48%,0 56%); }
 .mi-hero__skyline--east { clip-path: polygon(53% 44%,100% 34%,100% 100%,44% 100%); }
 
-/* Particulas vivas de telemetria de datos urbanos (Canvas) */
-.mi-hero-artwork__particles {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 4;
-  pointer-events: none;
-}
-
-/* Onda de barrido analitico que recorre Madrid periodicamente */
-.mi-hero-artwork__scan-wave {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  pointer-events: none;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.0) 38%, rgba(244, 237, 224, 0.42) 50%, rgba(255, 107, 91, 0.28) 54%, transparent 64%);
-  mix-blend-mode: overlay;
-  animation: mi-skyline-scan 9.5s cubic-bezier(0.4, 0.0, 0.2, 1) infinite;
-  will-change: transform, opacity;
-}
-
-@keyframes mi-skyline-scan {
-  0% {
-    transform: translateX(-120%);
-    opacity: 0;
-  }
-  15% {
-    opacity: 0.85;
-  }
-  45% {
-    transform: translateX(120%);
-    opacity: 0.85;
-  }
-  50%, 100% {
-    transform: translateX(120%);
-    opacity: 0;
-  }
-}
-
 .mi-hero-artwork__edge-light {
-  z-index: 5;
+  z-index: 3;
   opacity: 0;
-  filter: brightness(1.8) drop-shadow(0 0 6px rgba(255, 107, 91, 0.55));
+  filter: brightness(1.7) drop-shadow(0 0 8px rgba(22, 132, 167, 0.65));
   mix-blend-mode: screen;
-  -webkit-mask-image: radial-gradient(circle 160px at var(--mi-edge-x,-1000px) var(--mi-edge-y,-1000px), var(--azul-noche) 0, var(--azul-noche) 28%, color-mix(in srgb, var(--azul-noche) 78%, transparent) 54%, transparent 100%);
-  mask-image: radial-gradient(circle 160px at var(--mi-edge-x,-1000px) var(--mi-edge-y,-1000px), var(--azul-noche) 0, var(--azul-noche) 28%, color-mix(in srgb, var(--azul-noche) 78%, transparent) 54%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle 160px at var(--mi-edge-x,-1000px) var(--mi-edge-y,-1000px), #000 0, #000 28%, rgba(0, 0, 0, 0.6) 54%, transparent 100%);
+  mask-image: radial-gradient(circle 160px at var(--mi-edge-x,-1000px) var(--mi-edge-y,-1000px), #000 0, #000 28%, rgba(0, 0, 0, 0.6) 54%, transparent 100%);
   transition: opacity .2s ease;
 }
 .mi-hero-artwork__edge-light.is-visible { opacity: .96; }
 
-@media (prefers-reduced-motion: reduce) {
-  .mi-hero-artwork__horizon,
-  .mi-hero-artwork__scan-wave {
-    animation: none !important;
-  }
-}
 .mi-hero__meta { position: absolute; z-index: 2; right: max(64px,calc((100vw - 1480px)/2)); bottom: 32px; display: flex; align-items: center; gap: 12px; color: var(--mi-silver); font-size: 9px; font-weight: 500; letter-spacing: .12em; text-transform: uppercase; }
 .mi-hero__meta i { width: 22px; height: 1px; background: var(--mi-sky); }
 .mi-scroll { position: absolute; z-index: 2; bottom: 25px; left: max(64px,calc((100vw - 1480px)/2)); min-height: 44px; display: inline-flex; align-items: center; gap: 11px; color: var(--mi-silver) !important; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
@@ -1302,7 +1210,7 @@
   gap: 8px;
   padding: 6px 14px;
   border-radius: 9999px;
-  background: rgba(20, 33, 61, 0.88);
+  background: rgba(2, 20, 43, 0.88);
   border: 1px solid var(--color-coral-500);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
