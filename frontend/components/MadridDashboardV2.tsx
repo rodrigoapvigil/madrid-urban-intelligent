@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
+import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
@@ -1872,18 +1873,37 @@ const MadridDashboardV2: React.FC = () => {
         </div>
       )}
 
-      <SiteHeader activePath="/madrid">
-        <div className="v2-tabs-container">
-          <div className="v2-tabs-bg" role="group" aria-label="Perfil de mercado">
-            <div className="v2-indicator" style={{ transform: `translateX(${profileIdx * 100}%)` }} />
-            {PROFILES.map((p, i) => (
-              <button key={p.id} type="button" aria-pressed={profileIdx === i} className={`v2-tab-btn ${profileIdx === i ? 'active' : ''}`} onClick={() => handleProfileChange(i)}>
-                {p.label}
-              </button>
-            ))}
+      <SiteHeader activePath="/madrid" />
+
+      {/* 1. TOOLBAR DEL CUADRO DE MANDO (Perfil de mercado + Submenú Dashboard / AMBI / El Veredicto) */}
+      <div className="v2-toolbar">
+        <div className="v2-toolbar-inner">
+          <div className="v2-toolbar-left" />
+          <div className="v2-tabs-container">
+            <div className="v2-tabs-bg" role="group" aria-label="Perfil de mercado">
+              <div className="v2-indicator" style={{ transform: `translateX(${profileIdx * 100}%)` }} />
+              {PROFILES.map((p, i) => (
+                <button
+                  key={p.id}
+                  type="button"
+                  aria-pressed={profileIdx === i}
+                  className={`v2-tab-btn ${profileIdx === i ? "active" : ""}`}
+                  onClick={() => handleProfileChange(i)}
+                >
+                  {p.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="v2-toolbar-right">
+            <nav className="v2-tool-subnav" aria-label="Navegación del cuadro de mando">
+              <Link href="/madrid" className="v2-tool-subnav-link active">Dashboard</Link>
+              <Link href="/madrid/chat" className="v2-tool-subnav-link">AMBI</Link>
+              <Link href="/madrid/veredicto" className="v2-tool-subnav-link">El Veredicto</Link>
+            </nav>
           </div>
         </div>
-      </SiteHeader>
+      </div>
 
 
       {/* 2. FILTROS REFINADOS (CUSTOM APPLE DROPDOWNS) */}

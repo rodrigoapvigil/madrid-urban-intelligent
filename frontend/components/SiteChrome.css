@@ -1,104 +1,160 @@
 /* ==========================================================================
    SITE HEADER UNIFICADO (Idéntico a MadridLanding en todas las páginas)
    ========================================================================== */
-.site-header {
-  position: relative;
+.site-header,
+.mi-header {
+  position: sticky;
   z-index: 1200;
+  top: 0;
   width: 100%;
-  color: #FFFFFF;
-  background: #02142B;
-  border-bottom: 1px solid rgba(186, 204, 214, 0.12);
-}
-
-.site-header-main {
-  width: min(1440px, calc(100% - 64px));
-  min-height: 84px;
-  margin: 0 auto;
-  padding: 12px 0;
-  display: flex;
+  min-height: 88px;
+  padding-inline: max(48px, calc((100vw - 1600px)/2 + 64px));
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(480px, 1.6fr) minmax(210px, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 28px;
+  gap: 32px;
+  background: rgba(2, 20, 43, 0.92);
+  border: none !important;
+  border-bottom: none !important;
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
 }
 
-.site-brand {
+.site-brand,
+.mi-brand {
   display: inline-flex;
   align-items: center;
   gap: 12px;
+  width: fit-content;
+  color: #FFFFFF;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
   text-decoration: none;
+}
+
+.site-brand:hover,
+.mi-brand:hover {
+  opacity: 0.9;
+}
+
+.mi-brand__mark {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
   flex: 0 0 auto;
+  overflow: hidden;
 }
 
-.site-header-context {
-  flex: 1 1 auto;
-  min-width: 0;
+.mi-brand__mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: rotate(90deg);
+  filter: brightness(0) invert(1) drop-shadow(0 0 2px rgba(255, 255, 255, 0.4));
+  transition: transform 0.3s ease;
+}
+
+.site-brand:hover .mi-brand__mark img,
+.mi-brand:hover .mi-brand__mark img {
+  transform: rotate(90deg) scale(1.06);
+}
+
+.mi-brand__text {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  line-height: 1.1;
+  gap: 2px;
 }
 
-.site-navigation {
+.mi-brand__acronym {
+  font-size: 20px;
+  font-weight: 750;
+  letter-spacing: -0.025em;
+  color: #FFFFFF;
+}
+
+.mi-brand__subtitle {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-silver-mist, #BACCD6);
+}
+
+.site-navigation,
+.mi-nav {
   display: flex;
   align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
+  justify-content: center;
+  gap: clamp(20px, 3vw, 48px);
 }
 
-.site-navigation a {
-  position: relative;
-  min-height: 42px;
-  padding: 8px 16px;
+.site-navigation a,
+.mi-nav a {
+  min-height: 44px;
   display: inline-flex;
   align-items: center;
   color: var(--color-silver-mist, #BACCD6);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.105em;
+  text-transform: uppercase;
   text-decoration: none;
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: 9999px;
-  transition: color 160ms ease, background-color 160ms ease;
+  transition: color 0.2s ease;
 }
 
 .site-navigation a:hover,
-.site-navigation a.active {
+.mi-nav a:hover {
   color: #FFFFFF;
-  background: rgba(0, 45, 84, 0.55);
 }
 
-.site-navigation a.active::after {
-  position: absolute;
-  right: 16px;
-  bottom: 4px;
-  left: 16px;
-  height: 2px;
-  content: '';
-  border-radius: 2px;
-  background: var(--color-cyan-neon, #00F0FF);
+.site-navigation a.active,
+.mi-nav a.active {
+  color: var(--color-cyan-neon, #00F0FF);
 }
 
 /* Header CTA Button */
 .mi-header__cta {
+  justify-self: end;
+  min-height: 42px;
+  padding: 0 20px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 10px 22px;
-  border-radius: 9999px;
-  background: linear-gradient(135deg, #00F0FF 0%, #7928CA 100%);
+  border: 1px solid rgba(0, 240, 255, 0.45);
+  border-radius: 8px;
   color: #011024 !important;
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 0.04em;
+  background: linear-gradient(135deg, #00F0FF 0%, #7928CA 100%);
+  box-shadow: 0 4px 16px rgba(0, 45, 84, 0.35), 0 0 16px rgba(0, 240, 255, 0.30);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   text-decoration: none;
-  box-shadow: 0 4px 18px rgba(0, 240, 255, 0.35);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
 }
 
 .mi-header__cta:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(0, 240, 255, 0.6);
+  background: linear-gradient(135deg, #33F3FF 0%, #8E3CE6 100%);
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(0, 45, 84, 0.45), 0 0 24px rgba(0, 240, 255, 0.50);
+}
+
+.mi-header__cta svg {
+  width: 14px;
+  height: 14px;
+  stroke: #011024;
+  stroke-width: 2.5;
 }
 
 /* ==========================================================================
-   AUROS FOOTER UNIFICADO (Idéntico en todas las páginas)
+   AUROS FOOTER UNIFICADO (Idéntico en todas las páginas - CERO líneas divisorias)
    ========================================================================== */
 .auros-footer {
   width: 100%;
@@ -107,7 +163,9 @@
   padding: clamp(64px, 8vw, 104px) 0 clamp(32px, 4vw, 48px);
   position: relative;
   overflow: hidden;
-  border-top: none;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
 }
 
 .auros-footer__inner {
@@ -158,12 +216,14 @@
   color: #011024 !important;
   font-size: 13px !important;
   font-weight: 750 !important;
-  letter-spacing: 0.06em !important;
+  letter-spacing: 0.08em !important;
   text-transform: uppercase !important;
   text-decoration: none !important;
+  box-shadow: 0 0 24px rgba(0, 240, 255, 0.5) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, color 0.2s ease !important;
   border: 1px solid rgba(0, 240, 255, 0.8) !important;
-  box-shadow: 0 0 24px rgba(0, 240, 255, 0.45) !important;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease !important;
+  cursor: pointer !important;
+  min-height: 48px !important;
 }
 
 .auros-footer__cta-button:hover {
@@ -180,7 +240,8 @@
   gap: 24px;
   padding-top: clamp(28px, 3vw, 40px);
   padding-bottom: clamp(28px, 3vw, 40px);
-  border-top: 1px solid rgba(186, 204, 214, 0.12);
+  border: none !important;
+  border-top: none !important;
   flex-wrap: wrap;
 }
 
@@ -236,7 +297,8 @@
   align-items: center;
   justify-content: flex-end;
   padding-top: 24px;
-  border-top: 1px solid rgba(186, 204, 214, 0.08);
+  border: none !important;
+  border-top: none !important;
   font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.08em;
@@ -244,65 +306,18 @@
   text-transform: uppercase;
 }
 
-/* ==========================================================================
-   DMIYC BRAND (Logo rotado 90º en sentido horario + tipografía jerárquica)
-   ========================================================================== */
-.mi-brand, .site-brand {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 12px !important;
-  text-decoration: none !important;
-}
-
-.mi-brand__mark {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  flex-shrink: 0;
-}
-
-.mi-brand__mark img {
-  width: 36px !important;
-  height: 36px !important;
-  object-fit: contain;
-  transform: rotate(90deg) !important;
-  transition: transform 0.28s ease, filter 0.28s ease;
-  filter: drop-shadow(0 0 8px rgba(0, 240, 255, 0.45));
-}
-
-.mi-brand:hover .mi-brand__mark img,
-.site-brand:hover .mi-brand__mark img {
-  transform: rotate(90deg) scale(1.08) !important;
-  filter: drop-shadow(0 0 12px rgba(0, 240, 255, 0.75));
-}
-
-.mi-brand__text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-  gap: 2px;
-}
-
-.mi-brand__acronym {
-  font-size: 20px;
-  font-weight: 750;
-  letter-spacing: -0.025em;
-  color: #FFFFFF;
-}
-
-.mi-brand__subtitle {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-silver-mist, #BACCD6);
-}
-
 @media (max-width: 900px) {
-  .site-header-main { flex-wrap: wrap; justify-content: space-between; gap: 12px 16px; }
-  .site-header-context { order: 3; flex: 1 0 100%; }
+  .site-header,
+  .mi-header {
+    min-height: 76px;
+    padding-inline: 20px;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+  }
+  .site-navigation,
+  .mi-nav {
+    display: none;
+  }
   .auros-footer__top {
     flex-direction: column;
     align-items: flex-start;
@@ -319,10 +334,4 @@
   .auros-footer__bottom {
     justify-content: flex-start;
   }
-}
-
-@media (max-width: 640px) {
-  .site-header-main { gap: 8px 12px; }
-  .site-navigation { width: 100%; justify-content: flex-start; overflow-x: auto; padding-bottom: 4px; }
-  .site-navigation a { padding: 6px 10px; font-size: 12px; }
 }

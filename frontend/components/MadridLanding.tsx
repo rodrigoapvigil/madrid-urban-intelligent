@@ -1,6 +1,6 @@
 'use client';
 
-import { SiteFooter } from './SiteChrome';
+import { SiteFooter, SiteHeader } from './SiteChrome';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -27,26 +27,7 @@ export default function MadridLanding() {
   return (
     <div className="mi-home" id="inicio">
       <div className="mi-atmosphere" aria-hidden="true"/>
-      <header className="mi-header">
-        <Link href="/" className="mi-brand" aria-label="DMIYC - Decide Madrid: Invierte Y Compra">
-          <span className="mi-brand__mark">
-            <Image src="/decide-madrid-mark.webp" alt="DMIYC" width={38} height={38} priority />
-          </span>
-          <span className="mi-brand__text">
-            <strong className="mi-brand__acronym">DMIYC</strong>
-            <small className="mi-brand__subtitle">Decide Madrid · Invierte y Compra</small>
-          </span>
-        </Link>
-        <nav className="mi-nav" aria-label="Navegación principal">
-          <a href="#plataforma">Plataforma</a>
-          <a href="#impacto">A quién ayuda</a>
-          <Link href="/madrid/chat">AMBI</Link>
-          <Link href="/madrid/veredicto">El Veredicto</Link>
-        </nav>
-        <Link href="/madrid" className="mi-header__cta">
-          Ver precios <ArrowUpRight aria-hidden="true"/>
-        </Link>
-      </header>
+      <SiteHeader activePath="/" />
 
       <main id="contenido-principal">
         {/* 0. HERO: Claridad en 3 segundos */}

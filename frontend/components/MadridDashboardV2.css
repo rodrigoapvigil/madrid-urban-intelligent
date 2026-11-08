@@ -2182,7 +2182,8 @@
 .v2-filters,
 .v2-root .v2-filters {
   background: #011024 !important;
-  border-bottom: 1px solid rgba(186, 204, 214, 0.12) !important;
+  border: none !important;
+  border-bottom: none !important;
 }
 
 .v2-custom-select,
@@ -2230,4 +2231,73 @@
 .v2-compare-section {
   margin-top: 48px !important;
   margin-bottom: 0 !important;
+}
+
+/* TOOLBAR SUPERIOR DEL CUADRO DE MANDO (Perfil de mercado + Submenú Dashboard / AMBI / El Veredicto) */
+.v2-toolbar {
+  width: 100%;
+  background: #011024 !important;
+  padding: 16px 24px 8px !important;
+  border: none !important;
+  border-bottom: none !important;
+}
+
+.v2-toolbar-inner {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 20px;
+}
+
+.v2-toolbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.v2-toolbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.v2-tool-subnav {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 45, 84, 0.35);
+  padding: 4px 6px;
+  border-radius: 9999px;
+  border: 1px solid rgba(186, 204, 214, 0.16);
+}
+
+.v2-tool-subnav-link {
+  padding: 6px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #BACCD6;
+  text-decoration: none;
+  border-radius: 9999px;
+  transition: all 0.2s ease;
+}
+
+.v2-tool-subnav-link:hover {
+  color: #FFFFFF;
+}
+
+.v2-tool-subnav-link.active {
+  color: #FFFFFF;
+  background: rgba(0, 240, 255, 0.18);
+  border: 1px solid rgba(0, 240, 255, 0.45);
+}
+
+@media (max-width: 900px) {
+  .v2-toolbar-inner {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 12px;
+  }
+  .v2-toolbar-left { display: none; }
+  .v2-toolbar-right { justify-content: center; }
 }

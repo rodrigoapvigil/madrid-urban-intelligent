@@ -8,33 +8,29 @@ type SiteHeaderProps = {
   children?: ReactNode;
 };
 
-export function SiteHeader({ activePath, children }: SiteHeaderProps) {
+export function SiteHeader({ activePath }: SiteHeaderProps) {
   return (
-    <header className="site-header" role="banner">
-      <div className="site-header-main">
-        <Link href="/" className="site-brand" aria-label="DMIYC - Decide Madrid: Invierte Y Compra">
-          <span className="mi-brand__mark">
-            <Image src="/decide-madrid-mark.webp" alt="DMIYC" width={38} height={38} priority />
-          </span>
-          <span className="mi-brand__text">
-            <strong className="mi-brand__acronym">DMIYC</strong>
-            <small className="mi-brand__subtitle">Decide Madrid · Invierte y Compra</small>
-          </span>
-        </Link>
+    <header className="mi-header site-header" role="banner">
+      <Link href="/" className="mi-brand site-brand" aria-label="DMIYC - Decide Madrid: Invierte Y Compra">
+        <span className="mi-brand__mark">
+          <Image src="/decide-madrid-mark.webp" alt="DMIYC" width={38} height={38} priority />
+        </span>
+        <span className="mi-brand__text">
+          <strong className="mi-brand__acronym">DMIYC</strong>
+          <small className="mi-brand__subtitle">Decide Madrid · Invierte y Compra</small>
+        </span>
+      </Link>
 
-        {children && <div className="site-header-context">{children}</div>}
+      <nav className="mi-nav site-navigation" aria-label="Navegación principal">
+        <Link href="/#plataforma">Plataforma</Link>
+        <Link href="/#impacto">A quién ayuda</Link>
+        <Link href="/madrid/chat" className={activePath === '/madrid/chat' ? 'active' : ''}>AMBI</Link>
+        <Link href="/madrid/veredicto" className={activePath === '/madrid/veredicto' ? 'active' : ''}>El Veredicto</Link>
+      </nav>
 
-        <nav className="site-navigation" aria-label="Navegación principal">
-          <Link href="/#plataforma">Plataforma</Link>
-          <Link href="/#impacto">A quién ayuda</Link>
-          <Link href="/madrid/chat" className={activePath === '/madrid/chat' ? 'active' : ''}>AMBI</Link>
-          <Link href="/madrid/veredicto" className={activePath === '/madrid/veredicto' ? 'active' : ''}>El Veredicto</Link>
-        </nav>
-
-        <Link href="/madrid" className="mi-header__cta">
-          Ver precios <ArrowUpRight size={16} aria-hidden="true" />
-        </Link>
-      </div>
+      <Link href="/madrid" className="mi-header__cta">
+        Ver precios <ArrowUpRight size={14} aria-hidden="true" />
+      </Link>
     </header>
   );
 }
