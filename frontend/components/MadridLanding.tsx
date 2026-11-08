@@ -253,63 +253,90 @@ export default function MadridLanding() {
           </div>
         </section>
 
-        {/* Reconocimientos y Premios Oficiales */}
-        <section className="mi-awards" id="premios" aria-labelledby="mi-awards-title">
+        {/* Sección de Confianza y Reconocimiento Institucional (Estilo Auros Trust) */}
+        <section className="mi-trust" id="premios" aria-labelledby="mi-trust-title">
           <div className="mi-wrap">
-            <div className="mi-awards__intro">
-              <p className="mi-kicker mi-kicker--muted">RECONOCIMIENTO Y AUTORIDAD PÚBLICA</p>
-              <h2 id="mi-awards-title">Premios de innovación.<br/><span>Avalados por instituciones.</span></h2>
-              <p className="mi-awards__lead">La metodología, el rigor analítico y la transparencia de Decide Madrid han sido distinguidos oficialmente por entidades públicas y líderes tecnológicos.</p>
-            </div>
+            <div className="mi-trust-frame">
+              <div className="mi-trust-frame__header">
+                <p className="mi-trust-frame__kicker">RECONOCIMIENTO</p>
+                <h2 id="mi-trust-title" className="mi-trust-frame__title">El respaldo de las instituciones</h2>
+              </div>
 
-            <div className="mi-awards__grid">
-              {/* Premio 1: Ayuntamiento de Madrid (2026) */}
-              <article className="mi-award-card">
-                <div className="mi-award-card__header">
-                  <div className="mi-award-card__logo-badge">
+              <div className="mi-trust-grid">
+                {/* Columna 1: Ayuntamiento de Madrid */}
+                <article className="mi-trust-col">
+                  <blockquote className="mi-trust-col__quote">
+                    “Premio del Ayuntamiento de Madrid a la innovación en datos abiertos por su capacidad para transparentar los precios reales del mercado inmobiliario en los 131 barrios con datos de cierre.”
+                  </blockquote>
+                  <div className="mi-trust-col__author">
+                    <strong>2026</strong>
+                    <span>Ayuntamiento de Madrid · Datos Abiertos</span>
+                  </div>
+                  <div className="mi-trust-col__logo-wrap">
                     <Image
                       src="/logo-ayuntamiento-madrid-transparent.png"
                       alt="Ayuntamiento de Madrid"
                       width={160}
-                      height={50}
-                      className="mi-award-card__logo"
+                      height={48}
+                      className="mi-trust-col__logo"
                     />
                   </div>
-                  <span className="mi-award-card__year">2026</span>
-                </div>
-                <div className="mi-award-card__body">
-                  <span className="mi-award-card__badge">GALARDÓN OFICIAL DE INNOVACIÓN</span>
-                  <h3>Concurso de Reutilización de Datos Abiertos</h3>
-                  <p className="mi-award-card__entity">Ayuntamiento de Madrid · Categoría Estudios e Investigaciones</p>
-                  <p className="mi-award-card__desc">
-                    Segundo premio concedido por el Ayuntamiento de Madrid al proyecto de análisis inteligente del mercado inmobiliario y cuadro de mando analítico basado en datos abiertos municipales para los 131 barrios de la capital.
-                  </p>
-                </div>
-              </article>
+                </article>
 
-              {/* Premio 2: Grupo SATEC & Universidad Politécnica de Madrid (2025) */}
-              <article className="mi-award-card">
-                <div className="mi-award-card__header">
-                  <div className="mi-award-card__logo-badge">
+                {/* Columna 2: Grupo SATEC */}
+                <article className="mi-trust-col">
+                  <blockquote className="mi-trust-col__quote">
+                    “Galardón concedido por Grupo SATEC al mejor proyecto con impacto en desarrollo sostenible, democratizando el acceso a estimaciones auditadas y reduciendo asimetrías de mercado.”
+                  </blockquote>
+                  <div className="mi-trust-col__author">
+                    <strong>2025</strong>
+                    <span>Grupo SATEC · Sostenibilidad e Innovación</span>
+                  </div>
+                  <div className="mi-trust-col__logo-wrap">
                     <Image
                       src="/logo-satec-transparent.png"
                       alt="Grupo SATEC"
                       width={150}
-                      height={40}
-                      className="mi-award-card__logo"
+                      height={44}
+                      className="mi-trust-col__logo"
                     />
                   </div>
-                  <span className="mi-award-card__year">2025</span>
+                </article>
+
+                {/* Columna 3: Universidad Politécnica de Madrid (UPM) */}
+                <article className="mi-trust-col">
+                  <blockquote className="mi-trust-col__quote">
+                    “Reconocimiento institucional y académico al modelado predictivo, arquitectura analítica y rigor en ingeniería de datos para la evaluación objetiva del mercado madrileño.”
+                  </blockquote>
+                  <div className="mi-trust-col__author">
+                    <strong>2025</strong>
+                    <span>Universidad Politécnica de Madrid · UPM</span>
+                  </div>
+                  <div className="mi-trust-col__logo-wrap">
+                    <Image
+                      src="/logo-upm-transparent.svg"
+                      alt="Universidad Politécnica de Madrid"
+                      width={160}
+                      height={46}
+                      unoptimized
+                      className="mi-trust-col__logo"
+                    />
+                  </div>
+                </article>
+              </div>
+
+              {/* Tira inferior de entidades (Estilo Auros Trust Bottom Bar) */}
+              <div className="mi-trust-footer">
+                <div className="mi-trust-footer__item">
+                  <Image src="/logo-ayuntamiento-madrid-transparent.png" alt="Ayuntamiento de Madrid" width={130} height={36} className="mi-trust-footer__logo" />
                 </div>
-                <div className="mi-award-card__body">
-                  <span className="mi-award-card__badge">PREMIO TECNOLOGÍA & SOSTENIBILIDAD</span>
-                  <h3>Premio SATEC al Impacto en Desarrollo Sostenible</h3>
-                  <p className="mi-award-card__entity">Grupo SATEC & Universidad Politécnica de Madrid (UPM)</p>
-                  <p className="mi-award-card__desc">
-                    Reconocimiento otorgado por la multinacional de integración tecnológica SATEC y la UPM por el valor transformador del proyecto en sostenibilidad urbana, transparencia de precios y accesibilidad a la información pública.
-                  </p>
+                <div className="mi-trust-footer__item">
+                  <Image src="/logo-satec-transparent.png" alt="Grupo SATEC" width={115} height={30} className="mi-trust-footer__logo" />
                 </div>
-              </article>
+                <div className="mi-trust-footer__item">
+                  <Image src="/logo-upm-transparent.svg" alt="Universidad Politécnica de Madrid" width={140} height={36} unoptimized className="mi-trust-footer__logo" />
+                </div>
+              </div>
             </div>
           </div>
         </section>
