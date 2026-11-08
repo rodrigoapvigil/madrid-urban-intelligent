@@ -93,20 +93,14 @@ const getNiceChartScale = (datasets: Array<Array<number | null>>) => {
   };
 };
 
-const createAreaGradient = (context: any, color: string, opacity = 0.28) => {
+const createAreaGradient = (context: any, color: string, opacity = 0.25) => {
   const chart = context.chart;
   const area = chart.chartArea;
-  const resolvedColor = resolveCssColor(color);
-  if (!area || !resolvedColor.startsWith('#')) return colorWithAlpha(resolvedColor, opacity);
-  const hex = resolvedColor.slice(1);
-  const value = hex.length === 3 ? hex.split('').map((part: string) => part + part).join('') : hex;
-  const red = parseInt(value.slice(0, 2), 16);
-  const middleChannel = parseInt(value.slice(2, 4), 16);
-  const blue = parseInt(value.slice(4, 6), 16);
+  if (!area) return 'rgba(0, 240, 255, 0.25)';
   const gradient = chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
-  gradient.addColorStop(0, `rgba(${red}, ${middleChannel}, ${blue}, ${opacity})`);
-  gradient.addColorStop(0.55, `rgba(${red}, ${middleChannel}, ${blue}, ${opacity * 0.42})`);
-  gradient.addColorStop(1, `rgba(${red}, ${middleChannel}, ${blue}, 0.01)`);
+  gradient.addColorStop(0, 'rgba(0, 240, 255, 0.25)');
+  gradient.addColorStop(0.65, 'rgba(0, 45, 84, 0.10)');
+  gradient.addColorStop(1, 'rgba(1, 16, 36, 0.0)');
   return gradient;
 };
 
@@ -923,39 +917,45 @@ const MadridDashboardV2: React.FC = () => {
                 {
                   label: 'Media Madrid',
                   data: alignedMadrid,
-                  borderColor: 'var(--coral)',
-                  backgroundColor: (context: any) => createAreaGradient(context, 'var(--coral)', 0.17),
-                  fill: 'start',
-                  borderWidth: 2.25,
+                  borderColor: 'rgba(186, 204, 214, 0.45)',
+                  borderWidth: 1.5,
+                  borderDash: [3, 3],
                   tension: 0.32,
                   cubicInterpolationMode: 'monotone',
                   pointRadius: 0,
+                  fill: false,
                 },
                 {
                   label: `${label} · Dato real`,
                   data: actualPrices,
-                  borderColor: mainColor,
-                  backgroundColor: (context: any) => createAreaGradient(context, mainColor, 0.24),
-                  fill: { target: 0 },
-                  tension: 0.38,
+                  borderColor: '#FFFFFF',
+                  backgroundColor: (context: any) => createAreaGradient(context, '#00F0FF', 0.25),
+                  fill: 'start',
+                  tension: 0.35,
                   cubicInterpolationMode: 'monotone',
-                  borderWidth: 3,
-                  pointRadius: 0,
-                  pointHoverRadius: 5,
+                  borderWidth: 2.5,
+                  pointRadius: 4,
+                  pointBackgroundColor: '#FFFFFF',
+                  pointBorderColor: '#011024',
+                  pointBorderWidth: 2,
+                  pointHoverRadius: 6,
                   pointHitRadius: 14,
                 },
                 {
                   label: 'Proyección (Predicción)',
                   data: forecastPrices,
-                  borderColor: 'var(--precio-subida)',
-                  backgroundColor: (context: any) => createAreaGradient(context, 'var(--precio-subida)', 0.24),
-                  fill: { target: 0 },
-                  tension: 0.38,
+                  borderColor: '#00F0FF',
+                  backgroundColor: (context: any) => createAreaGradient(context, '#00F0FF', 0.12),
+                  fill: 'start',
+                  tension: 0.35,
                   cubicInterpolationMode: 'monotone',
-                  borderDash: [6, 4],
-                  borderWidth: 3,
-                  pointRadius: 0,
-                  pointHoverRadius: 5,
+                  borderDash: [5, 4],
+                  borderWidth: 2.5,
+                  pointRadius: 4,
+                  pointBackgroundColor: '#00F0FF',
+                  pointBorderColor: '#011024',
+                  pointBorderWidth: 2,
+                  pointHoverRadius: 6,
                   pointHitRadius: 14,
                 }
               ]
@@ -979,10 +979,13 @@ const MadridDashboardV2: React.FC = () => {
                   position: 'top',
                   align: 'end',
                   labels: {
-                    boxWidth: 14,
-                    usePointStyle: false,
-                    font: { size: 10, weight: 500 },
-                    padding: 10
+                    boxWidth: 8,
+                    boxHeight: 8,
+                    usePointStyle: true,
+                    pointStyle: 'circle',
+                    color: 'rgba(186, 204, 214, 0.85)',
+                    font: { size: 11, weight: 500 },
+                    padding: 12
                   }
                 },
                 datalabels: {
@@ -1146,20 +1149,29 @@ const MadridDashboardV2: React.FC = () => {
                 x: {
                   grid: { display: false },
                   offset: true,
-                  ticks: { padding: 10, maxRotation: 0, minRotation: 0, autoSkip: true, maxTicksLimit: 12, font: { size: 9 } }
+                  ticks: {
+                    color: 'rgba(186, 204, 214, 0.7)',
+                    padding: 10,
+                    maxRotation: 0,
+                    minRotation: 0,
+                    autoSkip: true,
+                    maxTicksLimit: 12,
+                    font: { size: 10 }
+                  }
                 },
                 y: {
                   min: scale.min,
                   max: scale.max,
-                  grid: { color: 'var(--blanco-humo)', lineWidth: 1 },
+                  grid: { color: 'rgba(255, 255, 255, 0.08)', lineWidth: 1 },
                   border: { display: false },
                   ticks: {
+                    color: 'rgba(186, 204, 214, 0.7)',
                     stepSize: scale.stepSize,
                     padding: 8,
                     maxTicksLimit: 7,
                     font: { size: 10 },
                     callback: (value) => {
-                      const unit = activeProfile.id === 'inversion' ? '%' : '€/m²';
+                      const unit = activeProfile.id === 'inversion' ? '%' : ' €/m²';
                       return new Intl.NumberFormat('es-ES').format(Number(value)) + unit;
                     }
                   }
@@ -1199,56 +1211,63 @@ const MadridDashboardV2: React.FC = () => {
                 {
                   label: `${selectedZoneA} · Dato real`,
                   data: overlayA,
-                  borderColor: activeProfile.color,
-                  borderWidth: 3,
-                  pointRadius: 0,
-                  pointHoverRadius: 5,
+                  borderColor: '#FFFFFF',
+                  borderWidth: 2.5,
+                  pointRadius: 4,
+                  pointBackgroundColor: '#FFFFFF',
+                  pointBorderColor: '#011024',
+                  pointBorderWidth: 2,
+                  pointHoverRadius: 6,
                   pointHitRadius: 14,
-                  fill: { target: 2 },
-                  backgroundColor: (context: any) => createAreaGradient(context, activeProfile.color, 0.16),
-                  tension: 0.38,
+                  fill: 'start',
+                  backgroundColor: (context: any) => createAreaGradient(context, '#FFFFFF', 0.16),
+                  tension: 0.35,
                   cubicInterpolationMode: 'monotone',
                   segment: {
                     borderColor: (context: any) => {
                       const found = seriesA.find(d => d.mes === context.p1DataIndex + 1);
-                      return found && found.is_prediction ? 'var(--precio-subida)' : activeProfile.color;
+                      return found && found.is_prediction ? '#00F0FF' : '#FFFFFF';
                     },
                     borderDash: (context: any) => {
                       const found = seriesA.find(d => d.mes === context.p1DataIndex + 1);
-                      return found && found.is_prediction ? [5, 5] : undefined;
+                      return found && found.is_prediction ? [5, 4] : undefined;
                     }
                   }
                 },
                 {
                   label: `${selectedZoneB} · Dato real`,
                   data: overlayB,
-                  borderColor: 'var(--azul-noche)',
+                  borderColor: '#00F0FF',
                   borderWidth: 2.5,
-                  pointRadius: 0,
-                  pointHoverRadius: 5,
+                  pointRadius: 4,
+                  pointBackgroundColor: '#00F0FF',
+                  pointBorderColor: '#011024',
+                  pointBorderWidth: 2,
+                  pointHoverRadius: 6,
                   pointHitRadius: 14,
-                  fill: { target: 2 },
-                  backgroundColor: (context: any) => createAreaGradient(context, 'var(--azul-linea)', 0.14),
-                  tension: 0.38,
+                  fill: 'start',
+                  backgroundColor: (context: any) => createAreaGradient(context, '#00F0FF', 0.12),
+                  tension: 0.35,
                   cubicInterpolationMode: 'monotone',
                   segment: {
                     borderColor: (context: any) => {
                       const found = seriesB.find(d => d.mes === context.p1DataIndex + 1);
-                      return found && found.is_prediction ? 'var(--precio-subida)' : 'var(--azul-noche)';
+                      return found && found.is_prediction ? '#00F0FF' : '#00F0FF';
                     },
                     borderDash: (context: any) => {
                       const found = seriesB.find(d => d.mes === context.p1DataIndex + 1);
-                      return found && found.is_prediction ? [5, 5] : undefined;
+                      return found && found.is_prediction ? [5, 4] : undefined;
                     }
                   }
                 },
                 {
                   label: 'Media Madrid',
                   data: overlayMadrid,
-                  borderColor: 'var(--coral)',
-                  backgroundColor: (context: any) => createAreaGradient(context, 'var(--coral)', 0.17),
-                  fill: 'start',
-                  borderWidth: 2.25,
+                  borderColor: 'rgba(186, 204, 214, 0.45)',
+                  backgroundColor: 'transparent',
+                  fill: false,
+                  borderWidth: 1.5,
+                  borderDash: [3, 3],
                   pointRadius: 0,
                   tension: 0.32,
                   cubicInterpolationMode: 'monotone'
@@ -1280,20 +1299,29 @@ const MadridDashboardV2: React.FC = () => {
                 x: {
                   grid: { display: false },
                   offset: true,
-                  ticks: { padding: 10, maxRotation: 0, minRotation: 0, autoSkip: true, maxTicksLimit: 12, font: { size: 9 } }
+                  ticks: {
+                    color: 'rgba(186, 204, 214, 0.7)',
+                    padding: 10,
+                    maxRotation: 0,
+                    minRotation: 0,
+                    autoSkip: true,
+                    maxTicksLimit: 12,
+                    font: { size: 10 }
+                  }
                 },
                 y: {
                   min: overlayScale.min,
                   max: overlayScale.max,
-                  grid: { color: 'var(--blanco-humo)', lineWidth: 1 },
+                  grid: { color: 'rgba(255, 255, 255, 0.08)', lineWidth: 1 },
                   border: { display: false },
                   ticks: {
+                    color: 'rgba(186, 204, 214, 0.7)',
                     stepSize: overlayScale.stepSize,
                     padding: 8,
                     maxTicksLimit: 7,
                     font: { size: 10 },
                     callback: (value) => {
-                      const unit = activeProfile.id === 'inversion' ? '%' : '€/m²';
+                      const unit = activeProfile.id === 'inversion' ? '%' : ' €/m²';
                       return new Intl.NumberFormat('es-ES').format(Number(value)) + unit;
                     }
                   }

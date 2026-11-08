@@ -107,7 +107,7 @@
   padding: clamp(64px, 8vw, 104px) 0 clamp(32px, 4vw, 48px);
   position: relative;
   overflow: hidden;
-  border-top: 1px solid rgba(186, 204, 214, 0.12);
+  border-top: none;
 }
 
 .auros-footer__inner {

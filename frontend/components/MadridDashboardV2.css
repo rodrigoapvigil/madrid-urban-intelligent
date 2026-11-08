@@ -2035,3 +2035,199 @@
   background: rgba(1, 16, 36, 0.95) !important;
   border: 1px solid rgba(186, 204, 214, 0.25) !important;
 }
+
+/* ========================================================
+   UNIFIED LANDING-PAGE DARK THEME FOR ALL CARDS & CHARTS
+   ======================================================== */
+
+.v2-root {
+  background: #011024 !important;
+  color: #BACCDE !important;
+  --v2-apple-bg: #011024 !important;
+  --v2-card-bg: #011024 !important;
+  --v2-text-main: #FFFFFF !important;
+  --v2-text-sec: #8EA8C3 !important;
+  --v2-border: rgba(186, 204, 214, 0.14) !important;
+  border-bottom: none !important;
+}
+
+.v2-viewport {
+  background: transparent !important;
+}
+
+.v2-panel {
+  background: transparent !important;
+  padding-bottom: 24px !important;
+}
+
+/* ALL CARDS & CONTAINERS: DEEP NAVY #011024 WITH SUBTLE 1PX BORDER */
+.v2-kpi-card,
+.v2-map-card,
+.v2-chart-card,
+.v2-mini-kpi-card,
+.v2-overlay-wrapper,
+.v2-connectivity-card,
+.v2-affordability-card,
+.v2-explorer-grid,
+.v2-heatmap-card,
+.v2-root .v2-kpi-card,
+.v2-root .v2-map-card,
+.v2-root .v2-chart-card,
+.v2-root .v2-mini-kpi-card,
+.v2-root .v2-overlay-wrapper,
+.v2-root .v2-connectivity-card,
+.v2-root .v2-affordability-card,
+.v2-root .v2-explorer-grid,
+.v2-root .v2-heatmap-card {
+  background: #011024 !important;
+  background-color: #011024 !important;
+  border: 1px solid rgba(186, 204, 214, 0.14) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5) !important;
+  color: #FFFFFF !important;
+}
+
+/* MINI KPIS IN COMPARATIVE */
+.v2-mini-kpi-card,
+.v2-root .v2-mini-kpi-card {
+  border-radius: 12px !important;
+  padding: 18px 16px !important;
+}
+
+.v2-mini-kpi-card .v,
+.v2-root .v2-mini-kpi-card .v {
+  color: #FFFFFF !important;
+  font-size: 22px !important;
+  font-weight: 700 !important;
+}
+
+.v2-mini-kpi-card .l,
+.v2-root .v2-mini-kpi-card .l {
+  color: #8EA8C3 !important;
+  font-size: 11px !important;
+}
+
+/* OVERLAY COMPARISON CHART WRAPPER */
+.v2-overlay-wrapper,
+.v2-root .v2-overlay-wrapper {
+  margin-top: 24px !important;
+  margin-bottom: 0 !important;
+}
+
+.v2-overlay-header,
+.v2-root .v2-overlay-header {
+  background: #011024 !important;
+  color: #FFFFFF !important;
+  border-bottom: 1px solid rgba(186, 204, 214, 0.12) !important;
+  padding: 16px 20px !important;
+}
+
+.v2-overlay-header:hover {
+  background: #001b38 !important;
+}
+
+.v2-overlay-body {
+  background: #011024 !important;
+  padding: 20px !important;
+}
+
+/* HEADERS, TITLES & PILLS */
+.v2-chart-head,
+.v2-root .v2-chart-head {
+  color: #FFFFFF !important;
+  font-size: 15px !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid rgba(186, 204, 214, 0.12) !important;
+  padding-bottom: 12px !important;
+}
+
+.v2-section-header h2,
+.v2-root .v2-section-header h2,
+.v2-rank-title,
+.v2-root .v2-rank-title {
+  color: #FFFFFF !important;
+  font-size: 22px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em !important;
+}
+
+.v2-pill,
+.v2-root .v2-pill {
+  background: rgba(0, 45, 84, 0.5) !important;
+  color: #00F0FF !important;
+  border: 1px solid rgba(0, 240, 255, 0.25) !important;
+  border-radius: 9999px !important;
+  padding: 4px 12px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+.v2-map-sub span,
+.v2-root .v2-map-sub span {
+  color: #8EA8C3 !important;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+}
+
+.v2-val,
+.v2-root .v2-val {
+  color: #FFFFFF !important;
+}
+
+.v2-lbl,
+.v2-root .v2-lbl {
+  color: #8EA8C3 !important;
+}
+
+.v2-filters,
+.v2-root .v2-filters {
+  background: #011024 !important;
+  border-bottom: 1px solid rgba(186, 204, 214, 0.12) !important;
+}
+
+.v2-custom-select,
+.v2-root .v2-custom-select {
+  color: #FFFFFF !important;
+}
+
+.v2-filter-label,
+.v2-root .v2-filter-label {
+  color: #8EA8C3 !important;
+}
+
+/* CHART ZOOM CONTROLS */
+.v2-chart-controls,
+.v2-root .v2-chart-controls {
+  background: rgba(1, 16, 36, 0.9) !important;
+  border: 1px solid rgba(186, 204, 214, 0.2) !important;
+  border-radius: 8px !important;
+}
+
+.v2-chart-controls button,
+.v2-root .v2-chart-controls button {
+  color: #BACCDE !important;
+}
+
+.v2-chart-controls button:hover,
+.v2-root .v2-chart-controls button:hover {
+  background: rgba(0, 45, 84, 0.6) !important;
+  color: #00F0FF !important;
+}
+
+/* HEATMAP TABLE */
+.v2-root .v2-heatmap-table th {
+  background: #002D54 !important;
+  color: #FFFFFF !important;
+  border-color: rgba(186, 204, 214, 0.12) !important;
+}
+
+.v2-root .v2-heatmap-table .zona-name {
+  background: #011024 !important;
+  color: #FFFFFF !important;
+  border-color: rgba(186, 204, 214, 0.12) !important;
+}
+
+.v2-compare-section {
+  margin-top: 48px !important;
+  margin-bottom: 0 !important;
+}

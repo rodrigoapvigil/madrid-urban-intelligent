@@ -60,10 +60,10 @@ const MadridMap: React.FC<MapProps> = ({
     // Estilo base unificado idéntico a la landing page en todos los perfiles
     return {
       fillColor: isSelected ? accentColor : '#011833',
-      weight: isSelected ? 2 : 1,
-      opacity: isExcluded ? 0.25 : 0.85,
-      color: isSelected ? accentColor : 'rgba(186, 204, 214, 0.32)',
-      fillOpacity: isExcluded ? 0.12 : isSelected ? 0.72 : 0.45
+      weight: isSelected ? 2.5 : 1,
+      opacity: isExcluded ? 0.2 : 0.9,
+      color: isSelected ? '#00F0FF' : 'rgba(0, 240, 255, 0.35)',
+      fillOpacity: isExcluded ? 0.10 : isSelected ? 0.75 : 0.52
     };
   }, [selectedDistrict, selectedBarrio, type, accentColor]);
 
@@ -236,16 +236,36 @@ const MadridMap: React.FC<MapProps> = ({
   }, [type, data, selectedProfile, selectedDistrict, selectedBarrio, containerId, selectedMonth, selectedYear, onDistrictClick, style, accentColor]);
 
   return (
-    <div 
-      id={containerId} 
-      style={{ 
-        width: '100%', 
-        height: '100%', 
-        borderRadius: '12px', 
-        overflow: 'hidden', 
-        background: '#011024' 
-      }} 
-    />
+    <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: '12px', overflow: 'hidden', background: '#011024', border: '1px solid rgba(186, 204, 214, 0.14)' }}>
+      <div 
+        id={containerId} 
+        style={{ 
+          width: '100%', 
+          height: '100%', 
+          background: '#011024' 
+        }} 
+      />
+      <div style={{
+        position: 'absolute',
+        bottom: '8px',
+        left: '12px',
+        right: '12px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        pointerEvents: 'none',
+        zIndex: 500,
+        fontSize: '10px',
+        fontWeight: 600,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+        color: 'rgba(186, 204, 214, 0.55)',
+        textShadow: '0 2px 8px rgba(0,0,0,0.8)'
+      }}>
+        <span>Madrid · Red Urbana</span>
+        <span>{type === 'districts' ? '21 Distritos' : '131 Barrios'}</span>
+      </div>
+    </div>
   );
 };
 
