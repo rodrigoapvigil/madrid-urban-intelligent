@@ -40,7 +40,14 @@ function resolveChartValue(value: unknown): unknown {
     const original = value as (...args: unknown[]) => unknown;
     const cached = resolvedCallbacks.get(original);
     if (cached) return cached;
-    const wrapped = (...args: unknown[]) => resolveChartValue(original(...args));
+    const wrapped = (...args: unknown[]) => {
+      try {
+        const res = original(...args);
+        return typeof res === 'string' ? resolveChartValue(res) : res;
+      } catch (err) {
+        return 'rgba(0, 240, 255, 0.18)';
+      }
+    };
     resolvedCallbacks.set(original, wrapped);
     return wrapped;
   }

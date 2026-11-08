@@ -239,14 +239,21 @@ const getNiceChartScale = (datasets: Array<Array<number | null>>) => {
 };
 
 const createAreaGradient = (context: any, color: string, opacity = 0.25) => {
-  const chart = context.chart;
-  const area = chart.chartArea;
-  if (!area || area.bottom <= area.top) return 'rgba(0, 240, 255, 0.18)';
-  const gradient = chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
-  gradient.addColorStop(0, 'rgba(0, 240, 255, 0.25)');
-  gradient.addColorStop(0.65, 'rgba(0, 45, 84, 0.10)');
-  gradient.addColorStop(1, 'rgba(1, 16, 36, 0.0)');
-  return gradient;
+  try {
+    const chart = context?.chart;
+    const ctx = chart?.ctx;
+    const area = chart?.chartArea;
+    if (!ctx || !area || typeof area.top !== 'number' || typeof area.bottom !== 'number' || !Number.isFinite(area.top) || !Number.isFinite(area.bottom) || area.bottom <= area.top) {
+      return 'rgba(0, 240, 255, 0.18)';
+    }
+    const gradient = ctx.createLinearGradient(0, area.top, 0, area.bottom);
+    gradient.addColorStop(0, 'rgba(0, 240, 255, 0.25)');
+    gradient.addColorStop(0.65, 'rgba(0, 45, 84, 0.10)');
+    gradient.addColorStop(1, 'rgba(1, 16, 36, 0.0)');
+    return gradient;
+  } catch {
+    return 'rgba(0, 240, 255, 0.18)';
+  }
 };
 
 const getCurrentMadridPeriod = () => {
@@ -1145,7 +1152,7 @@ const MadridDashboardV2: React.FC = () => {
                   offset: 8,
                   color: (context) => {
                     const idx = context.dataIndex;
-                    const found = rawData.find(d => d.mes === idx + 1);
+                    const found = effectiveData.find(d => d.mes === idx + 1);
                     if (found && found.is_prediction) return 'var(--precio-subida)';
                     return mainColor;
                   },
@@ -1201,7 +1208,7 @@ const MadridDashboardV2: React.FC = () => {
                       }
 
                       // Línea principal de la zona
-                      const found = rawData.find(d => d.mes === idx + 1);
+                      const found = effectiveData.find(d => d.mes === idx + 1);
                       const isPred = found ? Boolean(found.is_prediction) : false;
                       const tipoDato = isPred ? 'Predicción' : 'Dato Real Oficial';
                       const valFormatted = new Intl.NumberFormat('es-ES', {
@@ -1234,7 +1241,7 @@ const MadridDashboardV2: React.FC = () => {
 
                       // 3. Comparativa con la otra zona si existe
                       if (otherLabel && otherRawData) {
-                        const otherFound = otherRawData.find(d => d.mes === idx + 1);
+                        const otherFound = Array.isArray(otherRawData) ? otherRawData.find(d => d.mes === idx + 1) : null;
                         const otherVal = otherFound ? otherFound.precio_m2 * multiplier : null;
                         if (otherVal !== null && otherVal > 0) {
                           const diffOther = ((val - otherVal) / otherVal) * 100;
@@ -1250,7 +1257,7 @@ const MadridDashboardV2: React.FC = () => {
                       }
 
                       // 4. Comparativa vs Media de Madrid
-                      const madridItem = seriesMadrid.find(d => d.mes === idx + 1);
+                      const madridItem = effectiveMadridSeries.find(d => d.mes === idx + 1);
                       const madridVal = madridItem ? madridItem.precio_m2 * multiplier : null;
                       if (madridVal !== null && madridVal !== undefined && madridVal > 0) {
                         const diffMadrid = ((val - madridVal) / madridVal) * 100;
@@ -1517,7 +1524,7 @@ const MadridDashboardV2: React.FC = () => {
                   font: { size: 9, weight: 'bold' },
                   color: (context) => {
                     const idx = context.dataIndex;
-                    const dataset = context.datasetIndex === 0 ? seriesA : seriesB;
+                    const dataset = context.datasetIndex === 0 ? effA : effB;
                     const found = dataset.find(d => d.mes === idx + 1);
                     if (found && found.is_prediction) return 'var(--precio-subida)';
                     return (context.dataset.borderColor as string);
@@ -1619,7 +1626,7 @@ const MadridDashboardV2: React.FC = () => {
                       }
 
                       // Comparativa con la media de Madrid
-                      const madridItem = seriesMadrid.find(d => d.mes === idx + 1);
+                      const madridItem = effMad.find(d => d.mes === idx + 1);
                       const madridVal = madridItem ? madridItem.precio_m2 * (activeProfile.id === 'inversion' ? 100 : 1) : null;
                       if (madridVal !== null && madridVal > 0) {
                         const diffMadrid = ((val - madridVal) / madridVal) * 100;
