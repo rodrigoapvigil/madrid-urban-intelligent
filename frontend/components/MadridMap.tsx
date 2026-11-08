@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -23,54 +23,188 @@ const normalize = (str: string) => {
 const getProfileAccentColor = (profile: string): string => {
   const p = normalize(profile);
   if (p.includes('alquiler')) return '#00F0FF';
-  if (p.includes('compra')) return '#7928CA';
+  if (p.includes('compra')) return '#A855F7';
   if (p.includes('venta')) return '#FF5C5C';
   if (p.includes('inversion')) return '#00E5FF';
   return '#00F0FF';
 };
 
+const getProfileKey = (profile: string): 'alquiler' | 'compra' | 'venta' | 'inversion' => {
+  const p = normalize(profile);
+  if (p.includes('compra')) return 'compra';
+  if (p.includes('venta')) return 'venta';
+  if (p.includes('invers')) return 'inversion';
+  return 'alquiler';
+};
 
-const getChoroplethColor = (val: number, profile: string): string => {
-  if (!val || val <= 0) return '#011833';
+const getChoroplethTier = (val: number, profile: string): number => {
+  if (!val || val <= 0) return 0;
   const p = normalize(profile);
 
   if (p.includes('alquiler')) {
-    if (val >= 24) return '#00F0FF';
-    if (val >= 21) return '#00C8E6';
-    if (val >= 18) return '#0099CC';
-    if (val >= 15) return '#006699';
-    if (val >= 12) return '#003D66';
-    return '#012447';
+    if (val >= 24) return 5;
+    if (val >= 21) return 4;
+    if (val >= 18) return 3;
+    if (val >= 15) return 2;
+    if (val >= 12) return 1;
+    return 0;
   }
 
-  if (p.includes('compra')) {
-    if (val >= 7000) return '#A855F7';
-    if (val >= 5500) return '#7928CA';
-    if (val >= 4200) return '#00A3E0';
-    if (val >= 3000) return '#006699';
-    if (val >= 2000) return '#003D66';
-    return '#012447';
-  }
-
-  if (p.includes('venta')) {
-    if (val >= 7000) return '#FF3366';
-    if (val >= 5500) return '#FF5C5C';
-    if (val >= 4200) return '#00A3E0';
-    if (val >= 3000) return '#006699';
-    if (val >= 2000) return '#003D66';
-    return '#012447';
+  if (p.includes('compra') || p.includes('venta')) {
+    if (val >= 6800) return 5;
+    if (val >= 5400) return 4;
+    if (val >= 4200) return 3;
+    if (val >= 3100) return 2;
+    if (val >= 2100) return 1;
+    return 0;
   }
 
   if (p.includes('inversion')) {
-    if (val >= 0.070) return '#00F0FF';
-    if (val >= 0.060) return '#00C8E6';
-    if (val >= 0.052) return '#0088CC';
-    if (val >= 0.045) return '#005588';
-    return '#012447';
+    if (val >= 0.074) return 5;
+    if (val >= 0.065) return 4;
+    if (val >= 0.057) return 3;
+    if (val >= 0.050) return 2;
+    if (val >= 0.043) return 1;
+    return 0;
   }
 
-  return '#0088CC';
+  return 2;
 };
+
+interface TierConfig {
+  size: number;
+  r: number;
+  baseFill: string;
+  dotColor: {
+    alquiler: string;
+    compra: string;
+    venta: string;
+    inversion: string;
+  };
+  hasGlow?: boolean;
+}
+
+const TIER_CONFIGS: TierConfig[] = [
+  {
+    size: 13,
+    r: 1.05,
+    baseFill: '#011024',
+    dotColor: {
+      alquiler: '#023868',
+      compra: '#201844',
+      venta: '#38141c',
+      inversion: '#023868',
+    },
+  },
+  {
+    size: 10.5,
+    r: 1.25,
+    baseFill: '#01132b',
+    dotColor: {
+      alquiler: '#025894',
+      compra: '#3c207b',
+      venta: '#5e1728',
+      inversion: '#025894',
+    },
+  },
+  {
+    size: 8.8,
+    r: 1.4,
+    baseFill: '#011736',
+    dotColor: {
+      alquiler: '#0077b6',
+      compra: '#631fa0',
+      venta: '#931834',
+      inversion: '#0077b6',
+    },
+  },
+  {
+    size: 7.2,
+    r: 1.55,
+    baseFill: '#011c42',
+    dotColor: {
+      alquiler: '#0099cc',
+      compra: '#8c24e6',
+      venta: '#c81840',
+      inversion: '#0099cc',
+    },
+  },
+  {
+    size: 6.0,
+    r: 1.75,
+    baseFill: '#012250',
+    dotColor: {
+      alquiler: '#00c8e6',
+      compra: '#b060ff',
+      venta: '#f43f5e',
+      inversion: '#00c8e6',
+    },
+  },
+  {
+    size: 4.8,
+    r: 1.9,
+    baseFill: '#012b66',
+    dotColor: {
+      alquiler: '#00f0ff',
+      compra: '#d8b4fe',
+      venta: '#ff5c77',
+      inversion: '#00f0ff',
+    },
+    hasGlow: true,
+  },
+];
+
+function getPatternDefsMarkup(type: string): string {
+  const profiles: ('alquiler' | 'compra' | 'venta' | 'inversion')[] = ['alquiler', 'compra', 'venta', 'inversion'];
+  let markup = '';
+
+  for (const prof of profiles) {
+    TIER_CONFIGS.forEach((tier, index) => {
+      const s = tier.size;
+      const r = tier.r;
+      const c = tier.dotColor[prof];
+      const p1 = (s * 0.25).toFixed(2);
+      const p2 = (s * 0.75).toFixed(2);
+      const glowHtml = tier.hasGlow
+        ? `<circle cx="${p1}" cy="${p1}" r="${(r * 0.5).toFixed(2)}" fill="#ffffff" /><circle cx="${p2}" cy="${p2}" r="${(r * 0.5).toFixed(2)}" fill="#ffffff" />`
+        : '';
+
+      markup += `<pattern id="dot-pat-${type}-${prof}-${index}" width="${s}" height="${s}" patternUnits="userSpaceOnUse"><rect width="${s}" height="${s}" fill="${tier.baseFill}" fill-opacity="0.94" /><circle cx="${p1}" cy="${p1}" r="${r}" fill="${c}" /><circle cx="${p2}" cy="${p2}" r="${r}" fill="${c}" />${glowHtml}</pattern>`;
+    });
+  }
+
+  // Hover pattern
+  markup += `<pattern id="dot-pat-${type}-hover" width="5.0" height="5.0" patternUnits="userSpaceOnUse"><rect width="5.0" height="5.0" fill="#003566" fill-opacity="0.96" /><circle cx="1.25" cy="1.25" r="2.0" fill="#00f0ff" /><circle cx="1.25" cy="1.25" r="1.0" fill="#ffffff" /><circle cx="3.75" cy="3.75" r="2.0" fill="#00f0ff" /><circle cx="3.75" cy="3.75" r="1.0" fill="#ffffff" /></pattern>`;
+
+  // Selected pattern
+  markup += `<pattern id="dot-pat-${type}-selected" width="4.6" height="4.6" patternUnits="userSpaceOnUse"><rect width="4.6" height="4.6" fill="#004680" fill-opacity="0.98" /><circle cx="1.15" cy="1.15" r="2.1" fill="#00f0ff" /><circle cx="1.15" cy="1.15" r="1.05" fill="#ffffff" /><circle cx="3.45" cy="3.45" r="2.1" fill="#00f0ff" /><circle cx="3.45" cy="3.45" r="1.05" fill="#ffffff" /></pattern>`;
+
+  return markup;
+}
+
+function injectPatternsIntoLeaflet(map: L.Map | null, type: string) {
+  if (!map) return;
+  try {
+    const pane = map.getPanes().overlayPane;
+    const svg = pane?.querySelector('svg');
+    if (!svg) return;
+
+    const defsId = `defs-leaflet-${type}`;
+    let defs = svg.querySelector(`#${defsId}`);
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      defs.setAttribute('id', defsId);
+      svg.insertBefore(defs, svg.firstChild);
+    }
+    defs.innerHTML = getPatternDefsMarkup(type);
+  } catch (err) {
+    console.warn('SVG defs injection error:', err);
+  }
+}
+
+// In-memory GeoJSON cache to ensure instant renders
+let cachedDistritosGeoJson: any = null;
+let cachedBarriosGeoJson: any = null;
 
 const MadridMap: React.FC<MapProps> = ({ 
   type, data, selectedYear, selectedMonth, selectedProfile, 
@@ -80,6 +214,7 @@ const MadridMap: React.FC<MapProps> = ({
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
   const containerId = useRef(`map-${type}-${Math.random().toString(36).slice(2, 11)}`).current;
   const accentColor = getProfileAccentColor(selectedProfile);
+  const profileKey = getProfileKey(selectedProfile);
 
   const style = useCallback((feature: any) => {
     const props = feature.properties || {};
@@ -87,7 +222,7 @@ const MadridMap: React.FC<MapProps> = ({
     
     // Check if this feature belongs to the selected district
     const featureDistrict = props.distrito || props.nombre || props.name || props.distrito_nombre;
-    let isExcluded = selectedDistrict && normalize(featureDistrict) !== normalize(selectedDistrict);
+    let isExcluded = Boolean(selectedDistrict && normalize(featureDistrict) !== normalize(selectedDistrict));
 
     if (selectedBarrio && type === 'neighborhoods') {
       const featureBarrio = props.barrio || props.name;
@@ -111,16 +246,19 @@ const MadridMap: React.FC<MapProps> = ({
       val = selectedProfile === 'Inversión' ? (item.rentabilidad || 0) : (item.precio_m2 || 0);
     }
 
-    const choroplethFill = getChoroplethColor(val, selectedProfile);
+    const tier = getChoroplethTier(val, selectedProfile);
+    const patternId = isSelected 
+      ? `dot-pat-${type}-selected` 
+      : `dot-pat-${type}-${profileKey}-${tier}`;
 
     return {
-      fillColor: isSelected ? accentColor : choroplethFill,
-      weight: isSelected ? 2.5 : 1,
-      opacity: isExcluded ? 0.18 : 0.95,
+      fillColor: `url(#${patternId})`,
+      weight: isSelected ? 2.5 : type === 'districts' ? 1.2 : 0.85,
+      opacity: isExcluded ? 0.20 : 0.95,
       color: isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
-      fillOpacity: isExcluded ? 0.10 : isSelected ? 0.85 : 0.65
+      fillOpacity: isExcluded ? 0.25 : 1.0,
     };
-  }, [data, selectedDistrict, selectedBarrio, type, accentColor, selectedProfile]);
+  }, [data, selectedDistrict, selectedBarrio, type, selectedProfile, profileKey]);
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -161,9 +299,14 @@ const MadridMap: React.FC<MapProps> = ({
     }
 
     const loadGeoJson = async () => {
-      const url = type === 'districts' ? '/madrid_distritos.geojson' : '/barrios_polygons.geojson';
-      const response = await fetch(url);
-      const geoData = await response.json();
+      let geoData: any = type === 'districts' ? cachedDistritosGeoJson : cachedBarriosGeoJson;
+      if (!geoData) {
+        const url = type === 'districts' ? '/madrid_distritos.geojson' : '/barrios_polygons.geojson';
+        const response = await fetch(url);
+        geoData = await response.json();
+        if (type === 'districts') cachedDistritosGeoJson = geoData;
+        else cachedBarriosGeoJson = geoData;
+      }
 
       if (geoJsonLayerRef.current) {
         mapRef.current?.removeLayer(geoJsonLayerRef.current);
@@ -225,9 +368,9 @@ const MadridMap: React.FC<MapProps> = ({
               const l = e.target;
               l.setStyle({
                 weight: 2,
-                color: accentColor,
-                fillColor: accentColor,
-                fillOpacity: 0.75
+                color: '#00F0FF',
+                fillColor: `url(#dot-pat-${type}-hover)`,
+                fillOpacity: 1
               });
               l.openPopup();
             },
@@ -244,6 +387,9 @@ const MadridMap: React.FC<MapProps> = ({
           });
         }
       }).addTo(mapRef.current!);
+
+      // Inject pattern defs into the Leaflet overlay SVG
+      injectPatternsIntoLeaflet(mapRef.current, type);
 
       // Zoom logic
       if (selectedBarrio && type === 'neighborhoods') {
@@ -290,8 +436,17 @@ const MadridMap: React.FC<MapProps> = ({
     };
   }, [type, data, selectedProfile, selectedDistrict, selectedBarrio, containerId, selectedMonth, selectedYear, onDistrictClick, style, accentColor]);
 
+  // Generate SVG defs for React DOM rendering
+  const svgDefsMarkup = useMemo(() => getPatternDefsMarkup(type), [type]);
+
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: '12px', overflow: 'hidden', background: '#011024', border: '1px solid rgba(186, 204, 214, 0.14)' }}>
+      {/* Hidden SVG with global pattern definitions */}
+      <svg 
+        style={{ position: 'absolute', width: 0, height: 0, pointerEvents: 'none', opacity: 0 }} 
+        aria-hidden="true"
+        dangerouslySetInnerHTML={{ __html: `<defs>${svgDefsMarkup}</defs>` }}
+      />
       <div 
         id={containerId} 
         style={{ 

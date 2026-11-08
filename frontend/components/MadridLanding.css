@@ -138,8 +138,8 @@
   -webkit-backdrop-filter: blur(18px) saturate(130%);
 }
 .mi-brand { display: inline-flex; align-items: center; gap: 12px; width: fit-content; color: var(--mi-white); font-size: 17px; font-weight: 500; letter-spacing: -.035em; white-space: nowrap; }
-.mi-brand__mark { width: 38px; height: 38px; display: grid; place-items: center; flex: 0 0 auto; overflow: hidden; }
-.mi-brand__mark img { width: 100%; height: 100%; object-fit: contain; filter: brightness(0) invert(1) drop-shadow(0 0 2px rgba(255,255,255,0.4)); }
+.mi-brand__mark { width: 38px; height: 38px; display: grid; place-items: center; flex: 0 0 auto; overflow: visible; background: transparent !important; border: none !important; box-shadow: none !important; }
+.mi-brand__mark img, .mi-brand__mark svg { width: 100%; height: 100%; object-fit: contain; background: transparent !important; border: none !important; box-shadow: none !important; filter: drop-shadow(0 0 6px rgba(0, 240, 255, 0.45)); }
 .mi-nav { display: flex; align-items: center; justify-content: center; gap: clamp(20px,3vw,48px); }
 .mi-nav a, .mi-footer nav a { min-height: 44px; display: inline-flex; align-items: center; color: var(--mi-silver); font-size: 11px; font-weight: 500; letter-spacing: .105em; text-transform: uppercase; transition: color .2s ease; }
 .mi-nav a:hover, .mi-footer nav a:hover { color: var(--mi-mist); }
