@@ -2358,3 +2358,258 @@
 .v2-root .v2-heatmap-table .zona-val {
   color: #FFFFFF !important;
 }
+
+/* ========================================================
+   REFINED BUTTON AFFORDANCE, ZERO DIVIDING LINES & ATMOSPHERE
+   ======================================================== */
+
+/* 1. Transparent root, panels and toolbars over fixed atmosphere */
+.v2-root {
+  background: transparent !important;
+  color: #BACCD6 !important;
+  position: relative !important;
+  min-height: 100vh !important;
+  border: none !important;
+  border-bottom: none !important;
+}
+
+.v2-toolbar,
+.v2-filters,
+.v2-viewport,
+.v2-panel,
+.v2-compare-section,
+.v2-overlay-wrapper {
+  background: transparent !important;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+}
+
+/* 2. Sleek tactile button affordance for all select dropdowns */
+.v2-custom-select,
+.v2-root .v2-custom-select {
+  appearance: none !important;
+  background: rgba(1, 24, 51, 0.88) !important;
+  border: 1px solid rgba(0, 240, 255, 0.38) !important;
+  border-radius: 9999px !important;
+  text-align: left !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #FFFFFF !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  min-height: 40px !important;
+  padding: 8px 18px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35) !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+}
+
+.v2-custom-select:hover,
+.v2-root .v2-custom-select:hover {
+  border-color: #00F0FF !important;
+  box-shadow: 0 0 16px rgba(0, 240, 255, 0.4) !important;
+  transform: translateY(-1px) !important;
+  background: rgba(1, 32, 68, 0.95) !important;
+}
+
+.v2-custom-select.open,
+.v2-root .v2-custom-select.open {
+  border-color: #00F0FF !important;
+  background: rgba(0, 45, 84, 0.98) !important;
+  box-shadow: 0 0 20px rgba(0, 240, 255, 0.5) !important;
+}
+
+.v2-select-chevron {
+  color: #00F0FF !important;
+  transition: transform 0.22s ease !important;
+  flex-shrink: 0 !important;
+}
+
+.v2-custom-select.open .v2-select-chevron {
+  transform: rotate(180deg) !important;
+}
+
+.v2-filter-label,
+.v2-root .v2-filter-label {
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.08em !important;
+  color: #00F0FF !important;
+  margin-bottom: 6px !important;
+  display: block !important;
+}
+
+/* 3. Dropdown Menu: anchored right under each button, dark & floating */
+.v2-dropdown-container,
+.v2-root .v2-dropdown-container {
+  position: relative !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.v2-dropdown-menu,
+.v2-root .v2-dropdown-menu {
+  position: absolute !important;
+  top: calc(100% + 8px) !important;
+  left: 0 !important;
+  right: auto !important;
+  bottom: auto !important;
+  min-width: 200px !important;
+  max-width: 320px !important;
+  max-height: 280px !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain !important;
+  background: #011024 !important;
+  border-radius: 14px !important;
+  border: 1px solid rgba(0, 240, 255, 0.35) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.9) !important;
+  padding: 6px !important;
+  z-index: 10000 !important;
+}
+
+.v2-dropdown-item,
+.v2-root .v2-dropdown-item {
+  color: #BACCD6 !important;
+  padding: 9px 14px !important;
+  border-radius: 8px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease !important;
+  display: block !important;
+  width: 100% !important;
+  text-align: left !important;
+  background: transparent !important;
+}
+
+.v2-dropdown-item:hover,
+.v2-root .v2-dropdown-item:hover {
+  background: rgba(0, 240, 255, 0.16) !important;
+  color: #00F0FF !important;
+  font-weight: 600 !important;
+  transform: translateX(2px) !important;
+}
+
+.v2-dropdown-item[aria-selected="true"],
+.v2-root .v2-dropdown-item[aria-selected="true"] {
+  background: rgba(0, 240, 255, 0.24) !important;
+  color: #00F0FF !important;
+  font-weight: 700 !important;
+}
+
+/* 4. Compare Zone Selectors - anchor dropdowns perfectly without jumping */
+.v2-compare-zone-selectors {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 24px !important;
+  margin: 0 0 16px !important;
+}
+
+.v2-compare-zone-select {
+  position: relative !important;
+  width: 100% !important;
+}
+
+.v2-compare-zone-select .v2-dropdown-menu {
+  position: absolute !important;
+  top: calc(100% + 8px) !important;
+  left: 0 !important;
+  width: 100% !important;
+  max-width: 380px !important;
+}
+
+/* 5. Segmented Control / Toggle Buttons (Distritos vs Barrios) */
+.v2-level-switch,
+.v2-tabs-bg.v2-level-switch,
+.v2-tabs-bg.small.v2-level-switch,
+.v2-root .v2-level-switch {
+  display: inline-flex !important;
+  align-items: center !important;
+  background: rgba(1, 16, 36, 0.85) !important;
+  border: 1px solid rgba(186, 204, 214, 0.25) !important;
+  border-radius: 9999px !important;
+  padding: 3px !important;
+  gap: 4px !important;
+  position: relative !important;
+}
+
+.v2-level-switch .v2-indicator {
+  display: none !important;
+}
+
+.v2-level-switch .v2-tab-btn,
+.v2-root .v2-level-switch .v2-tab-btn {
+  border: none !important;
+  border-radius: 9999px !important;
+  padding: 6px 18px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  color: #BACCD6 !important;
+  background: transparent !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.v2-level-switch .v2-tab-btn:hover,
+.v2-root .v2-level-switch .v2-tab-btn:hover {
+  color: #FFFFFF !important;
+}
+
+.v2-level-switch .v2-tab-btn.active,
+.v2-root .v2-level-switch .v2-tab-btn.active {
+  color: #011024 !important;
+  background: #00F0FF !important;
+  font-weight: 750 !important;
+  box-shadow: 0 2px 10px rgba(0, 240, 255, 0.5) !important;
+}
+
+/* 6. Floating Cards with Glassmorphism */
+.v2-kpi-card,
+.v2-map-card,
+.v2-chart-card,
+.v2-mini-kpi-card,
+.v2-overlay-wrapper,
+.v2-connectivity-card,
+.v2-affordability-card,
+.v2-explorer-grid,
+.v2-heatmap-card,
+.v2-root .v2-kpi-card,
+.v2-root .v2-map-card,
+.v2-root .v2-chart-card,
+.v2-root .v2-mini-kpi-card,
+.v2-root .v2-overlay-wrapper,
+.v2-root .v2-connectivity-card,
+.v2-root .v2-affordability-card,
+.v2-root .v2-explorer-grid,
+.v2-root .v2-heatmap-card {
+  background: rgba(1, 16, 36, 0.82) !important;
+  backdrop-filter: blur(14px) !important;
+  -webkit-backdrop-filter: blur(14px) !important;
+  border: 1px solid rgba(186, 204, 214, 0.14) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55) !important;
+  color: #FFFFFF !important;
+}
+
+/* 7. Zero dividing line between content and footer */
+.v2-root,
+.v2-viewport,
+.v2-panel,
+.v2-compare-section,
+.v2-overlay-wrapper,
+.auros-footer {
+  border-top: none !important;
+  border-bottom: none !important;
+}
+
+.auros-footer {
+  background: transparent !important;
+  border: none !important;
+}

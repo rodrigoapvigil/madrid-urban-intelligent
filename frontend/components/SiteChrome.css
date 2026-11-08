@@ -159,8 +159,10 @@
    ========================================================================== */
 .auros-footer {
   width: 100%;
-  background: #02142B;
+  background: transparent !important;
   color: #FFFFFF;
+  border: none !important;
+  border-top: none !important;
   padding: clamp(64px, 8vw, 104px) 0 clamp(32px, 4vw, 48px);
   position: relative;
   overflow: hidden;

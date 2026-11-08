@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { cssColorResolverPlugin, colorWithAlpha, resolveCssColor } from '../lib/colors';
-import { RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import { ChevronDown, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
 import './MadridDashboardV2.css';
 import { apiFetch } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
@@ -97,7 +97,7 @@ const getNiceChartScale = (datasets: Array<Array<number | null>>) => {
 const createAreaGradient = (context: any, color: string, opacity = 0.25) => {
   const chart = context.chart;
   const area = chart.chartArea;
-  if (!area) return 'rgba(0, 240, 255, 0.25)';
+  if (!area || area.bottom <= area.top) return 'rgba(0, 240, 255, 0.18)';
   const gradient = chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
   gradient.addColorStop(0, 'rgba(0, 240, 255, 0.25)');
   gradient.addColorStop(0.65, 'rgba(0, 45, 84, 0.10)');
@@ -943,7 +943,7 @@ const MadridDashboardV2: React.FC = () => {
                   pointHitRadius: 14,
                 },
                 {
-                  label: 'Proyección (Predicción)',
+                  label: 'Proyección del modelo',
                   data: forecastPrices,
                   borderColor: '#00F0FF',
                   backgroundColor: (context: any) => createAreaGradient(context, '#00F0FF', 0.12),
@@ -1274,7 +1274,7 @@ const MadridDashboardV2: React.FC = () => {
                   cubicInterpolationMode: 'monotone'
                 },
                 {
-                  label: 'Proyección (Predicción)',
+                  label: 'Proyección del modelo',
                   data: [],
                   borderColor: 'var(--precio-subida)',
                   borderDash: [5, 5],
@@ -1907,7 +1907,8 @@ const MadridDashboardV2: React.FC = () => {
           <div className={`v2-dropdown-container ${activeDropdown === 'year' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Año</span>
             <button type="button" className={`v2-custom-select ${activeDropdown === 'year' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'year'} onClick={() => setActiveDropdown(activeDropdown === 'year' ? null : 'year')}>
-              {selectedYear}
+              <span>{selectedYear}</span>
+              <ChevronDown size={14} className="v2-select-chevron" />
             </button>
             {activeDropdown === 'year' && (
               <div className="v2-dropdown-menu" role="listbox" aria-label="Año">
@@ -1922,7 +1923,8 @@ const MadridDashboardV2: React.FC = () => {
           <div className={`v2-dropdown-container ${activeDropdown === 'month' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Mes</span>
             <button type="button" className={`v2-custom-select ${activeDropdown === 'month' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'month'} onClick={() => setActiveDropdown(activeDropdown === 'month' ? null : 'month')}>
-              {selectedMonth}
+              <span>{selectedMonth}</span>
+              <ChevronDown size={14} className="v2-select-chevron" />
             </button>
             {activeDropdown === 'month' && (
               <div className="v2-dropdown-menu" role="listbox" aria-label="Mes">
@@ -1937,7 +1939,8 @@ const MadridDashboardV2: React.FC = () => {
           <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Distrito</span>
             <button type="button" className={`v2-custom-select ${activeDropdown === 'dist' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'dist'} onClick={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')}>
-              {selectedDistrict}
+              <span>{selectedDistrict}</span>
+              <ChevronDown size={14} className="v2-select-chevron" />
             </button>
             {activeDropdown === 'dist' && (
               <div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
@@ -1952,7 +1955,8 @@ const MadridDashboardV2: React.FC = () => {
           <div className={`v2-dropdown-container ${activeDropdown === 'barrio' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Barrio</span>
             <button type="button" className={`v2-custom-select ${activeDropdown === 'barrio' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'barrio'} onClick={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')}>
-              {selectedBarrio}
+              <span>{selectedBarrio}</span>
+              <ChevronDown size={14} className="v2-select-chevron" />
             </button>
             {activeDropdown === 'barrio' && (
               <div className="v2-dropdown-menu" role="listbox" aria-label="Barrio">
@@ -3268,7 +3272,8 @@ const MadridDashboardV2: React.FC = () => {
                 <div className={`v2-dropdown-container v2-compare-zone-select ${activeDropdown === 'zoneA' ? 'v2-z-up' : ''}`}>
                   <span className="v2-filter-label">Zona A</span>
                   <button type="button" className={`v2-custom-select ${activeDropdown === 'zoneA' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'zoneA'} onClick={() => setActiveDropdown(activeDropdown === 'zoneA' ? null : 'zoneA')}>
-                    {selectedZoneA}
+                    <span>{selectedZoneA}</span>
+                    <ChevronDown size={14} className="v2-select-chevron" />
                   </button>
                   {activeDropdown === 'zoneA' && (
                     <div className="v2-dropdown-menu" role="listbox" aria-label="Seleccionar Zona A">
@@ -3281,7 +3286,8 @@ const MadridDashboardV2: React.FC = () => {
                 <div className={`v2-dropdown-container v2-compare-zone-select ${activeDropdown === 'zoneB' ? 'v2-z-up' : ''}`}>
                   <span className="v2-filter-label">Zona B</span>
                   <button type="button" className={`v2-custom-select ${activeDropdown === 'zoneB' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'zoneB'} onClick={() => setActiveDropdown(activeDropdown === 'zoneB' ? null : 'zoneB')}>
-                    {selectedZoneB}
+                    <span>{selectedZoneB}</span>
+                    <ChevronDown size={14} className="v2-select-chevron" />
                   </button>
                   {activeDropdown === 'zoneB' && (
                     <div className="v2-dropdown-menu" role="listbox" aria-label="Seleccionar Zona B">
