@@ -69,7 +69,7 @@ export default function MadridLanding() {
         <section className="mi-statement" id="lectura" aria-labelledby="mi-statement-title">
           <div className="mi-wrap mi-statement__inner">
             <p className="mi-kicker mi-kicker--muted">Transparencia analítica radical</p>
-            <h2 id="mi-statement-title" className="mi-kinetic"><span>Información oficial</span><span>al alcance de todos</span></h2>
+            <h2 id="mi-statement-title" className="mi-kinetic"><span>Información</span><span>al alcance</span></h2>
             <div className="mi-statement__coordinates" aria-hidden="true"><span>21 DISTRITOS</span><span>131 BARRIOS</span><span>MADRID · DATOS ABIERTOS</span></div>
           </div>
         </section>
