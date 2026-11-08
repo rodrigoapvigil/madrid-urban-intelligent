@@ -1842,6 +1842,7 @@ const MadridDashboardV2: React.FC = () => {
 
   return (
     <div className="v2-root">
+      <div className="mi-atmosphere" aria-hidden="true"/>
       {/* LOADING OVERLAY */}
       {isDashboardLoading && (
         <div className="v2-loading-overlay">
@@ -1875,10 +1876,9 @@ const MadridDashboardV2: React.FC = () => {
 
       <SiteHeader activePath="/madrid" />
 
-      {/* 1. TOOLBAR DEL CUADRO DE MANDO (Perfil de mercado + Submenú Dashboard / AMBI / El Veredicto) */}
+      {/* 1. TOOLBAR DEL CUADRO DE MANDO (Perfil de mercado centrado y limpio) */}
       <div className="v2-toolbar">
         <div className="v2-toolbar-inner">
-          <div className="v2-toolbar-left" />
           <div className="v2-tabs-container">
             <div className="v2-tabs-bg" role="group" aria-label="Perfil de mercado">
               <div className="v2-indicator" style={{ transform: `translateX(${profileIdx * 100}%)` }} />
@@ -1894,13 +1894,6 @@ const MadridDashboardV2: React.FC = () => {
                 </button>
               ))}
             </div>
-          </div>
-          <div className="v2-toolbar-right">
-            <nav className="v2-tool-subnav" aria-label="Navegación del cuadro de mando">
-              <Link href="/madrid" className="v2-tool-subnav-link active">Dashboard</Link>
-              <Link href="/madrid/chat" className="v2-tool-subnav-link">AMBI</Link>
-              <Link href="/madrid/veredicto" className="v2-tool-subnav-link">El Veredicto</Link>
-            </nav>
           </div>
         </div>
       </div>

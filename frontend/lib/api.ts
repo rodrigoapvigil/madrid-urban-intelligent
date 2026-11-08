@@ -1,4 +1,5 @@
 const LOCAL_API_BASE = 'http://localhost:8001/api';
+const RENDER_API_BASE = 'https://madrid-urban-api.onrender.com/api';
 
 function normalizeApiBase(value: string): string {
   const base = value.trim().replace(/\/+$/, '');
@@ -14,7 +15,7 @@ function normalizeApiBase(value: string): string {
   return base.endsWith('/api') ? base : `${base}/api`;
 }
 
-export const API_BASE = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || LOCAL_API_BASE);
+export const API_BASE = normalizeApiBase(process.env.NEXT_PUBLIC_API_URL || RENDER_API_BASE);
 
 const API_CACHE_TTL_MS = 2 * 60 * 1000;
 const API_CACHE_MAX_ENTRIES = 80;
@@ -30,8 +31,8 @@ type CachedApiResponse = {
 const apiResponseCache = new Map<string, CachedApiResponse>();
 const apiRequestsInFlight = new Map<string, Promise<CachedApiResponse>>();
 
-export function apiUrl(path: string): string {
-  return `${API_BASE}/${path.replace(/^\/+/, '')}`;
+export function apiUrl(path: string, base = API_BASE): string {
+  return `${base}/${path.replace(/^\/+/, '')}`;
 }
 
 export async function apiFetch(path: string, init: RequestInit = {}, timeoutMs = 20000): Promise<Response> {
@@ -53,13 +54,19 @@ export async function apiFetch(path: string, init: RequestInit = {}, timeoutMs =
     if (pending) return respond(await pending);
   }
 
-  const request = async (): Promise<CachedApiResponse> => {
+  const fetchWithFallback = async (targetUrl: string, isRetry = false): Promise<CachedApiResponse> => {
     const controller = new AbortController();
     const timeout = globalThis.setTimeout(() => controller.abort(), timeoutMs);
 
     try {
-      const response = await fetch(url, { ...init, signal: init.signal || controller.signal });
-      if (!response.ok) throw new Error(`La API respondió con HTTP ${response.status}`);
+      const response = await fetch(targetUrl, { ...init, signal: init.signal || controller.signal });
+      if (!response.ok) {
+        if (!isRetry && targetUrl.includes('api.dmiyc.com')) {
+          const fallbackUrl = apiUrl(path, RENDER_API_BASE);
+          return await fetchWithFallback(fallbackUrl, true);
+        }
+        throw new Error(`La API respondió con HTTP ${response.status}`);
+      }
       const body = await response.text();
       const result: CachedApiResponse = {
         body,
@@ -78,6 +85,10 @@ export async function apiFetch(path: string, init: RequestInit = {}, timeoutMs =
       }
       return result;
     } catch (error) {
+      if (!isRetry && targetUrl.includes('api.dmiyc.com')) {
+        const fallbackUrl = apiUrl(path, RENDER_API_BASE);
+        return await fetchWithFallback(fallbackUrl, true);
+      }
       if (error instanceof DOMException && error.name === 'AbortError') {
         throw new Error('La API ha tardado demasiado en responder. Inténtalo de nuevo.');
       }
@@ -87,9 +98,9 @@ export async function apiFetch(path: string, init: RequestInit = {}, timeoutMs =
     }
   };
 
-  if (!cacheable) return respond(await request());
+  if (!cacheable) return respond(await fetchWithFallback(url));
 
-  const pending = request();
+  const pending = fetchWithFallback(url);
   apiRequestsInFlight.set(url, pending);
   try {
     return respond(await pending);

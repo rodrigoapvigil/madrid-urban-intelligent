@@ -29,6 +29,49 @@ const getProfileAccentColor = (profile: string): string => {
   return '#00F0FF';
 };
 
+
+const getChoroplethColor = (val: number, profile: string): string => {
+  if (!val || val <= 0) return '#011833';
+  const p = normalize(profile);
+
+  if (p.includes('alquiler')) {
+    if (val >= 24) return '#00F0FF';
+    if (val >= 21) return '#00C8E6';
+    if (val >= 18) return '#0099CC';
+    if (val >= 15) return '#006699';
+    if (val >= 12) return '#003D66';
+    return '#012447';
+  }
+
+  if (p.includes('compra')) {
+    if (val >= 7000) return '#A855F7';
+    if (val >= 5500) return '#7928CA';
+    if (val >= 4200) return '#00A3E0';
+    if (val >= 3000) return '#006699';
+    if (val >= 2000) return '#003D66';
+    return '#012447';
+  }
+
+  if (p.includes('venta')) {
+    if (val >= 7000) return '#FF3366';
+    if (val >= 5500) return '#FF5C5C';
+    if (val >= 4200) return '#00A3E0';
+    if (val >= 3000) return '#006699';
+    if (val >= 2000) return '#003D66';
+    return '#012447';
+  }
+
+  if (p.includes('inversion')) {
+    if (val >= 0.070) return '#00F0FF';
+    if (val >= 0.060) return '#00C8E6';
+    if (val >= 0.052) return '#0088CC';
+    if (val >= 0.045) return '#005588';
+    return '#012447';
+  }
+
+  return '#0088CC';
+};
+
 const MadridMap: React.FC<MapProps> = ({ 
   type, data, selectedYear, selectedMonth, selectedProfile, 
   selectedDistrict, selectedBarrio, onDistrictClick 
@@ -57,15 +100,27 @@ const MadridMap: React.FC<MapProps> = ({
       ? Boolean(selectedDistrict && normalize(name) === normalize(selectedDistrict))
       : Boolean(selectedBarrio && normalize(name) === normalize(selectedBarrio));
 
-    // Estilo base unificado idéntico a la landing page en todos los perfiles
+    const item = data.find(d => {
+      const dName = normalize(type === 'districts' ? d.distrito : d.barrio);
+      const geoName = normalize(name);
+      return dName === geoName || dName.includes(geoName) || geoName.includes(dName);
+    });
+
+    let val = 0;
+    if (item) {
+      val = selectedProfile === 'Inversión' ? (item.rentabilidad || 0) : (item.precio_m2 || 0);
+    }
+
+    const choroplethFill = getChoroplethColor(val, selectedProfile);
+
     return {
-      fillColor: isSelected ? accentColor : '#011833',
+      fillColor: isSelected ? accentColor : choroplethFill,
       weight: isSelected ? 2.5 : 1,
-      opacity: isExcluded ? 0.2 : 0.9,
-      color: isSelected ? '#00F0FF' : 'rgba(0, 240, 255, 0.35)',
-      fillOpacity: isExcluded ? 0.10 : isSelected ? 0.75 : 0.52
+      opacity: isExcluded ? 0.18 : 0.95,
+      color: isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
+      fillOpacity: isExcluded ? 0.10 : isSelected ? 0.85 : 0.65
     };
-  }, [selectedDistrict, selectedBarrio, type, accentColor]);
+  }, [data, selectedDistrict, selectedBarrio, type, accentColor, selectedProfile]);
 
   useEffect(() => {
     if (!mapRef.current) {

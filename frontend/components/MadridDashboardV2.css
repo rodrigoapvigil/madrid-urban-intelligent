@@ -2,20 +2,22 @@
 
 :root {
   --v2-profile-color: var(--precio-subida);
-  --v2-apple-bg: var(--blanco-humo);
-  --v2-card-bg: var(--blanco-humo);
-  --v2-border: color-mix(in srgb, var(--azul-noche) 10%, transparent);
-  --v2-text-main: var(--azul-noche);
-  --v2-text-sec: var(--texto-secundario-azul);
-  --v2-shadow: 0 4px 24px color-mix(in srgb, var(--azul-noche) 4%, transparent);
+  --v2-apple-bg: transparent;
+  --v2-card-bg: rgba(1, 16, 36, 0.75);
+  --v2-border: rgba(186, 204, 214, 0.14);
+  --v2-text-main: #FFFFFF;
+  --v2-text-sec: #BACCD6;
+  --v2-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
 .v2-root {
-  background: var(--blanco-humo);
+  background: transparent !important;
   min-height: 100vh;
+  position: relative;
+  z-index: 1;
   padding-top: 0;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
-  color: var(--v2-text-main);
+  color: #FFFFFF !important;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -1879,27 +1881,27 @@
 .v2-filters { background: var(--blanco-humo); border-bottom: 1px solid var(--humo-2); padding: 12px 0; }
 .v2-filter-group { max-width: 1440px; gap: clamp(18px, 3vw, 42px); padding: 0 28px; }
 .v2-dropdown-container { min-width: 105px; }
-.v2-filter-label { color: var(--azul-linea); font-size: 10px; letter-spacing: .07em; }
-.v2-custom-select { color: var(--azul-noche); font-weight: 650; }
+.v2-filter-label { color: #8EA8C3 !important; font-size: 10px; letter-spacing: .07em; }
+.v2-custom-select { color: #FFFFFF !important; font-weight: 650; }
 .v2-custom-select:hover { opacity: 1; color: var(--v2-profile-color); }
 .v2-dropdown-menu { border-color: var(--humo-2); border-radius: 14px; box-shadow: 0 18px 44px color-mix(in srgb, var(--azul-noche) 16%, transparent); }
 .v2-panel { padding: 32px 28px; }
 .v2-grid-main { grid-template-columns: minmax(260px, 330px) minmax(0,1fr); gap: 24px; margin-bottom: 42px; }
 .v2-kpi-stack { gap: 12px; }
 .v2-kpi-card { padding: 18px 20px; border-radius: 14px; box-shadow: 0 4px 16px color-mix(in srgb, var(--azul-noche) 4.5%, transparent); }
-.v2-kpi-card label { color: var(--azul-linea); letter-spacing: .045em; }
-.v2-val { margin-top: 10px; color: var(--azul-noche); font-size: 30px; font-variant-numeric: tabular-nums; }
+.v2-kpi-card label { color: #8EA8C3 !important; letter-spacing: .045em; }
+.v2-val { margin-top: 10px; color: #FFFFFF !important; font-size: 30px; font-variant-numeric: tabular-nums; }
 .v2-map-card { padding: 26px; border-radius: 16px; box-shadow: 0 6px 22px color-mix(in srgb, var(--azul-noche) 5.5%, transparent); }
 .v2-chart-card { border-color: var(--humo-2); border-radius: 16px; box-shadow: 0 6px 22px color-mix(in srgb, var(--azul-noche) 5.5%, transparent); }
 .v2-chart-card:hover { transform: translateY(-2px); box-shadow: 0 12px 30px color-mix(in srgb, var(--azul-noche) 9%, transparent); }
-.v2-chart-head { color: var(--azul-noche); font-size: 15px; font-weight: 700; }
+.v2-chart-head { color: #FFFFFF !important; font-size: 15px; font-weight: 700; }
 .v2-compare-section { margin-top: 52px; }
 .v2-section-header { margin-bottom: 22px; }
-.v2-section-header h2 { color: var(--azul-noche); font-size: 26px; letter-spacing: -.03em; }
+.v2-section-header h2 { color: #FFFFFF !important; font-size: 26px; letter-spacing: -.03em; }
 .v2-explorer-grid { gap: 26px; padding: 28px; border-radius: 18px; border-color: var(--humo-2); box-shadow: 0 8px 28px color-mix(in srgb, var(--azul-noche) 5%, transparent); }
 .v2-explorer-nav { gap: 14px; border-color: var(--humo-2); }
-.v2-rank-title { color: var(--azul-noche); font-size: 21px; letter-spacing: -.025em; }
-.v2-rank-desc { color: var(--azul-linea); line-height: 1.6; }
+.v2-rank-title { color: #FFFFFF !important; font-size: 21px; letter-spacing: -.025em; }
+.v2-rank-desc { color: #BACCD6 !important; line-height: 1.6; }
 .v2-rank-mini-card { background: var(--blanco-humo); border-color: var(--humo-2); }
 .v2-chart-controls { border-color: var(--humo-2); box-shadow: 0 2px 8px color-mix(in srgb, var(--azul-noche) 8%, transparent); }
 .v2-loading-overlay { background: color-mix(in srgb, var(--blanco-humo) 94%, transparent); backdrop-filter: none; -webkit-backdrop-filter: none; }
@@ -1954,7 +1956,7 @@
 .v2-root .site-header .v2-tab-btn { color: color-mix(in srgb, var(--blanco-humo) 82%, transparent); }
 .v2-root .site-header .v2-tab-btn:hover { color: var(--blanco-humo); }
 .v2-root .v2-filters { background: var(--mui-paper); border-color: var(--mui-line); }
-.v2-root .v2-filter-label { color: var(--azul-linea); }
+.v2-root .v2-filter-label { color: #8EA8C3 !important; }
 .v2-root .v2-custom-select { color: var(--mui-ink); }
 .v2-root .v2-dropdown-menu { background: #011024 !important; border-color: rgba(186, 204, 214, 0.25) !important; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7) !important; }
 .v2-root .v2-dropdown-item { color: #BACCDE !important; }
@@ -2300,4 +2302,59 @@
   }
   .v2-toolbar-left { display: none; }
   .v2-toolbar-right { justify-content: center; }
+}
+
+
+/* MI-ATMOSPHERE & GLOBAL WHITE TEXT ENFORCEMENT */
+.v2-root .mi-atmosphere {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 75% 85% at 12% 30%, rgba(22, 132, 167, 0.38) 0%, rgba(14, 110, 142, 0.24) 40%, rgba(2, 20, 43, 0.08) 72%, transparent 88%),
+    radial-gradient(circle 600px at 6% 14%, rgba(36, 160, 199, 0.28) 0%, rgba(14, 110, 142, 0.12) 50%, transparent 75%),
+    radial-gradient(ellipse 55% 42% at 92% 78%, rgba(22, 132, 167, 0.16) 0%, rgba(121, 40, 202, 0.08) 38%, transparent 72%),
+    linear-gradient(108deg, transparent 28%, rgba(1, 16, 36, 0.45) 50%, rgba(1, 16, 36, 0.88) 74%, #010B19 96%),
+    radial-gradient(ellipse 120% 105% at 50% 50%, transparent 58%, rgba(0, 6, 14, 0.65) 100%),
+    #02142B;
+}
+
+.v2-root h1, .v2-root h2, .v2-root h3, .v2-root h4,
+.v2-root .v2-title, .v2-root .v2-heading,
+.v2-root .v2-section-header h2,
+.v2-root .v2-rank-title,
+.v2-root .v2-chart-head,
+.v2-root .v2-val {
+  color: #FFFFFF !important;
+}
+
+.v2-root p, .v2-root span,
+.v2-root .v2-sub, .v2-root .v2-desc,
+.v2-root .v2-rank-desc,
+.v2-root label {
+  color: #BACCD6 !important;
+}
+
+.v2-root .v2-kicker,
+.v2-root .v2-card-kicker {
+  color: #00F0FF !important;
+}
+
+.v2-root input,
+.v2-root .v2-rent-input {
+  color: #FFFFFF !important;
+  background: rgba(1, 16, 36, 0.8) !important;
+  border-color: rgba(186, 204, 214, 0.2) !important;
+}
+
+.v2-root input::placeholder {
+  color: rgba(186, 204, 214, 0.5) !important;
+}
+
+/* Heatmap cell numbers */
+.v2-root .v2-heatmap-table td,
+.v2-root .v2-heatmap-table span,
+.v2-root .v2-heatmap-table .zona-val {
+  color: #FFFFFF !important;
 }
