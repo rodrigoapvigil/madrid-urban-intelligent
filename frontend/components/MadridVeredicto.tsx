@@ -37,6 +37,7 @@ export default function MadridVeredicto() {
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [neighborhoodOptions, setNeighborhoodOptions] = useState<string[]>([]);
   const [selectedNeighborhood, setSelectedNeighborhood] = useState('');
+  const [pendingNeighborhood, setPendingNeighborhood] = useState('');
   const [isLoadingNeighborhoods, setIsLoadingNeighborhoods] = useState(false);
 
   // Estados de carga y resultado
@@ -48,6 +49,7 @@ export default function MadridVeredicto() {
 
   // Estado para token de descarga directa si viene del checkout
   const [downloadToken, setDownloadToken] = useState<string | null>(tokenParam);
+  const [importHandled, setImportHandled] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -80,14 +82,78 @@ export default function MadridVeredicto() {
       const neighborhoods = Array.isArray(data) ? data : data.neighborhoods;
       const options = Array.isArray(neighborhoods) ? neighborhoods.filter((name: string) => name !== 'Todos') : [];
       setNeighborhoodOptions(options);
-      setSelectedNeighborhood('Todos');
+      setSelectedNeighborhood(pendingNeighborhood && options.includes(pendingNeighborhood) ? pendingNeighborhood : 'Todos');
+      setPendingNeighborhood('');
     }).catch(() => {
       if (active) setErrorMessage('No se pudieron cargar los barrios de este distrito. Vuelve a seleccionarlo para reintentar.');
     }).finally(() => {
       if (active) setIsLoadingNeighborhoods(false);
     });
     return () => { active = false; };
-  }, [selectedDistrict]);
+  }, [selectedDistrict, pendingNeighborhood]);
+
+  // Importación asistida desde la extensión de navegador. La extensión solo
+  // lee la página que el usuario ya ha abierto; aquí resolvemos la zona y
+  // reutilizamos el mismo motor de evaluación que la entrada manual.
+  useEffect(() => {
+    const rawImport = searchParams.get('dmiyc_import');
+    if (!rawImport || importHandled) return;
+
+    setImportHandled(true);
+    try {
+      const imported = JSON.parse(rawImport) as {
+        url?: string;
+        precio?: number;
+        metros?: number;
+        operacion?: 'Venta' | 'Alquiler';
+        barrio?: string | null;
+        ubicacion?: string;
+      };
+      const precio = Number(imported.precio);
+      const metros = Number(imported.metros);
+      const operacionImportada = imported.operacion === 'Alquiler' ? 'Alquiler' : 'Venta';
+      setUrlInput(imported.url || '');
+      setPrecioInput(Number.isFinite(precio) ? String(precio) : '');
+      setMetrosInput(Number.isFinite(metros) ? String(metros) : '');
+      setOperacion(operacionImportada);
+      setInfoNotice('Datos importados desde el anuncio abierto. Comprobando el barrio en el DataMart…');
+
+      const pistaZona = imported.barrio || imported.ubicacion || '';
+      if (!pistaZona) {
+        setInfoNotice('Se importaron precio y superficie, pero no se pudo identificar el barrio. Selecciónalo para continuar.');
+        setActiveTab('manual');
+        return;
+      }
+
+      apiFetch(`/veredicto/resolver-zona?texto=${encodeURIComponent(pistaZona)}`)
+        .then((response) => response.json())
+        .then((zona) => {
+          if (!zona.encontrado || !zona.barrio) {
+            setInfoNotice('Se importaron los datos del anuncio, pero confirma el distrito y el barrio antes de calcular el veredicto.');
+            setActiveTab('manual');
+            return;
+          }
+
+          setSelectedDistrict(zona.distrito || '');
+          setPendingNeighborhood(zona.barrio);
+          setInfoNotice(`Datos importados: ${precio.toLocaleString('es-ES')} €, ${metros.toLocaleString('es-ES')} m² · ${zona.barrio}.`);
+
+          if (precio > 0 && metros > 0) {
+            return ejecutarEvaluacion(precio, metros, zona.barrio, operacionImportada);
+          }
+
+          setActiveTab('manual');
+          return undefined;
+        })
+        .catch(() => {
+          setInfoNotice('Se importaron precio y superficie, pero no se pudo validar la zona. Selecciona el barrio para continuar.');
+          setActiveTab('manual');
+        });
+    } catch {
+      setErrorMessage('No se pudieron leer los datos importados desde la extensión.');
+      setActiveTab('manual');
+    }
+  }, [searchParams, importHandled]);
 
   useEffect(() => {
     if (tokenParam) {

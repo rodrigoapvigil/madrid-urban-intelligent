@@ -395,14 +395,14 @@ def clear_session(session_id: str):
 
 # ── Endpoints de El Veredicto ──────────────────────────────────────────────
 try:
-    from services.veredicto_engine import VeredictoRequest, VeredictoResponse, evaluar_inmueble
+    from services.veredicto_engine import VeredictoRequest, VeredictoResponse, evaluar_inmueble, buscar_zona_en_db, obtener_conexion_db
     from services.portal_parser import parse_portal_url, PortalParsedData
     from services.payment_service import (
         crear_sesion_checkout, procesar_webhook_stripe, verificar_token_descarga, confirmar_pago_y_generar_token
     )
     from services.pdf_generator import generar_dossier_pdf
 except ImportError:
-    from backend.services.veredicto_engine import VeredictoRequest, VeredictoResponse, evaluar_inmueble
+    from backend.services.veredicto_engine import VeredictoRequest, VeredictoResponse, evaluar_inmueble, buscar_zona_en_db, obtener_conexion_db
     from backend.services.portal_parser import parse_portal_url, PortalParsedData
     from backend.services.payment_service import (
         crear_sesion_checkout, procesar_webhook_stripe, verificar_token_descarga, confirmar_pago_y_generar_token
@@ -412,6 +412,31 @@ except ImportError:
 
 class ExtraerUrlRequest(BaseModel):
     url: str
+
+
+@app.get("/api/veredicto/resolver-zona")
+def resolver_zona_veredicto(texto: str):
+    """Resuelve un barrio o distrito detectado en el anuncio contra el DataMart."""
+    termino = (texto or "").strip()
+    if not termino:
+        return {"encontrado": False, "barrio": None, "distrito": None}
+
+    try:
+        conn = obtener_conexion_db()
+        zona = buscar_zona_en_db(conn, termino)
+        conn.close()
+    except Exception:
+        zona = None
+
+    if not zona:
+        return {"encontrado": False, "barrio": None, "distrito": None}
+
+    _barrio_id, _distrito_id, barrio, distrito = zona
+    return {
+        "encontrado": True,
+        "barrio": barrio,
+        "distrito": distrito,
+    }
 
 
 @app.post("/api/veredicto/extraer-url", response_model=PortalParsedData)
