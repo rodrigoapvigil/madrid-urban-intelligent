@@ -45,7 +45,7 @@ export function MethodologySequence({ assets, phases }: MethodologySequenceProps
               const index = phaseIndex * 3 + stepIndex;
 
               return (
-                <figure className={`methodology-step ${index % 2 === 1 ? 'is-reversed' : ''}`} key={slug}>
+                        <figure className={`methodology-step methodology-step--${slug} ${index % 2 === 1 ? 'is-reversed' : ''}`} key={slug}>
                   <div className="methodology-step__art">
                     <img src={`/assets/methodology/${slug}.svg`} alt={description} loading="eager" width="640" height="420" />
                   </div>
