@@ -2730,3 +2730,79 @@
   backdrop-filter: blur(16px) saturate(140%);
   -webkit-backdrop-filter: blur(16px) saturate(140%);
 }
+
+/* Keep the selected period visible while the dashboard is explored. */
+.v2-root .v2-filters {
+  position: sticky;
+  top: 88px;
+  z-index: 1100;
+  background: rgba(2, 20, 43, 0.72) !important;
+  border-bottom: 1px solid rgba(186, 204, 214, 0.16) !important;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+
+.v2-data-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 360px;
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid rgba(0, 240, 255, 0.28);
+  border-radius: 12px;
+  color: #c7d8e0;
+  background: rgba(1, 16, 36, 0.56);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.v2-data-status strong { color: #00f0ff; }
+.v2-data-status.is-projection { border-color: rgba(0, 240, 255, 0.22); }
+.v2-data-status.is-projection strong { color: #8de8f1; }
+.v2-data-status-dot {
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #00f0ff;
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.75);
+}
+.v2-data-status.is-projection .v2-data-status-dot {
+  background: transparent;
+  border: 1px dashed #00f0ff;
+  box-shadow: none;
+}
+
+.v2-map-legend {
+  display: grid;
+  gap: 6px;
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(186, 204, 214, 0.14);
+  border-radius: 12px;
+  background: rgba(1, 16, 36, 0.46);
+  color: #bacad4;
+  font-size: 11px;
+}
+.v2-map-legend-title { color: #fff; font-weight: 700; }
+.v2-map-legend-scale { display: flex; align-items: center; gap: 10px; }
+.v2-map-legend-swatches { display: flex; flex: 1; height: 9px; overflow: hidden; border-radius: 999px; }
+.v2-map-legend-swatches i { flex: 1; }
+.v2-map-legend-swatches .tier-1 { background: #01132b; }
+.v2-map-legend-swatches .tier-2 { background: #011736; }
+.v2-map-legend-swatches .tier-3 { background: #011c42; }
+.v2-map-legend-swatches .tier-4 { background: #012250; }
+.v2-map-legend-swatches .tier-5 { background: #00c8e6; }
+.v2-map-legend small { color: #8fa8b6; font-size: 11px; }
+
+@media (max-width: 900px) {
+  .v2-root .v2-filters { top: 76px; }
+  .v2-data-status { max-width: none; flex: 1 1 100%; }
+}
+
+@media (max-width: 600px) {
+  .v2-root .v2-filters { top: 68px; }
+  .v2-data-status { font-size: 10px; }
+}

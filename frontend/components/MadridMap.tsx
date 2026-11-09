@@ -247,12 +247,9 @@ const MadridMap: React.FC<MapProps> = ({
     }
 
     const tier = getChoroplethTier(val, selectedProfile);
-    const patternId = isSelected 
-      ? `dot-pat-${type}-selected` 
-      : `dot-pat-${type}-${profileKey}-${tier}`;
-
     return {
-      fillColor: `url(#${patternId})`,
+      // Use five solid choropleth steps so the map reads as data, not texture.
+      fillColor: isSelected ? '#00F0FF' : TIER_CONFIGS[tier].baseFill,
       weight: isSelected ? 2.5 : type === 'districts' ? 1.2 : 0.85,
       opacity: isExcluded ? 0.20 : 0.95,
       color: isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
