@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { cssColorResolverPlugin, colorWithAlpha, resolveCssColor } from '../lib/colors';
-import { ChevronDown, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import { Activity, ChevronDown, Database, MapPinned, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
 import './MadridDashboardV2.css';
 import { apiFetch } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
@@ -649,6 +649,7 @@ const MadridDashboardV2: React.FC = () => {
 
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
   const [isDashboardLoading, setIsDashboardLoading] = useState(true);
+  const [loadingStage, setLoadingStage] = useState(0);
   const [dashboardLoadError, setDashboardLoadError] = useState<string | null>(null);
   const [filtersReady, setFiltersReady] = useState(false);
   const [filtersAttempt, setFiltersAttempt] = useState(0);
@@ -694,6 +695,20 @@ const MadridDashboardV2: React.FC = () => {
   const hasLoadedPrimaryKpis = useRef(false);
 
   const activeProfile = PROFILES[profileIdx];
+  const loadingStages = [
+    { label: 'Conectando con la API', icon: Activity },
+    { label: 'Procesando datos del mercado', icon: Database },
+    { label: 'Preparando mapas y gráficas', icon: MapPinned },
+  ];
+
+  useEffect(() => {
+    if (!isDashboardLoading) return;
+    setLoadingStage(0);
+    const timer = window.setInterval(() => {
+      setLoadingStage((stage) => (stage + 1) % loadingStages.length);
+    }, 1800);
+    return () => window.clearInterval(timer);
+  }, [isDashboardLoading, loadingStages.length]);
 
   // Handle initial profile from query param
   useEffect(() => {
@@ -2015,21 +2030,33 @@ const MadridDashboardV2: React.FC = () => {
       <div className="mi-atmosphere" aria-hidden="true"/>
       {/* LOADING OVERLAY */}
       {isDashboardLoading && (
-        <div className="v2-loading-overlay">
+        <div className="v2-loading-overlay" role="status" aria-live="polite" aria-label="Cargando datos del mercado de Madrid">
           <div className="v2-loading-card">
-            <div className="v2-loading-brain">
-              <div className="v2-loading-pulse" />
-              <div className="v2-loading-pulse v2-loading-pulse--2" />
-              <div className="v2-loading-pulse v2-loading-pulse--3" />
+            <div className="v2-loading-topline">
+              <span className="v2-loading-brandmark" aria-hidden="true"><Activity size={18} /></span>
+              <span className="v2-loading-eyebrow">DMIYC · MADRID</span>
+              <span className="v2-loading-live"><i /> EN DIRECTO</span>
             </div>
-            <p className="v2-loading-title">Analizando el mercado</p>
-            <p className="v2-loading-sub">
-              Cargando datos de forma inteligente&hellip;<br />
-              esto tomará unas neuronas más.
-            </p>
+            <div className="v2-loading-orbit" aria-hidden="true">
+              <div className="v2-loading-orbit-ring" />
+              <div className="v2-loading-orbit-ring v2-loading-orbit-ring--inner" />
+              <div className="v2-loading-orbit-core"><Activity size={26} /></div>
+              <span className="v2-loading-orbit-dot v2-loading-orbit-dot--one" />
+              <span className="v2-loading-orbit-dot v2-loading-orbit-dot--two" />
+            </div>
+            <p className="v2-loading-title">Leyendo el mercado</p>
+            <p className="v2-loading-sub">Estamos preparando tu lectura de Madrid.</p>
+            <div className="v2-loading-steps" aria-hidden="true">
+              {loadingStages.map((stage, index) => {
+                const Icon = stage.icon;
+                const state = index < loadingStage ? 'complete' : index === loadingStage ? 'active' : '';
+                return <div key={stage.label} className={`v2-loading-step ${state}`}><span><Icon size={14} /></span>{stage.label}</div>;
+              })}
+            </div>
             <div className="v2-loading-bar">
               <div className="v2-loading-bar-fill" />
             </div>
+            <div className="v2-loading-footer"><span>Actualizando indicadores</span><span className="v2-loading-dots"><i /><i /><i /></span></div>
           </div>
         </div>
       )}
