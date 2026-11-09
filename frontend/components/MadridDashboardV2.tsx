@@ -707,7 +707,10 @@ const MadridDashboardV2: React.FC = () => {
 
   // Fetch initial filters
   useEffect(() => {
-    apiFetch('/filters')
+    setIsDashboardLoading(true);
+    setDashboardLoadError(null);
+
+    apiFetch('/filters', {}, 30000)
       .then(res => res.json())
       .then(data => {
         const years = (data.years || []).map(String);

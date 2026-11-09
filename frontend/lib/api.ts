@@ -98,9 +98,31 @@ export async function apiFetch(path: string, init: RequestInit = {}, timeoutMs =
     }
   };
 
-  if (!cacheable) return respond(await fetchWithFallback(url));
+  const retryDelays = [0, 1500, 3000, 6000];
+  const fetchWithStartupRetries = async (): Promise<CachedApiResponse> => {
+    let lastError: unknown;
 
-  const pending = fetchWithFallback(url);
+    for (let attempt = 0; attempt < retryDelays.length; attempt += 1) {
+      if (retryDelays[attempt] > 0) {
+        await new Promise((resolve) => setTimeout(resolve, retryDelays[attempt]));
+      }
+
+      try {
+        return await fetchWithFallback(url);
+      } catch (error) {
+        lastError = error;
+        const message = error instanceof Error ? error.message : String(error);
+        const retryable = /tardado demasiado|Failed to fetch|NetworkError|HTTP 5\d\d/i.test(message);
+        if (!retryable || attempt === retryDelays.length - 1) throw error;
+      }
+    }
+
+    throw lastError instanceof Error ? lastError : new Error('No se pudo conectar con la API.');
+  };
+
+  if (!cacheable) return respond(await fetchWithStartupRetries());
+
+  const pending = fetchWithStartupRetries();
   apiRequestsInFlight.set(url, pending);
   try {
     return respond(await pending);
