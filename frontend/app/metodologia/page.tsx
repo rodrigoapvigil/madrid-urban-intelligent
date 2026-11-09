@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { Fragment } from 'react';
 import Link from 'next/link';
 import { SiteFooter, SiteHeader } from '../../components/SiteChrome';
 import '../editorial.css';
@@ -19,6 +20,12 @@ const METHODOLOGY_ASSETS = [
   ['07-datamart', '07 · Histórico real', 'La base analítica no guarda predicciones ni sobrescribe observaciones.'],
   ['08-rag', '08 · Memoria RAG', 'Documentos y conocimiento contrastado convertidos en memoria vectorial.'],
   ['09-ambi', '09 · AMBI', 'El agente conversacional responde usando el contexto recuperado del proyecto.'],
+] as const;
+
+const METHODOLOGY_PHASES = [
+  ['FASE 01', 'Construir el conocimiento', 'Extraemos, transformamos y cargamos observaciones reales para formar una base trazable.'],
+  ['FASE 02', 'Dar inteligencia al dato', 'Entrenamos, reentrenamos y validamos modelos sin dejar que vean el futuro.'],
+  ['FASE 03', 'Conversar con contexto', 'La memoria RAG conecta el conocimiento contrastado con las respuestas de AMBI.'],
 ] as const;
 
 export default function MethodologyPage() {
@@ -50,19 +57,25 @@ export default function MethodologyPage() {
             </div>
             <div className="methodology-sequence">
               {METHODOLOGY_ASSETS.map(([slug, title, description], index) => (
-                <figure className={`methodology-step ${index % 2 === 1 ? 'is-reversed' : ''}`} key={slug}>
-                  <div className="methodology-step__art">
-                    <img src={`/assets/methodology/${slug}.svg`} alt={description} loading="eager" width="640" height="420" />
-                  </div>
-                  <figcaption className="methodology-step__copy">
-                    <span className="methodology-step__index">{String(index + 1).padStart(2, '0')}</span>
-                    <strong>{title.replace(/^\d+ · /, '')}</strong>
-                    <span>{description}</span>
-                    {index < 3 && <small>FASE 1 · ETL</small>}
-                    {index >= 3 && index < 6 && <small>FASE 2 · INTELIGENCIA PREDICTIVA</small>}
-                    {index >= 6 && <small>FASE 3 · RAG Y CONVERSACIÓN</small>}
-                  </figcaption>
-                </figure>
+                <Fragment key={slug}>
+                  {index % 3 === 0 && (
+                    <div className="methodology-phase">
+                      <span>{METHODOLOGY_PHASES[index / 3][0]}</span>
+                      <h3>{METHODOLOGY_PHASES[index / 3][1]}</h3>
+                      <p>{METHODOLOGY_PHASES[index / 3][2]}</p>
+                    </div>
+                  )}
+                  <figure className={`methodology-step ${index % 2 === 1 ? 'is-reversed' : ''}`}>
+                    <div className="methodology-step__art">
+                      <img src={`/assets/methodology/${slug}.svg`} alt={description} loading="eager" width="640" height="420" />
+                    </div>
+                    <figcaption className="methodology-step__copy">
+                      <span className="methodology-step__index">{String(index + 1).padStart(2, '0')}</span>
+                      <strong>{title.replace(/^\d+ · /, '')}</strong>
+                      <span>{description}</span>
+                    </figcaption>
+                  </figure>
+                </Fragment>
               ))}
             </div>
           </section>
