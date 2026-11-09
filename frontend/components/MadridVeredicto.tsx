@@ -3,8 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
-  Search,
-  FileText,
   CheckCircle2,
   AlertTriangle,
   TrendingUp,
@@ -12,7 +10,6 @@ import {
   Download,
   ShieldCheck,
   ChevronDown,
-  ExternalLink,
   Sparkles
 } from 'lucide-react';
 import { VeredictoResponse, VeredictoEstado } from '../types/veredicto';
@@ -25,31 +22,25 @@ export default function MadridVeredicto() {
   const tokenParam = searchParams.get('token');
   const sessionIdParam = searchParams.get('session_id');
 
-  // Modo de entrada: 'url' o 'manual'
-  const [activeTab, setActiveTab] = useState<'url' | 'manual'>('url');
   const [operacion, setOperacion] = useState<'Venta' | 'Alquiler'>('Venta');
 
   // Campos del formulario
-  const [urlInput, setUrlInput] = useState('');
   const [precioInput, setPrecioInput] = useState('');
   const [metrosInput, setMetrosInput] = useState('');
   const [districtOptions, setDistrictOptions] = useState<string[]>([]);
   const [selectedDistrict, setSelectedDistrict] = useState('');
   const [neighborhoodOptions, setNeighborhoodOptions] = useState<string[]>([]);
   const [selectedNeighborhood, setSelectedNeighborhood] = useState('');
-  const [pendingNeighborhood, setPendingNeighborhood] = useState('');
   const [isLoadingNeighborhoods, setIsLoadingNeighborhoods] = useState(false);
 
   // Estados de carga y resultado
   const [isLoading, setIsLoading] = useState(false);
-  const [isExtracting, setIsExtracting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [infoNotice, setInfoNotice] = useState<string | null>(null);
   const [resultado, setResultado] = useState<VeredictoResponse | null>(null);
 
   // Estado para token de descarga directa si viene del checkout
   const [downloadToken, setDownloadToken] = useState<string | null>(tokenParam);
-  const [importHandled, setImportHandled] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -82,78 +73,14 @@ export default function MadridVeredicto() {
       const neighborhoods = Array.isArray(data) ? data : data.neighborhoods;
       const options = Array.isArray(neighborhoods) ? neighborhoods.filter((name: string) => name !== 'Todos') : [];
       setNeighborhoodOptions(options);
-      setSelectedNeighborhood(pendingNeighborhood && options.includes(pendingNeighborhood) ? pendingNeighborhood : 'Todos');
-      setPendingNeighborhood('');
+      setSelectedNeighborhood('Todos');
     }).catch(() => {
       if (active) setErrorMessage('No se pudieron cargar los barrios de este distrito. Vuelve a seleccionarlo para reintentar.');
     }).finally(() => {
       if (active) setIsLoadingNeighborhoods(false);
     });
     return () => { active = false; };
-  }, [selectedDistrict, pendingNeighborhood]);
-
-  // Importación asistida desde la extensión de navegador. La extensión solo
-  // lee la página que el usuario ya ha abierto; aquí resolvemos la zona y
-  // reutilizamos el mismo motor de evaluación que la entrada manual.
-  useEffect(() => {
-    const rawImport = searchParams.get('dmiyc_import');
-    if (!rawImport || importHandled) return;
-
-    setImportHandled(true);
-    try {
-      const imported = JSON.parse(rawImport) as {
-        url?: string;
-        precio?: number;
-        metros?: number;
-        operacion?: 'Venta' | 'Alquiler';
-        barrio?: string | null;
-        ubicacion?: string;
-      };
-      const precio = Number(imported.precio);
-      const metros = Number(imported.metros);
-      const operacionImportada = imported.operacion === 'Alquiler' ? 'Alquiler' : 'Venta';
-      setUrlInput(imported.url || '');
-      setPrecioInput(Number.isFinite(precio) ? String(precio) : '');
-      setMetrosInput(Number.isFinite(metros) ? String(metros) : '');
-      setOperacion(operacionImportada);
-      setInfoNotice('Datos importados desde el anuncio abierto. Comprobando el barrio en el DataMart…');
-
-      const pistaZona = imported.barrio || imported.ubicacion || '';
-      if (!pistaZona) {
-        setInfoNotice('Se importaron precio y superficie, pero no se pudo identificar el barrio. Selecciónalo para continuar.');
-        setActiveTab('manual');
-        return;
-      }
-
-      apiFetch(`/veredicto/resolver-zona?texto=${encodeURIComponent(pistaZona)}`)
-        .then((response) => response.json())
-        .then((zona) => {
-          if (!zona.encontrado || !zona.barrio) {
-            setInfoNotice('Se importaron los datos del anuncio, pero confirma el distrito y el barrio antes de calcular el veredicto.');
-            setActiveTab('manual');
-            return;
-          }
-
-          setSelectedDistrict(zona.distrito || '');
-          setPendingNeighborhood(zona.barrio);
-          setInfoNotice(`Datos importados: ${precio.toLocaleString('es-ES')} €, ${metros.toLocaleString('es-ES')} m² · ${zona.barrio}.`);
-
-          if (precio > 0 && metros > 0) {
-            return ejecutarEvaluacion(precio, metros, zona.barrio, operacionImportada);
-          }
-
-          setActiveTab('manual');
-          return undefined;
-        })
-        .catch(() => {
-          setInfoNotice('Se importaron precio y superficie, pero no se pudo validar la zona. Selecciona el barrio para continuar.');
-          setActiveTab('manual');
-        });
-    } catch {
-      setErrorMessage('No se pudieron leer los datos importados desde la extensión.');
-      setActiveTab('manual');
-    }
-  }, [searchParams, importHandled]);
+  }, [selectedDistrict]);
 
   useEffect(() => {
     if (tokenParam) {
@@ -175,53 +102,6 @@ export default function MadridVeredicto() {
         });
     }
   }, [tokenParam, sessionIdParam]);
-
-  // Manejador para extraer datos desde la URL
-  const handleExtractUrl = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!urlInput.trim()) {
-      setErrorMessage('Por favor, introduce una dirección web de Idealista o Fotocasa.');
-      return;
-    }
-
-    setIsExtracting(true);
-    setErrorMessage(null);
-    setInfoNotice(null);
-
-    try {
-      const res = await apiFetch('/veredicto/extraer-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: urlInput.trim() })
-      });
-
-      if (!res.ok) {
-        throw new Error('No fue posible conectar con el servicio de extracción.');
-      }
-
-      const data = await res.json();
-
-      if (data.precio) setPrecioInput(String(data.precio));
-      if (data.metros) setMetrosInput(String(data.metros));
-      if (data.operacion) setOperacion(data.operacion as 'Venta' | 'Alquiler');
-
-      if (data.requiere_manual) {
-        setInfoNotice(
-          data.error_mensaje ||
-          'El portal requiere verificación antibot o faltan datos. Revisa o completa los campos abajo para emitir el veredicto.'
-        );
-        setActiveTab('manual');
-      } else {
-        // Si todos los datos están completos, evaluar directamente
-        await ejecutarEvaluacion(Number(data.precio), Number(data.metros), data.barrio, data.operacion);
-      }
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Error al procesar el enlace. Puedes introducir los datos manualmente.');
-      setActiveTab('manual');
-    } finally {
-      setIsExtracting(false);
-    }
-  };
 
   // Manejador para evaluación manual
   const handleManualSubmit = async (e: React.FormEvent) => {
@@ -268,7 +148,6 @@ export default function MadridVeredicto() {
 
       if (data.requiere_manual) {
         setInfoNotice(data.mensaje);
-        setActiveTab('manual');
       } else {
         setResultado(data as VeredictoResponse);
       }
@@ -396,25 +275,8 @@ export default function MadridVeredicto() {
           </div>
         </div>
 
-        {/* Tarjeta Glass de Entrada (Pestañas: URL vs Manual) */}
+        {/* Entrada directa de datos */}
         <div className="veredicto-card">
-          <div className="veredicto-tabs">
-            <button
-              onClick={() => setActiveTab('url')}
-              className={`veredicto-tab-btn ${activeTab === 'url' ? 'active' : ''}`}
-            >
-              <ExternalLink style={{ width: '16px', height: '16px' }} />
-              <span>Pegar enlace (Idealista o Fotocasa)</span>
-            </button>
-            <button
-              onClick={() => setActiveTab('manual')}
-              className={`veredicto-tab-btn ${activeTab === 'manual' ? 'active' : ''}`}
-            >
-              <FileText style={{ width: '16px', height: '16px' }} />
-              <span>Entrada manual (4 datos)</span>
-            </button>
-          </div>
-
           <div className="veredicto-card-body">
             {errorMessage && (
               <div className="veredicto-alert-error">
@@ -430,51 +292,7 @@ export default function MadridVeredicto() {
               </div>
             )}
 
-            {/* PESTAÑA 1: Pegar URL */}
-            {activeTab === 'url' ? (
-              <form onSubmit={handleExtractUrl}>
-                <div style={{ marginBottom: '16px' }}>
-                  <label className="veredicto-label">
-                    Enlace de Idealista, Fotocasa o Habitaclia
-                  </label>
-                  <input
-                    type="url"
-                    value={urlInput}
-                    onChange={(e) => setUrlInput(e.target.value)}
-                    placeholder="https://www.idealista.com/inmueble/10543210/..."
-                    className="veredicto-input"
-                    disabled={isExtracting}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
-                  <span className="veredicto-helper-text">
-                    Pegamos el enlace para intentar leer los datos públicos del anuncio. Si el portal no permite la consulta automática, podrás completar los datos manualmente.
-                  </span>
-                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <button
-                      type="submit"
-                      disabled={isExtracting}
-                      className="veredicto-btn-primary"
-                    >
-                      {isExtracting ? (
-                        <>
-                          <div style={{ width: '14px', height: '14px', border: '2px solid color-mix(in srgb, var(--blanco-humo) 30%, transparent)', borderTopColor: 'var(--blanco-humo)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-                          <span>Analizando enlace...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Search style={{ width: '16px', height: '16px' }} />
-                          <span>Analizar Inmueble</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </form>
-            ) : (
-              /* PESTAÑA 2: Entrada Manual */
-              <form onSubmit={handleManualSubmit}>
+            <form onSubmit={handleManualSubmit}>
                 <div className="veredicto-manual-grid">
                   {/* Precio */}
                   <div>
@@ -554,8 +372,7 @@ export default function MadridVeredicto() {
                     )}
                   </button>
                 </div>
-              </form>
-            )}
+            </form>
           </div>
         </div>
 
