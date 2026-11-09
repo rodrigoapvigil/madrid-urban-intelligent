@@ -1159,12 +1159,12 @@ const MadridDashboardV2: React.FC = () => {
                   display: false,
                   align: (context) => {
                     const val = context.dataset.data[context.dataIndex] as number;
-                    const madridVal = context.chart.data.datasets[1].data[context.dataIndex] as number;
+                    const madridVal = context.chart?.data?.datasets?.[1]?.data?.[context.dataIndex] as number ?? val;
                     return val >= madridVal ? 'top' : 'bottom';
                   },
                   anchor: (context) => {
                     const val = context.dataset.data[context.dataIndex] as number;
-                    const madridVal = context.chart.data.datasets[1].data[context.dataIndex] as number;
+                    const madridVal = context.chart?.data?.datasets?.[1]?.data?.[context.dataIndex] as number ?? val;
                     return val >= madridVal ? 'end' : 'start';
                   },
                   offset: 8,
@@ -1527,7 +1527,7 @@ const MadridDashboardV2: React.FC = () => {
                   align: (context) => {
                     const val = context.dataset.data[context.dataIndex] as number;
                     const otherIdx = context.datasetIndex === 0 ? 1 : 0;
-                    const otherVal = context.chart.data.datasets[otherIdx].data[context.dataIndex] as number;
+                    const otherVal = context.chart?.data?.datasets?.[otherIdx]?.data?.[context.dataIndex] as number ?? val;
                     if (val > otherVal) return 'top';
                     if (val < otherVal) return 'bottom';
                     return context.datasetIndex === 0 ? 'top' : 'bottom';
@@ -1535,7 +1535,7 @@ const MadridDashboardV2: React.FC = () => {
                   anchor: (context) => {
                     const val = context.dataset.data[context.dataIndex] as number;
                     const otherIdx = context.datasetIndex === 0 ? 1 : 0;
-                    const otherVal = context.chart.data.datasets[otherIdx].data[context.dataIndex] as number;
+                    const otherVal = context.chart?.data?.datasets?.[otherIdx]?.data?.[context.dataIndex] as number ?? val;
                     return val >= otherVal ? 'end' : 'start';
                   },
                   offset: 8,
@@ -2000,7 +2000,13 @@ const MadridDashboardV2: React.FC = () => {
     if (isTransitioning) return;
 
     const timer = setTimeout(initCharts, 150);
-    return () => clearTimeout(timer);
+    const resizeTimer = setTimeout(() => {
+      chartsRef.current.forEach((chart) => chart?.resize());
+    }, 650);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(resizeTimer);
+    };
   }, [profileIdx, isTransitioning, compareLevel, activeProfile.color, seriesA, seriesB, seriesMadrid, activeProfile.id, scatterData, interestImpactData, riskReturnData, liquidityLevel, selectedDistrict, selectedBarrio, selectedYear, selectedZoneA, selectedZoneB]);
 
   const handleProfileChange = (newIdx: number) => {

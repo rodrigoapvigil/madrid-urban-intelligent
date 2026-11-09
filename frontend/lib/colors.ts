@@ -56,19 +56,35 @@ function resolveChartValue(value: unknown): unknown {
 
 export const cssColorResolverPlugin = {
   id: 'cssColorResolver',
-  beforeUpdate(chart: { data: { datasets: Record<string, unknown>[] }; options: Record<string, unknown> }) {
-    const seen = new WeakSet<object>();
-    const visit = (target: unknown) => {
-      if (!target || typeof target !== 'object' || seen.has(target as object)) return;
-      seen.add(target as object);
-      if (Array.isArray(target)) { target.forEach(visit); return; }
-      for (const [key, value] of Object.entries(target as Record<string, unknown>)) {
-        if (/color$/i.test(key) || /colou?r$/i.test(key)) {
-          (target as Record<string, unknown>)[key] = resolveChartValue(value);
-        } else visit(value);
-      }
+  beforeUpdate(chart: {
+    data: { datasets: Record<string, unknown>[] };
+    config?: { options?: Record<string, unknown> };
+  }) {
+    // Only touch the raw color fields. Walking chart.options recursively causes
+    // Chart.js to execute unrelated scriptable callbacks (for example datalabels
+    // align/anchor) with an incomplete context before the chart exists.
+    const resolveFields = (target: unknown, fields: string[]) => {
+      if (!target || typeof target !== 'object') return;
+      const record = target as Record<string, unknown>;
+      fields.forEach((field) => {
+        if (field in record) record[field] = resolveChartValue(record[field]);
+      });
     };
-    chart.data.datasets.forEach(visit);
-    visit(chart.options);
+
+    const colorFields = [
+      'backgroundColor', 'borderColor', 'pointBackgroundColor',
+      'pointBorderColor', 'color', 'titleColor', 'bodyColor',
+    ];
+    chart.data.datasets.forEach((dataset) => resolveFields(dataset, colorFields));
+
+    const options = chart.config?.options;
+    if (!options) return;
+    resolveFields(options, colorFields);
+    const plugins = options.plugins as Record<string, unknown> | undefined;
+    resolveFields(plugins?.tooltip, colorFields);
+    resolveFields(plugins?.legend, colorFields);
+    const legend = plugins?.legend as Record<string, unknown> | undefined;
+    resolveFields(legend?.labels, colorFields);
+    resolveFields(plugins?.datalabels, colorFields);
   },
 };
