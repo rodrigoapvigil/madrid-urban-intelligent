@@ -48,13 +48,19 @@ export default function MethodologyPage() {
               <h2 id="methodology-gallery-title">Nueve pasos, una misma trazabilidad.</h2>
               <p>Cada imagen representa una pieza concreta del recorrido: desde la fuente pública hasta una respuesta contextualizada de AMBI.</p>
             </div>
-            <div className="methodology-gallery__grid">
-              {METHODOLOGY_ASSETS.map(([slug, title, description]) => (
-                <figure className="methodology-card" key={slug}>
-                  <img src={`/assets/methodology/${slug}.svg`} alt={description} loading="lazy" />
-                  <figcaption>
-                    <strong>{title}</strong>
+            <div className="methodology-sequence">
+              {METHODOLOGY_ASSETS.map(([slug, title, description], index) => (
+                <figure className={`methodology-step ${index % 2 === 1 ? 'is-reversed' : ''}`} key={slug}>
+                  <div className="methodology-step__art">
+                    <img src={`/assets/methodology/${slug}.svg`} alt={description} loading="eager" width="640" height="420" />
+                  </div>
+                  <figcaption className="methodology-step__copy">
+                    <span className="methodology-step__index">{String(index + 1).padStart(2, '0')}</span>
+                    <strong>{title.replace(/^\d+ · /, '')}</strong>
                     <span>{description}</span>
+                    {index < 3 && <small>FASE 1 · ETL</small>}
+                    {index >= 3 && index < 6 && <small>FASE 2 · INTELIGENCIA PREDICTIVA</small>}
+                    {index >= 6 && <small>FASE 3 · RAG Y CONVERSACIÓN</small>}
                   </figcaption>
                 </figure>
               ))}
