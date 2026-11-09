@@ -2691,3 +2691,22 @@
   box-shadow: none !important;
   margin-top: 0 !important;
 }
+
+/* Crystal navigation: keep the dashboard header visually continuous with the landing page. */
+.v2-root .site-header {
+  background:
+    linear-gradient(180deg, rgba(2, 20, 43, 0.68) 0%, rgba(2, 20, 43, 0.42) 100%),
+    radial-gradient(ellipse at 18% -80%, rgba(0, 240, 255, 0.16), transparent 52%) !important;
+  border-bottom: 1px solid rgba(186, 204, 214, 0.16) !important;
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
+}
+
+.v2-root .site-header .mi-nav__profile-pill-group {
+  background: rgba(1, 16, 36, 0.48);
+  border-color: rgba(186, 204, 214, 0.24);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+}
