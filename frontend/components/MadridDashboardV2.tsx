@@ -2202,7 +2202,7 @@ const MadridDashboardV2: React.FC = () => {
                 width: '16px',
                 height: '16px',
                 borderRadius: '50%',
-                backgroundColor: '#00F0FF',
+                backgroundColor: '#FFFFFF',
                 color: '#011024',
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -2214,37 +2214,6 @@ const MadridDashboardV2: React.FC = () => {
               <span style={{ color: '#FFFFFF', fontWeight: '700' }}>¿Cómo entender estos precios?</span>
             </button>
 
-            <a
-              href="/madrid/veredicto"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '7px',
-                background: 'linear-gradient(135deg, #00F0FF 0%, #7928CA 100%)',
-                border: '1px solid rgba(255, 255, 255, 0.4)',
-                borderRadius: '20px',
-                padding: '6px 18px',
-                fontSize: '12px',
-                fontWeight: '800',
-                color: '#FFFFFF',
-                textDecoration: 'none',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 3px 14px rgba(0, 240, 255, 0.45)',
-                whiteSpace: 'nowrap'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = 'scale(1.05)';
-                e.currentTarget.style.boxShadow = '0 0 20px rgba(0, 240, 255, 0.7)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = '0 3px 14px rgba(0, 240, 255, 0.45)';
-              }}
-              title="Comprueba si un piso en Idealista o Fotocasa está caro con El Veredicto"
-            >
-              <span style={{ color: '#FFFFFF', fontWeight: '800', letterSpacing: '0.02em' }}>El Veredicto</span>
-              <span style={{ color: '#FFFFFF', fontSize: '13px', fontWeight: '900' }}>→</span>
-            </a>
           </div>
 
         </div>
@@ -2260,47 +2229,6 @@ const MadridDashboardV2: React.FC = () => {
             <div className="v2-grid-main">
               <div className="v2-kpi-col">
                 <div className="v2-kpi-stack">
-
-                  {/* BARÓMETRO DE CLIMA INMOBILIARIO & FIABILIDAD (LENGUAJE CIUDADANO) */}
-                  {(() => {
-                    const info = getZoneReliability(selectedDistrict, Boolean(kpiData.is_prediction));
-                    return (
-                      <div
-                        style={{
-                          backgroundColor: info.bg,
-                          border: `0.5px solid ${info.borderColor}`,
-                          borderRadius: '14px',
-                          padding: '10px 14px',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '4px',
-                          boxShadow: '0 2px 8px color-mix(in srgb, var(--azul-noche) 2%, transparent)'
-                        }}
-                      >
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                          <span style={{ fontSize: '11px', fontWeight: '700', color: info.titleColor, textTransform: 'uppercase', letterSpacing: '0.4px' }}>
-                            {info.title}
-                          </span>
-                          <span
-                            style={{
-                              fontSize: '9px',
-                              fontWeight: '700',
-                              padding: '2px 6px',
-                              borderRadius: '4px',
-                              backgroundColor: 'var(--blanco-humo)',
-                              color: info.titleColor,
-                              boxShadow: '0 1px 3px color-mix(in srgb, var(--azul-noche) 6%, transparent)'
-                            }}
-                          >
-                            {info.tag}
-                          </span>
-                        </div>
-                        <p style={{ margin: 0, fontSize: '11px', color: 'var(--azul-noche-2)', lineHeight: 1.35, fontWeight: '400' }}>
-                          {info.description}
-                        </p>
-                      </div>
-                    );
-                  })()}
 
                   <div className="v2-kpi-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -3074,7 +3002,7 @@ const MadridDashboardV2: React.FC = () => {
                         width: '14px',
                         height: '14px',
                         borderRadius: '50%',
-                        backgroundColor: '#00F0FF',
+                        backgroundColor: '#FFFFFF',
                         color: '#011024',
                         display: 'inline-flex',
                         alignItems: 'center',
@@ -3301,7 +3229,7 @@ const MadridDashboardV2: React.FC = () => {
                         width: '15px',
                         height: '15px',
                         borderRadius: '50%',
-                        backgroundColor: '#00F0FF',
+                        backgroundColor: '#FFFFFF',
                         color: '#011024',
                         fontSize: '10px',
                         fontWeight: '900',
@@ -3498,7 +3426,7 @@ const MadridDashboardV2: React.FC = () => {
                       width: '15px',
                       height: '15px',
                       borderRadius: '50%',
-                      backgroundColor: '#00F0FF',
+                      backgroundColor: '#FFFFFF',
                       color: '#011024',
                       fontSize: '10px',
                       fontWeight: '900',

@@ -511,6 +511,7 @@
   height: 460px;
   width: 100%;
   position: relative;
+  overflow: visible;
 }
 
 /* Chart.js needs an explicit drawing surface when aspect ratio is disabled. */
@@ -527,7 +528,7 @@
 .v2-chart-controls {
   position: absolute;
   z-index: 4;
-  top: 4px;
+  top: -34px;
   right: 8px;
   display: flex;
   align-items: center;
@@ -555,8 +556,13 @@
 .v2-chart-controls button:hover,
 .v2-chart-controls button:focus-visible { background: var(--blanco-humo); outline: 2px solid var(--coral-texto); outline-offset: 1px; }
 
+/* Keep zoom controls in the chart header zone, above the legend. */
+.v2-chart-wrap { margin-top: 34px; }
+.v2-overlay-wrapper,
+.v2-overlay-body { overflow: visible !important; }
+
 @media (max-width: 480px) {
-  .v2-chart-controls { top: 2px; right: 3px; gap: 0; }
+  .v2-chart-controls { top: -30px; right: 3px; gap: 0; }
   .v2-chart-controls button { width: 32px; height: 32px; }
 }
 
