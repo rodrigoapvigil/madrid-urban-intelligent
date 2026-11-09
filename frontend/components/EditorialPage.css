@@ -143,9 +143,8 @@
 .methodology-sequence {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  column-gap: 84px;
-  row-gap: 30px;
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 34px;
   padding: 48px 0 24px;
 }
 
@@ -168,6 +167,7 @@
   margin: 12px auto 0;
   padding: 0 0 0 26px;
   border-left: 2px solid #00F0FF;
+  background: linear-gradient(90deg, rgba(4, 31, 49, .98), rgba(2, 20, 43, .98));
 }
 
 .methodology-phase span {
@@ -196,37 +196,27 @@
 .methodology-step {
   position: relative;
   display: grid;
-  grid-template-columns: minmax(0, 1.25fr) minmax(120px, .75fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   width: 100%;
-  gap: 14px;
+  gap: 30px;
   margin: 0;
   padding: 0;
   align-items: center;
 }
 
-.methodology-step:not(.is-reversed) {
-  grid-column: 2;
-  justify-self: start;
-}
-
 .methodology-step.is-reversed {
-  grid-column: 1;
-  grid-template-columns: minmax(120px, .75fr) minmax(0, 1.25fr);
-  justify-self: end;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
-.methodology-step.is-reversed .methodology-step__art { order: 2; }
-.methodology-step.is-reversed .methodology-step__copy { order: 1; }
+.methodology-step:not(.is-reversed) .methodology-step__art { order: 2; }
+.methodology-step:not(.is-reversed) .methodology-step__copy { order: 1; }
+.methodology-step.is-reversed .methodology-step__art { order: 1; }
+.methodology-step.is-reversed .methodology-step__copy { order: 2; }
 
-.methodology-step:nth-of-type(even) { justify-self: initial; }
-.methodology-step:not(.is-reversed)::after {
-  left: -50px;
+.methodology-step::after {
+  left: 50%;
   right: auto;
-}
-
-.methodology-step.is-reversed::after {
-  right: -50px;
-  left: auto;
+  transform: translateX(-50%);
 }
 .methodology-step::after {
   content: '';
@@ -375,7 +365,7 @@
   .methodology-sequence::before { left: 18px; }
   .methodology-step::after,
   .methodology-step:nth-of-type(odd)::after,
-  .methodology-step:nth-of-type(even)::after { left: 11px; right: auto; top: 24px; }
+  .methodology-step:nth-of-type(even)::after { left: 11px; right: auto; top: 24px; transform: none; }
   .methodology-step__copy { margin-left: 24px; }
   .methodology-phase { width: calc(100% - 28px); margin-left: 28px; padding-left: 18px; }
   .methodology-phase h3 { font-size: 42px; }
