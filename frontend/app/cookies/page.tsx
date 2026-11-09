@@ -18,15 +18,15 @@ export default function CookiesPage() {
         <p className="editorial-page__lead">Última actualización: <strong>9 de noviembre de 2026</strong>.</p>
 
         <section className="editorial-page__section"><h2>1. Qué utilizamos</h2>
-          <p>DMIYC no utiliza cookies de analítica, publicidad, seguimiento ni perfilado comercial. Actualmente no se ha identificado un sistema de consentimiento porque no se instalan cookies no necesarias.</p>
-          <p>La aplicación puede utilizar almacenamiento del navegador, como <code>sessionStorage</code>, para recordar temporalmente los filtros y preferencias que seleccionas.</p>
+          <p>DMIYC no utiliza cookies de analítica, publicidad, seguimiento ni perfilado comercial. No se instalan cookies no necesarias, por lo que no se solicita un consentimiento publicitario.</p>
+          <p>La aplicación puede utilizar <code>sessionStorage</code> para recordar temporalmente que has cerrado este aviso de privacidad durante la sesión. No se utiliza para crear perfiles ni para publicidad.</p>
         </section>
         <section className="editorial-page__section"><h2>2. Inventario conocido</h2>
           <div style={{ overflowX: 'auto', margin: '20px 0' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', lineHeight: '1.6' }}><thead><tr style={{ borderBottom: '2px solid #0E6E8E', textAlign: 'left', color: '#0E6E8E' }}><th style={{ padding: '10px 12px' }}>Elemento</th><th style={{ padding: '10px 12px' }}>Proveedor</th><th style={{ padding: '10px 12px' }}>Finalidad</th><th style={{ padding: '10px 12px' }}>Duración</th></tr></thead><tbody>
             <tr style={{ borderBottom: '1px solid #E2E8F0' }}><td style={{ padding: '10px 12px', fontWeight: '600' }}><code>sessionStorage</code></td><td style={{ padding: '10px 12px' }}>DMIYC</td><td style={{ padding: '10px 12px' }}>Recordar filtros y preferencias durante la sesión.</td><td style={{ padding: '10px 12px' }}>Hasta cerrar la pestaña</td></tr>
             <tr style={{ borderBottom: '1px solid #E2E8F0' }}><td style={{ padding: '10px 12px', fontWeight: '600' }}>Cookies técnicas del proveedor</td><td style={{ padding: '10px 12px' }}>Vercel / Render o su red de distribución</td><td style={{ padding: '10px 12px' }}>Seguridad, entrega y funcionamiento de la infraestructura.</td><td style={{ padding: '10px 12px' }}>La fijada por el proveedor</td></tr>
           </tbody></table></div>
-          <p>El inventario debe revisarse en el navegador antes de publicar cualquier cambio. Si aparece una cookie adicional, se incorporará aquí o se eliminará si no es necesaria.</p>
+          <p>Este inventario debe verificarse en cada despliegue. Si se incorpora una cookie o tecnología no necesaria, deberá bloquearse hasta obtener consentimiento previo y añadirse aquí con proveedor, finalidad, duración y mecanismo de revocación.</p>
         </section>
         <section className="editorial-page__section"><h2>3. Conexiones externas que no son cookies</h2>
           <ul><li><strong>Google Fonts:</strong> el navegador puede conectarse a <code>fonts.googleapis.com</code> y <code>fonts.gstatic.com</code> para descargar tipografías.</li><li><strong>API del proyecto:</strong> las consultas se envían a <code>madrid-urban-api.onrender.com</code>.</li><li><strong>Mapas:</strong> los datos geográficos se cargan desde el propio sitio mediante archivos GeoJSON; no se utilizan Mapbox, OpenStreetMap ni Carto.</li></ul>

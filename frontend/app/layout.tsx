@@ -1,6 +1,7 @@
 import React from 'react'
 import type { Metadata, Viewport } from 'next'
 import SmoothScroll from '../components/SmoothScroll'
+import PrivacyNotice from '../components/PrivacyNotice'
 import './globals.css'
 import '../components/SiteChrome.css'
 
@@ -45,6 +46,7 @@ export default function RootLayout({
       <body>
         <SmoothScroll />
         {children}
+        <PrivacyNotice />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org', '@type': 'WebSite', name: 'Decide Madrid: Invierte Y Compra',
           url: 'https://dmiyc.com/', inLanguage: 'es',
