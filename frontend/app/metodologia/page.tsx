@@ -1,5 +1,4 @@
 import type { Metadata } from 'next';
-import { Fragment } from 'react';
 import Link from 'next/link';
 import { SiteFooter, SiteHeader } from '../../components/SiteChrome';
 import '../editorial.css';
@@ -56,26 +55,32 @@ export default function MethodologyPage() {
               <p>Cada imagen representa una pieza concreta del recorrido: desde la fuente pública hasta una respuesta contextualizada de AMBI.</p>
             </div>
             <div className="methodology-sequence">
-              {METHODOLOGY_ASSETS.map(([slug, title, description], index) => (
-                <Fragment key={slug}>
-                  {index % 3 === 0 && (
-                    <div className="methodology-phase">
-                      <span>{METHODOLOGY_PHASES[index / 3][0]}</span>
-                      <h3>{METHODOLOGY_PHASES[index / 3][1]}</h3>
-                      <p>{METHODOLOGY_PHASES[index / 3][2]}</p>
-                    </div>
-                  )}
-                  <figure className={`methodology-step ${index % 2 === 1 ? 'is-reversed' : ''}`}>
-                    <div className="methodology-step__art">
-                      <img src={`/assets/methodology/${slug}.svg`} alt={description} loading="eager" width="640" height="420" />
-                    </div>
-                    <figcaption className="methodology-step__copy">
-                      <span className="methodology-step__index">{String(index + 1).padStart(2, '0')}</span>
-                      <strong>{title.replace(/^\d+ · /, '')}</strong>
-                      <span>{description}</span>
-                    </figcaption>
-                  </figure>
-                </Fragment>
+              {METHODOLOGY_PHASES.map(([phase, phaseTitle, phaseDescription], phaseIndex) => (
+                <section className="methodology-phase-group" key={phase} aria-labelledby={`methodology-phase-${phaseIndex + 1}`}>
+                  <div className="methodology-phase">
+                    <span>{phase}</span>
+                    <h3 id={`methodology-phase-${phaseIndex + 1}`}>{phaseTitle}</h3>
+                    <p>{phaseDescription}</p>
+                  </div>
+                  <div className="methodology-phase-steps">
+                    {METHODOLOGY_ASSETS.slice(phaseIndex * 3, phaseIndex * 3 + 3).map(([slug, title, description], stepIndex) => {
+                      const index = phaseIndex * 3 + stepIndex;
+
+                      return (
+                        <figure className={`methodology-step ${index % 2 === 1 ? 'is-reversed' : ''}`} key={slug}>
+                          <div className="methodology-step__art">
+                            <img src={`/assets/methodology/${slug}.svg`} alt={description} loading="eager" width="640" height="420" />
+                          </div>
+                          <figcaption className="methodology-step__copy">
+                            <span className="methodology-step__index">{String(index + 1).padStart(2, '0')}</span>
+                            <strong>{title.replace(/^\d+ · /, '')}</strong>
+                            <span>{description}</span>
+                          </figcaption>
+                        </figure>
+                      );
+                    })}
+                  </div>
+                </section>
               ))}
             </div>
           </section>
