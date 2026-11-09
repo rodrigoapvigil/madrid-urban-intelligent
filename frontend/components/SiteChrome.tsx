@@ -30,7 +30,7 @@ export function SiteHeader({
         </span>
         <span className="mi-brand__text">
           <strong className="mi-brand__acronym">DMIYC</strong>
-          <small className="mi-brand__subtitle">DECIDE MADRID · INVIERTE Y COMPRA</small>
+          <small className="mi-brand__subtitle">DECIDE MADRID: INVIERTE Y COMPRA</small>
         </span>
       </Link>
 
