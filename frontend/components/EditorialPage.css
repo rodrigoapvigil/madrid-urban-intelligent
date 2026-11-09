@@ -270,67 +270,6 @@ body:has(.editorial-page--methodology) {
 
 .methodology-step__art img { display: block; width: 100%; height: auto; }
 
-@keyframes methodology-extraction {
-  0%, 100% { transform: translate3d(-1.5%, 0, 0) scale(1); }
-  50% { transform: translate3d(2%, -1.5%, 0) scale(1.025); }
-}
-
-@keyframes methodology-transformation {
-  0%, 100% { transform: rotate(-1deg) translateY(0); }
-  50% { transform: rotate(1deg) translateY(-1.5%); }
-}
-
-@keyframes methodology-load {
-  0%, 100% { transform: translateY(1%); filter: brightness(.96); }
-  50% { transform: translateY(-2%); filter: brightness(1.12); }
-}
-
-@keyframes methodology-training {
-  0%, 100% { transform: translateY(1%) scale(.985); }
-  50% { transform: translateY(-2%) scale(1.02); }
-}
-
-@keyframes methodology-validation {
-  0%, 100% { transform: translateX(-1.5%); filter: brightness(.98); }
-  50% { transform: translateX(1.5%); filter: brightness(1.1); }
-}
-
-@keyframes methodology-memory {
-  0%, 100% { transform: translateY(0) rotate(-.7deg); }
-  50% { transform: translateY(-2%) rotate(.7deg); }
-}
-
-@keyframes methodology-conversation {
-  0%, 100% { transform: scale(.99); filter: brightness(.98); }
-  50% { transform: scale(1.035); filter: brightness(1.16); }
-}
-
-.methodology-step__art img {
-  transform-origin: 50% 70%;
-  animation-duration: 7s;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
-  will-change: transform, filter;
-}
-
-.methodology-step--01-extraccion .methodology-step__art img { animation-name: methodology-extraction; }
-.methodology-step--02-transformacion .methodology-step__art img { animation-name: methodology-transformation; animation-duration: 8s; }
-.methodology-step--03-carga .methodology-step__art img { animation-name: methodology-load; animation-duration: 6s; }
-.methodology-step--04-entrenamiento-mayo .methodology-step__art img,
-.methodology-step--05-entrenamiento-septiembre .methodology-step__art img { animation-name: methodology-training; animation-duration: 7.5s; }
-.methodology-step--06-validacion .methodology-step__art img { animation-name: methodology-validation; animation-duration: 6.5s; }
-.methodology-step--07-datamart .methodology-step__art img,
-.methodology-step--08-rag .methodology-step__art img { animation-name: methodology-memory; animation-duration: 8.5s; }
-.methodology-step--09-ambi .methodology-step__art img { animation-name: methodology-conversation; animation-duration: 6s; }
-
-.methodology-step.is-active .methodology-step__art img {
-  filter: drop-shadow(0 0 20px rgba(0, 240, 255, .22));
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .methodology-step__art img { animation: none; transition: none; }
-}
-
 .methodology-step__copy {
   display: grid;
   align-content: center;
