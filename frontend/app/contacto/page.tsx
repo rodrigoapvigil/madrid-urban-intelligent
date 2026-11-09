@@ -34,14 +34,17 @@ export default function ContactPage() {
           </section>
 
           <section className="editorial-page__section">
-            <h2>Colaboraciones Profesionales e Institucionales</h2>
+            <h2>Contacto y soporte</h2>
             <p>
-              Para consultas institucionales, propuestas de análisis sectorial, integración de fuentes de datos o contacto directo con el creador del proyecto:
+              Para sugerencias, errores en los datos o dudas sobre el proyecto, abre una incidencia pública en GitHub. No incluyas datos personales, información bancaria ni documentación confidencial.
             </p>
             <p>
-              <a href="https://www.linkedin.com/in/rodrigo-vigil/" target="_blank" rel="noopener noreferrer">
-                Contactar en LinkedIn con Rodrigo Vigil ↗
+              <a href="https://github.com/rodrigoapvigil/madrid-urban-intelligent/issues" target="_blank" rel="noopener noreferrer">
+                Abrir una incidencia en GitHub ↗
               </a>
+            </p>
+            <p>
+              Para cuestiones de privacidad o para ejercer tus derechos, escribe a <a href="mailto:privacidad@dmiyc.com">privacidad@dmiyc.com</a>.
             </p>
           </section>
 

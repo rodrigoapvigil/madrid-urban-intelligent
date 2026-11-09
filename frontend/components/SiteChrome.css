@@ -13,11 +13,12 @@
   grid-template-columns: minmax(260px, 1fr) minmax(480px, 1.6fr) minmax(210px, 1fr);
   align-items: center;
   gap: 32px;
-  background: rgba(2, 20, 43, 0.92);
+  /* Shared translucent chrome: the dashboard should feel continuous with the landing page. */
+  background: linear-gradient(180deg, rgba(2, 20, 43, 0.78) 0%, rgba(2, 20, 43, 0.58) 100%);
   border: none !important;
-  border-bottom: none !important;
-  backdrop-filter: blur(18px) saturate(130%);
-  -webkit-backdrop-filter: blur(18px) saturate(130%);
+  border-bottom: 1px solid rgba(186, 204, 214, 0.10) !important;
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
 }
 
 .site-brand,

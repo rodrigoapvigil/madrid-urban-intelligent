@@ -128,6 +128,9 @@ export function SiteFooter() {
 
         {/* Fila inferior: Copyright */}
         <div className="auros-footer__bottom">
+          <span className="auros-footer__disclaimer">
+            Proyecto personal e independiente. No es una plataforma del Ayuntamiento de Madrid ni cuenta con su aval.
+          </span>
           <span className="auros-footer__copyright">
             © 2026 DMIYC
           </span>

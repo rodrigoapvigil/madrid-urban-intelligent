@@ -176,6 +176,8 @@
 * { box-sizing: border-box; }
 html { min-height: 100%; background: var(--azul-noche); }
 body {
+  position: relative;
+  isolation: isolate;
   min-height: 100vh;
   margin: 0;
   color: var(--texto-sobre-azul);
@@ -183,5 +185,32 @@ body {
   font-family: var(--font-matter);
   -webkit-font-smoothing: antialiased;
 }
+/*
+ * Global lower-right light wash.
+ * It sits behind every route and keeps the depth of the dark interface
+ * without competing with text, controls, maps, or the landing atmosphere.
+ */
+body::before {
+  content: '';
+  position: fixed;
+  z-index: 0;
+  right: -14vw;
+  bottom: -22vh;
+  width: min(76vw, 1120px);
+  height: min(72vh, 900px);
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(244, 237, 224, 0.18) 0%,
+    rgba(214, 230, 235, 0.10) 28%,
+    rgba(31, 93, 121, 0.08) 52%,
+    transparent 74%
+  );
+  filter: blur(26px);
+  opacity: 0.72;
+  transform: translate3d(0, 0, 0);
+}
+body > * { position: relative; z-index: 1; }
 ::selection { color: var(--azul-noche); background: var(--coral); }
 :focus-visible { outline: 3px solid var(--coral); outline-offset: 3px; }
