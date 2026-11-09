@@ -175,7 +175,7 @@
   position: relative;
   z-index: 1;
   grid-column: 1 / -1;
-  width: min(780px, 100%);
+  width: min(1100px, 100%);
   margin: 0 auto;
   padding: 0 0 0 26px;
   border-left: 2px solid #00F0FF;
@@ -195,6 +195,7 @@
   font-size: clamp(39px, 5.2vw, 75px);
   line-height: .98;
   letter-spacing: -.055em;
+  white-space: nowrap;
 }
 
 .methodology-phase p {
@@ -297,8 +298,8 @@
 
 .methodology-facts {
   margin-top: clamp(64px, 8vw, 116px);
-  padding-top: 48px;
-  border-top: 1px solid rgba(186, 204, 214, 0.16);
+  padding-top: 0;
+  border-top: 0;
 }
 
 .methodology-facts__heading h2 {
@@ -381,7 +382,7 @@
   .methodology-step:nth-of-type(even)::after { left: 11px; right: auto; top: 24px; transform: none; }
   .methodology-step__copy { margin-left: 24px; }
   .methodology-phase { width: calc(100% - 28px); margin-left: 28px; padding-left: 18px; }
-  .methodology-phase h3 { font-size: 50px; }
+  .methodology-phase h3 { font-size: 50px; white-space: normal; }
   .methodology-step.is-reversed .methodology-step__art,
   .methodology-step.is-reversed .methodology-step__copy { order: initial; }
   .methodology-facts__grid { grid-template-columns: 1fr; gap: 0; }
@@ -506,9 +507,9 @@
   border-radius: 0;
   background: transparent;
   color: #8FAFBC;
-  border-top: 1px solid rgba(186, 204, 214, 0.16);
+  border-top: 0;
 }
-.editorial-page.editorial-page--methodology .editorial-page__actions { border-top-color: rgba(186, 204, 214, 0.16); }
+.editorial-page.editorial-page--methodology .editorial-page__actions { border-top: 0; }
 .editorial-page.editorial-page--methodology .editorial-page__actions a:not(.editorial-page__button) { color: #00F0FF; }
 
 .methodology-anatomy img { width: 115%; max-width: none; margin-left: -7.5%; }
