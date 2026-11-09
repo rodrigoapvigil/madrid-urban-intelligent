@@ -9,6 +9,18 @@ export const metadata: Metadata = {
   alternates: { canonical: '/metodologia' },
 };
 
+const METHODOLOGY_ASSETS = [
+  ['01-extraccion', '01 · Extracción', 'Portales de datos abiertos, Ayuntamiento, Comunidad e Instituto de Estadística.'],
+  ['02-transformacion', '02 · Transformación', 'Limpieza, normalización territorial y homogeneización de formatos.'],
+  ['03-carga', '03 · Carga', 'Las observaciones reales se almacenan en el DataMart histórico.'],
+  ['04-entrenamiento-mayo', '04 · Entrenamiento de mayo', 'Primer entrenamiento con históricos hasta 2025 y validación temporal.'],
+  ['05-entrenamiento-septiembre', '05 · Entrenamiento de septiembre', 'Reentrenamiento incorporando los nuevos datos disponibles de 2026.'],
+  ['06-validacion', '06 · Validación', 'Tres meses reservados para medir el rendimiento sin fuga de información.'],
+  ['07-datamart', '07 · Histórico real', 'La base analítica no guarda predicciones ni sobrescribe observaciones.'],
+  ['08-rag', '08 · Memoria RAG', 'Documentos y conocimiento contrastado convertidos en memoria vectorial.'],
+  ['09-ambi', '09 · AMBI', 'El agente conversacional responde usando el contexto recuperado del proyecto.'],
+] as const;
+
 export default function MethodologyPage() {
   return (
     <>
@@ -30,6 +42,24 @@ export default function MethodologyPage() {
               Del dato abierto a la inteligencia de AMBI: extracción, transformación, validación, predicción y recuperación de conocimiento.
             </figcaption>
           </figure>
+          <section className="methodology-gallery" aria-labelledby="methodology-gallery-title">
+            <div className="methodology-gallery__intro">
+              <p className="editorial-page__eyebrow">La anatomía del proyecto</p>
+              <h2 id="methodology-gallery-title">Nueve pasos, una misma trazabilidad.</h2>
+              <p>Cada imagen representa una pieza concreta del recorrido: desde la fuente pública hasta una respuesta contextualizada de AMBI.</p>
+            </div>
+            <div className="methodology-gallery__grid">
+              {METHODOLOGY_ASSETS.map(([slug, title, description]) => (
+                <figure className="methodology-card" key={slug}>
+                  <img src={`/assets/methodology/${slug}.svg`} alt={description} loading="lazy" />
+                  <figcaption>
+                    <strong>{title}</strong>
+                    <span>{description}</span>
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          </section>
           <section className="editorial-page__section">
             <h2>Operaciones observadas</h2>
             <p>
