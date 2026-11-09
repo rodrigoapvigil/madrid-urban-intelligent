@@ -433,6 +433,7 @@ const InfoTooltip: React.FC<{
   return (
     <div
       ref={containerRef}
+      className="v2-info-tooltip-trigger"
       style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}
       onMouseEnter={() => setOpen(true)}
       onMouseLeave={() => setOpen(false)}
@@ -450,7 +451,7 @@ const InfoTooltip: React.FC<{
           borderRadius: '50%',
           border: '0.5px solid var(--humo-2)',
           backgroundColor: open ? 'var(--precio-subida)' : 'var(--blanco-humo)',
-          color: open ? 'var(--blanco-humo)' : 'var(--texto-secundario-azul)',
+          color: '#011024',
           fontSize: '10px',
           fontWeight: '700',
           fontStyle: 'italic',
@@ -469,6 +470,7 @@ const InfoTooltip: React.FC<{
 
       {open && (
         <div
+          className="v2-info-tooltip"
           style={{
             position: 'absolute',
             top: '24px',

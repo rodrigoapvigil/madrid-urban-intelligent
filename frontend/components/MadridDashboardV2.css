@@ -305,6 +305,26 @@
   letter-spacing: 0.02em;
 }
 
+/* KPI info popovers must escape the neighbouring cards and map surface. */
+.v2-info-tooltip-trigger {
+  z-index: 2;
+}
+
+.v2-info-tooltip-trigger:hover,
+.v2-info-tooltip-trigger:focus-within {
+  z-index: 10000;
+}
+
+.v2-kpi-card:has(.v2-info-tooltip-trigger:hover),
+.v2-kpi-card:has(.v2-info-tooltip-trigger:focus-within) {
+  position: relative;
+  z-index: 1000;
+}
+
+.v2-info-tooltip {
+  z-index: 10001 !important;
+}
+
 .v2-val {
   font-size: 32px;
   font-weight: 600;
