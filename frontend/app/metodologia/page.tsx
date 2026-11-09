@@ -79,23 +79,28 @@ export default function MethodologyPage() {
               ))}
             </div>
           </section>
-          <section className="editorial-page__section">
-            <h2>Operaciones observadas</h2>
-            <p>
-              Las series históricas se consultan desde el DataMart del proyecto y proceden de datos públicos de cierre del Ayuntamiento de Madrid. Se agregan por mes y por zona; por eso una media de distrito o de Madrid describe la tendencia territorial agregada.
-            </p>
-          </section>
-          <section className="editorial-page__section">
-            <h2>Estimaciones y periodo</h2>
-            <p>
-              Los meses sin registro histórico pueden aparecer como proyección. El dashboard y el gráfico de portada etiquetan cada punto como dato real o proyección y muestran el mes y año de la observación más reciente disponible.
-            </p>
-          </section>
-          <section className="editorial-page__section">
-            <h2>Validación y límites</h2>
-            <p>
-              La memoria del proyecto informa un error absoluto medio (MAE) agregado de 104,25 €/m² para venta y aproximadamente 0,48 €/m² para alquiler en la evaluación final descrita. El rendimiento cambia por operación, zona y periodo. Una estimación debe leerse como referencia estadística, separada de las operaciones observadas.
-            </p>
+          <section className="methodology-facts" aria-labelledby="methodology-facts-title">
+            <div className="methodology-facts__heading">
+              <span className="editorial-page__eyebrow">Cómo leer el resultado</span>
+              <h2 id="methodology-facts-title">Tres reglas antes de interpretar una cifra.</h2>
+            </div>
+            <div className="methodology-facts__grid">
+              <article>
+                <span>01</span>
+                <h3>Operaciones observadas</h3>
+                <p>Las series históricas proceden de datos públicos de cierre del Ayuntamiento de Madrid y se agregan por mes y zona.</p>
+              </article>
+              <article>
+                <span>02</span>
+                <h3>Dato real o proyección</h3>
+                <p>Los meses sin registro histórico se muestran como proyección y quedan identificados por separado en el dashboard.</p>
+              </article>
+              <article>
+                <span>03</span>
+                <h3>Validación y límites</h3>
+                <p>El MAE agregado informado es 104,25 €/m² para venta y aproximadamente 0,48 €/m² para alquiler; una estimación es una referencia estadística.</p>
+              </article>
+            </div>
           </section>
           <p className="editorial-page__note">
             En el gráfico de evolución puedes abrir la tabla mensual para consultar el valor, la unidad y la etiqueta de cada punto auditado.
