@@ -20,6 +20,16 @@ export default function MethodologyPage() {
           <p className="editorial-page__lead">
             La plataforma reúne operaciones históricas oficiales y estimaciones mensuales para ayudar a leer el mercado residencial de Madrid. Las dos clases de dato se identifican por separado con total transparencia.
           </p>
+          <figure className="methodology-anatomy">
+            <img
+              src="/assets/madrid-methodology-anatomy.svg"
+              alt="Tubería isométrica de la metodología: extracción de datos abiertos, transformación y validación, modelos predictivos y memoria RAG para AMBI."
+              loading="eager"
+            />
+            <figcaption>
+              Del dato abierto a la inteligencia de AMBI: extracción, transformación, validación, predicción y recuperación de conocimiento.
+            </figcaption>
+          </figure>
           <section className="editorial-page__section">
             <h2>Operaciones observadas</h2>
             <p>

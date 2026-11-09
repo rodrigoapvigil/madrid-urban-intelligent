@@ -59,6 +59,37 @@
   letter-spacing: -0.015em;
 }
 
+.methodology-anatomy {
+  margin: 0 0 44px;
+  padding: 20px 18px 16px;
+  border: 1px solid rgba(14, 110, 142, 0.16);
+  border-radius: 20px;
+  background: #02142B;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 14px 32px rgba(1, 16, 36, 0.16);
+}
+
+.methodology-anatomy img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.methodology-anatomy figcaption {
+  margin: 12px 4px 0;
+  color: #B8CBD5;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .methodology-anatomy {
+    margin-right: -10px;
+    margin-left: -10px;
+    padding: 12px 10px;
+    border-radius: 14px;
+  }
+}
+
 .editorial-page__section {
   padding: 32px 0;
   border-top: 1px solid rgba(14, 110, 142, 0.15);
