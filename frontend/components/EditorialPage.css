@@ -240,7 +240,15 @@
   border: 2px solid #02142B;
   border-radius: 50%;
   background: #00F0FF;
+  opacity: .34;
+  transition: opacity .35s ease, transform .35s ease, box-shadow .35s ease;
   box-shadow: 0 0 0 5px rgba(0, 240, 255, 0.12), 0 0 18px rgba(0, 240, 255, 0.55);
+}
+
+.methodology-step.is-active::after {
+  opacity: 1;
+  transform: translateX(-50%) scale(1.22);
+  box-shadow: 0 0 0 7px rgba(0, 240, 255, 0.16), 0 0 26px rgba(0, 240, 255, 0.86);
 }
 
 .methodology-step__art {
@@ -297,7 +305,7 @@
 }
 
 .methodology-facts {
-  margin-top: clamp(64px, 8vw, 116px);
+  margin-top: clamp(74px, 9.2vw, 133px);
   padding-top: 0;
   border-top: 0;
 }
