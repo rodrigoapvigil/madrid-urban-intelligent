@@ -228,7 +228,7 @@ def es_url_segura(url: str) -> Tuple[bool, Optional[str]]:
     return True, None
 
 
-async def parse_portal_url(url: str, timeout_sec: float = 4.0, max_redirects: int = 3) -> PortalParsedData:
+async def parse_portal_url(url: str, timeout_sec: float = 10.0, max_redirects: int = 3) -> PortalParsedData:
     """
     Descarga de forma asíncrona la URL validada verificando de forma estricta
     cada salto de redirección contra ataques SSRF.
@@ -258,7 +258,7 @@ async def parse_portal_url(url: str, timeout_sec: float = 4.0, max_redirects: in
                 if resp.status_code in [403, 429]:
                     return PortalParsedData(
                         requiere_manual=True,
-                        error_mensaje="El portal inmobiliario aplicó verificación antibot. Introduce precio, metros y barrio manualmente para obtener tu veredicto inmediato."
+                        error_mensaje="El portal no permite consultar este anuncio automáticamente. Completa precio, superficie y barrio manualmente para obtener tu veredicto."
                     )
 
                 if resp.status_code != 200:

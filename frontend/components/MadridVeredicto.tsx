@@ -383,7 +383,7 @@ export default function MadridVeredicto() {
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginTop: '16px' }}>
                   <span className="veredicto-helper-text">
-                    Si el portal aplica protección antibot, podrás rellenar los datos manualmente sin esperas.
+                    Pegamos el enlace para intentar leer los datos públicos del anuncio. Si el portal no permite la consulta automática, podrás completar los datos manualmente.
                   </span>
                   <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <button

@@ -696,6 +696,27 @@
   border-color: rgba(0, 240, 255, .24) !important;
 }
 
+/* The verdict title sits directly on the page atmosphere, without a panel. */
+.veredicto-hero {
+  padding: 12px 0 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.veredicto-hero .veredicto-title { text-shadow: 0 8px 28px rgba(0, 0, 0, .22); }
+
+/* High-contrast ink on bright action controls. */
+.veredicto-btn-primary,
+.veredicto-btn-primary:hover:not(:disabled),
+.veredicto-segment-btn.active {
+  color: #02152d !important;
+}
+
+.veredicto-btn-primary svg,
+.veredicto-segment-btn.active svg { color: #02152d; }
+
 @media (max-width: 734px) {
   .veredicto-main { padding-top: 32px; }
   .veredicto-card { border-radius: 18px; }
