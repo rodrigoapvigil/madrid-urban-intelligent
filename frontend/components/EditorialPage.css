@@ -28,6 +28,23 @@
   z-index: 2;
 }
 
+/* Methodology is an immersive landing-style story, unlike the legal/editorial pages. */
+.editorial-page--methodology {
+  padding-top: clamp(52px, 7vw, 96px);
+  color: #FFFFFF;
+}
+
+.editorial-page--methodology .editorial-page__inner {
+  width: min(1240px, 100%);
+  padding: clamp(24px, 4vw, 56px) clamp(18px, 4vw, 52px) clamp(72px, 8vw, 120px);
+  background: transparent;
+  box-shadow: none;
+  color: #FFFFFF;
+}
+
+.editorial-page--methodology h1 { color: #FFFFFF; }
+.editorial-page--methodology .editorial-page__lead { color: #B8CBD5; }
+
 .editorial-page__eyebrow {
   margin: 0 0 16px;
   color: #1684A7;
@@ -87,6 +104,10 @@
   border-top: 1px solid rgba(14, 110, 142, 0.15);
 }
 
+.editorial-page--methodology .methodology-gallery {
+  border-top-color: rgba(186, 204, 214, 0.16);
+}
+
 .methodology-gallery__intro h2 {
   margin: 0 0 10px;
   color: #0E6E8E;
@@ -94,6 +115,9 @@
   line-height: 1.08;
   letter-spacing: -.04em;
 }
+
+.editorial-page--methodology .methodology-gallery__intro h2 { color: #FFFFFF; }
+.editorial-page--methodology .methodology-gallery__intro > p:last-child { color: #B8CBD5; }
 
 .methodology-gallery__intro > p:last-child {
   max-width: 680px;
@@ -104,31 +128,54 @@
 }
 
 .methodology-sequence {
+  position: relative;
   display: grid;
-  gap: 22px;
+  gap: 48px;
+  padding: 24px 0;
+}
+
+.methodology-sequence::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(0, 240, 255, 0.48) 8%, rgba(0, 240, 255, 0.18) 92%, transparent);
+  transform: translateX(-50%);
 }
 
 .methodology-step {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr;
-  align-items: center;
+  width: calc(50% - 34px);
   gap: 16px;
   margin: 0;
-  padding: 18px;
-  border: 1px solid rgba(14, 110, 142, 0.16);
-  border-radius: 22px;
-  background: linear-gradient(135deg, #02142B 0%, #011024 100%);
-  box-shadow: 0 12px 28px rgba(1, 16, 36, 0.14);
+  padding: 0;
+  justify-self: end;
 }
 
-.methodology-step.is-reversed { grid-template-columns: 1fr; }
+.methodology-step:nth-child(even) { justify-self: start; }
+.methodology-step::after {
+  content: '';
+  position: absolute;
+  top: 30px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #02142B;
+  border-radius: 50%;
+  background: #00F0FF;
+  box-shadow: 0 0 0 5px rgba(0, 240, 255, 0.12), 0 0 18px rgba(0, 240, 255, 0.55);
+}
+.methodology-step:nth-child(odd)::after { right: -42px; }
+.methodology-step:nth-child(even)::after { left: -42px; }
 
 .methodology-step__art {
   overflow: hidden;
-  width: min(100%, 760px);
+  width: 100%;
   justify-self: center;
-  border-radius: 16px;
-  background: #02142B;
+  background: transparent;
 }
 
 .methodology-step__art img { display: block; width: 100%; height: auto; }
@@ -141,6 +188,12 @@
   max-width: 760px;
   width: 100%;
   justify-self: center;
+  padding: 18px 20px 20px;
+  border: 1px solid rgba(186, 204, 214, 0.14);
+  border-radius: 16px;
+  background: rgba(1, 16, 36, 0.54);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .methodology-step__index {
@@ -181,9 +234,16 @@
   .methodology-step,
   .methodology-step.is-reversed {
     grid-template-columns: 1fr;
+    width: 100%;
     gap: 16px;
     padding: 12px;
+    justify-self: center;
   }
+  .methodology-sequence::before { left: 18px; }
+  .methodology-step::after,
+  .methodology-step:nth-child(odd)::after,
+  .methodology-step:nth-child(even)::after { left: 11px; right: auto; top: 24px; }
+  .methodology-step__copy { margin-left: 24px; }
   .methodology-step.is-reversed .methodology-step__art,
   .methodology-step.is-reversed .methodology-step__copy { order: initial; }
 }

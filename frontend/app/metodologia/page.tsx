@@ -25,7 +25,7 @@ export default function MethodologyPage() {
   return (
     <>
       <SiteHeader />
-      <main className="editorial-page">
+      <main className="editorial-page editorial-page--methodology">
         <div className="editorial-page__inner">
           <p className="editorial-page__eyebrow">Transparencia y metodología</p>
           <h1>Qué mide cada cifra y qué no.</h1>
