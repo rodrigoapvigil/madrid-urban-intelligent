@@ -26,7 +26,7 @@ export function SiteHeader({
     <header className="mi-header site-header" role="banner">
       <Link href="/" className="mi-brand site-brand" aria-label="DMIYC - Decide Madrid: Invierte Y Compra">
         <span className="mi-brand__mark">
-          <Image src="/decide-madrid-mark.svg" alt="DMIYC" width={40} height={40} priority unoptimized />
+          <Image src="/dmiyc-logo-glow-transparent.png" alt="DMIYC" width={40} height={40} priority unoptimized />
         </span>
         <span className="mi-brand__text">
           <strong className="mi-brand__acronym">DMIYC</strong>
