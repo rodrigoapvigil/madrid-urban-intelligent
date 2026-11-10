@@ -226,6 +226,11 @@ const PROFILES = [
   { id: 'inversion', label: 'Inversión', color: 'var(--texto-secundario-azul)', op: 'inversion' },
 ];
 
+// La comparación es común a todos los perfiles; solo cambia la métrica y su unidad.
+const getComparisonMetric = (profileId: string) => profileId === 'inversion'
+  ? { label: 'Rentabilidad', unit: '%', tooltipUnit: '%', multiplier: 100, decimals: 2 }
+  : { label: 'Precio m²', unit: '€/m²', tooltipUnit: '€/m²', multiplier: 1, decimals: profileId === 'alquiler' ? 2 : 1 };
+
 const MONTHS_ES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 const MADRID_NAME_EXCEPTIONS: Record<string, string> = {
@@ -1065,6 +1070,7 @@ const MadridDashboardV2: React.FC = () => {
       chartsRef.current = [];
 
       const profileId = activeProfile.id;
+      const comparisonMetric = getComparisonMetric(profileId);
       const ctxA = document.getElementById(`v2-chartA-${profileId}`) as HTMLCanvasElement;
       const ctxB = document.getElementById(`v2-chartB-${profileId}`) as HTMLCanvasElement;
       const ctxOverlay = document.getElementById(`v2-overlay-${profileId}`) as HTMLCanvasElement;
@@ -1083,7 +1089,7 @@ const MadridDashboardV2: React.FC = () => {
           const forecastColor = mainColor === COMPARISON_COLORS.zoneB
             ? COMPARISON_COLORS.forecastB
             : COMPARISON_COLORS.forecastA;
-          const multiplier = activeProfile.id === 'inversion' ? 100 : 1;
+          const multiplier = comparisonMetric.multiplier;
 
           // Use effective data or robust baseline so chart is NEVER empty
           const effectiveData = (rawData && rawData.length > 0 && rawData.some(d => d && d.precio_m2 != null))
@@ -1218,7 +1224,7 @@ const MadridDashboardV2: React.FC = () => {
                   formatter: (value, context) => {
                     if (context.datasetIndex === 0) return null;
                     if (value === null) return null;
-                    const unit = activeProfile.id === 'inversion' ? '%' : '€';
+                    const unit = comparisonMetric.unit === '%' ? '%' : '€';
                     return new Intl.NumberFormat('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value) + unit;
                   }
                 },
@@ -1253,7 +1259,7 @@ const MadridDashboardV2: React.FC = () => {
                     label: (context: any) => {
                       const idx = context.dataIndex;
                       const val = context.parsed.y;
-                      const unit = activeProfile.id === 'inversion' ? '%' : '€/m²';
+                      const unit = comparisonMetric.tooltipUnit;
 
                       if (val === null || val === undefined) {
                         return 'Sin datos registrados por el Ayuntamiento de Madrid para este periodo';
@@ -1262,7 +1268,7 @@ const MadridDashboardV2: React.FC = () => {
                       // La media es referencia estadística, no una cifra oficial proyectada.
                       if (context.datasetIndex === 0) {
                         const formatted = new Intl.NumberFormat('es-ES', {
-                          minimumFractionDigits: activeProfile.id === 'alquiler' ? 2 : 1,
+                          minimumFractionDigits: comparisonMetric.decimals,
                           maximumFractionDigits: 2
                         }).format(val);
                         return `Media Madrid: ${formatted} ${unit}`;
@@ -1273,7 +1279,7 @@ const MadridDashboardV2: React.FC = () => {
                       const isPred = found ? Boolean(found.is_prediction) : false;
                       const tipoDato = isPred ? 'Proyección' : 'Dato real';
                       const valFormatted = new Intl.NumberFormat('es-ES', {
-                        minimumFractionDigits: activeProfile.id === 'alquiler' ? 2 : 1,
+                        minimumFractionDigits: comparisonMetric.decimals,
                         maximumFractionDigits: 2
                       }).format(val);
 
@@ -1307,7 +1313,7 @@ const MadridDashboardV2: React.FC = () => {
                         const diffMadrid = ((val - madridVal) / madridVal) * 100;
                         const absDiffMadrid = Math.abs(diffMadrid).toFixed(1);
                         const madridFmt = new Intl.NumberFormat('es-ES', {
-                          minimumFractionDigits: activeProfile.id === 'alquiler' ? 2 : 1,
+                          minimumFractionDigits: comparisonMetric.decimals,
                           maximumFractionDigits: 1
                         }).format(madridVal);
 
@@ -1352,7 +1358,7 @@ const MadridDashboardV2: React.FC = () => {
                     maxTicksLimit: 7,
                     font: { size: 10 },
                     callback: (value) => {
-                      const unit = activeProfile.id === 'inversion' ? '%' : ' €/m²';
+                      const unit = comparisonMetric.unit === '%' ? '%' : ` ${comparisonMetric.unit}`;
                       return new Intl.NumberFormat('es-ES').format(Number(value)) + unit;
                     }
                   }
@@ -1362,7 +1368,7 @@ const MadridDashboardV2: React.FC = () => {
           });
         };
 
-        const chartMultiplier = activeProfile.id === 'inversion' ? 100 : 1;
+        const chartMultiplier = comparisonMetric.multiplier;
         const chartSeries = (raw: any[], zone: string) => {
           const effective = (raw && raw.length > 0 && raw.some(d => d && d.precio_m2 != null))
             ? raw
@@ -1400,7 +1406,7 @@ const MadridDashboardV2: React.FC = () => {
           try {
             const prevO = ChartJS.getChart(ctxOverlay);
             if (prevO) prevO.destroy();
-          const overlayMultiplier = activeProfile.id === 'inversion' ? 100 : 1;
+          const overlayMultiplier = comparisonMetric.multiplier;
           const effA = (seriesA && seriesA.length > 0 && seriesA.some(d => d && d.precio_m2 != null))
             ? seriesA
             : resolveFallbackSeries(activeProfile.id, selectedZoneA);
@@ -1554,7 +1560,7 @@ const MadridDashboardV2: React.FC = () => {
                     maxTicksLimit: 7,
                     font: { size: 10 },
                     callback: (value) => {
-                      const unit = activeProfile.id === 'inversion' ? '%' : ' €/m²';
+                      const unit = comparisonMetric.unit === '%' ? '%' : ` ${comparisonMetric.unit}`;
                       return new Intl.NumberFormat('es-ES').format(Number(value)) + unit;
                     }
                   }
@@ -1602,7 +1608,7 @@ const MadridDashboardV2: React.FC = () => {
                   formatter: (value, context) => {
                     if (context.datasetIndex === 4) return null; // No etiquetas para Madrid
                     if (value === null) return null;
-                      const unit = activeProfile.id === 'inversion' ? '%' : '€/m²';
+                      const unit = comparisonMetric.tooltipUnit;
                     return new Intl.NumberFormat('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value) + unit;
                   }
                 },
@@ -1637,14 +1643,14 @@ const MadridDashboardV2: React.FC = () => {
                     label: (context: any) => {
                       const idx = context.dataIndex;
                       const val = context.parsed.y;
-                      const unit = activeProfile.id === 'inversion' ? '%' : '€/m²';
+                      const unit = comparisonMetric.tooltipUnit;
 
                       if (val === null || val === undefined) {
                         return 'Sin datos registrados por el Ayuntamiento de Madrid para este periodo';
                       }
 
                       const valFormatted = new Intl.NumberFormat('es-ES', {
-                        minimumFractionDigits: activeProfile.id === 'alquiler' ? 2 : 1,
+                        minimumFractionDigits: comparisonMetric.decimals,
                         maximumFractionDigits: 2
                       }).format(val);
 
@@ -1688,7 +1694,7 @@ const MadridDashboardV2: React.FC = () => {
 
                       // Comparar con la otra zona
                       const otherItem = otherDataset.find(d => d.mes === idx + 1);
-                      const otherVal = otherItem ? otherItem.precio_m2 * (activeProfile.id === 'inversion' ? 100 : 1) : null;
+                      const otherVal = otherItem ? otherItem.precio_m2 * comparisonMetric.multiplier : null;
                       if (otherVal !== null && otherVal > 0) {
                         const diffOther = ((val - otherVal) / otherVal) * 100;
                         const absDiffOther = Math.abs(diffOther).toFixed(1);
@@ -1703,7 +1709,7 @@ const MadridDashboardV2: React.FC = () => {
 
                       // Comparativa con la media de Madrid
                       const madridItem = effMad.find(d => d.mes === idx + 1);
-                      const madridVal = madridItem ? madridItem.precio_m2 * (activeProfile.id === 'inversion' ? 100 : 1) : null;
+                      const madridVal = madridItem ? madridItem.precio_m2 * comparisonMetric.multiplier : null;
                       if (madridVal !== null && madridVal > 0) {
                         const diffMadrid = ((val - madridVal) / madridVal) * 100;
                         const absDiffMadrid = Math.abs(diffMadrid).toFixed(1);
@@ -3521,7 +3527,7 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-comp-col zone-a">
                     <div className="v2-chart-card">
                       <div className="v2-chart-head">
-                        Evolución {p.id === 'inversion' ? 'Rentabilidad' : 'Precio m²'} ({p.label}) - {selectedZoneA}
+                        Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneA}
                       </div>
                       <div className="v2-chart-wrap"><ChartZoomControls chartId={`v2-chartA-${p.id}`} /><canvas id={`v2-chartA-${p.id}`}></canvas></div>
                     </div>
@@ -3744,7 +3750,7 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-comp-col zone-b">
                     <div className="v2-chart-card">
                       <div className="v2-chart-head">
-                        Evolución {p.id === 'inversion' ? 'Rentabilidad' : 'Precio m²'} ({p.label}) - {selectedZoneB}
+                        Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneB}
                       </div>
                       <div className="v2-chart-wrap"><ChartZoomControls chartId={`v2-chartB-${p.id}`} /><canvas id={`v2-chartB-${p.id}`}></canvas></div>
                     </div>
