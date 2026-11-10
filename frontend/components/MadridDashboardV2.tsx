@@ -14,6 +14,13 @@ import { SiteFooter, SiteHeader } from './SiteChrome';
 
 ChartJS.register(ChartDataLabels, cssColorResolverPlugin);
 
+const COMPARISON_COLORS = {
+  zoneA: '#00E5FF',
+  zoneB: '#FFB86B',
+  forecastA: '#A78BFA',
+  forecastB: '#FF7AA8',
+} as const;
+
 const updateChartZoom = (canvasId: string, action: 'in' | 'out' | 'reset') => {
   const chart = ChartJS.getChart(canvasId) as any;
   if (!chart) return;
@@ -1049,7 +1056,10 @@ const MadridDashboardV2: React.FC = () => {
           otherRawData?: any[],
           color?: string
         ) => {
-          const mainColor = color || activeProfile.color;
+          const mainColor = color || COMPARISON_COLORS.zoneA;
+          const forecastColor = mainColor === COMPARISON_COLORS.zoneB
+            ? COMPARISON_COLORS.forecastB
+            : COMPARISON_COLORS.forecastA;
           const multiplier = activeProfile.id === 'inversion' ? 100 : 1;
 
           // Use effective data or robust baseline so chart is NEVER empty
@@ -1102,31 +1112,31 @@ const MadridDashboardV2: React.FC = () => {
                 {
                   label: `${label} · Dato real`,
                   data: actualPrices,
-                  borderColor: '#00F0FF',
-                  backgroundColor: (context: any) => createAreaGradient(context, '#00F0FF', 0.25),
+                  borderColor: mainColor,
+                  backgroundColor: (context: any) => createAreaGradient(context, mainColor, 0.25),
                   fill: 'start',
                   tension: 0.35,
                   cubicInterpolationMode: 'monotone',
                   borderWidth: 2.5,
                   pointRadius: 4,
-                  pointBackgroundColor: '#00F0FF',
+                  pointBackgroundColor: mainColor,
                   pointBorderColor: '#011024',
                   pointBorderWidth: 2,
                   pointHoverRadius: 6,
                   pointHitRadius: 14,
                 },
                 {
-                  label: 'Proyección del modelo',
+                  label: `${label} · Proyección`,
                   data: forecastPrices,
-                  borderColor: '#00F0FF',
-                  backgroundColor: (context: any) => createAreaGradient(context, '#00F0FF', 0.12),
-                  fill: 'start',
+                  borderColor: forecastColor,
+                  backgroundColor: (context: any) => createAreaGradient(context, forecastColor, 0.12),
+                  fill: false,
                   tension: 0.35,
                   cubicInterpolationMode: 'monotone',
                   borderDash: [5, 4],
                   borderWidth: 2.5,
                   pointRadius: 4,
-                  pointBackgroundColor: '#00F0FF',
+                  pointBackgroundColor: forecastColor,
                   pointBorderColor: '#011024',
                   pointBorderWidth: 2,
                   pointHoverRadius: 6,
@@ -1368,7 +1378,7 @@ const MadridDashboardV2: React.FC = () => {
           try {
             const prevB = ChartJS.getChart(ctxB);
             if (prevB) prevB.destroy();
-            chartsRef.current.push(createLineChart(ctxB, selectedZoneB, seriesB, selectedZoneA, seriesA, '#00F0FF'));
+            chartsRef.current.push(createLineChart(ctxB, selectedZoneB, seriesB, selectedZoneA, seriesA, COMPARISON_COLORS.zoneB));
           } catch (e) {
             console.error('Error creating Chart B:', e);
           }
@@ -1391,6 +1401,20 @@ const MadridDashboardV2: React.FC = () => {
           const overlayA = Array.from({ length: 12 }, (_, i) => { const found = effA.find(d => Number(d.mes) === i + 1); return found ? found.precio_m2 * overlayMultiplier : null; });
           const overlayB = Array.from({ length: 12 }, (_, i) => { const found = effB.find(d => Number(d.mes) === i + 1); return found ? found.precio_m2 * overlayMultiplier : null; });
           const overlayMadrid = Array.from({ length: 12 }, (_, i) => { const found = effMad.find(d => Number(d.mes) === i + 1); return found ? found.precio_m2 * overlayMultiplier : null; });
+          const splitSeries = (series: any[], values: Array<number | null>) => ({
+            real: values.map((value, index) => {
+              const found = series.find(d => Number(d.mes) === index + 1);
+              return found && !found.is_prediction ? value : null;
+            }),
+            forecast: values.map((value, index) => {
+              const found = series.find(d => Number(d.mes) === index + 1);
+              const firstForecast = series.findIndex(d => Boolean(d.is_prediction));
+              const isBoundary = firstForecast > 0 && index === firstForecast - 1;
+              return found?.is_prediction || isBoundary ? value : null;
+            })
+          });
+          const overlayASplit = splitSeries(effA, overlayA);
+          const overlayBSplit = splitSeries(effB, overlayB);
           const overlayScale = getNiceChartScale([overlayA, overlayB, overlayMadrid]);
           chartsRef.current.push(new ChartJS(ctxOverlay, {
             type: 'line',
@@ -1400,55 +1424,67 @@ const MadridDashboardV2: React.FC = () => {
               datasets: [
                 {
                   label: `${selectedZoneA} · Dato real`,
-                  data: overlayA,
-                  borderColor: '#00F0FF',
+                  data: overlayASplit.real,
+                  borderColor: COMPARISON_COLORS.zoneA,
                   borderWidth: 2.5,
                   pointRadius: 4,
-                  pointBackgroundColor: '#00F0FF',
+                  pointBackgroundColor: COMPARISON_COLORS.zoneA,
                   pointBorderColor: '#011024',
                   pointBorderWidth: 2,
                   pointHoverRadius: 6,
                   pointHitRadius: 14,
                   fill: 'start',
-                  backgroundColor: (context: any) => createAreaGradient(context, '#00F0FF', 0.12),
+                  backgroundColor: (context: any) => createAreaGradient(context, COMPARISON_COLORS.zoneA, 0.12),
                   tension: 0.35,
-                  cubicInterpolationMode: 'monotone',
-                  segment: {
-                    borderColor: (context: any) => {
-                      const found = seriesA.find(d => d.mes === context.p1DataIndex + 1);
-                      return found && found.is_prediction ? 'rgba(0, 240, 255, 0.68)' : '#00F0FF';
-                    },
-                    borderDash: (context: any) => {
-                      const found = seriesA.find(d => d.mes === context.p1DataIndex + 1);
-                      return found && found.is_prediction ? [5, 4] : undefined;
-                    }
-                  }
+                  cubicInterpolationMode: 'monotone'
+                },
+                {
+                  label: `${selectedZoneA} · Proyección`,
+                  data: overlayASplit.forecast,
+                  borderColor: COMPARISON_COLORS.forecastA,
+                  borderDash: [6, 5],
+                  borderWidth: 2.5,
+                  pointRadius: 4,
+                  pointBackgroundColor: COMPARISON_COLORS.forecastA,
+                  pointBorderColor: '#011024',
+                  pointBorderWidth: 2,
+                  pointHoverRadius: 6,
+                  pointHitRadius: 14,
+                  fill: false,
+                  tension: 0.35,
+                  cubicInterpolationMode: 'monotone'
                 },
                 {
                   label: `${selectedZoneB} · Dato real`,
-                  data: overlayB,
-                  borderColor: '#00F0FF',
+                  data: overlayBSplit.real,
+                  borderColor: COMPARISON_COLORS.zoneB,
                   borderWidth: 2.5,
                   pointRadius: 4,
-                  pointBackgroundColor: '#00F0FF',
+                  pointBackgroundColor: COMPARISON_COLORS.zoneB,
                   pointBorderColor: '#011024',
                   pointBorderWidth: 2,
                   pointHoverRadius: 6,
                   pointHitRadius: 14,
                   fill: 'start',
-                  backgroundColor: (context: any) => createAreaGradient(context, '#00F0FF', 0.12),
+                  backgroundColor: (context: any) => createAreaGradient(context, COMPARISON_COLORS.zoneB, 0.12),
                   tension: 0.35,
-                  cubicInterpolationMode: 'monotone',
-                  segment: {
-                    borderColor: (context: any) => {
-                      const found = seriesB.find(d => d.mes === context.p1DataIndex + 1);
-                      return found && found.is_prediction ? '#00F0FF' : '#00F0FF';
-                    },
-                    borderDash: (context: any) => {
-                      const found = seriesB.find(d => d.mes === context.p1DataIndex + 1);
-                      return found && found.is_prediction ? [5, 4] : undefined;
-                    }
-                  }
+                  cubicInterpolationMode: 'monotone'
+                },
+                {
+                  label: `${selectedZoneB} · Proyección`,
+                  data: overlayBSplit.forecast,
+                  borderColor: COMPARISON_COLORS.forecastB,
+                  borderDash: [6, 5],
+                  borderWidth: 2.5,
+                  pointRadius: 4,
+                  pointBackgroundColor: COMPARISON_COLORS.forecastB,
+                  pointBorderColor: '#011024',
+                  pointBorderWidth: 2,
+                  pointHoverRadius: 6,
+                  pointHitRadius: 14,
+                  fill: false,
+                  tension: 0.35,
+                  cubicInterpolationMode: 'monotone'
                 },
                 {
                   label: 'Media Madrid',
@@ -1462,14 +1498,6 @@ const MadridDashboardV2: React.FC = () => {
                   tension: 0.32,
                   cubicInterpolationMode: 'monotone'
                 },
-                {
-                  label: 'Proyección del modelo',
-                  data: [],
-                  borderColor: 'var(--precio-subida)',
-                  borderDash: [5, 5],
-                  borderWidth: 2.5,
-                  pointRadius: 0
-                }
               ]
             },
             options: {
@@ -1555,7 +1583,7 @@ const MadridDashboardV2: React.FC = () => {
                     return (context.dataset.borderColor as string);
                   },
                   formatter: (value, context) => {
-                    if (context.datasetIndex === 2) return null; // No etiquetas para Madrid
+                    if (context.datasetIndex === 4) return null; // No etiquetas para Madrid
                     if (value === null) return null;
                       const unit = activeProfile.id === 'inversion' ? '%' : '€/m²';
                     return new Intl.NumberFormat('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(value) + unit;
@@ -1598,21 +1626,21 @@ const MadridDashboardV2: React.FC = () => {
                       }).format(val);
 
                       // Si es la media de Madrid
-                      if (context.datasetIndex === 2) {
+                      if (context.datasetIndex === 4) {
                         return [
                           `Media Madrid: ${valFormatted} ${unit}`,
                           `Referencia oficial de la capital`
                         ];
                       }
 
-                      const isZoneA = context.datasetIndex === 0;
+                      const isZoneA = context.datasetIndex === 0 || context.datasetIndex === 1;
                       const currentZone = isZoneA ? selectedZoneA : selectedZoneB;
                       const otherZone = isZoneA ? selectedZoneB : selectedZoneA;
                       const currentDataset = isZoneA ? seriesA : seriesB;
                       const otherDataset = isZoneA ? seriesB : seriesA;
 
                       const found = currentDataset.find(d => d.mes === idx + 1);
-                      const isPred = found ? Boolean(found.is_prediction) : false;
+                      const isPred = context.datasetIndex === 1 || context.datasetIndex === 3 || (found ? Boolean(found.is_prediction) : false);
                       const tipoDato = isPred ? 'Proyección' : 'Dato real';
 
                       const lines: string[] = [
@@ -2165,10 +2193,6 @@ const MadridDashboardV2: React.FC = () => {
             )}
           </div>
           {/* BOTONES DE ACCIÓN EN ALTO CONTRASTE */}
-          <div className={`v2-data-status ${isProjectionPeriod ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
-            <span className="v2-data-status-dot" aria-hidden="true" />
-            <span><strong>{periodStatusLabel}</strong> · Datos reales hasta junio de 2026 · proyección desde julio · Actualizado el 9 de noviembre de 2026</span>
-          </div>
           <div className="v2-filter-actions">
             <button
               onClick={() => setShowHelpModal(true)}
@@ -2970,8 +2994,12 @@ const MadridDashboardV2: React.FC = () => {
 
               <div className="v2-map-col">
                 <div className="v2-map-card">
-                  <div className="v2-map-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                  <div className="v2-map-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
                     <div className="v2-pill">Mapas Interactivos</div>
+                    <div className={`v2-data-status ${isProjectionPeriod ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
+                      <span className="v2-data-status-dot" aria-hidden="true" />
+                      <span><strong>{periodStatusLabel}</strong> · Datos reales hasta junio de 2026 · proyección desde julio · Actualizado el 9 de noviembre de 2026</span>
+                    </div>
                     <button
                       onClick={() => setShowMapHelpModal(true)}
                       style={{
@@ -3478,7 +3506,7 @@ const MadridDashboardV2: React.FC = () => {
               <div className="v2-compare-viewport">
                 <div className="v2-compare-grid">
                   {/* ZONA A (IZQ) */}
-                  <div className="v2-comp-col">
+                  <div className="v2-comp-col zone-a">
                     <div className="v2-chart-card">
                       <div className="v2-chart-head">
                         Evolución {p.id === 'inversion' ? 'Rentabilidad' : 'Precio m²'} ({p.label}) - {selectedZoneA}
@@ -3701,7 +3729,7 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
 
                   {/* ZONA B (DER) */}
-                  <div className="v2-comp-col">
+                  <div className="v2-comp-col zone-b">
                     <div className="v2-chart-card">
                       <div className="v2-chart-head">
                         Evolución {p.id === 'inversion' ? 'Rentabilidad' : 'Precio m²'} ({p.label}) - {selectedZoneB}
