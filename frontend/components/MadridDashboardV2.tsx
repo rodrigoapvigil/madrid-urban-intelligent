@@ -11,6 +11,7 @@ import { Activity, ChevronDown, Database, MapPinned, RotateCcw, ZoomIn, ZoomOut 
 import './MadridDashboardV2.css';
 import { apiFetch } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
+import LoadingScreen from './LoadingScreen';
 
 ChartJS.register(ChartDataLabels, cssColorResolverPlugin);
 
@@ -669,6 +670,7 @@ const MadridDashboardV2: React.FC = () => {
 
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
   const [isDashboardLoading, setIsDashboardLoading] = useState(true);
+  const [showDashboardLoader, setShowDashboardLoader] = useState(true);
   const [loadingStage, setLoadingStage] = useState(0);
   const [dashboardLoadError, setDashboardLoadError] = useState<string | null>(null);
   const [filtersReady, setFiltersReady] = useState(false);
@@ -2071,37 +2073,13 @@ const MadridDashboardV2: React.FC = () => {
   return (
     <div className="v2-root">
       <div className="mi-atmosphere" aria-hidden="true"/>
-      {/* LOADING OVERLAY */}
-      {isDashboardLoading && (
-        <div className="v2-loading-overlay" role="status" aria-live="polite" aria-label="Cargando datos del mercado de Madrid">
-          <div className="v2-loading-card">
-            <div className="v2-loading-topline">
-              <span className="v2-loading-brandmark" aria-hidden="true"><Activity size={18} /></span>
-              <span className="v2-loading-eyebrow">DMIYC · MADRID</span>
-              <span className="v2-loading-live"><i /> EN DIRECTO</span>
-            </div>
-            <div className="v2-loading-orbit" aria-hidden="true">
-              <div className="v2-loading-orbit-ring" />
-              <div className="v2-loading-orbit-ring v2-loading-orbit-ring--inner" />
-              <div className="v2-loading-orbit-core"><Activity size={26} /></div>
-              <span className="v2-loading-orbit-dot v2-loading-orbit-dot--one" />
-              <span className="v2-loading-orbit-dot v2-loading-orbit-dot--two" />
-            </div>
-            <p className="v2-loading-title">Leyendo el mercado</p>
-            <p className="v2-loading-sub">Estamos preparando tu lectura de Madrid.</p>
-            <div className="v2-loading-steps" aria-hidden="true">
-              {loadingStages.map((stage, index) => {
-                const Icon = stage.icon;
-                const state = index < loadingStage ? 'complete' : index === loadingStage ? 'active' : '';
-                return <div key={stage.label} className={`v2-loading-step ${state}`}><span><Icon size={14} /></span>{stage.label}</div>;
-              })}
-            </div>
-            <div className="v2-loading-bar">
-              <div className="v2-loading-bar-fill" />
-            </div>
-            <div className="v2-loading-footer"><span>Actualizando indicadores</span><span className="v2-loading-dots"><i /><i /><i /></span></div>
-          </div>
-        </div>
+      {showDashboardLoader && (
+        <LoadingScreen
+          ready={!isDashboardLoading}
+          estimatedSeconds={25}
+          onExited={() => setShowDashboardLoader(false)}
+          onRetry={() => window.location.reload()}
+        />
       )}
 
       {dashboardLoadError && !isDashboardLoading && (
