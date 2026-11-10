@@ -2818,6 +2818,22 @@
 /* Comparison language: the zone is identified by hue, the data type by style. */
 .v2-comp-col.zone-a .v2-chart-card { border-top: 2px solid #00e5ff; }
 .v2-comp-col.zone-b .v2-chart-card { border-top: 2px solid #ffb86b; }
+
+.v2-comp-col.zone-a .v2-chart-head {
+  color: #00e5ff !important;
+}
+
+.v2-comp-col.zone-b .v2-chart-head {
+  color: #ffb86b !important;
+}
+
+.v2-filter-label.zone-a-label {
+  color: #00e5ff !important;
+}
+
+.v2-filter-label.zone-b-label {
+  color: #ffb86b !important;
+}
 .v2-map-header .v2-data-status {
   flex: 1 1 360px;
   max-width: 440px;

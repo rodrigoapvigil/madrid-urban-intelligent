@@ -1234,8 +1234,14 @@ const MadridDashboardV2: React.FC = () => {
                   cornerRadius: 10,
                   borderWidth: 0.5,
                   borderColor: 'color-mix(in srgb, var(--blanco-humo) 20%, transparent)',
-                  displayColors: false,
+                  displayColors: true,
+                  boxWidth: 10,
+                  boxHeight: 10,
                   callbacks: {
+                    labelColor: (context: any) => {
+                      const color = context.dataset?.borderColor || '#E5F2F7';
+                      return { borderColor: color, backgroundColor: color };
+                    },
                     title: (items: any[]) => {
                       const monthNames = [
                         'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -1612,8 +1618,14 @@ const MadridDashboardV2: React.FC = () => {
                   cornerRadius: 10,
                   borderWidth: 0.5,
                   borderColor: 'color-mix(in srgb, var(--blanco-humo) 20%, transparent)',
-                  displayColors: false,
+                  displayColors: true,
+                  boxWidth: 10,
+                  boxHeight: 10,
                   callbacks: {
+                    labelColor: (context: any) => {
+                      const color = context.dataset?.borderColor || '#E5F2F7';
+                      return { borderColor: color, backgroundColor: color };
+                    },
                     title: (items: any[]) => {
                       const monthNames = [
                         'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -3474,7 +3486,7 @@ const MadridDashboardV2: React.FC = () => {
 
               <div className="v2-compare-zone-selectors">
                 <div className={`v2-dropdown-container v2-compare-zone-select ${activeDropdown === 'zoneA' ? 'v2-z-up' : ''}`}>
-                  <span className="v2-filter-label">Zona A</span>
+                  <span className="v2-filter-label zone-a-label">Zona A · {formatZoneOption(selectedZoneA)}</span>
                   <button type="button" className={`v2-custom-select ${activeDropdown === 'zoneA' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'zoneA'} onClick={() => setActiveDropdown(activeDropdown === 'zoneA' ? null : 'zoneA')}>
                     <span>{formatZoneOption(selectedZoneA)}</span>
                     <ChevronDown size={14} className="v2-select-chevron" />
@@ -3488,7 +3500,7 @@ const MadridDashboardV2: React.FC = () => {
                   )}
                 </div>
                 <div className={`v2-dropdown-container v2-compare-zone-select ${activeDropdown === 'zoneB' ? 'v2-z-up' : ''}`}>
-                  <span className="v2-filter-label">Zona B</span>
+                  <span className="v2-filter-label zone-b-label">Zona B · {formatZoneOption(selectedZoneB)}</span>
                   <button type="button" className={`v2-custom-select ${activeDropdown === 'zoneB' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'zoneB'} onClick={() => setActiveDropdown(activeDropdown === 'zoneB' ? null : 'zoneB')}>
                     <span>{formatZoneOption(selectedZoneB)}</span>
                     <ChevronDown size={14} className="v2-select-chevron" />
