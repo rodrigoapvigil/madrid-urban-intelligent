@@ -22,6 +22,8 @@ const COMPARISON_COLORS = {
   forecastB: '#FF7AA8',
 } as const;
 
+const COMPARISON_MEDIA_COLOR = '#E5F2F7';
+
 const updateChartZoom = (canvasId: string, action: 'in' | 'out' | 'reset') => {
   const chart = ChartJS.getChart(canvasId) as any;
   if (!chart) return;
@@ -263,15 +265,15 @@ const createAreaGradient = (context: any, color: string, opacity = 0.25) => {
     const ctx = chart?.ctx;
     const area = chart?.chartArea;
     if (!ctx || !area || typeof area.top !== 'number' || typeof area.bottom !== 'number' || !Number.isFinite(area.top) || !Number.isFinite(area.bottom) || area.bottom <= area.top) {
-      return 'rgba(0, 240, 255, 0.18)';
+      return colorWithAlpha(color, opacity);
     }
     const gradient = ctx.createLinearGradient(0, area.top, 0, area.bottom);
-    gradient.addColorStop(0, 'rgba(0, 240, 255, 0.25)');
-    gradient.addColorStop(0.65, 'rgba(0, 45, 84, 0.10)');
-    gradient.addColorStop(1, 'rgba(1, 16, 36, 0.0)');
+    gradient.addColorStop(0, colorWithAlpha(color, opacity));
+    gradient.addColorStop(0.65, colorWithAlpha(color, opacity * 0.35));
+    gradient.addColorStop(1, colorWithAlpha(color, 0));
     return gradient;
   } catch {
-    return 'rgba(0, 240, 255, 0.18)';
+    return colorWithAlpha(color, opacity);
   }
 };
 
@@ -1122,13 +1124,14 @@ const MadridDashboardV2: React.FC = () => {
                 {
                   label: 'Media Madrid',
                   data: alignedMadrid,
-                  borderColor: 'rgba(186, 204, 214, 0.78)',
+                  borderColor: COMPARISON_MEDIA_COLOR,
+                  backgroundColor: (context: any) => createAreaGradient(context, COMPARISON_MEDIA_COLOR, 0.09),
                   borderWidth: 2,
                   borderDash: [6, 4],
                   tension: 0.32,
                   cubicInterpolationMode: 'monotone',
                   pointRadius: 0,
-                  fill: false,
+                  fill: 'start',
                 },
                 {
                   label: `${label} · Dato real`,
@@ -1151,7 +1154,7 @@ const MadridDashboardV2: React.FC = () => {
                   data: forecastPrices,
                   borderColor: forecastColor,
                   backgroundColor: (context: any) => createAreaGradient(context, forecastColor, 0.12),
-                  fill: false,
+                  fill: 'start',
                   tension: 0.35,
                   cubicInterpolationMode: 'monotone',
                   borderDash: [5, 4],
@@ -1187,7 +1190,7 @@ const MadridDashboardV2: React.FC = () => {
                     boxWidth: 28,
                     boxHeight: 2,
                     usePointStyle: false,
-                    color: 'rgba(220, 235, 242, 0.92)',
+                    color: 'rgba(245, 250, 252, 0.96)',
                     font: { size: 13, weight: 500 },
                     padding: 14
                   }
@@ -1322,7 +1325,7 @@ const MadridDashboardV2: React.FC = () => {
                   grid: { display: false },
                   offset: true,
                   ticks: {
-                    color: 'rgba(186, 204, 214, 0.7)',
+                    color: 'rgba(230, 242, 248, 0.86)',
                     padding: 10,
                     maxRotation: 0,
                     minRotation: 0,
@@ -1337,7 +1340,7 @@ const MadridDashboardV2: React.FC = () => {
                   grid: { color: 'rgba(255, 255, 255, 0.08)', lineWidth: 1 },
                   border: { display: false },
                   ticks: {
-                    color: 'rgba(186, 204, 214, 0.7)',
+                    color: 'rgba(230, 242, 248, 0.86)',
                     stepSize: scale.stepSize,
                     padding: 8,
                     maxTicksLimit: 7,
@@ -1454,7 +1457,8 @@ const MadridDashboardV2: React.FC = () => {
                   pointBorderWidth: 2,
                   pointHoverRadius: 6,
                   pointHitRadius: 14,
-                  fill: false,
+                  fill: 'start',
+                  backgroundColor: (context: any) => createAreaGradient(context, COMPARISON_COLORS.forecastA, 0.14),
                   tension: 0.35,
                   cubicInterpolationMode: 'monotone'
                 },
@@ -1486,17 +1490,18 @@ const MadridDashboardV2: React.FC = () => {
                   pointBorderWidth: 2,
                   pointHoverRadius: 6,
                   pointHitRadius: 14,
-                  fill: false,
+                  fill: 'start',
+                  backgroundColor: (context: any) => createAreaGradient(context, COMPARISON_COLORS.forecastB, 0.14),
                   tension: 0.35,
                   cubicInterpolationMode: 'monotone'
                 },
                 {
                   label: 'Media Madrid',
                   data: overlayMadrid,
-                  borderColor: 'rgba(186, 204, 214, 0.45)',
-                  backgroundColor: 'transparent',
-                  fill: false,
-                  borderWidth: 1.5,
+                  borderColor: COMPARISON_MEDIA_COLOR,
+                  backgroundColor: (context: any) => createAreaGradient(context, COMPARISON_MEDIA_COLOR, 0.09),
+                  fill: 'start',
+                  borderWidth: 2,
                   borderDash: [3, 3],
                   pointRadius: 0,
                   tension: 0.32,
@@ -1522,7 +1527,7 @@ const MadridDashboardV2: React.FC = () => {
                   grid: { display: false },
                   offset: true,
                   ticks: {
-                    color: 'rgba(186, 204, 214, 0.7)',
+                    color: 'rgba(230, 242, 248, 0.86)',
                     padding: 10,
                     maxRotation: 0,
                     minRotation: 0,
@@ -1537,7 +1542,7 @@ const MadridDashboardV2: React.FC = () => {
                   grid: { color: 'rgba(255, 255, 255, 0.08)', lineWidth: 1 },
                   border: { display: false },
                   ticks: {
-                    color: 'rgba(186, 204, 214, 0.7)',
+                    color: 'rgba(230, 242, 248, 0.86)',
                     stepSize: overlayScale.stepSize,
                     padding: 8,
                     maxTicksLimit: 7,
@@ -1555,10 +1560,12 @@ const MadridDashboardV2: React.FC = () => {
                   position: 'top',
                   align: 'end',
                   labels: {
-                  boxWidth: 14,
+                  boxWidth: 18,
+                  boxHeight: 3,
                     usePointStyle: false,
+                  color: 'rgba(245, 250, 252, 0.96)',
                   font: { size: 12, weight: 'bold' },
-                  padding: 10
+                  padding: 12
                   }
                 },
                 datalabels: {
