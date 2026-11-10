@@ -702,11 +702,14 @@ def get_kpi_data(anio: int, mes: str, op: str, distrito: str = "Todos", barrio: 
 
         rentabilidad = res['rentabilidad'] if 'rentabilidad' in res and not pd.isna(res['rentabilidad']) else 0.05
 
-        # Cálculo de Esfuerzo Compra (Años de ahorro para el 30% de la entrada)
-        # Basado en ahorrar el 20% de la renta media anual
-        # entrada = p_vivienda_venta * 0.30
-        # ahorro_anual = r_m * 0.20
+        # Esfuerzo de alquiler: misma definición para Madrid, distrito y barrio.
+        # Es el porcentaje de la renta media mensual destinado al alquiler.
+        esfuerzo_alquiler = (p_vivienda / (r_m / 12)) * 100 if r_m > 0 else 0
+
+        # Para compra/venta conservamos la métrica histórica: años necesarios
+        # para ahorrar el 30% de entrada ahorrando el 20% de la renta anual.
         esfuerzo_compra = (p_vivienda_venta * 0.30) / (r_m * 0.20) if r_m > 0 else 0
+        esfuerzo = esfuerzo_alquiler if op_l == 'alquiler' else esfuerzo_compra
 
         # Estado del Mercado según Variación Anual
         if v_a > 5:
@@ -734,7 +737,7 @@ def get_kpi_data(anio: int, mes: str, op: str, distrito: str = "Todos", barrio: 
                 pass
                 pass
 
-        return (p_m2, p_vivienda, v_m, v_t, v_a, r_m, s_m, p_vivienda_venta, esfuerzo_compra, estado_mercado, is_pred, rentabilidad, transactions)
+        return (p_m2, p_vivienda, v_m, v_t, v_a, r_m, s_m, p_vivienda_venta, esfuerzo, estado_mercado, is_pred, rentabilidad, transactions)
     except Exception as e:
         print(f"[get_kpi_data] error: {e}")
         return 0, 0, 0, 0, 0, 0, 0, 0, 0, "N/A", False, 0.0, 0.0

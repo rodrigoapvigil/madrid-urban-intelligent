@@ -118,7 +118,10 @@ def get_kpis(
         "renta_media": renta_media,
         "superficie_media": sup_media,
         "p_vivienda_venta": p_vivienda_venta,
-        "esfuerzo_compra": esfuerzo,
+        # Mantener ambos nombres para compatibilidad con clientes antiguos,
+        # pero exponer la métrica con el significado correcto según la operación.
+        "esfuerzo_alquiler": esfuerzo if op.lower() == "alquiler" else None,
+        "esfuerzo_compra": esfuerzo if op.lower() != "alquiler" else None,
         "estado_mercado": estado,
         "is_prediction": is_pred,
         "rentabilidad": rentabilidad,

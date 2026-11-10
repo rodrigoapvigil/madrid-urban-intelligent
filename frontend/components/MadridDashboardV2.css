@@ -240,6 +240,40 @@
   font-weight: 600;
 }
 
+.v2-dropdown-search {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 6px;
+  padding: 9px 10px;
+  border: 1px solid rgba(0, 229, 255, 0.45);
+  border-radius: 8px;
+  background: #061b35;
+  color: #f4fbff;
+  font: inherit;
+  outline: none;
+}
+.v2-dropdown-search::placeholder { color: #8ea8c3; }
+.v2-dropdown-search:focus { border-color: #00e5ff; box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.14); }
+
+.v2-guide-modal {
+  background: linear-gradient(145deg, #062744, #011024) !important;
+  border: 1px solid rgba(0, 229, 255, 0.28) !important;
+  color: #f4fbff;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.48) !important;
+}
+.v2-guide-modal h3,
+.v2-guide-modal [style*="color: var(--azul-noche)"],
+.v2-guide-modal [style*="color:var(--azul-noche)"] { color: #f4fbff !important; }
+.v2-guide-modal p,
+.v2-guide-modal [style*="color: var(--azul-linea)"],
+.v2-guide-modal [style*="color:var(--azul-linea)"] { color: #baccd6 !important; }
+.v2-guide-modal > div > div > div:not(:first-child),
+.v2-guide-modal [style*="background-color: var(--blanco-humo)"],
+.v2-guide-modal [style*="backgroundColor: var(--blanco-humo)"] {
+  background: rgba(255, 255, 255, 0.055) !important;
+  border-color: rgba(186, 204, 214, 0.18) !important;
+}
+
 @keyframes v2FadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }

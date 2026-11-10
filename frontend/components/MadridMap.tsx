@@ -20,6 +20,13 @@ const normalize = (str: string) => {
   return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 };
 
+const MADRID_NAME_EXCEPTIONS: Record<string, string> = {
+  'Puente De Vallecas': 'Puente de Vallecas',
+  'Villa De Vallecas': 'Villa de Vallecas',
+  'Alameda De Osuna': 'Alameda de Osuna',
+};
+const formatMadridName = (value: string) => MADRID_NAME_EXCEPTIONS[value] || value;
+
 const getProfileAccentColor = (profile: string): string => {
   const p = normalize(profile);
   if (p.includes('alquiler')) return '#00F0FF';
@@ -313,7 +320,8 @@ const MadridMap: React.FC<MapProps> = ({
         style: style,
         onEachFeature: (feature, layer) => {
           const props = feature.properties || {};
-          const name = props.barrio || props.nombre || props.name || props.distrito_nombre || props.distrito || 'Área de Madrid';
+          const rawName = props.barrio || props.nombre || props.name || props.distrito_nombre || props.distrito || 'Área de Madrid';
+          const name = formatMadridName(rawName);
           const districtName = props.distrito || props.nombre || props.name || props.distrito_nombre;
           
           const isDatePredicted = selectedYear > 2026 || (selectedYear === 2026 && !['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'].includes(selectedMonth));
@@ -330,21 +338,35 @@ const MadridMap: React.FC<MapProps> = ({
           if (item) {
             const fmtPrice = (v: number) => new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(v);
             const fmtYield = (v: number) => (v * 100).toFixed(2) + '%';
+            const comparable = data
+              .map(entry => Number(entry.precio_m2))
+              .filter(value => Number.isFinite(value) && value > 0)
+              .sort((a, b) => b - a);
+            const itemValue = Number(item.precio_m2);
+            const rank = comparable.findIndex(value => value <= itemValue) + 1;
+            const madridMean = comparable.length
+              ? comparable.reduce((sum, value) => sum + value, 0) / comparable.length
+              : 0;
+            const delta = madridMean > 0 ? ((itemValue - madridMean) / madridMean) * 100 : 0;
             
             popupContent += `<div style="color: rgba(186, 204, 214, 0.9); font-size: 13px; line-height: 1.6;">`;
+            if (rank > 0) {
+              const deltaLabel = `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}% frente a la media`;
+              popupContent += `<div style="color: #BACCD6; margin-bottom: 5px; font-size: 12px;">${rank}.º de ${comparable.length} por €/m² · ${deltaLabel}</div>`;
+            }
             
             if (selectedProfile === 'Alquiler') {
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² Alquiler:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtPrice(item.precio_m2)} €/m²${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Alquiler Promedio:</span> <span style="color: #FFFFFF; font-weight: 600;">${fmtPrice(item.precio_vivienda)} €/mes${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² Alquiler:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtPrice(item.precio_m2)} €/m²${isDatePredicted ? ' (Proyección)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Alquiler Promedio:</span> <span style="color: #FFFFFF; font-weight: 600;">${fmtPrice(item.precio_vivienda)} €/mes${isDatePredicted ? ' (Proyección)' : ''}</span></div>`;
             } else if (selectedProfile === 'Compra' || selectedProfile === 'Venta') {
               const label = selectedProfile === 'Compra' ? 'Compra' : 'Venta';
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² ${label}:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtPrice(item.precio_m2)} €/m²${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Precio Vivienda:</span> <span style="color: #FFFFFF; font-weight: 600;">${fmtPrice(item.precio_vivienda)} €${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² ${label}:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtPrice(item.precio_m2)} €/m²${isDatePredicted ? ' (Proyección)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Precio Vivienda:</span> <span style="color: #FFFFFF; font-weight: 600;">${fmtPrice(item.precio_vivienda)} €${isDatePredicted ? ' (Proyección)' : ''}</span></div>`;
             } else if (selectedProfile === 'Inversión') {
               const buyPriceM2 = item.precio_venta_m2 || item.precio_m2;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² Compra:</span> <span style="color: rgba(186, 204, 214, 0.95); font-weight: 600;">${fmtPrice(buyPriceM2)} €/m²${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Rentabilidad:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtYield(item.rentabilidad)}${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Alquiler Estimado:</span> <span style="color: #00F0FF; font-weight: 600;">${fmtPrice(item.precio_alquiler || item.precio_vivienda)} €/mes${isDatePredicted ? ' (Predicción)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² Compra:</span> <span style="color: rgba(186, 204, 214, 0.95); font-weight: 600;">${fmtPrice(buyPriceM2)} €/m²${isDatePredicted ? ' (Proyección)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Rentabilidad:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtYield(item.rentabilidad)}${isDatePredicted ? ' (Proyección)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Alquiler Estimado:</span> <span style="color: #00F0FF; font-weight: 600;">${fmtPrice(item.precio_alquiler || item.precio_vivienda)} €/mes${isDatePredicted ? ' (Proyección)' : ''}</span></div>`;
             }
             
             popupContent += `</div>`;

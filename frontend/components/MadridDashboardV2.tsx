@@ -225,6 +225,17 @@ const PROFILES = [
 
 const MONTHS_ES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
+const MADRID_NAME_EXCEPTIONS: Record<string, string> = {
+  'Puente De Vallecas': 'Puente de Vallecas',
+  'Villa De Vallecas': 'Villa de Vallecas',
+  'Alameda De Osuna': 'Alameda de Osuna',
+};
+const formatMadridName = (value: string) => MADRID_NAME_EXCEPTIONS[value] || value;
+const formatNumber = (value: number, maximumFractionDigits = 0) =>
+  new Intl.NumberFormat('es-ES', { maximumFractionDigits }).format(value);
+const formatEuro = (value: number, maximumFractionDigits = 0) => `${formatNumber(value, maximumFractionDigits)} €`;
+const formatZoneOption = (value: string) => value === 'Todos' ? 'Madrid (media)' : formatMadridName(value);
+
 const getNiceChartScale = (datasets: Array<Array<number | null>>) => {
   const values = datasets.flat().filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
   if (!values.length) return { min: undefined, max: undefined, stepSize: undefined };
@@ -453,13 +464,13 @@ const InfoTooltip: React.FC<{
         }}
         aria-label={`Información sobre ${title}`}
         style={{
-          width: '16px',
-          height: '16px',
+          width: '18px',
+          height: '18px',
           borderRadius: '50%',
-          border: '0.5px solid var(--humo-2)',
+          border: '1px solid #00E5FF',
           backgroundColor: open ? 'var(--precio-subida)' : 'var(--blanco-humo)',
           color: '#011024',
-          fontSize: '10px',
+          fontSize: '11px',
           fontWeight: '700',
           fontStyle: 'italic',
           fontFamily: 'serif',
@@ -512,7 +523,7 @@ const InfoTooltip: React.FC<{
           )}
           {ruleOfThumb && (
             <div style={{ color: 'var(--coral)', fontSize: '11px', fontWeight: '400', borderTop: example ? 'none' : '0.5px solid color-mix(in srgb, var(--blanco-humo) 10%, transparent)', paddingTop: example ? '0' : '5px' }}>
-              <strong style={{ color: 'var(--blanco-humo)', fontWeight: '600' }}>Consejo:</strong> {ruleOfThumb}
+              <strong style={{ color: 'var(--blanco-humo)', fontWeight: '600' }}>Referencia:</strong> {ruleOfThumb}
             </div>
           )}
         </div>
@@ -532,8 +543,8 @@ const getComparisonKpiInfo = (metric: string, zoneName: string) => {
       };
     case 'roi_alquiler':
       return {
-        title: `Rentabilidad Bruta (ROI) · ${zoneName}`,
-        description: `Mide el beneficio anual que genera la vivienda en alquiler respecto al precio de compra en ${zoneName}. Te indica qué porcentaje de la inversión se recupera cada año con las cuotas de los inquilinos.`,
+        title: `Rentabilidad bruta · ${zoneName}`,
+        description: `Mide los ingresos anuales del alquiler respecto al precio de compra en ${zoneName}, antes de gastos, impuestos, vacancia y financiación.`,
         example: `Un 4% significa que por cada 100.000 € de valor del inmueble, se ingresan unos 4.000 € brutos al año.`,
         ruleOfThumb: `En barrios muy consolidados suele ser menor (3-4%) por el alto valor de compra; en áreas en expansión o asequibles suele subir al 5% o más.`
       };
@@ -581,7 +592,7 @@ const getComparisonKpiInfo = (metric: string, zoneName: string) => {
       };
     case 'roi_neto':
       return {
-        title: `Rentabilidad Neta · ${zoneName}`,
+        title: `Rentabilidad neta · ${zoneName}`,
         description: `La ganancia anual real que te queda limpia en ${zoneName} tras descontar gastos fijos indispensables: comunidad, IBI, seguro de hogar/impago y mantenimiento.`,
         example: `Si un alquiler genera 9.000 € brutos al año pero soportas 1.500 € en gastos, la rentabilidad neta calcula sobre los 7.500 € netos.`,
         ruleOfThumb: `Es la cifra más honesta y decisiva para saber cuánto dinero entrará verdaderamente en tu cuenta bancaria.`
@@ -707,6 +718,13 @@ const MadridDashboardV2: React.FC = () => {
   const selectedMonthIndex = MONTHS_ES.indexOf(selectedMonth);
   const isProjectionPeriod = Number(selectedYear) > 2026 || (Number(selectedYear) === 2026 && selectedMonthIndex >= 6);
   const periodStatusLabel = isProjectionPeriod ? 'Proyección' : 'Dato real';
+  const realSeriesPoints = seriesMadrid.filter(point => point && !point.is_prediction);
+  const latestRealPoint = realSeriesPoints[realSeriesPoints.length - 1];
+  const latestRealMonth = latestRealPoint?.mes_nombre || 'junio';
+  const latestRealYear = selectedYear || '2026';
+  const firstProjectionMonth = latestRealPoint
+    ? MONTHS_ES[Number(latestRealPoint.mes) || 6] || 'julio'
+    : 'julio';
   const loadingStages = [
     { label: 'Conectando con la API', icon: Activity },
     { label: 'Procesando datos del mercado', icon: Database },
@@ -792,7 +810,7 @@ const MadridDashboardV2: React.FC = () => {
         p_vivienda: data.precio_vivienda,
         v_mes: data.variacion_mensual,
         v_anual: data.variacion_anual,
-        esfuerzo_compra: data.esfuerzo_compra,
+        esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra,
         estado_mercado: data.estado_mercado,
         is_prediction: data.is_prediction,
         renta_media: data.renta_media,
@@ -827,13 +845,13 @@ const MadridDashboardV2: React.FC = () => {
     const zoneAParam = compareLevel === 'Distritos' ? `district=${encodeURIComponent(selectedZoneA)}` : `barrio=${encodeURIComponent(selectedZoneA)}`;
     apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneAParam}`)
       .then(res => res.json())
-      .then(data => setKpiDataA(data));
+      .then(data => setKpiDataA({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra }));
 
     // KPIs Zone B
     const zoneBParam = compareLevel === 'Distritos' ? `district=${encodeURIComponent(selectedZoneB)}` : `barrio=${encodeURIComponent(selectedZoneB)}`;
     apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneBParam}`)
       .then(res => res.json())
-      .then(data => setKpiDataB(data));
+      .then(data => setKpiDataB({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra }));
 
     // Map Data
     apiFetch(`/map?year=${selectedYear}&month=${selectedMonth}&interest=${activeProfile.id === 'alquiler' ? 'Alquiler' : activeProfile.id === 'compra' ? 'Compra-venta' : activeProfile.id === 'venta' ? 'Venta' : 'Inversión'}`)
@@ -1054,7 +1072,8 @@ const MadridDashboardV2: React.FC = () => {
           rawData: any[],
           otherLabel?: string,
           otherRawData?: any[],
-          color?: string
+          color?: string,
+          scaleOverride?: { min?: number; max?: number; stepSize?: number }
         ) => {
           const mainColor = color || COMPARISON_COLORS.zoneA;
           const forecastColor = mainColor === COMPARISON_COLORS.zoneB
@@ -1090,7 +1109,7 @@ const MadridDashboardV2: React.FC = () => {
             const isBoundary = predictionStart > 0 && index === predictionStart - 1;
             return found?.is_prediction || isBoundary ? value : null;
           });
-          const scale = getNiceChartScale([alignedPrices, alignedMadrid]);
+          const scale = scaleOverride || getNiceChartScale([alignedPrices, alignedMadrid]);
 
           return new ChartJS(ctx, {
             type: 'line',
@@ -1101,9 +1120,9 @@ const MadridDashboardV2: React.FC = () => {
                 {
                   label: 'Media Madrid',
                   data: alignedMadrid,
-                  borderColor: 'rgba(186, 204, 214, 0.45)',
-                  borderWidth: 1.5,
-                  borderDash: [3, 3],
+                  borderColor: 'rgba(186, 204, 214, 0.78)',
+                  borderWidth: 2,
+                  borderDash: [6, 4],
                   tension: 0.32,
                   cubicInterpolationMode: 'monotone',
                   pointRadius: 0,
@@ -1163,11 +1182,10 @@ const MadridDashboardV2: React.FC = () => {
                   position: 'top',
                   align: 'end',
                   labels: {
-                    boxWidth: 8,
-                    boxHeight: 8,
-                    usePointStyle: true,
-                    pointStyle: 'circle',
-                    color: 'rgba(186, 204, 214, 0.85)',
+                    boxWidth: 28,
+                    boxHeight: 2,
+                    usePointStyle: false,
+                    color: 'rgba(220, 235, 242, 0.92)',
                     font: { size: 11, weight: 500 },
                     padding: 12
                   }
@@ -1206,8 +1224,8 @@ const MadridDashboardV2: React.FC = () => {
                   titleFont: { size: 14, weight: 'bold' },
                   bodyColor: 'var(--blanco-humo)',
                   bodyFont: { size: 13, weight: 'normal' },
-                  bodySpacing: 8,
-                  padding: 14,
+                  bodySpacing: 4,
+                  padding: 10,
                   cornerRadius: 10,
                   borderWidth: 0.5,
                   borderColor: 'color-mix(in srgb, var(--blanco-humo) 20%, transparent)',
@@ -1230,16 +1248,13 @@ const MadridDashboardV2: React.FC = () => {
                         return 'Sin datos registrados por el Ayuntamiento de Madrid para este periodo';
                       }
 
-                      // Línea 2: Media Madrid
+                      // La media es referencia estadística, no una cifra oficial proyectada.
                       if (context.datasetIndex === 0) {
                         const formatted = new Intl.NumberFormat('es-ES', {
                           minimumFractionDigits: activeProfile.id === 'alquiler' ? 2 : 1,
                           maximumFractionDigits: 2
                         }).format(val);
-                        return [
-                          `Media Madrid: ${formatted} ${unit}`,
-                          `Referencia oficial ponderada de la capital`
-                        ];
+                        return `Media Madrid: ${formatted} ${unit}`;
                       }
 
                       // Línea principal de la zona
@@ -1274,24 +1289,7 @@ const MadridDashboardV2: React.FC = () => {
                         lines.push(`Inicio del ejercicio ${selectedYear}`);
                       }
 
-                      // 3. Comparativa con la otra zona si existe
-                      if (otherLabel && otherRawData) {
-                        const otherFound = Array.isArray(otherRawData) ? otherRawData.find(d => d.mes === idx + 1) : null;
-                        const otherVal = otherFound ? otherFound.precio_m2 * multiplier : null;
-                        if (otherVal !== null && otherVal > 0) {
-                          const diffOther = ((val - otherVal) / otherVal) * 100;
-                          const absDiffOther = Math.abs(diffOther).toFixed(1);
-                          if (diffOther > 0.08) {
-                            lines.push(`Comparativa con ${otherLabel}: Un ${absDiffOther}% más caro`);
-                          } else if (diffOther < -0.08) {
-                            lines.push(`Comparativa con ${otherLabel}: Un ${absDiffOther}% más barato`);
-                          } else {
-                            lines.push(`Comparativa con ${otherLabel}: Mismo nivel de precio`);
-                          }
-                        }
-                      }
-
-                      // 4. Comparativa vs Media de Madrid
+                      // 3. Comparativa vs Media de Madrid
                       const madridItem = effectiveMadridSeries.find(d => d.mes === idx + 1);
                       const madridVal = madridItem ? madridItem.precio_m2 * multiplier : null;
                       if (madridVal !== null && madridVal !== undefined && madridVal > 0) {
@@ -1310,18 +1308,6 @@ const MadridDashboardV2: React.FC = () => {
                           lines.push(`Comparativa Madrid: Un ${absDiffMadrid}% más barato que la media (${madridFmt} ${unit})`);
                         }
 
-                        // 5. Diagnóstico
-                        if (diffMadrid >= 20) {
-                          lines.push(`Diagnóstico: Zona prémium de alta cotización`);
-                        } else if (diffMadrid > 5) {
-                          lines.push(`Diagnóstico: Por encima del promedio`);
-                        } else if (diffMadrid <= -20) {
-                          lines.push(`Diagnóstico: Zona asequible y económica`);
-                        } else if (diffMadrid < -5) {
-                          lines.push(`Diagnóstico: Más accesible que el promedio`);
-                        } else {
-                          lines.push(`Diagnóstico: Precio en la media de la capital`);
-                        }
                       }
 
                       return lines;
@@ -1365,11 +1351,27 @@ const MadridDashboardV2: React.FC = () => {
           });
         };
 
+        const chartMultiplier = activeProfile.id === 'inversion' ? 100 : 1;
+        const chartSeries = (raw: any[], zone: string) => {
+          const effective = (raw && raw.length > 0 && raw.some(d => d && d.precio_m2 != null))
+            ? raw
+            : resolveFallbackSeries(activeProfile.id, zone);
+          return Array.from({ length: 12 }, (_, i) => {
+            const found = effective.find(d => Number(d.mes) === i + 1);
+            return found ? found.precio_m2 * chartMultiplier : null;
+          });
+        };
+        const sharedComparisonScale = getNiceChartScale([
+          chartSeries(seriesA, selectedZoneA),
+          chartSeries(seriesB, selectedZoneB),
+          chartSeries(seriesMadrid, 'madrid'),
+        ]);
+
         if (ctxA) {
           try {
             const prevA = ChartJS.getChart(ctxA);
             if (prevA) prevA.destroy();
-            chartsRef.current.push(createLineChart(ctxA, selectedZoneA, seriesA, selectedZoneB, seriesB));
+            chartsRef.current.push(createLineChart(ctxA, selectedZoneA, seriesA, selectedZoneB, seriesB, COMPARISON_COLORS.zoneA, sharedComparisonScale));
           } catch (e) {
             console.error('Error creating Chart A:', e);
           }
@@ -1378,7 +1380,7 @@ const MadridDashboardV2: React.FC = () => {
           try {
             const prevB = ChartJS.getChart(ctxB);
             if (prevB) prevB.destroy();
-            chartsRef.current.push(createLineChart(ctxB, selectedZoneB, seriesB, selectedZoneA, seriesA, COMPARISON_COLORS.zoneB));
+            chartsRef.current.push(createLineChart(ctxB, selectedZoneB, seriesB, selectedZoneA, seriesA, COMPARISON_COLORS.zoneB, sharedComparisonScale));
           } catch (e) {
             console.error('Error creating Chart B:', e);
           }
@@ -1930,7 +1932,7 @@ const MadridDashboardV2: React.FC = () => {
             datasets: [
               {
                 type: 'bar',
-                label: 'ROI Esperado (%)',
+                label: 'Rentabilidad esperada (%)',
                 data: sortedPoints.map(p => p.y),
                 backgroundColor: sortedPoints.map(p => p.isSelected ? 'var(--coral)' : p.color),
                 borderRadius: 4,
@@ -2002,7 +2004,7 @@ const MadridDashboardV2: React.FC = () => {
               yROI: {
                 type: 'linear',
                 position: 'left',
-                title: { display: true, text: 'ROI esperado (%)', font: { size: 10, weight: 'bold' } },
+                title: { display: true, text: 'Rentabilidad esperada (%)', font: { size: 10, weight: 'bold' } },
                 ticks: {
                   callback: (val) => val + '%',
                   font: { size: 9 }
@@ -2165,13 +2167,13 @@ const MadridDashboardV2: React.FC = () => {
           <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Distrito</span>
             <button type="button" className={`v2-custom-select ${activeDropdown === 'dist' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'dist'} onClick={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')}>
-              <span>{selectedDistrict}</span>
+              <span>{formatZoneOption(selectedDistrict)}</span>
               <ChevronDown size={14} className="v2-select-chevron" />
             </button>
             {activeDropdown === 'dist' && (
               <div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
                 {availableDistricts.map(d => (
-                  <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={selectedDistrict === d} onClick={(e) => { e.stopPropagation(); setSelectedDistrict(d); setActiveDropdown(null); }}>{d}</button>
+                  <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={selectedDistrict === d} onClick={(e) => { e.stopPropagation(); setSelectedDistrict(d); setActiveDropdown(null); }}>{formatZoneOption(d)}</button>
                 ))}
               </div>
             )}
@@ -2181,13 +2183,26 @@ const MadridDashboardV2: React.FC = () => {
           <div className={`v2-dropdown-container ${activeDropdown === 'barrio' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Barrio</span>
             <button type="button" className={`v2-custom-select ${activeDropdown === 'barrio' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'barrio'} onClick={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')}>
-              <span>{selectedBarrio}</span>
+                    <span>{formatZoneOption(selectedBarrio)}</span>
               <ChevronDown size={14} className="v2-select-chevron" />
             </button>
             {activeDropdown === 'barrio' && (
               <div className="v2-dropdown-menu" role="listbox" aria-label="Barrio">
+                <input
+                  className="v2-dropdown-search"
+                  aria-label="Buscar barrio"
+                  placeholder="Buscar barrio…"
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) => {
+                    const query = e.target.value.toLocaleLowerCase('es-ES');
+                    const menu = e.currentTarget.parentElement;
+                    menu?.querySelectorAll<HTMLButtonElement>('.v2-dropdown-item').forEach(item => {
+                      item.hidden = query.length > 0 && !item.textContent?.toLocaleLowerCase('es-ES').includes(query);
+                    });
+                  }}
+                />
                 {availableBarrios.map(b => (
-                  <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={selectedBarrio === b} onClick={(e) => { e.stopPropagation(); setSelectedBarrio(b); setActiveDropdown(null); }}>{b}</button>
+                  <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={selectedBarrio === b} onClick={(e) => { e.stopPropagation(); setSelectedBarrio(b); setActiveDropdown(null); }}>{formatZoneOption(b)}</button>
                 ))}
               </div>
             )}
@@ -2806,7 +2821,7 @@ const MadridDashboardV2: React.FC = () => {
                             <InfoTooltip
                               title="Oportunidad y Rentabilidad de Inversión"
                               description="Combina el rendimiento neto del alquiler con el volumen anual de transacciones para evaluar qué tan rápido y rentable es invertir aquí."
-                              example="Un ROI neto del 4.5% con alta liquidez permite ingresar rentas estables con facilidad para vender si necesitas recuperar el capital."
+                              example="Una rentabilidad neta del 4,5% con alta liquidez permite ingresar rentas estables con facilidad para vender si necesitas recuperar el capital."
                               ruleOfThumb="A mayor liquidez (más de 300 transacciones/año), menor riesgo de quedarte atrapado con el inmueble en caso de querer venderlo."
                             />
                           </div>
@@ -2816,7 +2831,7 @@ const MadridDashboardV2: React.FC = () => {
                           GRM {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ fontSize: '15px', color: '#FFFFFF', display: 'block', marginTop: '2px' }}>{grm > 0 ? grm.toFixed(1) : '-'} años <span style={{ fontSize: '10px', fontWeight: 'normal', color: '#00F0FF' }}>(recuperación)</span></strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          ROI Neto esperado: <strong style={{ fontSize: '16px', display: 'block', color: '#00F0FF', fontWeight: '800', marginTop: '2px' }}>{roiNeto > 0 ? roiNeto.toFixed(1) : '-'}%/año</strong>
+                          Rentabilidad neta esperada: <strong style={{ fontSize: '16px', display: 'block', color: '#00F0FF', fontWeight: '800', marginTop: '2px' }}>{roiNeto > 0 ? roiNeto.toFixed(1) : '-'}%/año</strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
                           Volumen de transacciones: <strong style={{ fontSize: '15px', color: '#FFFFFF' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(transacciones)}/año</strong>
@@ -2998,7 +3013,7 @@ const MadridDashboardV2: React.FC = () => {
                     <div className="v2-pill">Mapas Interactivos</div>
                     <div className={`v2-data-status ${isProjectionPeriod ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
                       <span className="v2-data-status-dot" aria-hidden="true" />
-                      <span><strong>{periodStatusLabel}</strong> · Datos reales hasta junio de 2026 · proyección desde julio · Actualizado el 9 de noviembre de 2026</span>
+                      <span><strong>{periodStatusLabel}</strong> · Datos reales hasta {latestRealMonth} de {latestRealYear} · proyección desde {firstProjectionMonth} · Actualizado el 9 de noviembre de 2026</span>
                     </div>
                     <button
                       onClick={() => setShowMapHelpModal(true)}
@@ -3139,7 +3154,7 @@ const MadridDashboardV2: React.FC = () => {
                           return (
                             <tr key={i} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
                               <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
-                                {i+1}. {item.name}
+                                {i+1}. {formatMadridName(item.name)}
                               </td>
                               <td style={{ padding: '8px 0', textAlign: 'right', color: '#FF5C5C', fontWeight: '700' }}>
                                 {new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(item.value)} trans.
@@ -3156,13 +3171,13 @@ const MadridDashboardV2: React.FC = () => {
                       <span style={{ fontSize: '15px', fontWeight: '700', color: '#FFFFFF' }}>
                         {rankingLevel === 'Distritos' ? 'Distritos más asequibles' : 'Barrios más asequibles'}
                       </span>
-                      <span className="v2-rank-sub" style={{ color: '#BACCD6', fontSize: '11px' }}>Top 10 zonas con menor carga financiera</span>
+                        <span className="v2-rank-sub" style={{ color: '#BACCD6', fontSize: '11px' }}>Top 10 por alquiler medio mensual (€)</span>
                     </div>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}>
                           <th style={{ paddingBottom: '8px', fontWeight: '600' }}>{rankingLevel === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th>
-                          <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>PRECIO</th>
+                          <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>ALQUILER €/MES</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -3172,10 +3187,10 @@ const MadridDashboardV2: React.FC = () => {
                           return (
                             <tr key={i} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
                               <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
-                                {i+1}. {item.name}
+                                {i+1}. {formatMadridName(item.name)}
                               </td>
                               <td style={{ padding: '8px 0', textAlign: 'right', color: '#00F0FF', fontWeight: '700' }}>
-                                {new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(price)}€
+                                {formatEuro(price)}
                               </td>
                             </tr>
                           );
@@ -3204,7 +3219,7 @@ const MadridDashboardV2: React.FC = () => {
                           return (
                             <tr key={i} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
                               <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
-                                {i+1}. {item.name}
+                                {i+1}. {formatMadridName(item.name)}
                               </td>
                               <td style={{ padding: '8px 0', textAlign: 'right', color: '#00F0FF', fontWeight: '700' }}>
                                 {yearsVal}
@@ -3268,12 +3283,12 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                   {Number(selectedYear) === 2026 && (
                     <div style={{ fontSize: '11px', color: 'var(--azul-linea)', marginBottom: '12px', paddingLeft: '4px' }}>
-                      * Nota: Los datos del mes 1 al 6 son reales (Banco de Datos Ayto. de Madrid); del <strong>mes 7 al 12</strong> son <strong>proyecciones estimadas</strong>.
+                      * Nota: los datos reales llegan hasta <strong>{latestRealMonth} de {latestRealYear}</strong>; desde <strong>{firstProjectionMonth}</strong> son <strong>proyecciones</strong>. El color más brillante indica un valor €/m² más alto.
                     </div>
                   )}
                   {Number(selectedYear) > 2026 && (
                     <div style={{ fontSize: '11px', color: 'var(--azul-linea)', marginBottom: '12px', paddingLeft: '4px' }}>
-                      * Nota: Todos los meses mostrados para el año {selectedYear} son <strong>predicciones estimadas</strong> basadas en datos históricos.
+                      * Nota: Los meses de {selectedYear} se muestran como <strong>proyecciones</strong> basadas en datos históricos. El color más brillante indica un valor €/m² más alto.
                     </div>
                   )}
                   <div className="v2-heatmap-scroll">
@@ -3360,7 +3375,7 @@ const MadridDashboardV2: React.FC = () => {
                             liquidityData.map((item, idx) => (
                               <tr key={idx} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
                                 <td style={{ padding: '12px 0', color: '#FFFFFF', fontWeight: '600' }}>
-                                  {idx + 1}. {item.name}
+                                  {idx + 1}. {formatMadridName(item.name)}
                                 </td>
                                 <td style={{ padding: '12px 0', textAlign: 'center', color: '#00F0FF', fontWeight: '700' }}>
                                   {item.transactions}
@@ -3476,13 +3491,13 @@ const MadridDashboardV2: React.FC = () => {
                 <div className={`v2-dropdown-container v2-compare-zone-select ${activeDropdown === 'zoneA' ? 'v2-z-up' : ''}`}>
                   <span className="v2-filter-label">Zona A</span>
                   <button type="button" className={`v2-custom-select ${activeDropdown === 'zoneA' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'zoneA'} onClick={() => setActiveDropdown(activeDropdown === 'zoneA' ? null : 'zoneA')}>
-                    <span>{selectedZoneA}</span>
+                    <span>{formatZoneOption(selectedZoneA)}</span>
                     <ChevronDown size={14} className="v2-select-chevron" />
                   </button>
                   {activeDropdown === 'zoneA' && (
                     <div className="v2-dropdown-menu" role="listbox" aria-label="Seleccionar Zona A">
                       {(compareLevel === 'Distritos' ? availableDistricts : availableBarrios).map(z => (
-                        <button type="button" key={z} className="v2-dropdown-item" role="option" aria-selected={selectedZoneA === z} onClick={() => { setSelectedZoneA(z); setActiveDropdown(null); }}>{z}</button>
+                        <button type="button" key={z} className="v2-dropdown-item" role="option" aria-selected={selectedZoneA === z} onClick={() => { setSelectedZoneA(z); setActiveDropdown(null); }}>{formatZoneOption(z)}</button>
                       ))}
                     </div>
                   )}
@@ -3490,13 +3505,13 @@ const MadridDashboardV2: React.FC = () => {
                 <div className={`v2-dropdown-container v2-compare-zone-select ${activeDropdown === 'zoneB' ? 'v2-z-up' : ''}`}>
                   <span className="v2-filter-label">Zona B</span>
                   <button type="button" className={`v2-custom-select ${activeDropdown === 'zoneB' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'zoneB'} onClick={() => setActiveDropdown(activeDropdown === 'zoneB' ? null : 'zoneB')}>
-                    <span>{selectedZoneB}</span>
+                    <span>{formatZoneOption(selectedZoneB)}</span>
                     <ChevronDown size={14} className="v2-select-chevron" />
                   </button>
                   {activeDropdown === 'zoneB' && (
                     <div className="v2-dropdown-menu" role="listbox" aria-label="Seleccionar Zona B">
                       {(compareLevel === 'Distritos' ? availableDistricts : availableBarrios).map(z => (
-                        <button type="button" key={z} className="v2-dropdown-item" role="option" aria-selected={selectedZoneB === z} onClick={() => { setSelectedZoneB(z); setActiveDropdown(null); }}>{z}</button>
+                        <button type="button" key={z} className="v2-dropdown-item" role="option" aria-selected={selectedZoneB === z} onClick={() => { setSelectedZoneB(z); setActiveDropdown(null); }}>{formatZoneOption(z)}</button>
                       ))}
                     </div>
                   )}
@@ -3528,7 +3543,7 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataA.rentabilidad ? (kpiDataA.rentabilidad * 100 * 0.85).toFixed(2) + '%' : '-'}
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                ROI NETO {selectedZoneA.toUpperCase()}
+                                RENTABILIDAD NETA {selectedZoneA.toUpperCase()}
                                 {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
@@ -3592,7 +3607,7 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataA.rentabilidad ? (kpiDataA.rentabilidad * 100).toFixed(2) + '%' : '-'}
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                ROI % {selectedZoneA.toUpperCase()}
+                                RENTABILIDAD BRUTA {selectedZoneA.toUpperCase()}
                                 {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
@@ -3751,7 +3766,7 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataB.rentabilidad ? (kpiDataB.rentabilidad * 100 * 0.85).toFixed(2) + '%' : '-'}
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                ROI NETO {selectedZoneB.toUpperCase()}
+                                RENTABILIDAD NETA {selectedZoneB.toUpperCase()}
                                 {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
@@ -3815,7 +3830,7 @@ const MadridDashboardV2: React.FC = () => {
                                 {kpiDataB.rentabilidad ? (kpiDataB.rentabilidad * 100).toFixed(2) + '%' : '-'}
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                ROI % {selectedZoneB.toUpperCase()}
+                                RENTABILIDAD BRUTA {selectedZoneB.toUpperCase()}
                                 {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
                               </div>
                             </div>
@@ -3988,6 +4003,7 @@ const MadridDashboardV2: React.FC = () => {
           onClick={() => setShowHelpModal(false)}
         >
           <div
+            className="v2-guide-modal"
             style={{
               backgroundColor: 'var(--blanco-humo)',
               borderRadius: '24px',
@@ -4041,7 +4057,7 @@ const MadridDashboardV2: React.FC = () => {
                 </div>
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--azul-noche)', marginBottom: '2px' }}>
-                    Precios Reales Oficiales (Hasta Junio 2026)
+                    Datos reales hasta {latestRealMonth} de {latestRealYear}
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
                     Son precios fácticos extraídos directamente del Banco de Datos oficial del Ayuntamiento de Madrid. Si ves la etiqueta <strong style={{ color: 'var(--precio-subida)' }}>✓ DATO OFICIAL</strong>, ese es el precio real registrado de los contratos y ventas.
@@ -4056,7 +4072,7 @@ const MadridDashboardV2: React.FC = () => {
                 </div>
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--azul-noche)', marginBottom: '2px' }}>
-                    Previsiones Estimadas (Julio 2026 a 2028)
+                    Proyecciones desde {firstProjectionMonth}
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
                     Nuestros modelos estadísticos y predictivos analizan el histórico de más de 10.000 operaciones y viviendas, los tipos de interés y la demanda de cada barrio para proyectar qué precio cabe esperar en los próximos meses y años.
@@ -4129,6 +4145,7 @@ const MadridDashboardV2: React.FC = () => {
           onClick={() => setShowMapHelpModal(false)}
         >
           <div
+            className="v2-guide-modal"
             style={{
               backgroundColor: 'var(--blanco-humo)',
               borderRadius: '24px',
@@ -4353,7 +4370,7 @@ const MadridDashboardV2: React.FC = () => {
                     Intensidad del Color
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
-                    Cuanto más <strong>oscuro e intenso</strong> es el fondo de la casilla, mayor es el valor (precio por m² más alto o rentabilidad más elevada). Los <strong>tonos claros o suaves</strong> señalan los meses o zonas más asequibles o con menor presión de precios.
+                    Cuanto más <strong>brillante y cian</strong> es el fondo de la casilla, mayor es el valor (precio por m² más alto o rentabilidad más elevada). Los <strong>tonos oscuros</strong> señalan los meses o zonas más asequibles o con menor presión de precios.
                   </div>
                 </div>
               </div>
