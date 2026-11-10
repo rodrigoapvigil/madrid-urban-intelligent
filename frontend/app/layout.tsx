@@ -1,9 +1,17 @@
 import React from 'react'
 import type { Metadata, Viewport } from 'next'
+import { Anton } from 'next/font/google'
 import SmoothScroll from '../components/SmoothScroll'
 import PrivacyNotice from '../components/PrivacyNotice'
 import './globals.css'
 import '../components/SiteChrome.css'
+
+const display = Anton({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-ls-display',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://dmiyc.com'),
@@ -42,7 +50,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es">
+    <html lang="es" className={display.variable}>
       <body>
         <SmoothScroll />
         {children}
