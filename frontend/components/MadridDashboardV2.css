@@ -562,7 +562,7 @@
 .v2-chart-controls {
   position: absolute;
   z-index: 4;
-  top: -34px;
+  top: -56px;
   right: 8px;
   display: flex;
   align-items: center;
@@ -596,7 +596,7 @@
 .v2-overlay-body { overflow: visible !important; }
 
 @media (max-width: 480px) {
-  .v2-chart-controls { top: -30px; right: 3px; gap: 0; }
+  .v2-chart-controls { top: -48px; right: 3px; gap: 0; }
   .v2-chart-controls button { width: 32px; height: 32px; }
 }
 

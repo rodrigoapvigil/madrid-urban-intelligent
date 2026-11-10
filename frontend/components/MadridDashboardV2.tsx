@@ -1188,8 +1188,8 @@ const MadridDashboardV2: React.FC = () => {
                     boxHeight: 2,
                     usePointStyle: false,
                     color: 'rgba(220, 235, 242, 0.92)',
-                    font: { size: 11, weight: 500 },
-                    padding: 12
+                    font: { size: 13, weight: 500 },
+                    padding: 14
                   }
                 },
                 datalabels: {
@@ -1557,8 +1557,8 @@ const MadridDashboardV2: React.FC = () => {
                   labels: {
                   boxWidth: 14,
                     usePointStyle: false,
-                  font: { size: 10, weight: 'bold' },
-                  padding: 8
+                  font: { size: 12, weight: 'bold' },
+                  padding: 10
                   }
                 },
                 datalabels: {
