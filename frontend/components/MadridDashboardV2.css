@@ -2161,6 +2161,21 @@
   padding: 4px 6px;
 }
 
+.apple-popup {
+  z-index: 1200 !important;
+}
+
+.apple-popup .leaflet-popup-content {
+  width: min(286px, calc(100vw - 56px)) !important;
+  max-width: 286px;
+  margin: 10px 12px !important;
+  overflow-wrap: anywhere;
+}
+
+.apple-popup .leaflet-popup-content strong {
+  line-height: 1.25;
+}
+
 .apple-popup .leaflet-popup-tip {
   background: rgba(1, 16, 36, 0.95) !important;
   border: 1px solid rgba(186, 204, 214, 0.25) !important;

@@ -379,7 +379,12 @@ const MadridMap: React.FC<MapProps> = ({
             className: 'apple-popup',
             closeButton: false,
             offset: L.point(0, -10),
-            autoPan: false
+            autoPan: true,
+            keepInView: true,
+            autoPanPaddingTopLeft: L.point(24, 24),
+            autoPanPaddingBottomRight: L.point(24, 24),
+            maxWidth: 320,
+            minWidth: 220
           });
           
           layer.on({
