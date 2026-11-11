@@ -3218,3 +3218,17 @@
   .v2-rent-calculator input { min-width: 0; padding: 8px 9px; border: 1px solid rgba(186,204,214,.2); border-radius: 8px; background: rgba(1,16,36,.68); color: #fff; font-size: 12px; }
   .v2-rent-calculator > span { color: #baccd6; font-size: 11px; }
 }
+
+/* Keep the landing header and dashboard filter context pinned on mobile. */
+@media (max-width: 768px) {
+  .v2-root .site-header { position: sticky !important; inset-block-start: 0 !important; z-index: 1500 !important; }
+  .v2-root .v2-mobile-section-nav { position: relative !important; inset-block-start: auto !important; z-index: auto !important; }
+  .v2-root .v2-mobile-filter-bar {
+    position: sticky !important;
+    inset-block-start: 68px !important;
+    z-index: 1450 !important;
+    background: rgba(2, 20, 43, .97) !important;
+    box-shadow: 0 10px 24px rgba(0, 0, 0, .2);
+  }
+  .v2-root [data-dashboard-section] { scroll-margin-top: 140px; }
+}
