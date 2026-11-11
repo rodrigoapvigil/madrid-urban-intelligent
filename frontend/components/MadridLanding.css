@@ -1724,3 +1724,17 @@ footer.auros-footer,
 
   .mi-home .mi-hero__meta i { width: 16px; }
 }
+
+/* Mobile hero: slightly taller chrome, lower centered copy, no redundant bottom strip. */
+@media (max-width: 650px) {
+  .mi-home .mi-header { min-height: 68px; }
+
+  .mi-home .mi-hero__content {
+    padding-top: clamp(88px, 13vh, 118px);
+  }
+
+  .mi-home .mi-scroll,
+  .mi-home .mi-hero__meta {
+    display: none !important;
+  }
+}
