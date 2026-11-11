@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import Image from "next/image";
 import "./loading-screen.css";
 
 export type LoadingScreenProps = {
@@ -65,7 +66,6 @@ function Words({ text }: { text: string }) {
   return <>{text.split(" ").map((word, i) => <span className="dmiyc-ls__w" key={`${word}-${i}`}><span style={{ animationDelay: `${i * 70}ms` }}>{word}</span></span>)}</>;
 }
 
-const mmss = (seconds: number) => `${String(Math.floor(seconds / 60)).padStart(2, "0")}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
 export default function LoadingScreen({ ready = false, estimatedSeconds = 25, onExited, onRetry }: LoadingScreenProps) {
   const [elapsed, setElapsed] = useState(0);
@@ -118,9 +118,11 @@ export default function LoadingScreen({ ready = false, estimatedSeconds = 25, on
 
   return <div className="dmiyc-ls" data-leaving={leaving}>
     <span className="dmiyc-ls__sr" role="status">{ready ? "Datos cargados" : "Cargando el cuadro de mando"}</span>
-    <div className="dmiyc-ls__top" aria-hidden="true">
-      <div className="dmiyc-ls__brand"><i /><b>DMIYC</b><span>Decide Madrid</span></div>
-      <div className="dmiyc-ls__clock"><b>{mmss(elapsed)}</b>{!ready && !late ? ` / ${mmss(est)}` : ""}</div>
+    <div className="dmiyc-ls__top">
+      <div className="dmiyc-ls__brand">
+        <Image src="/dmiyc-logo-glow-transparent.png" alt="" width={42} height={42} priority unoptimized />
+        <span className="dmiyc-ls__brand-copy"><b>DMIYC</b><span>DECIDE MADRID: INVIERTE Y COMPRA</span></span>
+      </div>
     </div>
     <div className="dmiyc-ls__main">
       <div className="dmiyc-ls__pill" data-late={late}><i />{ready ? "Todo cargado" : late ? "Tardando más de lo normal" : "Primera carga"}</div>
