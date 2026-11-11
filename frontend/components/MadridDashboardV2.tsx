@@ -86,7 +86,12 @@ const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?:
         datasets: chart.data.datasets.map((dataset: any) => ({ ...dataset, data: [...(dataset.data || [])] })),
       };
     }
-    window.setTimeout(() => chart?.resize(), 80);
+    const chartContainer = target.querySelector('.v2-chart-wrap');
+    const chartResizeObserver = chartContainer && chart ? new ResizeObserver(() => chart.resize()) : null;
+    if (chartContainer) chartResizeObserver?.observe(chartContainer);
+    const resizeChart = () => window.setTimeout(() => chart?.resize(), 180);
+    window.setTimeout(() => chart?.resize(), 120);
+    window.addEventListener('orientationchange', resizeChart);
     const onBack = () => setExpanded(false);
     const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') window.history.back(); };
     const onResize = () => chart?.resize();
@@ -107,6 +112,8 @@ const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?:
       window.removeEventListener('popstate', onBack);
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', resizeChart);
+      chartResizeObserver?.disconnect();
       document.removeEventListener('fullscreenchange', onFullscreenChange);
       screen.orientation?.unlock?.();
       if (nativeFullscreenRef.current && document.fullscreenElement) {
@@ -161,7 +168,7 @@ const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?:
     const scope = event.currentTarget.closest('.v2-panel') || document;
     targetRef.current = (targetSelector ? scope.querySelector(targetSelector) : event.currentTarget.closest('.v2-chart-card, .v2-overlay-wrapper')) as HTMLElement | null;
     if (!targetRef.current) return;
-    if (window.matchMedia('(max-width: 768px)').matches) {
+    if (window.matchMedia('(max-width: 768px), (orientation: landscape) and (max-height: 600px)').matches) {
       const fullscreenRequest = document.documentElement.requestFullscreen?.();
       fullscreenRequest?.then(async () => {
         nativeFullscreenRef.current = true;
@@ -177,7 +184,10 @@ const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?:
     {expanded && (chartId || targetRef.current?.querySelector('table')) && <div className="v2-fullscreen-toolbar" role="toolbar" aria-label="Herramientas de pantalla completa">
       {chartId && <div className="v2-fullscreen-zoom" role="group" aria-label="Zoom del gráfico"><button type="button" title="Acercar" aria-label="Acercar gráfica" onClick={() => updateChartZoom(chartId, 'in')}><ZoomIn size={16} /></button><button type="button" title="Alejar" aria-label="Alejar gráfica" onClick={() => updateChartZoom(chartId, 'out')}><ZoomOut size={16} /></button><button type="button" title="Restablecer vista" aria-label="Restablecer zoom de la gráfica" onClick={() => updateChartZoom(chartId, 'reset')}><RotateCcw size={15} /></button></div>}
       {chartId && <div className="v2-fullscreen-ranges">{(['6M', '12M', 'Todo'] as const).map(range => <button key={range} type="button" onClick={() => setRange(range)}>{range}</button>)}</div>}
-      {chart?.data.datasets.map((dataset: any, index: number) => <button key={`${dataset.label}-${index}`} type="button" className="v2-fullscreen-series" aria-pressed={chart.isDatasetVisible(index)} onClick={() => { chart.setDatasetVisibility(index, !chart.isDatasetVisible(index)); chart.update('none'); setToolbarRevision(value => value + 1); }}><i style={{ background: dataset.borderColor || dataset.backgroundColor }} />{dataset.label}</button>)}
+      {chart?.data.datasets.map((dataset: any, index: number) => {
+        const compactLabel = chart.data.datasets.length === 5 && index < 4 ? `${index < 2 ? 'A' : 'B'} ${index % 2 === 0 ? 'real' : 'est.'}` : dataset.label;
+        return <button key={`${dataset.label}-${index}`} type="button" className="v2-fullscreen-series" title={dataset.label} aria-label={`${chart.isDatasetVisible(index) ? 'Ocultar' : 'Mostrar'} ${dataset.label}`} aria-pressed={chart.isDatasetVisible(index)} onClick={() => { chart.setDatasetVisibility(index, !chart.isDatasetVisible(index)); chart.update('none'); setToolbarRevision(value => value + 1); }}><i style={{ background: dataset.borderColor || dataset.backgroundColor }} />{compactLabel}</button>;
+      })}
       <button type="button" onClick={exportPng}>PNG</button><button type="button" onClick={exportCsv}>CSV</button>
       <span hidden>{toolbarRevision}</span>
     </div>}
@@ -1685,7 +1695,6 @@ const MadridDashboardV2: React.FC = () => {
           });
           const overlayASplit = splitSeries(effA, overlayA);
           const overlayBSplit = splitSeries(effB, overlayB);
-          const overlayScale = getNiceChartScale([overlayA, overlayB, overlayMadrid]);
           chartsRef.current.push(new ChartJS(ctxOverlay, {
             type: 'line',
             plugins: [],
@@ -1784,7 +1793,7 @@ const MadridDashboardV2: React.FC = () => {
                 mode: 'index',
                 intersect: false
               },
-              layout: { padding: { top: 8, right: 12, bottom: 14, left: 4 } },
+              layout: { padding: { top: 14, right: 16, bottom: 8, left: 4 } },
               scales: {
                 x: {
                   grid: { display: false },
@@ -1800,15 +1809,13 @@ const MadridDashboardV2: React.FC = () => {
                   }
                 },
                 y: {
-                  min: overlayScale.min,
-                  max: overlayScale.max,
+                  grace: '8%',
                   grid: { color: 'rgba(255, 255, 255, 0.08)', lineWidth: 1 },
                   border: { display: false },
                   ticks: {
                     color: 'rgba(230, 242, 248, 0.86)',
-                    stepSize: overlayScale.stepSize,
                     padding: 8,
-                    maxTicksLimit: 7,
+                    maxTicksLimit: 6,
                     font: { size: 10 },
                     callback: (value) => {
                       const unit = comparisonMetric.unit === '%' ? '%' : ` ${comparisonMetric.unit}`;
@@ -1865,17 +1872,19 @@ const MadridDashboardV2: React.FC = () => {
                 },
                 tooltip: {
                   enabled: true,
+                  position: 'nearest',
                   backgroundColor: 'color-mix(in srgb, var(--azul-noche) 95%, transparent)',
                   titleColor: 'var(--blanco-humo)',
-                  titleFont: { size: 14, weight: 'bold' },
+                  titleFont: { size: 12, weight: 'bold' },
                   bodyColor: 'var(--blanco-humo)',
-                  bodyFont: { size: 13, weight: 'normal' },
-                  bodySpacing: 8,
-                  padding: 14,
+                  bodyFont: { size: 11, weight: 'normal' },
+                  bodySpacing: 3,
+                  padding: 8,
                   cornerRadius: 10,
                   borderWidth: 0.5,
                   borderColor: 'color-mix(in srgb, var(--blanco-humo) 20%, transparent)',
-                  displayColors: true,
+                  displayColors: false,
+                  filter: (item: any) => item.datasetIndex !== 4,
                   boxWidth: 10,
                   boxHeight: 10,
                   callbacks: {
@@ -1889,91 +1898,29 @@ const MadridDashboardV2: React.FC = () => {
                         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
                       ];
                       const idx = items[0]?.dataIndex ?? 0;
-                      return `${monthNames[idx]} ${selectedYear} · Comparativa Superpuesta`;
+                      return `${monthNames[idx]} ${selectedYear}`;
                     },
                     label: (context: any) => {
-                      const idx = context.dataIndex;
                       const val = context.parsed.y;
-                      const unit = comparisonMetric.tooltipUnit;
-
-                      if (val === null || val === undefined) {
-                        return 'Sin datos registrados por el Ayuntamiento de Madrid para este periodo';
-                      }
-
-                      const valFormatted = new Intl.NumberFormat('es-ES', {
-                        minimumFractionDigits: comparisonMetric.decimals,
-                        maximumFractionDigits: 2
-                      }).format(val);
-
-                      // Si es la media de Madrid
-                      if (context.datasetIndex === 4) {
-                        return [
-                          `Media Madrid: ${valFormatted} ${unit}`,
-                          `Media estadística de Madrid (no es dato oficial si es estimación)`
-                        ];
-                      }
-
-                      const isZoneA = context.datasetIndex === 0 || context.datasetIndex === 1;
-                      const currentZone = isZoneA ? selectedZoneA : selectedZoneB;
-                      const otherZone = isZoneA ? selectedZoneB : selectedZoneA;
-                      const currentDataset = isZoneA ? seriesA : seriesB;
-                      const otherDataset = isZoneA ? seriesB : seriesA;
-
-                      const found = currentDataset.find(d => d.mes === idx + 1);
-                      const isPred = context.datasetIndex === 1 || context.datasetIndex === 3 || (found ? Boolean(found.is_prediction) : false);
-                      const tipoDato = isPred ? 'Estimación' : 'Dato real';
-
-                      const lines: string[] = [
-                        `${currentZone}: ${valFormatted} ${unit} (${tipoDato})`
-                      ];
-
-                      // Variación vs mes anterior en esta zona
-                      if (idx > 0) {
-                        const prevVal = context.dataset.data[idx - 1];
-                        if (prevVal !== null && prevVal !== undefined && prevVal > 0) {
-                          const diffPrev = ((val - prevVal) / prevVal) * 100;
-                          const absDiff = Math.abs(diffPrev).toFixed(1);
-                          if (diffPrev > 0.08) {
-                            lines.push(`Variación mes anterior: Subida del ${absDiff}%`);
-                          } else if (diffPrev < -0.08) {
-                            lines.push(`Variación mes anterior: Bajada del ${absDiff}%`);
-                          } else {
-                            lines.push(`Variación mes anterior: Sin variación (0.0%)`);
-                          }
-                        }
-                      }
-
-                      // Comparar con la otra zona
-                      const otherItem = otherDataset.find(d => d.mes === idx + 1);
-                      const otherVal = otherItem ? otherItem.precio_m2 * comparisonMetric.multiplier : null;
-                      if (otherVal !== null && otherVal > 0) {
-                        const diffOther = ((val - otherVal) / otherVal) * 100;
-                        const absDiffOther = Math.abs(diffOther).toFixed(1);
-                        if (diffOther > 0) {
-                          lines.push(`Comparativa con ${otherZone}: Un ${absDiffOther}% más caro`);
-                        } else if (diffOther < 0) {
-                          lines.push(`Comparativa con ${otherZone}: Un ${absDiffOther}% más barato`);
-                        } else {
-                          lines.push(`Comparativa con ${otherZone}: Mismo nivel de precio`);
-                        }
-                      }
-
-                      // Comparativa con la media de Madrid
-                      const madridItem = effMad.find(d => d.mes === idx + 1);
-                      const madridVal = madridItem ? madridItem.precio_m2 * comparisonMetric.multiplier : null;
-                      if (madridVal !== null && madridVal > 0) {
-                        const diffMadrid = ((val - madridVal) / madridVal) * 100;
-                        const absDiffMadrid = Math.abs(diffMadrid).toFixed(1);
-                        if (Math.abs(diffMadrid) <= 2) {
-                          lines.push(`Comparativa Madrid: En la media general`);
-                        } else if (diffMadrid > 0) {
-                          lines.push(`Comparativa Madrid: Un ${absDiffMadrid}% superior a la media`);
-                        } else {
-                          lines.push(`Comparativa Madrid: Un ${absDiffMadrid}% por debajo de la media`);
-                        }
-                      }
-
-                      return lines;
+                      if (val === null || val === undefined) return null;
+                      const isZoneA = context.datasetIndex < 2;
+                      const source = isZoneA ? effA : effB;
+                      const point = source.find(item => item.mes === context.dataIndex + 1);
+                      const isEstimate = context.datasetIndex % 2 === 1 || Boolean(point?.is_prediction);
+                      const formatted = new Intl.NumberFormat('es-ES', { minimumFractionDigits: comparisonMetric.decimals, maximumFractionDigits: comparisonMetric.decimals }).format(val);
+                      return `${isZoneA ? 'A' : 'B'} · ${isZoneA ? formatZoneOption(selectedZoneA) : formatZoneOption(selectedZoneB)} · ${isEstimate ? 'Est.' : 'Real'}: ${formatted} ${comparisonMetric.tooltipUnit}`;
+                    },
+                    footer: (items: any[]) => {
+                      const index = items[0]?.dataIndex;
+                      if (index === undefined) return [];
+                      const datasets = items[0].chart.data.datasets;
+                      const valueA = datasets[0]?.data[index] ?? datasets[1]?.data[index];
+                      const valueB = datasets[2]?.data[index] ?? datasets[3]?.data[index];
+                      if (valueA === null || valueA === undefined || valueB === null || valueB === undefined || !Number(valueB)) return [];
+                      const difference = Number(valueA) - Number(valueB);
+                      const percent = difference / Number(valueB) * 100;
+                      const format = (value: number) => new Intl.NumberFormat('es-ES', { minimumFractionDigits: comparisonMetric.decimals, maximumFractionDigits: comparisonMetric.decimals }).format(value);
+                      return [`Dif. A–B: ${difference > 0 ? '+' : ''}${format(difference)} ${comparisonMetric.tooltipUnit} (${percent > 0 ? '+' : ''}${percent.toFixed(1)}%)`];
                     }
                   }
                 }
@@ -4323,15 +4270,15 @@ const MadridDashboardV2: React.FC = () => {
 
                 <div className="v2-overlay-wrapper">
                   <div className="v2-overlay-header">
-                    <span>Ver comparativa superpuesta</span>
+                    <span>Comparativa · A {formatZoneOption(selectedZoneA)} · B {formatZoneOption(selectedZoneB)}</span>
+                    <div className="v2-compare-legend" aria-label="Leyenda del gráfico">
+                      <span><i className="zone-a" />A</span><span><i className="zone-b" />B</span><span><i className="real" />Real</span><span><i className="estimated" />Est.</span><span><i className="madrid" />Media</span>
+                    </div>
                   </div>
                   <div className="v2-overlay-body">
                     <div className="v2-chart-wrap large">
                       <ChartZoomControls chartId={`v2-overlay-${p.id}`} />
                       <canvas id={`v2-overlay-${p.id}`}></canvas>
-                    </div>
-                    <div className="v2-compare-legend" aria-label="Leyenda del gráfico">
-                      <span><i className="real" />Real</span><span><i className="estimated" />Estimado</span><span><i className="madrid" />Media Madrid</span>
                     </div>
                     {p.id === 'alquiler' && (() => {
                       const priceA = Number(kpiDataA.precio_m2) || 0;
