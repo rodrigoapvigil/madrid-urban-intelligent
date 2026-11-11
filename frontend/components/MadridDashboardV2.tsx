@@ -2503,7 +2503,7 @@ const MadridDashboardV2: React.FC = () => {
         {PROFILES.map((profile, index) => {
           const ProfileIcon = [Home, Building2, Tag, Activity][index];
           return (
-            <button key={profile.id} type="button" className={profileIdx === index ? 'active' : ''} aria-pressed={profileIdx === index} onClick={() => handleProfileChange(index)}>
+            <button key={profile.id} type="button" className={profileIdx === index ? 'active' : ''} aria-current={profileIdx === index ? 'page' : undefined} aria-pressed={profileIdx === index} onClick={() => handleProfileChange(index)}>
               <ProfileIcon size={17} aria-hidden="true" />
               <span>{profile.label}</span>
             </button>
