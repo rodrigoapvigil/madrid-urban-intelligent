@@ -3190,16 +3190,19 @@
   .v2-rent-real { display: flex; align-items: center; gap: 7px; color: #baccd6; font-size: 11px; }
   .v2-rent-real i { width: 7px; height: 7px; border-radius: 50%; background: #00e5ee; }
   .v2-rent-hero .v2-info-tooltip-trigger { width: 44px !important; height: 44px !important; justify-content: center; }
-  .v2-rent-hero .v2-info-tooltip-trigger > button { width: 18px !important; height: 18px !important; background: transparent !important; color: #baccd6 !important; border-color: rgba(186,204,214,.45) !important; }
+  .v2-rent-hero .v2-info-tooltip-trigger > button {
+    width: 30px !important; height: 30px !important; border: 1px solid rgba(0,229,238,.58) !important;
+    border-radius: 50% !important; background: rgba(0,229,238,.13) !important; color: #8ff7ff !important;
+    font-size: 15px !important; box-shadow: 0 0 18px rgba(0,229,238,.12); transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+  }
+  .v2-rent-hero .v2-info-tooltip-trigger > button:hover,
+  .v2-rent-hero .v2-info-tooltip-trigger > button:focus-visible { background: rgba(0,229,238,.24) !important; transform: scale(1.06); box-shadow: 0 0 20px rgba(0,229,238,.22); }
   .v2-rent-main-value { display: flex; align-items: baseline; gap: 6px; margin-top: 18px; white-space: nowrap; }
   .v2-rent-main-value strong { color: #fff; font-size: clamp(44px, 13vw, 56px); font-weight: 700; letter-spacing: -.045em; line-height: 1; }
   .v2-rent-main-value span { color: rgba(255,255,255,.58); font-size: 20px; font-weight: 500; }
   .v2-rent-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 16px; }
   .v2-rent-chips > span { padding: 5px 9px; border-radius: 999px; background: rgba(255,255,255,.08); color: #d3e2e8; font-size: 12px; font-weight: 650; }
   .v2-rent-chips > .v2-rent-market { background: rgba(0,229,238,.12); color: #9cecf0; }
-  .v2-rent-sparkline { height: 40px; margin-top: 13px; opacity: .75; }
-  .v2-rent-sparkline svg { display: block; width: 100%; height: 100%; overflow: visible; }
-  .v2-rent-sparkline polyline { fill: none; stroke: #00e5ee; stroke-width: 1.5; vector-effect: non-scaling-stroke; stroke-linecap: round; stroke-linejoin: round; }
   .v2-rent-secondary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .v2-rent-secondary-card { min-width: 0; padding: 17px 15px; border: 0; border-radius: 18px; background: rgba(255,255,255,.045); }
   .v2-rent-secondary-card > strong { display: block; margin-top: 9px; color: #fff; font-size: clamp(17px, 5vw, 21px); font-weight: 700; white-space: nowrap; }

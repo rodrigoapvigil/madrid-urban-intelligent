@@ -2427,17 +2427,6 @@ const MadridDashboardV2: React.FC = () => {
                 <div className="v2-kpi-stack">
 
                   {activeProfile.id === 'alquiler' && (() => {
-                    const points = seriesMadrid
-                      .filter(point => point && Number.isFinite(Number(point.precio_m2)))
-                      .slice(-12);
-                    const values = points.map(point => Number(point.precio_m2));
-                    const low = values.length ? Math.min(...values) : 0;
-                    const high = values.length ? Math.max(...values) : 1;
-                    const sparkline = values.map((value, index) => {
-                      const x = values.length < 2 ? 0 : (index / (values.length - 1)) * 100;
-                      const y = 30 - ((value - low) / Math.max(1, high - low)) * 24;
-                      return `${x},${y}`;
-                    }).join(' ');
                     const rent = kpiData.p_vivienda || 0;
                     const incomeMonthly = (kpiData.renta_media || 0) / 12;
                     const effort = incomeMonthly > 0 ? (rent / incomeMonthly) * 100 : 0;
@@ -2468,9 +2457,6 @@ const MadridDashboardV2: React.FC = () => {
                             <span>{Number(kpiData.v_mes || 0) < 0 ? '↘' : '↗'} {kpiData.v_mes > 0 ? '+' : ''}{Number(kpiData.v_mes || 0).toFixed(1)}% mes</span>
                             <span>{Number(kpiData.v_anual || 0) < 0 ? '↘' : '↗'} {kpiData.v_anual > 0 ? '+' : ''}{Number(kpiData.v_anual || 0).toFixed(1)}% año</span>
                             <span className="v2-rent-market">{kpiData.estado_mercado || 'Mercado estable'}</span>
-                          </div>
-                          <div className="v2-rent-sparkline" aria-label="Evolución de los últimos doce meses">
-                            <svg viewBox="0 0 100 34" preserveAspectRatio="none" role="img"><polyline points={sparkline} /></svg>
                           </div>
                         </section>
                         <section className="v2-rent-secondary">
