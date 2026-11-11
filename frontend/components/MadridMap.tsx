@@ -12,6 +12,8 @@ interface MapProps {
   selectedProfile: string;
   selectedDistrict: string | null;
   selectedBarrio?: string | null;
+  compareZoneA?: string;
+  compareZoneB?: string;
   onDistrictClick: (districtName: string | null) => void;
   onBarrioClick?: (barrioName: string | null) => void;
 }
@@ -218,7 +220,7 @@ let cachedBarriosGeoJson: any = null;
 
 const MadridMap: React.FC<MapProps> = ({ 
   type, data, selectedYear, selectedMonth, selectedProfile, 
-  selectedDistrict, selectedBarrio, onDistrictClick, onBarrioClick
+  selectedDistrict, selectedBarrio, compareZoneA, compareZoneB, onDistrictClick, onBarrioClick
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
@@ -250,6 +252,8 @@ const MadridMap: React.FC<MapProps> = ({
     const isSelected = type === 'districts'
       ? Boolean(selectedDistrict && normalize(name) === normalize(selectedDistrict))
       : Boolean(selectedBarrio && normalize(name) === normalize(selectedBarrio));
+    const isCompareA = Boolean(compareZoneA && normalize(name) === normalize(compareZoneA));
+    const isCompareB = Boolean(compareZoneB && normalize(name) === normalize(compareZoneB));
 
     const item = data.find(d => {
       const dName = normalize(type === 'districts' ? d.distrito : d.barrio);
@@ -265,13 +269,13 @@ const MadridMap: React.FC<MapProps> = ({
     const tier = getChoroplethTier(val, selectedProfile);
     return {
       // Use five solid choropleth steps so the map reads as data, not texture.
-      fillColor: isSelected ? '#00F0FF' : item ? TIER_CONFIGS[tier].baseFill : `url(#no-data-pat-${type})`,
-      weight: isSelected ? 2.5 : type === 'districts' ? 1.2 : 0.85,
+      fillColor: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#00F0FF' : item ? TIER_CONFIGS[tier].baseFill : `url(#no-data-pat-${type})`,
+      weight: isCompareA || isCompareB ? 2.5 : isSelected ? 2.5 : type === 'districts' ? 1.2 : 0.85,
       opacity: isExcluded ? 0.20 : 0.95,
-      color: isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
+      color: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
       fillOpacity: isExcluded ? 0.25 : 1.0,
     };
-  }, [data, selectedDistrict, selectedBarrio, type, selectedProfile]);
+  }, [data, selectedDistrict, selectedBarrio, type, selectedProfile, compareZoneA, compareZoneB]);
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -416,9 +420,9 @@ const MadridMap: React.FC<MapProps> = ({
             click: () => {
               if (type === 'districts') {
                 const targetName = districtName;
-                onDistrictClick(normalize(targetName) === normalize(selectedDistrict) ? null : targetName);
+                onDistrictClick(compareZoneA !== undefined ? targetName : normalize(targetName) === normalize(selectedDistrict) ? null : targetName);
               } else if (onBarrioClick) {
-                onBarrioClick(normalize(name) === normalize(selectedBarrio) ? null : name);
+                onBarrioClick(compareZoneA !== undefined ? name : normalize(name) === normalize(selectedBarrio) ? null : name);
               }
             }
           });

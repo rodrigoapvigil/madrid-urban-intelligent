@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { cssColorResolverPlugin, colorWithAlpha, resolveCssColor } from '../lib/colors';
-import { Activity, Building2, ChevronDown, Database, Home, MapPinned, RotateCcw, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Activity, Building2, ChevronDown, Database, Home, MapPinned, Maximize2, RotateCcw, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
 import './MadridDashboardV2.css';
 import { apiFetch } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
@@ -65,11 +65,104 @@ const updateChartZoom = (canvasId: string, action: 'in' | 'out' | 'reset') => {
   chart.update('none');
 };
 
+const FullscreenToggle = ({ targetSelector, chartId }: { targetSelector?: string; chartId?: string }) => {
+  const [expanded, setExpanded] = useState(false);
+  const [toolbarRevision, setToolbarRevision] = useState(0);
+  const targetRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!expanded || !targetRef.current) return;
+    const target = targetRef.current;
+    const oldOverflow = document.body.style.overflow;
+    target.classList.add('v2-is-fullscreen');
+    document.body.classList.add('v2-fullscreen-open');
+    document.body.style.overflow = 'hidden';
+    window.history.pushState({ v2Fullscreen: true }, '', `${window.location.pathname}${window.location.search}#pantalla-completa`);
+    const chart = chartId ? ChartJS.getChart(chartId) as any : null;
+    if (chart && !chart.$v2FullscreenOriginal) {
+      chart.$v2FullscreenOriginal = {
+        labels: [...(chart.data.labels || [])],
+        datasets: chart.data.datasets.map((dataset: any) => ({ ...dataset, data: [...(dataset.data || [])] })),
+      };
+    }
+    window.setTimeout(() => chart?.resize(), 80);
+    const onBack = () => setExpanded(false);
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') window.history.back(); };
+    window.addEventListener('popstate', onBack);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      target.classList.remove('v2-is-fullscreen');
+      document.body.classList.remove('v2-fullscreen-open');
+      document.body.style.overflow = oldOverflow;
+      window.removeEventListener('popstate', onBack);
+      window.removeEventListener('keydown', onKey);
+      window.setTimeout(() => chart?.resize(), 80);
+    };
+  }, [expanded, chartId]);
+
+  const close = () => window.history.back();
+  const exportCsv = () => {
+    const chart = chartId ? ChartJS.getChart(chartId) as any : null;
+    let rows: string[][] = [];
+    if (chart) {
+      rows = [['Periodo', ...chart.data.datasets.map((dataset: any) => dataset.label || 'Serie')], ...(chart.data.labels || []).map((label: any, index: number) => [String(label), ...chart.data.datasets.map((dataset: any) => String(dataset.data?.[index] ?? ''))])];
+    } else {
+      const table = targetRef.current?.querySelector('table');
+      rows = table ? Array.from(table.rows).map(row => Array.from(row.cells).map(cell => cell.innerText.trim())) : [];
+    }
+    if (!rows.length) return;
+    const csv = rows.map(row => row.map(value => `"${value.replace(/"/g, '""')}"`).join(',')).join('\r\n');
+    const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a'); link.href = url; link.download = `${chartId || 'datos-dashboard'}.csv`; link.click(); URL.revokeObjectURL(url);
+  };
+  const exportPng = () => {
+    const chart = chartId ? ChartJS.getChart(chartId) as any : null;
+    if (chart) {
+      const link = document.createElement('a'); link.href = chart.toBase64Image('image/png', 1); link.download = `${chartId}.png`; link.click(); return;
+    }
+    const table = targetRef.current?.querySelector('table');
+    if (!table) return;
+    const rows = Array.from(table.rows).map(row => Array.from(row.cells).map(cell => cell.innerText.trim()));
+    const widths = Math.max(...rows.map(row => row.length), 1);
+    const canvas = document.createElement('canvas'); canvas.width = Math.max(720, widths * 120); canvas.height = Math.max(180, rows.length * 34 + 32);
+    const context = canvas.getContext('2d'); if (!context) return;
+    context.fillStyle = '#06162d'; context.fillRect(0, 0, canvas.width, canvas.height); context.font = '14px sans-serif';
+    rows.forEach((row, rowIndex) => row.forEach((value, colIndex) => { context.fillStyle = rowIndex === 0 ? '#00e5ee' : '#eaf5ff'; context.fillText(value.slice(0, 32), 14 + colIndex * 120, 26 + rowIndex * 34); }));
+    const link = document.createElement('a'); link.href = canvas.toDataURL('image/png'); link.download = 'tabla-dashboard.png'; link.click();
+  };
+  const setRange = (range: '6M' | '12M' | 'Todo') => {
+    const chart = chartId ? ChartJS.getChart(chartId) as any : null;
+    if (!chart?.$v2FullscreenOriginal) return;
+    const original = chart.$v2FullscreenOriginal;
+    const count = range === '6M' ? 6 : range === '12M' ? 12 : original.labels.length;
+    chart.data.labels = original.labels.slice(-count);
+    chart.data.datasets = original.datasets.map((dataset: any) => ({ ...dataset, data: dataset.data.slice(-count) }));
+    chart.update('none'); setToolbarRevision(value => value + 1);
+  };
+  const chart = chartId ? ChartJS.getChart(chartId) as any : null;
+  const open = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const scope = event.currentTarget.closest('.v2-panel') || document;
+    targetRef.current = (targetSelector ? scope.querySelector(targetSelector) : event.currentTarget.closest('.v2-chart-card, .v2-overlay-wrapper')) as HTMLElement | null;
+    if (targetRef.current) setExpanded(true);
+  };
+
+  return <div className="v2-fullscreen-control">
+    <button type="button" className="v2-expand-button" aria-label={expanded ? 'Cerrar pantalla completa' : 'Ampliar a pantalla completa'} title={expanded ? 'Cerrar' : 'Pantalla completa'} onClick={expanded ? close : open}>{expanded ? <X size={17} /> : <Maximize2 size={17} />}</button>
+    {expanded && <div className="v2-fullscreen-toolbar" role="toolbar" aria-label="Herramientas de pantalla completa">
+      {chartId && <div className="v2-fullscreen-ranges">{(['6M', '12M', 'Todo'] as const).map(range => <button key={range} type="button" onClick={() => setRange(range)}>{range}</button>)}</div>}
+      {chart?.data.datasets.map((dataset: any, index: number) => <button key={`${dataset.label}-${index}`} type="button" className="v2-fullscreen-series" aria-pressed={chart.isDatasetVisible(index)} onClick={() => { chart.setDatasetVisibility(index, !chart.isDatasetVisible(index)); chart.update('none'); setToolbarRevision(value => value + 1); }}><i style={{ background: dataset.borderColor || dataset.backgroundColor }} />{dataset.label}</button>)}
+      <button type="button" onClick={exportPng}>PNG</button><button type="button" onClick={exportCsv}>CSV</button>
+      <span hidden>{toolbarRevision}</span>
+    </div>}
+  </div>;
+};
+
 const ChartZoomControls = ({ chartId }: { chartId: string }) => (
   <div className="v2-chart-controls" role="group" aria-label="Controles de zoom de la gráfica">
     <button type="button" title="Acercar" aria-label="Acercar gráfica" onClick={() => updateChartZoom(chartId, 'in')}><ZoomIn size={17} /></button>
     <button type="button" title="Alejar" aria-label="Alejar gráfica" onClick={() => updateChartZoom(chartId, 'out')}><ZoomOut size={17} /></button>
     <button type="button" title="Restablecer vista" aria-label="Restablecer zoom de la gráfica" onClick={() => updateChartZoom(chartId, 'reset')}><RotateCcw size={16} /></button>
+    <FullscreenToggle chartId={chartId} />
   </div>
 );
 
@@ -668,6 +761,7 @@ const MadridDashboardV2: React.FC = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [mapLevel, setMapLevel] = useState<'districts' | 'neighborhoods'>('districts');
+  const [selectedMapFeature, setSelectedMapFeature] = useState<string | null>(null);
   const [draftFilters, setDraftFilters] = useState({ year: '', month: '', district: 'Todos', barrio: 'Todos' });
   const [draftBarrios, setDraftBarrios] = useState<string[]>(['Todos']);
   const [selectedYear, setSelectedYear] = useState('');
@@ -677,6 +771,8 @@ const MadridDashboardV2: React.FC = () => {
   const [selectedBarrio, setSelectedBarrio] = useState('Todos');
   const [selectedZoneA, setSelectedZoneA] = useState('Salamanca');
   const [selectedZoneB, setSelectedZoneB] = useState('Centro');
+  const [compareMapTarget, setCompareMapTarget] = useState<'A' | 'B'>('A');
+  const [compareDisplay, setCompareDisplay] = useState<'overlay' | 'A' | 'B'>('overlay');
 
   // State: Dynamic Options
   const [availableYears, setAvailableYears] = useState<string[]>(['2023', '2024', '2025']);
@@ -3271,7 +3367,7 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
 
                   <div className="v2-mobile-map-switch" role="group" aria-label="Nivel del mapa">
-                    <button type="button" className={mapLevel === 'districts' ? 'active' : ''} aria-pressed={mapLevel === 'districts'} onClick={() => setMapLevel('districts')}>Distritos</button>
+                    <button type="button" className={mapLevel === 'districts' ? 'active' : ''} aria-pressed={mapLevel === 'districts'} onClick={() => { setMapLevel('districts'); setSelectedMapFeature(null); }}>Distritos</button>
                     <button type="button" className={mapLevel === 'neighborhoods' ? 'active' : ''} aria-pressed={mapLevel === 'neighborhoods'} onClick={() => setMapLevel('neighborhoods')}>Barrios</button>
                   </div>
                   <div className="v2-dual-maps">
@@ -3287,7 +3383,7 @@ const MadridDashboardV2: React.FC = () => {
                           selectedProfile={activeProfile.label}
                           selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
                           selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
-                          onDistrictClick={(d) => { setSelectedDistrict(d || 'Todos'); setSelectedBarrio('Todos'); }}
+                          onDistrictClick={(d) => { setSelectedDistrict(d || 'Todos'); setSelectedBarrio('Todos'); setMapLevel(d ? 'neighborhoods' : 'districts'); setSelectedMapFeature(d); }}
                         />
                       </div>
                     </div>
@@ -3303,12 +3399,17 @@ const MadridDashboardV2: React.FC = () => {
                           selectedProfile={activeProfile.label}
                           selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
                           selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
-                          onDistrictClick={(d) => { setSelectedDistrict(d || 'Todos'); setSelectedBarrio('Todos'); }}
-                          onBarrioClick={(b) => setSelectedBarrio(b || 'Todos')}
+                          onDistrictClick={(d) => { setSelectedDistrict(d || 'Todos'); setSelectedBarrio('Todos'); setMapLevel(d ? 'neighborhoods' : 'districts'); setSelectedMapFeature(d); }}
+                          onBarrioClick={(b) => { setSelectedBarrio(b || 'Todos'); setSelectedMapFeature(b); }}
                         />
                       </div>
                     </div>
                   </div>
+                  {selectedMapFeature && <div className="v2-map-bottom-sheet" role="status">
+                    <div><strong>{selectedMapFeature}</strong><span>{selectedBarrio !== 'Todos' ? 'Barrio seleccionado en los filtros' : 'Distrito seleccionado · mapa ampliado a sus barrios'}</span></div>
+                    <button type="button" onClick={() => { setSelectedMapFeature(null); setSelectedBarrio('Todos'); setSelectedDistrict('Todos'); setMapLevel('districts'); }}>Ver Madrid</button>
+                    <button type="button" className="v2-map-sheet-close" aria-label="Cerrar ficha" onClick={() => setSelectedMapFeature(null)}>×</button>
+                  </div>}
                   <div className="v2-map-legend" aria-label="Leyenda del mapa por precio por metro cuadrado">
                     <div className="v2-map-legend-title">Intensidad de precio · {activeProfile.id === 'inversion' ? '%' : activeProfile.id === 'venta' || activeProfile.id === 'compra' ? '€ / m²' : '€/m²'}</div>
                     <div className="v2-map-legend-scale" aria-label="Tramos de la escala de color">
@@ -3363,6 +3464,7 @@ const MadridDashboardV2: React.FC = () => {
 
               {/* COL 2: AFFORDABILITY / RENTABILITY / DEMAND RANKINGS */}
               <div className="v2-explorer-col v2-rankings-stack" data-dashboard-section="ranking" style={{ minWidth: '260px' }}>
+                <FullscreenToggle targetSelector=".v2-rankings-stack" />
                 {activeProfile.id === 'venta' ? (
                   <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
                     <div className="v2-rank-head" style={{ marginBottom: '16px' }}>
@@ -3469,6 +3571,7 @@ const MadridDashboardV2: React.FC = () => {
                 <div className="v2-heatmap-card">
                   <div className="v2-heatmap-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
                     <span>{activeProfile.id === 'inversion' ? 'Evolución mensual de rentabilidad (%)' : activeProfile.id === 'alquiler' ? 'Evolución mensual del alquiler (€/m²)' : 'Evolución mensual de venta (€/m²)'}</span>
+                    <FullscreenToggle targetSelector=".v2-heatmap-card" />
                     <button
                       onClick={() => setShowHeatmapHelpModal(true)}
                       style={{
@@ -3744,7 +3847,36 @@ const MadridDashboardV2: React.FC = () => {
                 </div>
               </div>
 
-              <div className="v2-compare-viewport">
+              <div className="v2-compare-viewport" data-compare-view={compareDisplay}>
+                <div className="v2-compare-map-panel">
+                  <div className="v2-compare-map-heading">Selecciona zonas en el mapa</div>
+                  <div className="v2-compare-map-target" role="group" aria-label="Zona que se asignará al tocar el mapa">
+                    <button type="button" className={compareMapTarget === 'A' ? 'active zone-a' : 'zone-a'} onClick={() => setCompareMapTarget('A')}>A · {formatZoneOption(selectedZoneA)}</button>
+                    <button type="button" className={compareMapTarget === 'B' ? 'active zone-b' : 'zone-b'} onClick={() => setCompareMapTarget('B')}>B · {formatZoneOption(selectedZoneB)}</button>
+                  </div>
+                  <div className="v2-compare-map-canvas">
+                    <MadridMap
+                      type={compareLevel === 'Distritos' ? 'districts' : 'neighborhoods'}
+                      data={compareLevel === 'Distritos' ? mapData.districts : mapData.neighborhoods}
+                      selectedYear={Number(selectedYear)} selectedMonth={selectedMonth} selectedProfile={activeProfile.label}
+                      selectedDistrict={null} selectedBarrio={null}
+                      compareZoneA={selectedZoneA} compareZoneB={selectedZoneB}
+                      onDistrictClick={(zone) => {
+                        if (!zone) return;
+                        if (compareMapTarget === 'A') { setSelectedZoneA(zone); setCompareMapTarget('B'); }
+                        else setSelectedZoneB(zone);
+                      }}
+                      onBarrioClick={(zone) => {
+                        if (!zone) return;
+                        if (compareMapTarget === 'A') { setSelectedZoneA(zone); setCompareMapTarget('B'); }
+                        else setSelectedZoneB(zone);
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="v2-compare-view-tabs" role="tablist" aria-label="Vista de la comparación">
+                  {(['overlay', 'A', 'B'] as const).map(view => <button key={view} type="button" role="tab" aria-selected={compareDisplay === view} className={compareDisplay === view ? 'active' : ''} onClick={() => setCompareDisplay(view)}>{view === 'overlay' ? 'Superpuesto' : `Zona ${view}`}</button>)}
+                </div>
                 <div className="v2-compare-grid">
                   {/* ZONA A (IZQ) */}
                   <div className="v2-comp-col zone-a">
