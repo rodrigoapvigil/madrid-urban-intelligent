@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -163,7 +163,7 @@ const TIER_CONFIGS: TierConfig[] = [
   },
 ];
 
-function getPatternDefsMarkup(type: string): string {
+function getPatternDefsMarkup(instanceId: string): string {
   const profiles: ('alquiler' | 'compra' | 'venta' | 'inversion')[] = ['alquiler', 'compra', 'venta', 'inversion'];
   let markup = '';
 
@@ -178,37 +178,37 @@ function getPatternDefsMarkup(type: string): string {
         ? `<circle cx="${p1}" cy="${p1}" r="${(r * 0.5).toFixed(2)}" fill="#ffffff" /><circle cx="${p2}" cy="${p2}" r="${(r * 0.5).toFixed(2)}" fill="#ffffff" />`
         : '';
 
-      markup += `<pattern id="dot-pat-${type}-${prof}-${index}" width="${s}" height="${s}" patternUnits="userSpaceOnUse"><rect width="${s}" height="${s}" fill="${tier.baseFill}" fill-opacity="0.94" /><circle cx="${p1}" cy="${p1}" r="${r}" fill="${c}" /><circle cx="${p2}" cy="${p2}" r="${r}" fill="${c}" />${glowHtml}</pattern>`;
+      markup += `<pattern id="dot-pat-${instanceId}-${prof}-${index}" width="${s}" height="${s}" patternUnits="userSpaceOnUse"><rect width="${s}" height="${s}" fill="${tier.baseFill}" fill-opacity="0.94" /><circle cx="${p1}" cy="${p1}" r="${r}" fill="${c}" /><circle cx="${p2}" cy="${p2}" r="${r}" fill="${c}" />${glowHtml}</pattern>`;
     });
   }
 
   // Explicit pattern for areas without an observation in the selected period.
-  markup += `<pattern id="no-data-pat-${type}" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#17263b" /><path d="M-2 2L2-2M0 8L8 0M6 10L10 6" stroke="#71859a" stroke-width="1" opacity="0.65" /></pattern>`;
+  markup += `<pattern id="no-data-pat-${instanceId}" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#17263b" /><path d="M-2 2L2-2M0 8L8 0M6 10L10 6" stroke="#71859a" stroke-width="1" opacity="0.65" /></pattern>`;
 
   // Hover pattern
-  markup += `<pattern id="dot-pat-${type}-hover" width="5.0" height="5.0" patternUnits="userSpaceOnUse"><rect width="5.0" height="5.0" fill="#003566" fill-opacity="0.96" /><circle cx="1.25" cy="1.25" r="2.0" fill="#00f0ff" /><circle cx="1.25" cy="1.25" r="1.0" fill="#ffffff" /><circle cx="3.75" cy="3.75" r="2.0" fill="#00f0ff" /><circle cx="3.75" cy="3.75" r="1.0" fill="#ffffff" /></pattern>`;
+  markup += `<pattern id="dot-pat-${instanceId}-hover" width="5.0" height="5.0" patternUnits="userSpaceOnUse"><rect width="5.0" height="5.0" fill="#003566" fill-opacity="0.96" /><circle cx="1.25" cy="1.25" r="2.0" fill="#00f0ff" /><circle cx="1.25" cy="1.25" r="1.0" fill="#ffffff" /><circle cx="3.75" cy="3.75" r="2.0" fill="#00f0ff" /><circle cx="3.75" cy="3.75" r="1.0" fill="#ffffff" /></pattern>`;
 
   // Selected pattern
-  markup += `<pattern id="dot-pat-${type}-selected" width="4.6" height="4.6" patternUnits="userSpaceOnUse"><rect width="4.6" height="4.6" fill="#004680" fill-opacity="0.98" /><circle cx="1.15" cy="1.15" r="2.1" fill="#00f0ff" /><circle cx="1.15" cy="1.15" r="1.05" fill="#ffffff" /><circle cx="3.45" cy="3.45" r="2.1" fill="#00f0ff" /><circle cx="3.45" cy="3.45" r="1.05" fill="#ffffff" /></pattern>`;
+  markup += `<pattern id="dot-pat-${instanceId}-selected" width="4.6" height="4.6" patternUnits="userSpaceOnUse"><rect width="4.6" height="4.6" fill="#004680" fill-opacity="0.98" /><circle cx="1.15" cy="1.15" r="2.1" fill="#00f0ff" /><circle cx="1.15" cy="1.15" r="1.05" fill="#ffffff" /><circle cx="3.45" cy="3.45" r="2.1" fill="#00f0ff" /><circle cx="3.45" cy="3.45" r="1.05" fill="#ffffff" /></pattern>`;
 
   return markup;
 }
 
-function injectPatternsIntoLeaflet(map: L.Map | null, type: string) {
+function injectPatternsIntoLeaflet(map: L.Map | null, instanceId: string) {
   if (!map) return;
   try {
     const pane = map.getPanes().overlayPane;
     const svg = pane?.querySelector('svg');
     if (!svg) return;
 
-    const defsId = `defs-leaflet-${type}`;
+    const defsId = `defs-leaflet-${instanceId}`;
     let defs = svg.querySelector(`#${defsId}`);
     if (!defs) {
       defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
       defs.setAttribute('id', defsId);
       svg.insertBefore(defs, svg.firstChild);
     }
-    defs.innerHTML = getPatternDefsMarkup(type);
+    defs.innerHTML = getPatternDefsMarkup(instanceId);
   } catch (err) {
     console.warn('SVG defs injection error:', err);
   }
@@ -269,7 +269,7 @@ const MadridMap: React.FC<MapProps> = ({
     const tier = getChoroplethTier(val, selectedProfile);
     return {
       // Use five solid choropleth steps so the map reads as data, not texture.
-      fillColor: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#00F0FF' : item ? TIER_CONFIGS[tier].baseFill : `url(#no-data-pat-${type})`,
+      fillColor: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#00F0FF' : item ? TIER_CONFIGS[tier].baseFill : `url(#no-data-pat-${containerId})`,
       weight: isCompareA || isCompareB ? 2.5 : isSelected ? 2.5 : type === 'districts' ? 1.2 : 0.85,
       opacity: isExcluded ? 0.20 : 0.95,
       color: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
@@ -303,7 +303,35 @@ const MadridMap: React.FC<MapProps> = ({
     }
 
     const handleResize = () => {
-      mapRef.current?.invalidateSize();
+      const map = mapRef.current;
+      const container = document.getElementById(containerId);
+      if (!map || !container?.clientWidth || !container.clientHeight) return;
+      map.invalidateSize({ pan: false });
+      window.requestAnimationFrame(() => {
+        const layer = geoJsonLayerRef.current;
+        if (!layer || !mapRef.current) return;
+        let bounds = L.latLngBounds([]);
+        if (selectedBarrio && type === 'neighborhoods') {
+          layer.eachLayer((featureLayer: any) => {
+            const name = featureLayer.feature?.properties?.barrio || featureLayer.feature?.properties?.name;
+            if (name && normalize(name) === normalize(selectedBarrio)) bounds.extend(featureLayer.getBounds());
+          });
+        } else if (selectedDistrict) {
+          layer.eachLayer((featureLayer: any) => {
+            const props = featureLayer.feature?.properties || {};
+            const featureName = type === 'districts'
+              ? props.distrito || props.name || props.nombre || props.distrito_nombre
+              : props.distrito || props.nombre || props.name || props.distrito_nombre;
+            if (featureName && normalize(featureName) === normalize(selectedDistrict)) bounds.extend(featureLayer.getBounds());
+          });
+        }
+        if (!bounds.isValid()) {
+          bounds = type === 'districts'
+            ? L.latLngBounds([40.285, -3.890], [40.640, -3.470])
+            : layer.getBounds();
+        }
+        if (bounds.isValid()) mapRef.current.fitBounds(bounds, { padding: [12, 12], animate: false });
+      });
     };
 
     const container = document.getElementById(containerId);
@@ -408,7 +436,7 @@ const MadridMap: React.FC<MapProps> = ({
               l.setStyle({
                 weight: 2,
                 color: '#00F0FF',
-                fillColor: `url(#dot-pat-${type}-hover)`,
+                fillColor: `url(#dot-pat-${containerId}-hover)`,
                 fillOpacity: 1
               });
               l.openPopup();
@@ -430,7 +458,7 @@ const MadridMap: React.FC<MapProps> = ({
       }).addTo(mapRef.current!);
 
       // Inject pattern defs into the Leaflet overlay SVG
-      injectPatternsIntoLeaflet(mapRef.current, type);
+      injectPatternsIntoLeaflet(mapRef.current, containerId);
 
       // Zoom logic
       if (selectedBarrio && type === 'neighborhoods') {
@@ -477,26 +505,19 @@ const MadridMap: React.FC<MapProps> = ({
     };
   }, [type, data, selectedProfile, selectedDistrict, selectedBarrio, containerId, selectedMonth, selectedYear, onDistrictClick, onBarrioClick, style, accentColor]);
 
-  // Generate SVG defs for React DOM rendering
-  const svgDefsMarkup = useMemo(() => getPatternDefsMarkup(type), [type]);
-
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', borderRadius: '12px', overflow: 'hidden', background: '#011024', border: '1px solid rgba(186, 204, 214, 0.14)' }}>
-      {/* Hidden SVG with global pattern definitions */}
-      <svg 
-        style={{ position: 'absolute', width: 0, height: 0, pointerEvents: 'none', opacity: 0 }} 
-        aria-hidden="true"
-        dangerouslySetInnerHTML={{ __html: `<defs>${svgDefsMarkup}</defs>` }}
-      />
+    <div style={{ position: 'relative', width: '100%', height: '100%', minWidth: 0, minHeight: 0, borderRadius: '12px', overflow: 'hidden', background: 'transparent', border: 0 }}>
       <div 
         id={containerId} 
         style={{ 
           width: '100%', 
           height: '100%', 
-          background: '#011024' 
+          minWidth: 0,
+          minHeight: 0,
+          background: 'transparent'
         }} 
       />
-      <div style={{
+      <div className="v2-map-location-label" style={{
         position: 'absolute',
         bottom: '8px',
         left: '12px',

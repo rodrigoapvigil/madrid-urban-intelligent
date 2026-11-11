@@ -174,11 +174,11 @@ const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?:
 
   return <div className="v2-fullscreen-control">
     <button type="button" className={`v2-expand-button${label ? ' has-label' : ''}`} aria-label={expanded ? 'Cerrar pantalla completa' : label || 'Ampliar a pantalla completa'} title={expanded ? 'Cerrar' : label || 'Pantalla completa'} onClick={expanded ? close : open}>{expanded ? <X size={17} /> : <Maximize2 size={17} />}{!expanded && label && <span>{label}</span>}</button>
-    {expanded && <div className="v2-fullscreen-toolbar" role="toolbar" aria-label="Herramientas de pantalla completa">
+    {expanded && (chartId || targetRef.current?.querySelector('table')) && <div className="v2-fullscreen-toolbar" role="toolbar" aria-label="Herramientas de pantalla completa">
       {chartId && <div className="v2-fullscreen-zoom" role="group" aria-label="Zoom del gráfico"><button type="button" title="Acercar" aria-label="Acercar gráfica" onClick={() => updateChartZoom(chartId, 'in')}><ZoomIn size={16} /></button><button type="button" title="Alejar" aria-label="Alejar gráfica" onClick={() => updateChartZoom(chartId, 'out')}><ZoomOut size={16} /></button><button type="button" title="Restablecer vista" aria-label="Restablecer zoom de la gráfica" onClick={() => updateChartZoom(chartId, 'reset')}><RotateCcw size={15} /></button></div>}
       {chartId && <div className="v2-fullscreen-ranges">{(['6M', '12M', 'Todo'] as const).map(range => <button key={range} type="button" onClick={() => setRange(range)}>{range}</button>)}</div>}
       {chart?.data.datasets.map((dataset: any, index: number) => <button key={`${dataset.label}-${index}`} type="button" className="v2-fullscreen-series" aria-pressed={chart.isDatasetVisible(index)} onClick={() => { chart.setDatasetVisibility(index, !chart.isDatasetVisible(index)); chart.update('none'); setToolbarRevision(value => value + 1); }}><i style={{ background: dataset.borderColor || dataset.backgroundColor }} />{dataset.label}</button>)}
-      {(chartId || targetRef.current?.querySelector('table')) && <><button type="button" onClick={exportPng}>PNG</button><button type="button" onClick={exportCsv}>CSV</button></>}
+      <button type="button" onClick={exportPng}>PNG</button><button type="button" onClick={exportCsv}>CSV</button>
       <span hidden>{toolbarRevision}</span>
     </div>}
     {expanded && <div className="v2-fullscreen-rotate-hint" role="status"><RotateCw size={16} /><span>Gira el móvil para verlo mejor</span></div>}
@@ -3424,10 +3424,10 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                   <div className="v2-dual-maps">
                     <div className="v2-map-sub" data-map-level="districts">
-                      <span>Distritos</span>
+                      <span>Distritos · 21</span>
                       <div className="v2-map-placeholder" style={{ border: 'none' }}>
                         <MadridMap
-                          key={`districts-${mapLevel}`}
+                          key="districts-map"
                           type="districts"
                           data={mapData.districts}
                           selectedYear={Number(selectedYear)}
@@ -3440,10 +3440,10 @@ const MadridDashboardV2: React.FC = () => {
                       </div>
                     </div>
                     <div className="v2-map-sub" data-map-level="neighborhoods">
-                      <span>Barrios</span>
+                      <span>Barrios · 131</span>
                       <div className="v2-map-placeholder" style={{ border: 'none' }}>
                         <MadridMap
-                          key={`neighborhoods-${mapLevel}`}
+                          key="neighborhoods-map"
                           type="neighborhoods"
                           data={mapData.neighborhoods}
                           selectedYear={Number(selectedYear)}
