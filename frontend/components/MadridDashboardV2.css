@@ -849,7 +849,7 @@
   .v2-mobile-filter-chips { display: flex; min-width: 0; gap: 5px; overflow-x: auto; }
   .v2-mobile-filter-chips button { min-height: 32px; padding: 0 9px; border: 1px solid rgba(186,204,214,.25); border-radius: 999px; background: rgba(255,255,255,.06); color: #fff; white-space: nowrap; font-size: 12px; }
   .v2-mobile-filter-trigger b { min-width: 19px; height: 19px; display: grid; place-items: center; border-radius: 50%; background: #00e5ee; color: #03172b; font-size: 11px; }
-  .v2-mobile-section-nav { position: sticky; top: 126px; z-index: 1250; display: flex; height: 44px; gap: 4px; overflow-x: auto; padding: 0 10px; border-bottom: 1px solid rgba(186,204,214,.14); background: rgba(2,20,43,.96); backdrop-filter: blur(14px); transform: none; opacity: 1; pointer-events: auto; scrollbar-width: none; }
+  .v2-mobile-section-nav { position: sticky; top: 68px; z-index: 1250; display: flex; height: 44px; gap: 4px; overflow-x: auto; padding: 0 10px; border-bottom: 1px solid rgba(186,204,214,.14); background: rgba(2,20,43,.96); backdrop-filter: blur(14px); transform: none; opacity: 1; pointer-events: auto; scrollbar-width: none; }
   .v2-mobile-section-nav.is-visible { height: 44px; transform: none; opacity: 1; pointer-events: auto; }
   .v2-mobile-section-nav button { flex: 0 0 auto; min-height: 42px; padding: 0 10px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #eaf5ff; font-size: 12px; font-weight: 650; }
   .v2-mobile-section-nav button:active { border-bottom-color: #00e5ee; }
@@ -866,10 +866,8 @@
   .v2-mobile-filter-apply, .v2-mobile-filter-reset { min-height: 46px; border-radius: 12px; font-size: 14px; font-weight: 750; }
   .v2-mobile-filter-apply { border: 0; color: #03172b; background: linear-gradient(115deg,#D9F8FF,#E9E8FF 58%,#F0E3FF); }
   .v2-mobile-filter-reset { border: 1px solid rgba(186,204,214,.3); color: #fff; background: transparent; }
-  .v2-mobile-profile-nav { grid-template-columns: repeat(5, minmax(0,1fr)) !important; }
-  .v2-mobile-profile-nav button, .v2-mobile-profile-nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 48px; font-size: 12px !important; text-decoration: none; }
-  .v2-mobile-profile-nav button span, .v2-mobile-verdict-link span { font-size: 17px; line-height: 1; }
-  .v2-mobile-verdict-link { border-radius: 11px; color: #dffaff; background: rgba(0,229,238,.1); font-weight: 700; }
+  .v2-mobile-profile-nav { grid-template-columns: repeat(4, minmax(0,1fr)) !important; }
+  .v2-mobile-profile-nav button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 48px; font-size: 12px !important; text-decoration: none; }
   .v2-root .v2-mobile-map-switch { display: flex; width: fit-content; gap: 4px; margin: 0 0 12px; padding: 4px; border: 1px solid rgba(186,204,214,.2); border-radius: 999px; background: rgba(1,16,36,.7); }
   .v2-mobile-map-switch button { min-height: 38px; padding: 0 15px; border: 0; border-radius: 999px; background: transparent; color: #d7e8ef; font-size: 12px; font-weight: 700; }
   .v2-mobile-map-switch button.active { background: #00e5ee; color: #03172b; }
@@ -3073,19 +3071,15 @@
 /* Final mobile overrides for the dashboard navigation and single-map switch. */
 @media (max-width: 768px) {
   .v2-root .v2-mobile-filter-summary { padding: 0; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
-  .v2-root .v2-mobile-profile-picker::after { content: '⌄'; margin-left: 6px; color: #8cebf4; }
-  .v2-mobile-profile-menu { position: sticky; top: 126px; z-index: 1350; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; padding: 8px 12px; background: #071b33; border-bottom: 1px solid rgba(186,204,214,.16); }
-  .v2-mobile-profile-menu button { min-height: 42px; border: 1px solid rgba(186,204,214,.2); border-radius: 10px; background: rgba(255,255,255,.04); color: #fff; font-size: 12px; }
-  .v2-mobile-profile-menu button.active { border-color: #00e5ee; background: rgba(0,229,238,.14); }
   .v2-root .site-header { display: flex !important; position: sticky !important; top: 0 !important; z-index: 1500 !important; min-height: 68px !important; }
-  .v2-root .v2-mobile-filter-bar { top: 68px; }
-  .v2-root .v2-mobile-section-nav { top: 126px; height: 44px; padding-top: 0; padding-bottom: 0; border-bottom: 1px solid rgba(186,204,214,.14); transform: none; opacity: 1; pointer-events: auto; }
+  .v2-root .v2-mobile-filter-bar { top: 112px; }
+  .v2-root .v2-mobile-section-nav { top: 68px; height: 44px; padding-top: 0; padding-bottom: 0; border-bottom: 1px solid rgba(186,204,214,.14); transform: none; opacity: 1; pointer-events: auto; }
   .v2-root .v2-mobile-section-nav.is-visible { height: 44px; padding-top: 0; padding-bottom: 0; border-bottom: 1px solid rgba(186,204,214,.14); }
-  .v2-root .v2-mobile-section-nav.is-visible + .v2-mobile-profile-nav { margin-top: 0; }
-  .v2-root .v2-mobile-profile-nav { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+  .v2-root .v2-mobile-profile-nav { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
   .v2-root .v2-mobile-profile-nav { min-height: 64px; }
-  .v2-root .v2-mobile-profile-nav button, .v2-root .v2-mobile-profile-nav a { color: #d9eaf2; }
-  .v2-root .v2-mobile-profile-nav button > span, .v2-root .v2-mobile-profile-nav a > span { color: #8cebf4; }
+  .v2-root .v2-mobile-profile-nav button { color: #d9eaf2; }
+  .v2-root .v2-mobile-profile-nav button > span { color: #8cebf4; }
+  .v2-root .v2-mobile-profile-nav button.active > span { color: #03172b; }
   .v2-root .v2-mobile-map-switch { display: flex; width: fit-content; gap: 4px; margin: 0 0 12px; padding: 4px; border: 1px solid rgba(186,204,214,.2); border-radius: 999px; background: rgba(1,16,36,.7); }
   .v2-root .v2-mobile-map-switch button { min-height: 38px; padding: 0 15px; border: 0; border-radius: 999px; background: transparent; color: #d7e8ef; font-size: 12px; font-weight: 700; }
   .v2-root .v2-mobile-map-switch button.active { background: #00e5ee; color: #03172b; }

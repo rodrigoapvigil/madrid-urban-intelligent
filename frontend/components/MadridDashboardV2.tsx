@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { cssColorResolverPlugin, colorWithAlpha, resolveCssColor } from '../lib/colors';
-import { Activity, ChevronDown, Database, MapPinned, RotateCcw, SlidersHorizontal, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Activity, Building2, ChevronDown, Database, Home, MapPinned, RotateCcw, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
 import './MadridDashboardV2.css';
 import { apiFetch } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
@@ -668,7 +668,6 @@ const MadridDashboardV2: React.FC = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [mapLevel, setMapLevel] = useState<'districts' | 'neighborhoods'>('districts');
-  const [isProfilePickerOpen, setIsProfilePickerOpen] = useState(false);
   const [draftFilters, setDraftFilters] = useState({ year: '', month: '', district: 'Todos', barrio: 'Todos' });
   const [draftBarrios, setDraftBarrios] = useState<string[]>(['Todos']);
   const [selectedYear, setSelectedYear] = useState('');
@@ -2239,12 +2238,17 @@ const MadridDashboardV2: React.FC = () => {
         ctaHref="/madrid/veredicto"
       />
 
+      <nav className="v2-mobile-section-nav is-visible" aria-label="Secciones del cuadro de mando">
+        {[
+          ['Resumen', 'summary'], ['Mapa', 'map'], ['Ranking', 'ranking'], ['Heatmap', 'heatmap'], ['Comparar', 'compare'],
+        ].map(([label, section]) => <button key={section} type="button" onClick={() => scrollToDashboardSection(section)}>{label}</button>)}
+      </nav>
 
       <div className="v2-mobile-filter-bar">
-        <button type="button" className="v2-mobile-filter-summary v2-mobile-profile-picker" aria-expanded={isProfilePickerOpen} onClick={() => setIsProfilePickerOpen(value => !value)}>
+        <div className="v2-mobile-filter-summary">
           <strong>{activeProfile.label}</strong>
           <span>{selectedDistrict === 'Todos' ? 'Madrid' : formatZoneOption(selectedDistrict)} · {selectedMonth} {selectedYear}</span>
-        </button>
+        </div>
         <div className="v2-mobile-filter-chips">
           {selectedDistrict !== 'Todos' && <button type="button" onClick={() => { setSelectedDistrict('Todos'); setSelectedBarrio('Todos'); }}>‹ {formatZoneOption(selectedDistrict)} ×</button>}
           {selectedBarrio !== 'Todos' && <button type="button" onClick={() => setSelectedBarrio('Todos')}>{formatZoneOption(selectedBarrio)} ×</button>}
@@ -2255,8 +2259,6 @@ const MadridDashboardV2: React.FC = () => {
           <span>Filtros</span><b>{Number(selectedDistrict !== 'Todos') + Number(selectedBarrio !== 'Todos') + Number(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month)}</b>
         </button>
       </div>
-
-      {isProfilePickerOpen && <div className="v2-mobile-profile-menu" role="group" aria-label="Cambiar perfil de mercado">{PROFILES.map((profile, index) => <button key={profile.id} type="button" className={profileIdx === index ? 'active' : ''} onClick={() => { handleProfileChange(index); setIsProfilePickerOpen(false); }}>{profile.label}</button>)}</div>}
 
       {isMobileFiltersOpen && <button type="button" className="v2-mobile-filter-backdrop" aria-label="Cerrar filtros" onClick={closeMobileFilters} />}
 
@@ -2400,18 +2402,16 @@ const MadridDashboardV2: React.FC = () => {
         </div>
       </div>
 
-      <nav className="v2-mobile-section-nav is-visible" aria-label="Secciones del cuadro de mando">
-        {[
-          ['Resumen', 'summary'], ['Mapa', 'map'], ['Ranking', 'ranking'], ['Heatmap', 'heatmap'], ['Comparar', 'compare'],
-        ].map(([label, section]) => <button key={section} type="button" onClick={() => scrollToDashboardSection(section)}>{label}</button>)}
-      </nav>
-
-      <nav className="v2-mobile-profile-nav" aria-label="Secciones principales">
-        <button type="button" onClick={() => scrollToDashboardSection('summary')}><span aria-hidden="true">⌂</span>Resumen</button>
-        <button type="button" onClick={() => scrollToDashboardSection('map')}><span aria-hidden="true">⌖</span>Mapa</button>
-        <button type="button" onClick={() => scrollToDashboardSection('ranking')}><span aria-hidden="true">▤</span>Ranking</button>
-        <button type="button" onClick={() => scrollToDashboardSection('compare')}><span aria-hidden="true">⇄</span>Comparar</button>
-        <Link href="/madrid/veredicto" className="v2-mobile-verdict-link"><span aria-hidden="true">◇</span>Veredicto</Link>
+      <nav className="v2-mobile-profile-nav" aria-label="Perfiles de mercado">
+        {PROFILES.map((profile, index) => {
+          const ProfileIcon = [Home, Building2, Tag, Activity][index];
+          return (
+            <button key={profile.id} type="button" className={profileIdx === index ? 'active' : ''} aria-pressed={profileIdx === index} onClick={() => handleProfileChange(index)}>
+              <ProfileIcon size={17} aria-hidden="true" />
+              <span>{profile.label}</span>
+            </button>
+          );
+        })}
       </nav>
 
 
