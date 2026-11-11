@@ -3356,6 +3356,92 @@ body.v2-fullscreen-open .v2-panel.v2-active { transform: none !important; }
   .v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-scroll { max-height: calc(100dvh - 100px) !important; }
 }
 
+/* Shared segmented selector treatment across exploration and comparison. */
+.v2-root .v2-level-switch,
+.v2-root .v2-ranking-unit-switch,
+.v2-root .v2-compare-view-tabs { padding: 4px !important; gap: 2px !important; border: 0 !important; border-radius: 12px !important; background: rgba(255,255,255,.05) !important; box-shadow: none !important; }
+.v2-root .v2-level-switch .v2-tab-btn,
+.v2-root .v2-ranking-unit-switch button,
+.v2-root .v2-compare-view-tabs button { min-height: 36px !important; padding: 0 14px !important; border: 0 !important; border-radius: 9px !important; background: transparent !important; color: #8fa3b8 !important; font-size: 13px !important; font-weight: 500 !important; text-transform: none !important; box-shadow: none !important; }
+.v2-root .v2-level-switch .v2-tab-btn.active,
+.v2-root .v2-ranking-unit-switch button.active,
+.v2-root .v2-compare-view-tabs button.active { background: rgba(0,229,255,.14) !important; color: #00e5ff !important; font-weight: 700 !important; box-shadow: none !important; }
+.v2-root .v2-compare-view-tabs { min-height: 44px; }
+.v2-root .v2-ranking-unit-switch { display: inline-flex; flex: 0 0 auto; min-height: 36px; }
+.v2-root .v2-ranking-unit-switch button { min-height: 30px !important; padding-inline: 9px !important; font-size: 11px !important; }
+.v2-root .v2-explorer-nav { gap: 14px !important; }
+.v2-root .v2-rank-title { margin: 0 !important; font-size: 21px !important; }
+.v2-root .v2-rank-settings { width: 100%; }
+.v2-root .v2-level-switch-full { display: flex !important; width: 100% !important; min-height: 44px !important; align-items: center; }
+.v2-root .v2-level-switch-full .v2-tab-btn { flex: 1; min-width: 0 !important; }
+.v2-root .v2-rank-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px !important; color: #eaf5ff; font-size: 14px; font-weight: 700; }
+.v2-root .v2-ranking-head-actions { display: inline-flex; align-items: center; gap: 6px; }
+.v2-root .v2-rank-head .v2-fullscreen-control { flex: 0 0 auto; }
+.v2-root .v2-rank-head .v2-expand-button.has-label { width: auto; min-height: 32px; padding: 0 7px; gap: 4px; color: #8fa3b8; font-size: 10px; font-weight: 600; white-space: nowrap; }
+.v2-root .v2-rank-head .v2-expand-button.has-label span { font-size: inherit; }
+.v2-root .v2-highlighted-zone { display: inline-flex; margin: -3px 0 8px; padding: 3px 7px; border-radius: 999px; background: rgba(0,229,255,.1); color: #8eeeff; font-size: 10px; font-weight: 650; }
+.v2-root .v2-ranking-table tbody tr:nth-child(n+11) { display: none; }
+.v2-root .v2-is-fullscreen .v2-ranking-table tbody tr:nth-child(n+11) { display: table-row; }
+.v2-root .v2-ranking-table tbody tr.is-filtered { background: rgba(0,229,255,.12); box-shadow: inset 3px 0 #00e5ff; }
+.v2-root .v2-ranking-value { position: relative; overflow: hidden; isolation: isolate; white-space: nowrap; }
+.v2-root .v2-ranking-value > i { position: absolute; z-index: -1; top: 18%; right: 0; bottom: 18%; display: block; border-radius: 5px; background: rgba(0,229,255,.22); }
+.v2-root .v2-ranking-value > span { position: relative; z-index: 1; }
+
+/* Comparison layout: keep zone identity stable and its selectors together. */
+.v2-root .v2-compare-title-block { display: grid; gap: 5px; }
+.v2-root .v2-compare-title-block > span { color: #8fa3b8; font-size: 13px; }
+.v2-root .v2-compare-zone-selectors { grid-template-columns: minmax(0,1fr) 42px minmax(0,1fr) !important; gap: 10px !important; align-items: center; }
+.v2-root .v2-compare-zone-select { min-width: 0; padding: 10px 12px; border: 1px solid rgba(186,204,214,.13); border-radius: 14px; background: rgba(255,255,255,.035); }
+.v2-root .v2-compare-zone-select .v2-filter-label { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.v2-root .v2-compare-zone-select .v2-filter-label i { width: 7px; height: 7px; border-radius: 50%; background: #00e5ff; }
+.v2-root .v2-compare-zone-select .zone-b-label i { background: #ffb86b; }
+.v2-root .v2-compare-zone-select .v2-custom-select { min-height: 36px; padding-inline: 0; border: 0; background: transparent; }
+.v2-root .v2-compare-swap { width: 40px; height: 40px; border: 1px solid rgba(186,204,214,.16); border-radius: 12px; background: rgba(255,255,255,.05); color: #c5d2dd; font-size: 21px; }
+.v2-root .v2-compare-swap:hover { color: #00e5ff; background: rgba(0,229,255,.1); }
+.v2-root .v2-compare-selectors-sticky { position: sticky; top: 116px; z-index: 40; padding: 8px 0; background: rgba(3,18,36,.94); backdrop-filter: blur(12px); }
+.v2-root .v2-compare-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; padding: 8px 4px 2px; color: #baccd6; font-size: 11px; }
+.v2-root .v2-compare-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.v2-root .v2-compare-legend i { width: 19px; height: 0; border-top: 2px solid #00e5ff; }
+.v2-root .v2-compare-legend i.estimated { border-top: 2px dashed #ffb86b; }
+.v2-root .v2-compare-legend i.madrid { border-top: 2px dotted #eaf5ff; }
+.v2-root .v2-compare-summary { margin-top: 12px; overflow: hidden; border: 1px solid rgba(186,204,214,.13); border-radius: 14px; background: rgba(255,255,255,.025); }
+.v2-root .v2-compare-diff-table { width: 100%; border-collapse: collapse; table-layout: auto; }
+.v2-root .v2-compare-diff-table th,
+.v2-root .v2-compare-diff-table td { padding: 10px 8px; border-bottom: 1px solid rgba(186,204,214,.1); text-align: right; color: #baccd6; font-size: 12px; }
+.v2-root .v2-compare-diff-table tr:last-child > * { border-bottom: 0; }
+.v2-root .v2-compare-diff-table th:first-child { text-align: left; color: #eaf5ff; }
+.v2-root .v2-compare-diff-table thead th { color: #8fa3b8; font-size: 10px; }
+.v2-root .v2-compare-diff-table td.winner { color: #00e5ff; font-weight: 750; }
+.v2-root .v2-compare-summary > p { margin: 0; padding: 10px 12px; border-top: 1px solid rgba(186,204,214,.1); color: #c8d5df; font-size: 12px; line-height: 1.5; }
+.v2-root .v2-zone-picker-backdrop { position: fixed; inset: 0; z-index: 6000; display: flex; align-items: flex-end; justify-content: center; padding: 12px; background: rgba(0,8,19,.7); backdrop-filter: blur(5px); }
+.v2-root .v2-zone-picker-sheet { display: flex; flex-direction: column; width: min(100%,560px); max-height: min(78dvh,720px); padding: 16px; border: 1px solid rgba(186,204,214,.18); border-radius: 20px 20px 12px 12px; background: #071b33; box-shadow: 0 18px 50px rgba(0,0,0,.4); }
+.v2-root .v2-zone-picker-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.v2-root .v2-zone-picker-head > div { display: grid; gap: 3px; }
+.v2-root .v2-zone-picker-head strong { color: #f3f8fc; font-size: 17px; }
+.v2-root .v2-zone-picker-head span { color: #8fa3b8; font-size: 12px; }
+.v2-root .v2-zone-picker-head button { width: 40px; height: 40px; border: 1px solid rgba(186,204,214,.2); border-radius: 12px; background: rgba(255,255,255,.05); color: #eaf5ff; font-size: 23px; }
+.v2-root .v2-zone-picker-sheet > input { min-height: 44px; padding: 0 12px; border: 1px solid rgba(186,204,214,.18); border-radius: 11px; background: rgba(1,16,36,.75); color: #fff; font: inherit; }
+.v2-root .v2-zone-picker-options { display: grid; gap: 4px; margin-top: 10px; overflow-y: auto; overscroll-behavior: contain; }
+.v2-root .v2-zone-picker-options button { min-height: 44px; padding: 0 12px; border: 0; border-radius: 9px; background: transparent; color: #d5e1eb; text-align: left; }
+.v2-root .v2-zone-picker-options button[aria-selected="true"],
+.v2-root .v2-zone-picker-options button:hover { background: rgba(0,229,255,.12); color: #00e5ff; }
+
+@media (max-width: 768px) {
+  .v2-root .v2-compare-section .v2-section-header { align-items: flex-start !important; }
+  .v2-root .v2-compare-section .v2-section-header > div:first-child { width: 100%; }
+  .v2-root .v2-compare-section .v2-section-header > .v2-tabs-container { width: 100%; }
+  .v2-root .v2-compare-zone-selectors { grid-template-columns: minmax(0,1fr) 34px minmax(0,1fr) !important; gap: 5px !important; }
+  .v2-root .v2-compare-zone-selectors { top: 112px; }
+  .v2-root .v2-compare-zone-select { padding: 8px; }
+  .v2-root .v2-compare-zone-select .v2-custom-select { gap: 2px; font-size: 12px; }
+  .v2-root .v2-compare-swap { width: 32px; height: 36px; font-size: 18px; }
+  .v2-root .v2-compare-diff-table th,
+  .v2-root .v2-compare-diff-table td { padding: 9px 5px; font-size: 10px; }
+  .v2-root .v2-compare-diff-table thead th { font-size: 9px; }
+  .v2-root .v2-zone-picker-backdrop { padding: 0; }
+  .v2-root .v2-zone-picker-sheet { max-height: calc(82dvh + env(safe-area-inset-bottom)); padding-bottom: calc(14px + env(safe-area-inset-bottom)); border-radius: 20px 20px 0 0; }
+}
+
 /* Keep the landing header and dashboard filter context pinned on mobile. */
 @media (max-width: 768px) {
   .v2-root .site-header { position: sticky !important; inset-block-start: 0 !important; z-index: 1500 !important; }

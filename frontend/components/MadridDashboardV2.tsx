@@ -65,7 +65,7 @@ const updateChartZoom = (canvasId: string, action: 'in' | 'out' | 'reset') => {
   chart.update('none');
 };
 
-const FullscreenToggle = ({ targetSelector, chartId }: { targetSelector?: string; chartId?: string }) => {
+const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?: string; chartId?: string; label?: string }) => {
   const [expanded, setExpanded] = useState(false);
   const [toolbarRevision, setToolbarRevision] = useState(0);
   const targetRef = useRef<HTMLElement | null>(null);
@@ -147,7 +147,7 @@ const FullscreenToggle = ({ targetSelector, chartId }: { targetSelector?: string
   };
 
   return <div className="v2-fullscreen-control">
-    <button type="button" className="v2-expand-button" aria-label={expanded ? 'Cerrar pantalla completa' : 'Ampliar a pantalla completa'} title={expanded ? 'Cerrar' : 'Pantalla completa'} onClick={expanded ? close : open}>{expanded ? <X size={17} /> : <Maximize2 size={17} />}</button>
+    <button type="button" className={`v2-expand-button${label ? ' has-label' : ''}`} aria-label={expanded ? 'Cerrar pantalla completa' : label || 'Ampliar a pantalla completa'} title={expanded ? 'Cerrar' : label || 'Pantalla completa'} onClick={expanded ? close : open}>{expanded ? <X size={17} /> : <Maximize2 size={17} />}{!expanded && label && <span>{label}</span>}</button>
     {expanded && <div className="v2-fullscreen-toolbar" role="toolbar" aria-label="Herramientas de pantalla completa">
       {chartId && <div className="v2-fullscreen-ranges">{(['6M', '12M', 'Todo'] as const).map(range => <button key={range} type="button" onClick={() => setRange(range)}>{range}</button>)}</div>}
       {chart?.data.datasets.map((dataset: any, index: number) => <button key={`${dataset.label}-${index}`} type="button" className="v2-fullscreen-series" aria-pressed={chart.isDatasetVisible(index)} onClick={() => { chart.setDatasetVisibility(index, !chart.isDatasetVisible(index)); chart.update('none'); setToolbarRevision(value => value + 1); }}><i style={{ background: dataset.borderColor || dataset.backgroundColor }} />{dataset.label}</button>)}
@@ -773,6 +773,8 @@ const MadridDashboardV2: React.FC = () => {
   const [selectedZoneB, setSelectedZoneB] = useState('Centro');
   const [compareMapTarget, setCompareMapTarget] = useState<'A' | 'B'>('A');
   const [compareDisplay, setCompareDisplay] = useState<'overlay' | 'A' | 'B'>('overlay');
+  const [compareZoneSheet, setCompareZoneSheet] = useState<'A' | 'B' | null>(null);
+  const [compareZoneSearch, setCompareZoneSearch] = useState('');
 
   // State: Dynamic Options
   const [availableYears, setAvailableYears] = useState<string[]>(['2023', '2024', '2025']);
@@ -962,6 +964,22 @@ const MadridDashboardV2: React.FC = () => {
     };
   }, [isMobileFiltersOpen]);
 
+  useEffect(() => {
+    if (!compareZoneSheet) return;
+    window.history.pushState({ compareZoneSheet: true }, '', `${window.location.pathname}${window.location.search}#zona-${compareZoneSheet.toLowerCase()}`);
+    const onBack = () => setCompareZoneSheet(null);
+    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') window.history.back(); };
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('popstate', onBack);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('popstate', onBack);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [compareZoneSheet]);
+
   // Fetch KPIs and Series
   useEffect(() => {
     if (!filtersReady || !selectedYear || !selectedMonth) return;
@@ -1117,7 +1135,7 @@ const MadridDashboardV2: React.FC = () => {
       ]).then(([dist, barr]) => {
         if (!isCurrent) return;
         const mapLiquidity = (list: any[]) => list.map(item => ({ name: item.name, value: item.transactions }));
-        setRankings({ topDist: mapLiquidity(dist || []).slice(0, 10), botDist: mapLiquidity(dist || []).slice(0, 10), topBarr: mapLiquidity(barr || []).slice(0, 10), botBarr: mapLiquidity(barr || []).slice(0, 10) });
+        setRankings({ topDist: mapLiquidity(dist || []), botDist: mapLiquidity(dist || []), topBarr: mapLiquidity(barr || []), botBarr: mapLiquidity(barr || []) });
       });
     } else {
       const category = activeProfile.id === 'inversion' ? 'Rentabilidad' : rankingMetric === 'unit' ? 'Precio m²' : 'Precio';
@@ -1135,7 +1153,7 @@ const MadridDashboardV2: React.FC = () => {
             return;
           }
         }
-        setRankings({ topDist: (dist || []).slice(0, 10), botDist: [...(dist || [])].sort((a: any, b: any) => a.value - b.value).slice(0, 10), topBarr: (barr || []).slice(0, 10), botBarr: [...(barr || [])].sort((a: any, b: any) => a.value - b.value).slice(0, 10) });
+        setRankings({ topDist: dist || [], botDist: [...(dist || [])].sort((a: any, b: any) => a.value - b.value), topBarr: barr || [], botBarr: [...(barr || [])].sort((a: any, b: any) => a.value - b.value) });
       });
     }
     return () => { isCurrent = false; };
@@ -1296,9 +1314,7 @@ const MadridDashboardV2: React.FC = () => {
           scaleOverride?: { min?: number; max?: number; stepSize?: number }
         ) => {
           const mainColor = color || COMPARISON_COLORS.zoneA;
-          const forecastColor = mainColor === COMPARISON_COLORS.zoneB
-            ? COMPARISON_COLORS.forecastB
-            : COMPARISON_COLORS.forecastA;
+          const forecastColor = mainColor;
           const multiplier = comparisonMetric.multiplier;
 
           // Use effective data or robust baseline so chart is NEVER empty
@@ -1670,17 +1686,17 @@ const MadridDashboardV2: React.FC = () => {
                 {
                   label: `${selectedZoneA} · Estimación`,
                   data: overlayASplit.forecast,
-                  borderColor: COMPARISON_COLORS.forecastA,
+                  borderColor: COMPARISON_COLORS.zoneA,
                   borderDash: [6, 5],
                   borderWidth: 2.5,
                   pointRadius: 4,
-                  pointBackgroundColor: COMPARISON_COLORS.forecastA,
+                  pointBackgroundColor: COMPARISON_COLORS.zoneA,
                   pointBorderColor: '#011024',
                   pointBorderWidth: 2,
                   pointHoverRadius: 6,
                   pointHitRadius: 14,
                   fill: 'start',
-                  backgroundColor: (context: any) => createAreaGradient(context, COMPARISON_COLORS.forecastA, 0.14),
+                  backgroundColor: (context: any) => createAreaGradient(context, COMPARISON_COLORS.zoneA, 0.14),
                   tension: 0.35,
                   cubicInterpolationMode: 'monotone'
                 },
@@ -1703,17 +1719,17 @@ const MadridDashboardV2: React.FC = () => {
                 {
                   label: `${selectedZoneB} · Estimación`,
                   data: overlayBSplit.forecast,
-                  borderColor: COMPARISON_COLORS.forecastB,
+                  borderColor: COMPARISON_COLORS.zoneB,
                   borderDash: [6, 5],
                   borderWidth: 2.5,
                   pointRadius: 4,
-                  pointBackgroundColor: COMPARISON_COLORS.forecastB,
+                  pointBackgroundColor: COMPARISON_COLORS.zoneB,
                   pointBorderColor: '#011024',
                   pointBorderWidth: 2,
                   pointHoverRadius: 6,
                   pointHitRadius: 14,
                   fill: 'start',
-                  backgroundColor: (context: any) => createAreaGradient(context, COMPARISON_COLORS.forecastB, 0.14),
+                  backgroundColor: (context: any) => createAreaGradient(context, COMPARISON_COLORS.zoneB, 0.14),
                   tension: 0.35,
                   cubicInterpolationMode: 'monotone'
                 },
@@ -1778,16 +1794,16 @@ const MadridDashboardV2: React.FC = () => {
               },
               plugins: {
                 legend: {
-                  display: true,
-                  position: 'top',
-                  align: 'end',
+                  display: false,
+                  position: 'bottom',
+                  align: 'center',
                   labels: {
-                  boxWidth: 18,
-                  boxHeight: 3,
+                  boxWidth: 12,
+                  boxHeight: 2,
                     usePointStyle: false,
                   color: 'rgba(245, 250, 252, 0.96)',
-                  font: { size: 12, weight: 'bold' },
-                  padding: 12
+                  font: { size: 10, weight: 'bold' },
+                  padding: 6
                   }
                 },
                 datalabels: {
@@ -2300,6 +2316,16 @@ const MadridDashboardV2: React.FC = () => {
     if (idx === prevIdx && isTransitioning) return profileIdx > prevIdx ? 'v2-out-left' : 'v2-out-right';
     return profileIdx > idx ? 'v2-before' : 'v2-after';
   };
+
+  const rankingRows = rankingLevel === 'Distritos'
+    ? (activeProfile.id === 'venta' || activeProfile.id === 'inversion' ? rankings.topDist : rankings.botDist)
+    : (activeProfile.id === 'venta' || activeProfile.id === 'inversion' ? rankings.topBarr : rankings.botBarr);
+  const rankingValueMax = Math.max(1, ...rankingRows.map(item => Number(item.value) || 0));
+  const normalizeZoneName = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
+  const highlightedRankingZone = rankingLevel === 'Distritos' ? selectedDistrict : selectedBarrio;
+  const selectedRankingZone = rankingLevel === 'Distritos'
+    ? selectedDistrict !== 'Todos' ? selectedDistrict : null
+    : selectedBarrio !== 'Todos' ? selectedBarrio : null;
 
   return (
     <div className="v2-root" data-profile={activeProfile.id}>
@@ -3434,32 +3460,17 @@ const MadridDashboardV2: React.FC = () => {
               <div className="v2-explorer-col v2-explorer-nav">
                 <div className="v2-rank-title">
                   {activeProfile.id === 'venta'
-                    ? 'Exploración de Demanda'
+                    ? 'Zonas con más demanda'
                     : activeProfile.id === 'inversion'
-                      ? 'Exploración de Vivienda Rentable'
-                      : 'Exploración de Vivienda Asequible'}
+                      ? 'Vivienda más rentable'
+                      : 'Zonas más asequibles'}
                 </div>
                 <div className="v2-rank-settings">
-                  <label>Ver por:</label>
-                  <div className="v2-tabs-bg small v2-level-switch" role="group" aria-label="Nivel de exploración">
+                  <div className="v2-tabs-bg small v2-level-switch v2-level-switch-full" role="group" aria-label="Nivel de zonas">
                     <span className="v2-indicator" style={{ transform: `translateX(${rankingLevel === 'Distritos' ? '0' : '100%'})`, backgroundColor: activeProfile.color }} />
                     <button type="button" aria-pressed={rankingLevel === 'Distritos'} className={`v2-tab-btn ${rankingLevel === 'Distritos' ? 'active' : ''}`} onClick={() => setRankingLevel('Distritos')}>Distritos</button>
                     <button type="button" aria-pressed={rankingLevel === 'Barrios'} className={`v2-tab-btn ${rankingLevel === 'Barrios' ? 'active' : ''}`} onClick={() => setRankingLevel('Barrios')}>Barrios</button>
                   </div>
-                </div>
-                {activeProfile.id !== 'venta' && activeProfile.id !== 'inversion' && (
-                  <div className="v2-ranking-metric" role="group" aria-label="Unidad de precio del ranking">
-                    <span>Ordenar por</span>
-                    <button type="button" className={rankingMetric === 'unit' ? 'active' : ''} aria-pressed={rankingMetric === 'unit'} onClick={() => setRankingMetric('unit')}>€/m²</button>
-                    <button type="button" className={rankingMetric === 'total' ? 'active' : ''} aria-pressed={rankingMetric === 'total'} onClick={() => setRankingMetric('total')}>{activeProfile.id === 'alquiler' ? '€/mes' : 'Precio'}</button>
-                  </div>
-                )}
-                <div className="v2-rank-desc">
-                  {activeProfile.id === 'venta'
-                    ? `Analiza el volumen de transacciones y encuentra las zonas con mayor demanda para el año ${selectedYear}.`
-                    : activeProfile.id === 'inversion'
-                      ? `Analiza la evolución mensual y encuentra las zonas con rentabilidad más alta para el año ${selectedYear}.`
-                      : `Analiza la evolución mensual y encuentra las zonas con precios más bajos para el año ${selectedYear}.`}
                 </div>
               </div>
 
@@ -3467,13 +3478,12 @@ const MadridDashboardV2: React.FC = () => {
               <div className="v2-explorer-col v2-rankings-stack" data-dashboard-section="ranking" style={{ minWidth: '260px' }}>
                 {activeProfile.id === 'venta' ? (
                   <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
-                    <div className="v2-rank-head" style={{ marginBottom: '16px' }}>
-                      <span style={{ fontSize: '15px', fontWeight: '700', color: '#FFFFFF' }}>
-                        {rankingLevel === 'Distritos' ? 'Distritos con mayor demanda' : 'Barrios con mayor demanda'}
-                      </span>
-                      <span className="v2-rank-sub" style={{ color: '#BACCD6', fontSize: '11px' }}>Top 10 zonas con mayor volumen de transacciones</span>
+                    <div className="v2-rank-head">
+                      <span>Top 10 · {rankingLevel === 'Distritos' ? 'distritos' : 'barrios'} con más demanda</span>
+                      <FullscreenToggle targetSelector=".v2-rank-mini-card" label={`Ver los ${rankingRows.length} ${rankingLevel.toLowerCase()} →`} />
                     </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                    {selectedRankingZone && <span className="v2-highlighted-zone">{formatZoneOption(selectedRankingZone)} resaltada</span>}
+                    <table className="v2-ranking-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}>
                           <th style={{ paddingBottom: '8px', fontWeight: '600' }}>{rankingLevel === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th>
@@ -3483,12 +3493,12 @@ const MadridDashboardV2: React.FC = () => {
                       <tbody>
                         {(rankingLevel === 'Distritos' ? rankings.topDist : rankings.topBarr).map((item, i) => {
                           return (
-                            <tr key={i} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
+                            <tr key={i} className={normalizeZoneName(item.name) === normalizeZoneName(highlightedRankingZone) ? 'is-filtered' : ''} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
                               <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
                                 {i+1}. {formatMadridName(item.name)}
                               </td>
-                              <td style={{ padding: '8px 0', textAlign: 'right', color: '#FF5C5C', fontWeight: '700' }}>
-                                {new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(item.value)} trans.
+                              <td className="v2-ranking-value" style={{ padding: '8px 0', textAlign: 'right', color: '#00E5FF', fontWeight: '700' }}>
+                                <i style={{ width: `${Math.max(0, Math.min(100, (Number(item.value) || 0) / rankingValueMax * 100))}%` }} /><span>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(item.value)} trans.</span>
                               </td>
                             </tr>
                           );
@@ -3498,15 +3508,18 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                 ) : activeProfile.id !== 'inversion' ? (
                   <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
-                    <div className="v2-rank-head" style={{ marginBottom: '16px' }}>
-                      <span style={{ fontSize: '15px', fontWeight: '700', color: '#FFFFFF' }}>
-                        {activeProfile.id === 'alquiler'
-                          ? `${rankingLevel === 'Distritos' ? 'Distritos' : 'Barrios'} ${rankingMetric === 'total' ? 'con menor alquiler mensual' : 'con menor precio por m²'}`
-                          : `${rankingLevel === 'Distritos' ? 'Distritos' : 'Barrios'} ${rankingMetric === 'total' ? 'con menor precio de compra' : 'con menor precio por m²'}`}
-                      </span>
-                      <span className="v2-rank-sub" style={{ color: '#BACCD6', fontSize: '12px' }}>{activeProfile.id === 'alquiler' ? (rankingMetric === 'total' ? 'Alquiler medio mensual (€)' : 'Precio de alquiler (€/m²)') : (rankingMetric === 'total' ? 'Precio medio de vivienda (€)' : 'Precio de compra (€/m²)')}</span>
+                    <div className="v2-rank-head">
+                      <span>Top 10 · {rankingLevel === 'Distritos' ? 'distritos' : 'barrios'} más asequibles</span>
+                      <div className="v2-ranking-head-actions">
+                        {activeProfile.id !== 'inversion' && <div className="v2-ranking-unit-switch" role="group" aria-label="Unidad mostrada">
+                          <button type="button" className={rankingMetric === 'total' ? 'active' : ''} aria-pressed={rankingMetric === 'total'} onClick={() => setRankingMetric('total')}>{activeProfile.id === 'alquiler' ? '€/mes' : '€'}</button>
+                          <button type="button" className={rankingMetric === 'unit' ? 'active' : ''} aria-pressed={rankingMetric === 'unit'} onClick={() => setRankingMetric('unit')}>€/m²</button>
+                        </div>}
+                        <FullscreenToggle targetSelector=".v2-rank-mini-card" label={`Ver los ${rankingRows.length} ${rankingLevel.toLowerCase()} →`} />
+                      </div>
                     </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                    {selectedRankingZone && <span className="v2-highlighted-zone">{formatZoneOption(selectedRankingZone)} resaltada</span>}
+                    <table className="v2-ranking-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}>
                           <th style={{ paddingBottom: '8px', fontWeight: '600' }}>{rankingLevel === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th>
@@ -3518,12 +3531,12 @@ const MadridDashboardV2: React.FC = () => {
                           const price = item.value || 0;
 
                           return (
-                            <tr key={i} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
+                            <tr key={i} className={normalizeZoneName(item.name) === normalizeZoneName(highlightedRankingZone) ? 'is-filtered' : ''} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
                               <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
                                 {i+1}. {formatMadridName(item.name)}
                               </td>
-                              <td style={{ padding: '8px 0', textAlign: 'right', color: '#00F0FF', fontWeight: '700' }}>
-                                {rankingMetric === 'unit' ? `${formatNumber(price, 0)} €/m²` : activeProfile.id === 'alquiler' ? `${formatEuro(price)}/mes` : formatEuro(price)}
+                              <td className="v2-ranking-value" style={{ padding: '8px 0', textAlign: 'right', color: '#00F0FF', fontWeight: '700' }}>
+                                <i style={{ width: `${Math.max(0, Math.min(100, price / rankingValueMax * 100))}%` }} /><span>{rankingMetric === 'unit' ? `${formatNumber(price, 0)} €/m²` : activeProfile.id === 'alquiler' ? `${formatEuro(price)}/mes` : formatEuro(price)}</span>
                               </td>
                             </tr>
                           );
@@ -3533,13 +3546,12 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                 ) : (
                   <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
-                    <div className="v2-rank-head" style={{ marginBottom: '16px' }}>
-                      <span style={{ fontSize: '15px', fontWeight: '700', color: '#FFFFFF' }}>
-                        {rankingLevel === 'Distritos' ? 'Amortización por Distrito' : 'Amortización por Barrio'}
-                      </span>
-                      <span className="v2-rank-sub" style={{ color: '#BACCD6', fontSize: '11px' }}>Menor tiempo de recuperación (GRM)</span>
+                    <div className="v2-rank-head">
+                      <span>Top 10 · amortización por {rankingLevel === 'Distritos' ? 'distrito' : 'barrio'}</span>
+                      <FullscreenToggle targetSelector=".v2-rank-mini-card" label={`Ver los ${rankingRows.length} ${rankingLevel.toLowerCase()} →`} />
                     </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                    {selectedRankingZone && <span className="v2-highlighted-zone">{formatZoneOption(selectedRankingZone)} resaltada</span>}
+                    <table className="v2-ranking-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}>
                           <th style={{ paddingBottom: '8px', fontWeight: '600' }}>{rankingLevel === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th>
@@ -3550,12 +3562,12 @@ const MadridDashboardV2: React.FC = () => {
                         {(rankingLevel === 'Distritos' ? rankings.topDist : rankings.topBarr).map((item, i) => {
                           const yearsVal = item.value > 0 ? (1 / item.value).toFixed(1) + ' años' : '-';
                           return (
-                            <tr key={i} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
+                            <tr key={i} className={normalizeZoneName(item.name) === normalizeZoneName(highlightedRankingZone) ? 'is-filtered' : ''} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
                               <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
                                 {i+1}. {formatMadridName(item.name)}
                               </td>
-                              <td style={{ padding: '8px 0', textAlign: 'right', color: '#00F0FF', fontWeight: '700' }}>
-                                {yearsVal}
+                              <td className="v2-ranking-value" style={{ padding: '8px 0', textAlign: 'right', color: '#00F0FF', fontWeight: '700' }}>
+                                <i style={{ width: `${Math.max(0, Math.min(100, (Number(item.value) || 0) / rankingValueMax * 100))}%` }} /><span>{yearsVal}</span>
                               </td>
                             </tr>
                           );
@@ -3763,49 +3775,10 @@ const MadridDashboardV2: React.FC = () => {
             <section className="v2-compare-section" data-dashboard-section="compare">
               <div className="v2-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                  <h2 style={{ margin: 0 }}>Comparación de zonas</h2>
-                  <button
-                    onClick={() => setShowCompareHelpModal(true)}
-                    style={{
-                      background: 'rgba(1, 16, 36, 0.92)',
-                      border: '1.5px solid #00F0FF',
-                      borderRadius: '20px',
-                      padding: '5px 14px',
-                      fontSize: '11px',
-                      fontWeight: '700',
-                      color: '#FFFFFF',
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '7px',
-                      transition: 'all 0.2s ease',
-                      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
-                      whiteSpace: 'nowrap'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(0, 240, 255, 0.18)';
-                      e.currentTarget.style.boxShadow = '0 0 14px rgba(0, 240, 255, 0.45)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'rgba(1, 16, 36, 0.92)';
-                      e.currentTarget.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.5)';
-                    }}
-                  >
-                    <span style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '15px',
-                      height: '15px',
-                      borderRadius: '50%',
-                      backgroundColor: '#FFFFFF',
-                      color: '#011024',
-                      fontSize: '10px',
-                      fontWeight: '900',
-                      fontFamily: 'sans-serif'
-                    }}>i</span>
-                    <span style={{ color: '#FFFFFF', fontWeight: '700' }}>¿Cómo usar la comparación?</span>
-                  </button>
+                  <div className="v2-compare-title-block">
+                    <h2 style={{ margin: 0 }}>Comparar zonas</h2>
+                    <span>Elige dos zonas y mira cómo se diferencian</span>
+                  </div>
                 </div>
                 <div className="v2-tabs-container" style={{ flex: 'none' }}>
                   <div className="v2-tabs-bg v2-level-switch" role="group" aria-label="Nivel de comparación">
@@ -3816,10 +3789,10 @@ const MadridDashboardV2: React.FC = () => {
                 </div>
               </div>
 
-              <div className="v2-compare-zone-selectors">
+              <div className="v2-compare-zone-selectors v2-compare-selectors-sticky">
                 <div className={`v2-dropdown-container v2-compare-zone-select ${activeDropdown === 'zoneA' ? 'v2-z-up' : ''}`}>
-                  <span className="v2-filter-label zone-a-label">Zona A · {formatZoneOption(selectedZoneA)}</span>
-                  <button type="button" className={`v2-custom-select ${activeDropdown === 'zoneA' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'zoneA'} onClick={() => setActiveDropdown(activeDropdown === 'zoneA' ? null : 'zoneA')}>
+                  <span className="v2-filter-label zone-a-label"><i /> ZONA A</span>
+                  <button type="button" className="v2-custom-select" aria-haspopup="dialog" aria-expanded={compareZoneSheet === 'A'} onClick={() => { setCompareZoneSearch(''); setCompareZoneSheet('A'); }}>
                     <span>{formatZoneOption(selectedZoneA)}</span>
                     <ChevronDown size={14} className="v2-select-chevron" />
                   </button>
@@ -3831,9 +3804,10 @@ const MadridDashboardV2: React.FC = () => {
                     </div>
                   )}
                 </div>
+                <button type="button" className="v2-compare-swap" aria-label="Intercambiar zonas A y B" title="Intercambiar zonas" onClick={() => { setSelectedZoneA(selectedZoneB); setSelectedZoneB(selectedZoneA); }}><span>⇄</span></button>
                 <div className={`v2-dropdown-container v2-compare-zone-select ${activeDropdown === 'zoneB' ? 'v2-z-up' : ''}`}>
-                  <span className="v2-filter-label zone-b-label">Zona B · {formatZoneOption(selectedZoneB)}</span>
-                  <button type="button" className={`v2-custom-select ${activeDropdown === 'zoneB' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'zoneB'} onClick={() => setActiveDropdown(activeDropdown === 'zoneB' ? null : 'zoneB')}>
+                  <span className="v2-filter-label zone-b-label"><i /> ZONA B</span>
+                  <button type="button" className="v2-custom-select" aria-haspopup="dialog" aria-expanded={compareZoneSheet === 'B'} onClick={() => { setCompareZoneSearch(''); setCompareZoneSheet('B'); }}>
                     <span>{formatZoneOption(selectedZoneB)}</span>
                     <ChevronDown size={14} className="v2-select-chevron" />
                   </button>
@@ -4334,9 +4308,50 @@ const MadridDashboardV2: React.FC = () => {
                       <ChartZoomControls chartId={`v2-overlay-${p.id}`} />
                       <canvas id={`v2-overlay-${p.id}`}></canvas>
                     </div>
+                    <div className="v2-compare-legend" aria-label="Leyenda del gráfico">
+                      <span><i className="real" />Real</span><span><i className="estimated" />Estimado</span><span><i className="madrid" />Media Madrid</span>
+                    </div>
+                    {p.id === 'alquiler' && (() => {
+                      const priceA = Number(kpiDataA.precio_m2) || 0;
+                      const priceB = Number(kpiDataB.precio_m2) || 0;
+                      const yieldA = Number(kpiDataA.rentabilidad) || 0;
+                      const yieldB = Number(kpiDataB.rentabilidad) || 0;
+                      const effortA = Number(kpiDataA.esfuerzo_compra) || 0;
+                      const effortB = Number(kpiDataB.esfuerzo_compra) || 0;
+                      const percentDifference = (a: number, b: number) => b ? `${a > b ? '+' : ''}${((a - b) / b * 100).toFixed(1)}%` : '—';
+                      const pointDifference = (a: number, b: number) => `${a > b ? '+' : ''}${((a - b) * 100).toFixed(1)} pt`;
+                      const rows = [
+                        { label: 'Precio m²', a: priceA ? `${formatNumber(priceA, 2)} €/m²` : '—', b: priceB ? `${formatNumber(priceB, 2)} €/m²` : '—', diff: percentDifference(priceA, priceB), aWins: priceA <= priceB },
+                        { label: 'Rentabilidad', a: yieldA ? `${(yieldA * 100).toFixed(2)}%` : '—', b: yieldB ? `${(yieldB * 100).toFixed(2)}%` : '—', diff: pointDifference(yieldA, yieldB), aWins: yieldA >= yieldB },
+                        { label: 'Esfuerzo', a: effortA ? `${effortA.toFixed(1)}%` : '—', b: effortB ? `${effortB.toFixed(1)}%` : '—', diff: pointDifference(effortA, effortB), aWins: effortA <= effortB },
+                      ];
+                      const pricePct = priceB ? Math.abs((priceA - priceB) / priceB * 100).toFixed(1) : null;
+                      const cheaper = priceA <= priceB ? selectedZoneA : selectedZoneB;
+                      const lessEffort = effortA <= effortB ? selectedZoneA : selectedZoneB;
+                      return <div className="v2-compare-summary">
+                        <table className="v2-compare-diff-table"><thead><tr><th>Métrica</th><th>{formatZoneOption(selectedZoneA)}</th><th>{formatZoneOption(selectedZoneB)}</th><th>Dif.</th></tr></thead>
+                          <tbody>{rows.map(row => <tr key={row.label}><th>{row.label}</th><td className={row.aWins ? 'winner' : ''}>{row.a}</td><td className={!row.aWins ? 'winner' : ''}>{row.b}</td><td>{row.diff}</td></tr>)}</tbody>
+                        </table>
+                        {pricePct && <p>{cheaper} tiene el alquiler un {pricePct}% más bajo; {lessEffort} exige menos esfuerzo sobre la renta media.</p>}
+                      </div>;
+                    })()}
                   </div>
                 </div>
               </div>
+              {compareZoneSheet && <div className="v2-zone-picker-backdrop" role="presentation" onClick={() => window.history.back()}>
+                <div className="v2-zone-picker-sheet" role="dialog" aria-modal="true" aria-label={`Seleccionar zona ${compareZoneSheet}`} onClick={event => event.stopPropagation()}>
+                  <div className="v2-zone-picker-head"><div><strong>Seleccionar zona {compareZoneSheet}</strong><span>Busca por distrito o barrio</span></div><button type="button" aria-label="Cerrar" onClick={() => window.history.back()}>×</button></div>
+                  <input autoFocus value={compareZoneSearch} onChange={event => setCompareZoneSearch(event.target.value)} placeholder="Buscar zona…" aria-label="Buscar zona" />
+                  <div className="v2-zone-picker-options" role="listbox">
+                    {(compareLevel === 'Distritos' ? availableDistricts : availableBarrios)
+                      .filter(zone => zone !== 'Todos' && formatZoneOption(zone).toLocaleLowerCase('es').includes(compareZoneSearch.toLocaleLowerCase('es')))
+                      .map(zone => <button type="button" role="option" aria-selected={zone === (compareZoneSheet === 'A' ? selectedZoneA : selectedZoneB)} key={zone} onClick={() => {
+                        if (compareZoneSheet === 'A') setSelectedZoneA(zone); else setSelectedZoneB(zone);
+                        window.history.back();
+                      }}>{formatZoneOption(zone)}</button>)}
+                  </div>
+                </div>
+              </div>}
             </section>            </div>
         ))}
       </main>
