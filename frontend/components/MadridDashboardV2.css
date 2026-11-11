@@ -849,9 +849,9 @@
   .v2-mobile-filter-chips { display: flex; min-width: 0; gap: 5px; overflow-x: auto; }
   .v2-mobile-filter-chips button { min-height: 32px; padding: 0 9px; border: 1px solid rgba(186,204,214,.25); border-radius: 999px; background: rgba(255,255,255,.06); color: #fff; white-space: nowrap; font-size: 12px; }
   .v2-mobile-filter-trigger b { min-width: 19px; height: 19px; display: grid; place-items: center; border-radius: 50%; background: #00e5ee; color: #03172b; font-size: 11px; }
-  .v2-mobile-section-nav { position: sticky; top: 68px; z-index: 1250; display: flex; height: 44px; gap: 4px; overflow-x: auto; padding: 0 10px; border-bottom: 1px solid rgba(186,204,214,.14); background: rgba(2,20,43,.96); backdrop-filter: blur(14px); transform: none; opacity: 1; pointer-events: auto; scrollbar-width: none; }
+  .v2-mobile-section-nav { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); height: 44px; gap: 0; overflow: visible; padding: 0 8px; border-bottom: 1px solid rgba(186,204,214,.14); background: rgba(2,20,43,.96); }
   .v2-mobile-section-nav.is-visible { height: 44px; transform: none; opacity: 1; pointer-events: auto; }
-  .v2-mobile-section-nav button { flex: 0 0 auto; min-height: 42px; padding: 0 10px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #eaf5ff; font-size: 12px; font-weight: 650; }
+  .v2-mobile-section-nav button { min-width: 0; min-height: 42px; padding: 0 3px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #eaf5ff; font-size: 11px; font-weight: 650; white-space: nowrap; }
   .v2-mobile-section-nav button:active { border-bottom-color: #00e5ee; }
   .v2-root:has(.v2-mobile-filters-open) .v2-mobile-profile-nav,
   .v2-root:has(.v2-mobile-filters-open) .v2-mobile-section-nav { display: none !important; }
@@ -3072,9 +3072,7 @@
 @media (max-width: 768px) {
   .v2-root .v2-mobile-filter-summary { padding: 0; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
   .v2-root .site-header { display: flex !important; position: sticky !important; top: 0 !important; z-index: 1500 !important; min-height: 68px !important; }
-  .v2-root .v2-mobile-filter-bar { top: 112px; }
-  .v2-root .v2-mobile-section-nav { top: 68px; height: 44px; padding-top: 0; padding-bottom: 0; border-bottom: 1px solid rgba(186,204,214,.14); transform: none; opacity: 1; pointer-events: auto; }
-  .v2-root .v2-mobile-section-nav.is-visible { height: 44px; padding-top: 0; padding-bottom: 0; border-bottom: 1px solid rgba(186,204,214,.14); }
+  .v2-root .v2-mobile-section-nav { height: 44px; padding-top: 0; padding-bottom: 0; border-bottom: 1px solid rgba(186,204,214,.14); }
   .v2-root .v2-mobile-profile-nav { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
   .v2-root .v2-mobile-profile-nav { min-height: 64px; }
   .v2-root .v2-mobile-profile-nav button { color: #d9eaf2; }
@@ -3117,9 +3115,9 @@
 
 @media (max-width: 768px) {
   .v2-root .v2-mobile-filter-bar {
-    position: sticky;
-    top: 0;
-    z-index: 1300;
+    position: relative;
+    top: auto;
+    z-index: auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -3136,9 +3134,10 @@
   .v2-mobile-filter-summary span { overflow: hidden; color: #baccd6; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
   .v2-mobile-filter-trigger {
     display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; gap: 7px;
-    min-height: 40px; padding: 0 13px; border: 1px solid rgba(0, 240, 255, .55); border-radius: 12px;
-    background: rgba(0, 240, 255, .1); color: #eaffff; font-size: 12px; font-weight: 700;
+    min-height: 40px; padding: 0 4px; border: 0; border-radius: 6px;
+    background: transparent; color: #eaf5ff; font-size: 12px; font-weight: 700; box-shadow: none;
   }
+  .v2-root .v2-mobile-filter-trigger:focus-visible { outline: 2px solid #00e5ee; outline-offset: 3px; }
   .v2-mobile-filter-backdrop { position: fixed; inset: 0; z-index: 1600; width: 100%; height: 100%; border: 0; background: rgba(0, 8, 19, .68); }
   .v2-root .v2-filters {
     position: fixed; inset: auto 0 0; z-index: 1601; display: flex; flex-direction: column; width: 100%;
