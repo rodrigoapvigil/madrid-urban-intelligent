@@ -394,8 +394,7 @@ const MadridMap: React.FC<MapProps> = ({
             popupContent += `<div style="color: rgba(186, 204, 214, 0.9); font-size: 13px; line-height: 1.6;">`;
             if (rank > 0) {
               const deltaLabel = `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}% frente a la media`;
-              const totalAreas = Array.isArray(geoData.features) ? geoData.features.length : comparable.length;
-              popupContent += `<div style="color: #BACCD6; margin-bottom: 5px; font-size: 12px;">${rank}.º de ${comparable.length} con datos (${totalAreas} zonas) · ${deltaLabel}</div>`;
+              popupContent += `<div style="color: #BACCD6; margin-bottom: 5px; font-size: 12px;">Puesto ${rank} de ${comparable.length} · ${deltaLabel.replace('frente a la media', 'vs media')}</div>`;
             }
             
             if (selectedProfile === 'Alquiler') {
@@ -418,32 +417,38 @@ const MadridMap: React.FC<MapProps> = ({
           }
           popupContent += `</div>`;
           
-          layer.bindPopup(popupContent, {
-            className: 'apple-popup',
-            closeButton: false,
-            offset: L.point(0, -10),
-            autoPan: true,
-            keepInView: true,
-            autoPanPaddingTopLeft: L.point(24, 24),
-            autoPanPaddingBottomRight: L.point(24, 24),
-            maxWidth: 320,
-            minWidth: 220
-          });
+          const hasHoverPointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+          if (hasHoverPointer) {
+            layer.bindPopup(popupContent, {
+              className: 'apple-popup',
+              closeButton: true,
+              offset: L.point(0, -10),
+              autoPan: true,
+              keepInView: true,
+              autoPanPaddingTopLeft: L.point(24, 24),
+              autoPanPaddingBottomRight: L.point(24, 24),
+              maxWidth: 320,
+              minWidth: 220
+            });
+          }
           
           layer.on({
             mouseover: (e) => {
+              if (!hasHoverPointer) return;
               const l = e.target;
               l.setStyle({
                 weight: 2,
                 color: '#00F0FF',
-                fillColor: `url(#dot-pat-${containerId}-hover)`,
+                fillColor: '#00F0FF',
                 fillOpacity: 1
               });
               l.openPopup();
             },
             mouseout: (e) => {
-              geoJsonLayerRef.current?.resetStyle(e.target);
-              e.target.closePopup();
+              if (hasHoverPointer) {
+                geoJsonLayerRef.current?.resetStyle(e.target);
+                e.target.closePopup();
+              }
             },
             click: () => {
               if (type === 'districts') {

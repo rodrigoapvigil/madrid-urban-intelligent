@@ -3493,6 +3493,43 @@ body.v2-fullscreen-open .v2-root .v2-filters { display: none !important; }
 .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend-title { font-size: 10px; }
 .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend-labels { display: flex !important; flex-wrap: nowrap; justify-content: center; gap: 6px 12px; font-size: 9px; }
 .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend small { display: none; }
+.v2-root .v2-map-bottom-sheet { position: relative; inset: auto; z-index: 2; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 8px 12px; width: 100%; max-width: 100%; margin: 10px 0 0; padding: 12px; border: 1px solid rgba(0,229,238,.24); border-radius: 14px; background: rgba(7,27,51,.98); box-shadow: none; }
+.v2-root .v2-map-bottom-sheet .v2-map-sheet-heading { display: grid; gap: 3px; min-width: 0; }
+.v2-root .v2-map-bottom-sheet .v2-map-sheet-heading strong { font-size: 14px; }
+.v2-root .v2-map-bottom-sheet .v2-map-sheet-heading span { font-size: 11px; }
+.v2-root .v2-map-bottom-sheet .v2-map-sheet-metrics { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
+.v2-root .v2-map-bottom-sheet .v2-map-sheet-metrics > span { display: grid; gap: 3px; min-width: 0; padding: 9px; border-radius: 10px; background: rgba(255,255,255,.045); }
+.v2-root .v2-map-bottom-sheet .v2-map-sheet-metrics strong { color: #eaf5ff; font-size: 15px; }
+.v2-root .v2-map-bottom-sheet .v2-map-sheet-metrics small { color: #9fb3c7; font-size: 10px; }
+.v2-root .v2-map-bottom-sheet .v2-map-sheet-delta { display: inline-flex; align-items: center; justify-self: start; padding: 4px 8px; border-radius: 999px; background: rgba(0,229,238,.1); color: #8ef5ff; font-size: 11px; font-weight: 700; }
+.v2-root .v2-map-bottom-sheet .v2-map-sheet-actions { display: flex; grid-column: 1 / -1; justify-content: space-between; gap: 8px; }
+.v2-root .v2-map-bottom-sheet .v2-map-sheet-close { position: absolute; top: 7px; right: 8px; width: 32px; height: 32px; padding: 0; font-size: 20px; }
+.v2-root .v2-heatmap-search { width: min(100%,280px); min-height: 38px; margin: 0 0 8px; padding: 0 11px; border: 1px solid rgba(186,204,214,.18); border-radius: 10px; background: rgba(1,16,36,.72); color: #eaf5ff; font: inherit; font-size: 12px; }
+.v2-root .v2-heatmap-scroll { position: relative; max-height: min(60vh,704px); overflow: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.v2-root .v2-heatmap-table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; }
+.v2-root .v2-heatmap-table th, .v2-root .v2-heatmap-table td { height: 44px; min-width: 56px; padding: 0 8px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.v2-root .v2-heatmap-table th { position: sticky; top: 0; z-index: 3; background: #0b2a4a; }
+.v2-root .v2-heatmap-table th:first-child, .v2-root .v2-heatmap-table td:first-child { position: sticky; left: 0; z-index: 2; width: 120px; min-width: 120px; max-width: 120px; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.v2-root .v2-heatmap-table th:first-child { z-index: 4; }
+.v2-root .v2-heatmap-table .zona-name { background: #061426 !important; text-decoration: none !important; }
+.v2-root .v2-heatmap-extra-row { display: none; }
+.v2-root .v2-heatmap-more { min-height: 38px; margin: 8px 0; padding: 0 12px; border: 1px solid rgba(0,229,238,.32); border-radius: 10px; background: rgba(0,229,238,.08); color: #8ef5ff; font-weight: 700; }
+body.v2-fullscreen-open .v2-mobile-profile-nav,
+body.v2-fullscreen-open .site-header,
+body.v2-fullscreen-open .auros-footer,
+body.v2-fullscreen-open footer { display: none !important; }
+.v2-root .v2-is-fullscreen { z-index: 2147483000 !important; }
+.v2-root .v2-is-fullscreen.v2-heatmap-card { display: flex !important; flex-direction: column; overflow: hidden !important; padding: max(10px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(58px,calc(58px + env(safe-area-inset-bottom))) max(12px,env(safe-area-inset-left)) !important; }
+.v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-search { flex: 0 0 38px; }
+.v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-scroll { flex: 1 1 auto; width: 100%; min-height: 0; max-height: none !important; overflow: auto !important; }
+.v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-extra-row { display: table-row !important; }
+.v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-more { display: none; }
+.v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-head > button:not(.v2-expand-button) { display: none !important; }
+.v2-root .v2-is-fullscreen.v2-map-card { z-index: 2147483000 !important; }
+.v2-root .v2-is-fullscreen.v2-overlay-wrapper { z-index: 2147483000 !important; }
+@media (max-width: 768px) {
+  .v2-root .v2-map-bottom-sheet { position: relative; inset: auto; display: grid; width: 100%; max-width: 100%; margin-top: 10px; }
+}
 .v2-root .v2-is-fullscreen.v2-overlay-wrapper {
   display: grid !important; grid-template-rows: 40px minmax(0,1fr) !important; gap: 0 !important;
   min-height: 0 !important; padding: max(6px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(58px,calc(58px + env(safe-area-inset-bottom))) max(12px,env(safe-area-inset-left)) !important;

@@ -377,6 +377,7 @@ const formatNumber = (value: number, maximumFractionDigits = 0) =>
   new Intl.NumberFormat('es-ES', { maximumFractionDigits }).format(value);
 const formatEuro = (value: number, maximumFractionDigits = 0) => `${formatNumber(value, maximumFractionDigits)} €`;
 const formatZoneOption = (value: string) => value === 'Todos' ? 'Madrid (media)' : formatMadridName(value);
+const normalizeZoneLabel = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
 
 const getNiceChartScale = (datasets: Array<Array<number | null>>) => {
   const values = datasets.flat().filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
@@ -847,6 +848,8 @@ const MadridDashboardV2: React.FC = () => {
   const [affordabilityData, setAffordabilityData] = useState<any[]>([]);
   const [seasonalTrend, setSeasonalTrend] = useState<any[]>([]);
   const [heatmapData, setHeatmapData] = useState<any[]>([]);
+  const [heatmapSearch, setHeatmapSearch] = useState('');
+  const [heatmapVisibleCount, setHeatmapVisibleCount] = useState(15);
   const [rankingLevel, setRankingLevel] = useState<'Distritos' | 'Barrios'>('Distritos');
   const [rankingMetric, setRankingMetric] = useState<'total' | 'unit'>('total');
   const [scatterData, setScatterData] = useState<any[]>([]);
@@ -900,6 +903,18 @@ const MadridDashboardV2: React.FC = () => {
   );
   const heatmapMin = heatmapValues.length ? Math.min(...heatmapValues) : 0;
   const heatmapMax = heatmapValues.length ? Math.max(...heatmapValues) : 0;
+  const filteredHeatmapRows = useMemo(() => {
+    const query = heatmapSearch.trim().toLocaleLowerCase('es');
+    return query ? heatmapData.filter(row => String(row.zona || '').toLocaleLowerCase('es').includes(query)) : heatmapData;
+  }, [heatmapData, heatmapSearch]);
+  const mapFeatureItem = selectedMapFeature
+    ? [...mapData.districts, ...mapData.neighborhoods].find(item => [item.distrito, item.barrio].filter(Boolean).some(name => normalizeZoneLabel(String(name)) === normalizeZoneLabel(selectedMapFeature)))
+    : null;
+  const mapFeatureIsDistrict = Boolean(selectedMapFeature && mapData.districts.some(item => normalizeZoneLabel(String(item.distrito || '')) === normalizeZoneLabel(selectedMapFeature)));
+  const mapFeatureRows = mapFeatureIsDistrict ? mapData.districts : mapData.neighborhoods;
+  const mapFeatureRank = mapFeatureItem ? [...mapFeatureRows].sort((a, b) => Number(b.precio_m2 || 0) - Number(a.precio_m2 || 0)).findIndex(item => normalizeZoneLabel(String(mapFeatureIsDistrict ? item.distrito : item.barrio || '')) === normalizeZoneLabel(selectedMapFeature)) + 1 : 0;
+  const mapFeatureAverage = mapFeatureRows.length ? mapFeatureRows.reduce((sum, item) => sum + Number(item.precio_m2 || 0), 0) / mapFeatureRows.length : 0;
+  const mapFeatureDelta = mapFeatureAverage && mapFeatureItem ? (Number(mapFeatureItem.precio_m2 || 0) - mapFeatureAverage) / mapFeatureAverage * 100 : null;
   const loadingStages = [
     { label: 'Conectando con la API', icon: Activity },
     { label: 'Procesando datos del mercado', icon: Database },
@@ -3405,8 +3420,10 @@ const MadridDashboardV2: React.FC = () => {
                     </div>
                   </div>
                   {selectedMapFeature && <div className="v2-map-bottom-sheet" role="status">
-                    <div><strong>{selectedMapFeature}</strong><span>{selectedBarrio !== 'Todos' ? 'Barrio seleccionado en los filtros' : 'Distrito seleccionado · mapa ampliado a sus barrios'}</span></div>
-                    <button type="button" onClick={() => { setSelectedMapFeature(null); setSelectedBarrio('Todos'); setSelectedDistrict('Todos'); setMapLevel('districts'); }}>Ver Madrid</button>
+                    <div className="v2-map-sheet-heading"><strong>{selectedMapFeature}</strong><span>{mapFeatureRank ? `Puesto ${mapFeatureRank} de ${mapFeatureRows.length}` : 'Zona seleccionada'}</span></div>
+                    <div className="v2-map-sheet-metrics"><span><strong>{mapFeatureItem?.precio_m2 ? `${formatNumber(Number(mapFeatureItem.precio_m2), 1)} €/m²` : '—'}</strong><small>{periodStatusLabel}</small></span><span><strong>{activeProfile.id === 'inversion' && mapFeatureItem?.rentabilidad ? `${(Number(mapFeatureItem.rentabilidad) * 100).toFixed(1)}%` : mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_vivienda), 0)} ${activeProfile.id === 'alquiler' ? '€/mes' : '€'}` : '—'}</strong><small>{activeProfile.id === 'inversion' ? 'Rentabilidad' : activeProfile.id === 'alquiler' ? 'Alquiler medio' : 'Precio medio'}</small></span></div>
+                    {mapFeatureDelta !== null && <span className="v2-map-sheet-delta">{mapFeatureDelta > 0 ? '+' : ''}{mapFeatureDelta.toFixed(1)}% frente a la media</span>}
+                    <div className="v2-map-sheet-actions"><button type="button" onClick={() => { const level = mapFeatureIsDistrict ? 'Distritos' : 'Barrios'; const zones = level === 'Distritos' ? availableDistricts : availableBarrios; setCompareLevel(level); setSelectedZoneA(selectedMapFeature); if (selectedZoneB === selectedMapFeature) setSelectedZoneB(zones.find(zone => zone !== selectedMapFeature) || 'Todos'); setSelectedMapFeature(null); scrollToDashboardSection('compare'); }}>Ver evolución →</button><button type="button" onClick={() => { setSelectedMapFeature(null); setSelectedBarrio('Todos'); setSelectedDistrict('Todos'); setMapLevel('districts'); }}>Ver Madrid</button></div>
                     <button type="button" className="v2-map-sheet-close" aria-label="Cerrar ficha" onClick={() => setSelectedMapFeature(null)}>×</button>
                   </div>}
                   <div className="v2-map-legend" aria-label="Leyenda del mapa por precio por metro cuadrado">
@@ -3606,6 +3623,7 @@ const MadridDashboardV2: React.FC = () => {
                       * Nota: Los meses de {selectedYear} se muestran como <strong>estimaciones</strong> basadas en datos históricos. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un valor €/m² más alto.'}
                     </div>
                   )}
+                  <input className="v2-heatmap-search" type="search" value={heatmapSearch} onChange={event => { setHeatmapSearch(event.target.value); setHeatmapVisibleCount(15); }} placeholder={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'}…`} aria-label={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'} en el mapa de calor`} />
                   <div className="v2-heatmap-scroll">
                     <table className="v2-heatmap-table">
                       <thead>
@@ -3615,13 +3633,13 @@ const MadridDashboardV2: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {Array.isArray(heatmapData) && heatmapData.length > 0 ? (
-                          heatmapData.map((row, idx) => {
+                        {filteredHeatmapRows.length > 0 ? (
+                          filteredHeatmapRows.map((row, idx) => {
                             let cellColor = '#00DDF0';
                             if (activeProfile.id === 'venta' || activeProfile.id === 'compra') cellColor = '#FF8B6A';
 
                             return (
-                              <tr key={idx}>
+                              <tr key={idx} className={idx >= heatmapVisibleCount ? 'v2-heatmap-extra-row' : undefined}>
                                 <td className="zona-name">{row.zona}</td>
                                 {[...Array(12)].map((_, i) => {
                                   const val = row[`m${i+1}`];
@@ -3632,8 +3650,8 @@ const MadridDashboardV2: React.FC = () => {
                                     <td key={i+1} style={{ backgroundColor: bgColor, color: textColor }}>
                                       {val > 0
                                         ? activeProfile.id === 'inversion'
-                                          ? `${formatNumber(val * 100, 0)} %`
-                                          : `${formatNumber(val, 0)}`
+                                          ? formatNumber(val * 100, 1)
+                                          : formatNumber(val, 1)
                                         : '-'}
                                     </td>
                                   );
@@ -3647,6 +3665,7 @@ const MadridDashboardV2: React.FC = () => {
                         )}
                       </tbody>
                     </table>
+                    {filteredHeatmapRows.length > heatmapVisibleCount && <button className="v2-heatmap-more" type="button" onClick={() => setHeatmapVisibleCount(count => count + 15)}>Mostrar 15 más</button>}
                   </div>
                 </div>
               </div>
