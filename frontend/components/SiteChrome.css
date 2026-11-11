@@ -768,3 +768,47 @@
     letter-spacing: 0.06em !important;
   }
 }
+
+/* Brand-aligned refinements: pale glass CTA and understated mobile menu. */
+.mi-header__cta {
+  border-color: rgba(224, 242, 255, 0.72);
+  color: #06162d !important;
+  background: linear-gradient(110deg, #d9fbff 0%, #e9f1ff 72%, #f1e5ff 100%);
+  box-shadow: 0 5px 18px rgba(140, 198, 232, 0.18);
+}
+.mi-header__cta:hover {
+  background: linear-gradient(110deg, #e8fdff 0%, #f0f5ff 72%, #f7edff 100%);
+  filter: none;
+  box-shadow: 0 7px 22px rgba(140, 198, 232, 0.24);
+}
+.mi-header__cta svg { stroke: #06162d; }
+.mi-header__menu-btn {
+  border: 0;
+  background: rgba(24, 57, 87, 0.72);
+  box-shadow: none;
+}
+.mi-header__menu-btn:hover {
+  border: 0;
+  background: rgba(39, 77, 108, 0.78);
+  box-shadow: 0 4px 14px rgba(0, 10, 30, 0.18);
+}
+.mi-header__menu-btn:focus-visible {
+  outline: 2px solid rgba(217, 251, 255, 0.9);
+  outline-offset: 3px;
+}
+.mi-header__menu-btn--close { border: 0; }
+.mi-header__menu-btn--close:hover { border: 0; color: #fff; }
+.auros-footer__cta-button {
+  min-height: 52px !important;
+  padding: 12px 28px !important;
+  border: 1px solid rgba(224, 242, 255, 0.72) !important;
+  border-radius: 8px !important;
+  background: linear-gradient(110deg, #d9fbff 0%, #e9f1ff 72%, #f1e5ff 100%) !important;
+  color: #06162d !important;
+  box-shadow: 0 5px 18px rgba(140, 198, 232, 0.18) !important;
+}
+.auros-footer__cta-button:hover {
+  background: linear-gradient(110deg, #e8fdff 0%, #f0f5ff 72%, #f7edff 100%) !important;
+  color: #06162d !important;
+  box-shadow: 0 7px 22px rgba(140, 198, 232, 0.24) !important;
+}

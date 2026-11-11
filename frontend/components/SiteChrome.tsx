@@ -60,7 +60,7 @@ export function SiteHeader({
         {/* Brand: Logo + Title */}
         <Link href="/" className="mi-brand site-brand" aria-label="DMIYC - Decide Madrid: Invierte Y Compra">
           <span className="mi-brand__mark">
-            <Image src="/decide-madrid-mark.svg" alt="DMIYC" width={40} height={40} priority unoptimized />
+            <Image src="/dmiyc-logo-glow-transparent.png" alt="DMIYC" width={40} height={40} priority unoptimized />
           </span>
           <span className="mi-brand__text">
             <strong className="mi-brand__acronym">DMIYC</strong>
@@ -143,7 +143,7 @@ export function SiteHeader({
               aria-label="DMIYC - Inicio"
             >
               <span className="mi-brand__mark">
-                <Image src="/decide-madrid-mark.svg" alt="DMIYC" width={36} height={36} priority unoptimized />
+                <Image src="/dmiyc-logo-glow-transparent.png" alt="DMIYC" width={36} height={36} priority unoptimized />
               </span>
               <span className="mi-brand__text">
                 <strong className="mi-brand__acronym">DMIYC</strong>
@@ -254,10 +254,10 @@ export function SiteHeader({
 
               <div className="mi-mobile-drawer__socials">
                 <a
-                  href="https://www.linkedin.com/in/rodrigo-vigil/"
+                  href="https://www.linkedin.com/in/rodrigoalonzopenavigil"
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Perfil de LinkedIn de Rodrigo Vigil"
+                  aria-label="Perfil de LinkedIn de Rodrigo Alonso Peña Vigil"
                   className="mi-mobile-drawer__social-btn"
                 >
                   <Linkedin size={20} />
@@ -315,10 +315,10 @@ export function SiteFooter() {
 
           <div className="auros-footer__socials">
             <a
-              href="https://www.linkedin.com/in/rodrigo-vigil/"
+              href="https://www.linkedin.com/in/rodrigoalonzopenavigil"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Perfil de LinkedIn de Rodrigo Vigil"
+              aria-label="Perfil de LinkedIn de Rodrigo Alonso Peña Vigil"
               className="auros-footer__social-btn"
             >
               <Linkedin size={18} />
