@@ -668,7 +668,6 @@ const MadridDashboardV2: React.FC = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [mapLevel, setMapLevel] = useState<'districts' | 'neighborhoods'>('districts');
-  const [sectionNavVisible, setSectionNavVisible] = useState(true);
   const [isProfilePickerOpen, setIsProfilePickerOpen] = useState(false);
   const [draftFilters, setDraftFilters] = useState({ year: '', month: '', district: 'Todos', barrio: 'Todos' });
   const [draftBarrios, setDraftBarrios] = useState<string[]>(['Todos']);
@@ -866,17 +865,6 @@ const MadridDashboardV2: React.FC = () => {
       document.body.style.overflow = previousOverflow;
     };
   }, [isMobileFiltersOpen]);
-
-  useEffect(() => {
-    let previousY = window.scrollY;
-    const handleScroll = () => {
-      const currentY = window.scrollY;
-      setSectionNavVisible(currentY < 140 || currentY < previousY - 4);
-      previousY = currentY;
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Fetch KPIs and Series
   useEffect(() => {
@@ -2412,7 +2400,7 @@ const MadridDashboardV2: React.FC = () => {
         </div>
       </div>
 
-      <nav className={`v2-mobile-section-nav ${sectionNavVisible ? 'is-visible' : ''}`} aria-label="Secciones del cuadro de mando">
+      <nav className="v2-mobile-section-nav is-visible" aria-label="Secciones del cuadro de mando">
         {[
           ['Resumen', 'summary'], ['Mapa', 'map'], ['Ranking', 'ranking'], ['Heatmap', 'heatmap'], ['Comparar', 'compare'],
         ].map(([label, section]) => <button key={section} type="button" onClick={() => scrollToDashboardSection(section)}>{label}</button>)}
@@ -3234,6 +3222,7 @@ const MadridDashboardV2: React.FC = () => {
                       <span>Distritos</span>
                       <div className="v2-map-placeholder" style={{ border: 'none' }}>
                         <MadridMap
+                          key={`districts-${mapLevel}`}
                           type="districts"
                           data={mapData.districts}
                           selectedYear={Number(selectedYear)}
@@ -3249,6 +3238,7 @@ const MadridDashboardV2: React.FC = () => {
                       <span>Barrios</span>
                       <div className="v2-map-placeholder" style={{ border: 'none' }}>
                         <MadridMap
+                          key={`neighborhoods-${mapLevel}`}
                           type="neighborhoods"
                           data={mapData.neighborhoods}
                           selectedYear={Number(selectedYear)}

@@ -226,6 +226,12 @@ const MadridMap: React.FC<MapProps> = ({
   const accentColor = getProfileAccentColor(selectedProfile);
   const profileKey = getProfileKey(selectedProfile);
 
+  useEffect(() => () => {
+    mapRef.current?.remove();
+    mapRef.current = null;
+    geoJsonLayerRef.current = null;
+  }, []);
+
   const style = useCallback((feature: any) => {
     const props = feature.properties || {};
     const name = props.barrio || props.name || props.distrito_nombre || props.nombre || props.distrito;
