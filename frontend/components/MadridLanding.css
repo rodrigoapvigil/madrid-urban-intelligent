@@ -1789,3 +1789,15 @@ footer.auros-footer,
     font-size: clamp(42.5px, 5.25vw, 75px);
   }
 }
+/* Mobile hero refinement: lower the message and let the Madrid panorama lead. */
+@media (max-width: 650px) {
+  .mi-home .mi-hero__content {
+    padding-top: clamp(101px, 15vh, 136px);
+  }
+
+  .mi-home .mi-hero-artwork__canvas {
+    left: -62.5%;
+    width: 225%;
+    height: 62.5%;
+  }
+}
