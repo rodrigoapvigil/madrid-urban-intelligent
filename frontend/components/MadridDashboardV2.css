@@ -963,14 +963,14 @@
   overflow-x: auto;
   border-radius: 12px;
   border: 1px solid var(--v2-border);
-  max-height: 450px;
-  overflow-y: auto;
+  max-height: none;
+  overflow-y: visible;
 }
 
 .v2-heatmap-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 10px;
+  font-size: 12px;
 }
 
 .v2-heatmap-table th {
@@ -983,7 +983,7 @@
 }
 
 .v2-heatmap-table td {
-  padding: 6px 10px;
+  padding: 8px 10px;
   text-align: center;
   border-bottom: 0.5px solid color-mix(in srgb, var(--azul-noche) 3%, transparent);
 }
@@ -2769,11 +2769,10 @@
 
 /* Crystal navigation: keep the dashboard header visually continuous with the landing page. */
 .v2-root .site-header {
-  background:
-    linear-gradient(180deg, rgba(2, 20, 43, 0.68) 0%, rgba(2, 20, 43, 0.42) 100%),
-    radial-gradient(ellipse at 18% -80%, rgba(0, 240, 255, 0.16), transparent 52%) !important;
-  border-bottom: 1px solid rgba(186, 204, 214, 0.16) !important;
-  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.18);
+  /* Keep the dashboard chrome on the same navy/translucent surface as the landing page. */
+  background: linear-gradient(180deg, rgba(2, 20, 43, 0.78) 0%, rgba(2, 20, 43, 0.58) 100%) !important;
+  border-bottom: 1px solid rgba(186, 204, 214, 0.10) !important;
+  box-shadow: none;
   backdrop-filter: blur(22px) saturate(145%);
   -webkit-backdrop-filter: blur(22px) saturate(145%);
 }
@@ -2875,12 +2874,15 @@
 .v2-map-legend-scale { display: flex; align-items: center; gap: 10px; }
 .v2-map-legend-swatches { display: flex; flex: 1; height: 9px; overflow: hidden; border-radius: 999px; }
 .v2-map-legend-swatches i { flex: 1; }
-.v2-map-legend-swatches .tier-1 { background: #01132b; }
-.v2-map-legend-swatches .tier-2 { background: #011736; }
-.v2-map-legend-swatches .tier-3 { background: #011c42; }
-.v2-map-legend-swatches .tier-4 { background: #012250; }
+.v2-map-legend-swatches .tier-1 { background: #08254a; }
+.v2-map-legend-swatches .tier-2 { background: #0a3b68; }
+.v2-map-legend-swatches .tier-3 { background: #075d86; }
+.v2-map-legend-swatches .tier-4 { background: #058caf; }
 .v2-map-legend-swatches .tier-5 { background: #00c8e6; }
-.v2-map-legend small { color: #8fa8b6; font-size: 11px; }
+.v2-map-legend-labels { display: flex; flex-wrap: wrap; gap: 8px 14px; color: #d4e5ed; font-size: 12px; }
+.v2-map-legend-labels .no-data-label { display: inline-flex; align-items: center; gap: 5px; }
+.v2-map-legend-labels .no-data-label i { width: 14px; height: 10px; display: inline-block; background: repeating-linear-gradient(135deg, #17263b 0 4px, #71859a 4px 5px); border-radius: 2px; }
+.v2-map-legend small { color: #b0c4cf; font-size: 12px; }
 
 @media (max-width: 900px) {
   .v2-root .v2-filters { top: 76px; }

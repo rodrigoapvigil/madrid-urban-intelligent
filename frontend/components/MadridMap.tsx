@@ -13,6 +13,7 @@ interface MapProps {
   selectedDistrict: string | null;
   selectedBarrio?: string | null;
   onDistrictClick: (districtName: string | null) => void;
+  onBarrioClick?: (barrioName: string | null) => void;
 }
 
 const normalize = (str: string) => {
@@ -49,12 +50,11 @@ const getChoroplethTier = (val: number, profile: string): number => {
   const p = normalize(profile);
 
   if (p.includes('alquiler')) {
-    if (val >= 24) return 5;
-    if (val >= 21) return 4;
-    if (val >= 18) return 3;
-    if (val >= 15) return 2;
-    if (val >= 12) return 1;
-    return 0;
+    if (val >= 25) return 5;
+    if (val >= 22) return 4;
+    if (val >= 19) return 3;
+    if (val >= 16) return 2;
+    return 1;
   }
 
   if (p.includes('compra') || p.includes('venta')) {
@@ -95,7 +95,7 @@ const TIER_CONFIGS: TierConfig[] = [
   {
     size: 13,
     r: 1.05,
-    baseFill: '#011024',
+    baseFill: '#08254a',
     dotColor: {
       alquiler: '#023868',
       compra: '#201844',
@@ -106,7 +106,7 @@ const TIER_CONFIGS: TierConfig[] = [
   {
     size: 10.5,
     r: 1.25,
-    baseFill: '#01132b',
+    baseFill: '#0a3b68',
     dotColor: {
       alquiler: '#025894',
       compra: '#3c207b',
@@ -117,7 +117,7 @@ const TIER_CONFIGS: TierConfig[] = [
   {
     size: 8.8,
     r: 1.4,
-    baseFill: '#011736',
+    baseFill: '#075d86',
     dotColor: {
       alquiler: '#0077b6',
       compra: '#631fa0',
@@ -128,7 +128,7 @@ const TIER_CONFIGS: TierConfig[] = [
   {
     size: 7.2,
     r: 1.55,
-    baseFill: '#011c42',
+    baseFill: '#058caf',
     dotColor: {
       alquiler: '#0099cc',
       compra: '#8c24e6',
@@ -139,7 +139,7 @@ const TIER_CONFIGS: TierConfig[] = [
   {
     size: 6.0,
     r: 1.75,
-    baseFill: '#012250',
+    baseFill: '#00c8e6',
     dotColor: {
       alquiler: '#00c8e6',
       compra: '#b060ff',
@@ -150,7 +150,7 @@ const TIER_CONFIGS: TierConfig[] = [
   {
     size: 4.8,
     r: 1.9,
-    baseFill: '#012b66',
+    baseFill: '#00f0ff',
     dotColor: {
       alquiler: '#00f0ff',
       compra: '#d8b4fe',
@@ -179,6 +179,9 @@ function getPatternDefsMarkup(type: string): string {
       markup += `<pattern id="dot-pat-${type}-${prof}-${index}" width="${s}" height="${s}" patternUnits="userSpaceOnUse"><rect width="${s}" height="${s}" fill="${tier.baseFill}" fill-opacity="0.94" /><circle cx="${p1}" cy="${p1}" r="${r}" fill="${c}" /><circle cx="${p2}" cy="${p2}" r="${r}" fill="${c}" />${glowHtml}</pattern>`;
     });
   }
+
+  // Explicit pattern for areas without an observation in the selected period.
+  markup += `<pattern id="no-data-pat-${type}" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#17263b" /><path d="M-2 2L2-2M0 8L8 0M6 10L10 6" stroke="#71859a" stroke-width="1" opacity="0.65" /></pattern>`;
 
   // Hover pattern
   markup += `<pattern id="dot-pat-${type}-hover" width="5.0" height="5.0" patternUnits="userSpaceOnUse"><rect width="5.0" height="5.0" fill="#003566" fill-opacity="0.96" /><circle cx="1.25" cy="1.25" r="2.0" fill="#00f0ff" /><circle cx="1.25" cy="1.25" r="1.0" fill="#ffffff" /><circle cx="3.75" cy="3.75" r="2.0" fill="#00f0ff" /><circle cx="3.75" cy="3.75" r="1.0" fill="#ffffff" /></pattern>`;
@@ -215,7 +218,7 @@ let cachedBarriosGeoJson: any = null;
 
 const MadridMap: React.FC<MapProps> = ({ 
   type, data, selectedYear, selectedMonth, selectedProfile, 
-  selectedDistrict, selectedBarrio, onDistrictClick 
+  selectedDistrict, selectedBarrio, onDistrictClick, onBarrioClick
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
@@ -256,13 +259,13 @@ const MadridMap: React.FC<MapProps> = ({
     const tier = getChoroplethTier(val, selectedProfile);
     return {
       // Use five solid choropleth steps so the map reads as data, not texture.
-      fillColor: isSelected ? '#00F0FF' : TIER_CONFIGS[tier].baseFill,
+      fillColor: isSelected ? '#00F0FF' : item ? TIER_CONFIGS[tier].baseFill : `url(#no-data-pat-${type})`,
       weight: isSelected ? 2.5 : type === 'districts' ? 1.2 : 0.85,
       opacity: isExcluded ? 0.20 : 0.95,
       color: isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
       fillOpacity: isExcluded ? 0.25 : 1.0,
     };
-  }, [data, selectedDistrict, selectedBarrio, type, selectedProfile, profileKey]);
+  }, [data, selectedDistrict, selectedBarrio, type, selectedProfile]);
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -325,6 +328,7 @@ const MadridMap: React.FC<MapProps> = ({
           const districtName = props.distrito || props.nombre || props.name || props.distrito_nombre;
           
           const isDatePredicted = selectedYear > 2026 || (selectedYear === 2026 && !['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'].includes(selectedMonth));
+          const periodLabel = isDatePredicted ? 'Estimación' : 'Dato real';
           
           const item = data.find(d => {
             const dName = normalize(type === 'districts' ? d.distrito : d.barrio);
@@ -352,21 +356,22 @@ const MadridMap: React.FC<MapProps> = ({
             popupContent += `<div style="color: rgba(186, 204, 214, 0.9); font-size: 13px; line-height: 1.6;">`;
             if (rank > 0) {
               const deltaLabel = `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}% frente a la media`;
-              popupContent += `<div style="color: #BACCD6; margin-bottom: 5px; font-size: 12px;">${rank}.º de ${comparable.length} por €/m² · ${deltaLabel}</div>`;
+              const totalAreas = Array.isArray(geoData.features) ? geoData.features.length : comparable.length;
+              popupContent += `<div style="color: #BACCD6; margin-bottom: 5px; font-size: 12px;">${rank}.º de ${comparable.length} con datos (${totalAreas} zonas) · ${deltaLabel}</div>`;
             }
             
             if (selectedProfile === 'Alquiler') {
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² Alquiler:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtPrice(item.precio_m2)} €/m²${isDatePredicted ? ' (Proyección)' : ''}</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Alquiler Promedio:</span> <span style="color: #FFFFFF; font-weight: 600;">${fmtPrice(item.precio_vivienda)} €/mes${isDatePredicted ? ' (Proyección)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² Alquiler:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtPrice(item.precio_m2)} €/m² (${periodLabel})</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Alquiler Promedio:</span> <span style="color: #FFFFFF; font-weight: 600;">${fmtPrice(item.precio_vivienda)} €/mes (${periodLabel})</span></div>`;
             } else if (selectedProfile === 'Compra' || selectedProfile === 'Venta') {
               const label = selectedProfile === 'Compra' ? 'Compra' : 'Venta';
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² ${label}:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtPrice(item.precio_m2)} €/m²${isDatePredicted ? ' (Proyección)' : ''}</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Precio Vivienda:</span> <span style="color: #FFFFFF; font-weight: 600;">${fmtPrice(item.precio_vivienda)} €${isDatePredicted ? ' (Proyección)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² ${label}:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtPrice(item.precio_m2)} €/m² (${periodLabel})</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Precio Vivienda:</span> <span style="color: #FFFFFF; font-weight: 600;">${fmtPrice(item.precio_vivienda)} € (${periodLabel})</span></div>`;
             } else if (selectedProfile === 'Inversión') {
               const buyPriceM2 = item.precio_venta_m2 || item.precio_m2;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² Compra:</span> <span style="color: rgba(186, 204, 214, 0.95); font-weight: 600;">${fmtPrice(buyPriceM2)} €/m²${isDatePredicted ? ' (Proyección)' : ''}</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Rentabilidad:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtYield(item.rentabilidad)}${isDatePredicted ? ' (Proyección)' : ''}</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Alquiler Estimado:</span> <span style="color: #00F0FF; font-weight: 600;">${fmtPrice(item.precio_alquiler || item.precio_vivienda)} €/mes${isDatePredicted ? ' (Proyección)' : ''}</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² Compra:</span> <span style="color: rgba(186, 204, 214, 0.95); font-weight: 600;">${fmtPrice(buyPriceM2)} €/m² (${periodLabel})</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Rentabilidad:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtYield(item.rentabilidad)} (${periodLabel})</span></div>`;
+              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Alquiler Estimado:</span> <span style="color: #00F0FF; font-weight: 600;">${fmtPrice(item.precio_alquiler || item.precio_vivienda)} €/mes (${periodLabel})</span></div>`;
             }
             
             popupContent += `</div>`;
@@ -406,6 +411,8 @@ const MadridMap: React.FC<MapProps> = ({
               if (type === 'districts') {
                 const targetName = districtName;
                 onDistrictClick(normalize(targetName) === normalize(selectedDistrict) ? null : targetName);
+              } else if (onBarrioClick) {
+                onBarrioClick(normalize(name) === normalize(selectedBarrio) ? null : name);
               }
             }
           });
@@ -458,7 +465,7 @@ const MadridMap: React.FC<MapProps> = ({
     return () => {
       resizeObserver.disconnect();
     };
-  }, [type, data, selectedProfile, selectedDistrict, selectedBarrio, containerId, selectedMonth, selectedYear, onDistrictClick, style, accentColor]);
+  }, [type, data, selectedProfile, selectedDistrict, selectedBarrio, containerId, selectedMonth, selectedYear, onDistrictClick, onBarrioClick, style, accentColor]);
 
   // Generate SVG defs for React DOM rendering
   const svgDefsMarkup = useMemo(() => getPatternDefsMarkup(type), [type]);

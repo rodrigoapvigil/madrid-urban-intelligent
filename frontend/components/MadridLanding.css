@@ -934,9 +934,8 @@ footer.auros-footer,
 
 @media (max-width: 1050px) {
   .mi-home { --mi-wrap: calc(100% - 64px); }
-  .mi-header { min-height: 80px; padding-inline: 32px; grid-template-columns: 1fr auto; gap: 8px 20px; }
-  .mi-nav { grid-column: 1 / -1; grid-row: 2; justify-content: flex-start; gap: clamp(20px,4vw,42px); }
-  .mi-header__cta { grid-column: 2; grid-row: 1; }
+  .mi-header { min-height: 68px; padding-inline: 24px; display: flex; justify-content: space-between; align-items: center; gap: 0; }
+  .mi-nav, .mi-header__cta { display: none !important; }
   .mi-hero { min-height: max(640px,calc(100svh - 80px)); }
   .mi-hero-artwork__canvas { bottom: clamp(80px, 12vh, 150px); width: 122%; max-width: none; left: 50%; right: auto; transform: translateX(-50%); }
   .mi-hero__skyline { width: 100%; }
@@ -946,20 +945,18 @@ footer.auros-footer,
   .mi-city-visual { min-height: 460px; }
   .mi-auros-frame__body { grid-template-columns: 1fr; gap: 32px; }
   .mi-trend { max-width: none; }
+  .mi-scale__stats { margin-top: 36px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
   .mi-scale__stat { min-height: 220px; }
-  .mi-scale__stat--volume { min-height: 454px; }
+  .mi-scale__stat--volume { grid-column: 1 / -1; min-height: 280px; }
   .mi-audience__layout, .mi-method__layout { grid-template-columns: 1fr; gap: 38px; }
   .mi-footer__top { grid-template-columns: 1fr; gap: 28px; }
 }
 @media (max-width: 650px) {
   .mi-home { --mi-wrap: calc(100% - 40px); }
-  .mi-header { min-height: 104px; padding: 8px 18px 5px; grid-template-columns: 1fr auto; gap: 0 10px; }
+  .mi-header { min-height: 64px; padding-inline: 16px; display: flex; justify-content: space-between; align-items: center; gap: 0; }
   .mi-brand { gap: 8px; font-size: 12px; }
   .mi-brand__mark { width: 31px; height: 31px; }
-  .mi-header__cta { min-height: 40px; padding-inline: 10px; gap: 5px; font-size: 9px; }
-  .mi-header__cta svg { width: 13px; height: 13px; }
-  .mi-nav { grid-column: 1 / -1; grid-row: 2; justify-content: space-between; gap: 6px; }
-  .mi-nav a { min-height: 36px; font-size: 8px; letter-spacing: .055em; }
+  .mi-nav, .mi-header__cta { display: none !important; }
   .mi-hero { min-height: max(560px,calc(100svh - 96px)); }
   .mi-hero__content { width: calc(100% - 32px); padding-top: clamp(48px,8vh,76px); }
   .mi-kicker { margin-bottom: 19px; font-size: 9px; letter-spacing: .11em; }

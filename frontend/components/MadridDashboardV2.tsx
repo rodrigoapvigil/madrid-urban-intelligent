@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
@@ -231,6 +231,12 @@ const getComparisonMetric = (profileId: string) => profileId === 'inversion'
   ? { label: 'Rentabilidad', unit: '%', tooltipUnit: '%', multiplier: 100, decimals: 2 }
   : { label: 'Precio m²', unit: '€/m²', tooltipUnit: '€/m²', multiplier: 1, decimals: profileId === 'alquiler' ? 2 : 1 };
 
+const getMapLegendLabels = (profileId: string) => {
+  if (profileId === 'inversion') return ['< 4,3 %', '4,3–5,0 %', '5,0–5,7 %', '5,7–6,5 %', '≥ 7,4 %'];
+  if (profileId === 'venta' || profileId === 'compra') return ['< 2.100 €', '2.100–3.100 €', '3.100–4.200 €', '4.200–5.400 €', '≥ 6.800 €'];
+  return ['< 16 €/m²', '16–19 €/m²', '19–22 €/m²', '22–25 €/m²', '≥ 25 €/m²'];
+};
+
 const MONTHS_ES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 const MADRID_NAME_EXCEPTIONS: Record<string, string> = {
@@ -371,17 +377,26 @@ const renderLightningBolts = (stars: number, speed: string, color: string) => {
   );
 };
 
+const getActivityLabel = (speed: string) => {
+  const normalized = (speed || '').toLowerCase();
+  if (normalized.includes('muy fácil')) return 'Actividad alta';
+  if (normalized.includes('fácil')) return 'Actividad media-alta';
+  if (normalized.includes('moderado')) return 'Actividad media';
+  if (normalized.includes('lento')) return 'Actividad baja';
+  return 'Actividad no disponible';
+};
+
 const getZoneReliability = (district: string, isPrediction: boolean) => {
   if (!isPrediction) {
     return {
       type: 'real',
-      tag: 'DATO OFICIAL',
-      title: 'Dato Real Oficial',
+      tag: 'DATO REAL',
+      title: 'Dato real registrado',
       titleColor: 'var(--precio-subida)',
       borderColor: 'color-mix(in srgb, var(--precio-subida) 25%, transparent)',
       bg: 'color-mix(in srgb, var(--precio-subida) 6%, transparent)',
       icon: '',
-      description: 'Precio oficial registrado y certificado por el Banco de Datos del Ayuntamiento de Madrid.'
+      description: 'Precio observado en la serie histórica del Banco de Datos del Ayuntamiento de Madrid.'
     };
   }
 
@@ -419,18 +434,18 @@ const getZoneReliability = (district: string, isPrediction: boolean) => {
       borderColor: 'color-mix(in srgb, var(--azul-linea) 35%, transparent)',
       bg: 'color-mix(in srgb, var(--azul-linea) 8%, transparent)',
       icon: '',
-      description: 'Barrio consolidado con precios firmes. La previsión estimada es altamente segura y predecible.'
+      description: 'Barrio consolidado con precios firmes. La estimación del modelo presenta una tendencia estable.'
     };
   }
   return {
     type: 'ai',
     tag: 'PROYECCIÓN',
-    title: 'Proyección del modelo',
+    title: 'Estimación del modelo',
     titleColor: 'var(--azul-linea)',
     borderColor: 'color-mix(in srgb, var(--precio-subida) 25%, transparent)',
     bg: 'color-mix(in srgb, var(--precio-subida) 7%, transparent)',
     icon: '',
-    description: 'Proyección calculada a partir de históricos y tendencias del mercado.'
+    description: 'Estimación calculada a partir de históricos y tendencias del mercado.'
   };
 };
 
@@ -614,10 +629,10 @@ const getComparisonKpiInfo = (metric: string, zoneName: string) => {
       };
     case 'volatilidad':
       return {
-        title: `Estabilidad de Precios · ${zoneName}`,
-        description: `Indica la oscilación de los precios mes a mes en ${zoneName}. Te muestra si el mercado es predecible o si sufre altibajos con frecuencia.`,
-        example: `Una volatilidad baja te da la certeza de que las rentas y el valor del piso se mantendrán estables en el tiempo.`,
-        ruleOfThumb: `Para inversores conservadores, una baja volatilidad ofrece máxima tranquilidad y menor exposición a riesgos.`
+        title: `Índice de riesgo · ${zoneName}`,
+        description: `Índice comparativo de dispersión histórica de precios, normalizado entre 10 y 90 para ordenar las zonas. No es una volatilidad porcentual ni una probabilidad.`,
+        example: `Un 70 indica más variación histórica que una zona con índice 35; no significa que el precio vaya a caer un 70%.`,
+        ruleOfThumb: `Úsalo junto a la rentabilidad y al histórico real: un índice alto implica más variación observada, no una predicción de pérdida.`
       };
     default:
       return {
@@ -726,14 +741,23 @@ const MadridDashboardV2: React.FC = () => {
   const activeProfile = PROFILES[profileIdx];
   const selectedMonthIndex = MONTHS_ES.indexOf(selectedMonth);
   const isProjectionPeriod = Number(selectedYear) > 2026 || (Number(selectedYear) === 2026 && selectedMonthIndex >= 6);
-  const periodStatusLabel = isProjectionPeriod ? 'Proyección' : 'Dato real';
+  const periodStatusLabel = isProjectionPeriod ? 'Estimación' : 'Dato real';
   const realSeriesPoints = seriesMadrid.filter(point => point && !point.is_prediction);
   const latestRealPoint = realSeriesPoints[realSeriesPoints.length - 1];
   const latestRealMonth = latestRealPoint?.mes_nombre || 'junio';
-  const latestRealYear = selectedYear || '2026';
+  const latestRealYear = Number(latestRealPoint?.anio || selectedYear || '2026');
   const firstProjectionMonth = latestRealPoint
     ? MONTHS_ES[Number(latestRealPoint.mes) || 6] || 'julio'
     : 'julio';
+  const heatmapValues = useMemo(
+    () => heatmapData.flatMap(row => Object.keys(row)
+      .filter(key => key.startsWith('m'))
+      .map(key => Number(row[key]))
+      .filter(value => Number.isFinite(value) && value > 0)),
+    [heatmapData]
+  );
+  const heatmapMin = heatmapValues.length ? Math.min(...heatmapValues) : 0;
+  const heatmapMax = heatmapValues.length ? Math.max(...heatmapValues) : 0;
   const loadingStages = [
     { label: 'Conectando con la API', icon: Activity },
     { label: 'Procesando datos del mercado', icon: Database },
@@ -775,6 +799,8 @@ const MadridDashboardV2: React.FC = () => {
         if (data.districts) setAvailableDistricts(['Todos', ...data.districts]);
         const preferredYear = allYears.includes('2026') ? '2026' : allYears[allYears.length - 1] || '2026';
         const preferredMonths = months[preferredYear] || MONTHS_ES;
+        // En 2026 el último corte observado publicado es junio; abrir ahí evita
+        // presentar una estimación como si fuera el dato actual por defecto.
         const preferredMonth = preferredYear === '2026' && preferredMonths.includes('Junio')
           ? 'Junio'
           : preferredMonths[preferredMonths.length - 1] || 'Diciembre';
@@ -992,7 +1018,7 @@ const MadridDashboardV2: React.FC = () => {
         .then(data => {
           const found = data.find((d: any) => d.name.toLowerCase() === selectedZoneA.toLowerCase());
           if (found) {
-            setVolatilityZoneA(found.risk.toFixed(1) + '%');
+            setVolatilityZoneA(found.risk.toFixed(1));
           } else {
             setVolatilityZoneA('N/A');
           }
@@ -1009,7 +1035,7 @@ const MadridDashboardV2: React.FC = () => {
         .then(data => {
           const found = data.find((d: any) => d.name.toLowerCase() === selectedZoneB.toLowerCase());
           if (found) {
-            setVolatilityZoneB(found.risk.toFixed(1) + '%');
+            setVolatilityZoneB(found.risk.toFixed(1));
           } else {
             setVolatilityZoneB('N/A');
           }
@@ -1156,7 +1182,7 @@ const MadridDashboardV2: React.FC = () => {
                   pointHitRadius: 14,
                 },
                 {
-                  label: `${label} · Proyección`,
+                  label: `${label} · Estimación`,
                   data: forecastPrices,
                   borderColor: forecastColor,
                   backgroundColor: (context: any) => createAreaGradient(context, forecastColor, 0.12),
@@ -1277,7 +1303,7 @@ const MadridDashboardV2: React.FC = () => {
                       // Línea principal de la zona
                       const found = effectiveData.find(d => d.mes === idx + 1);
                       const isPred = found ? Boolean(found.is_prediction) : false;
-                      const tipoDato = isPred ? 'Proyección' : 'Dato real';
+                      const tipoDato = isPred ? 'Estimación' : 'Dato real';
                       const valFormatted = new Intl.NumberFormat('es-ES', {
                         minimumFractionDigits: comparisonMetric.decimals,
                         maximumFractionDigits: 2
@@ -1458,7 +1484,7 @@ const MadridDashboardV2: React.FC = () => {
                   cubicInterpolationMode: 'monotone'
                 },
                 {
-                  label: `${selectedZoneA} · Proyección`,
+                  label: `${selectedZoneA} · Estimación`,
                   data: overlayASplit.forecast,
                   borderColor: COMPARISON_COLORS.forecastA,
                   borderDash: [6, 5],
@@ -1491,7 +1517,7 @@ const MadridDashboardV2: React.FC = () => {
                   cubicInterpolationMode: 'monotone'
                 },
                 {
-                  label: `${selectedZoneB} · Proyección`,
+                  label: `${selectedZoneB} · Estimación`,
                   data: overlayBSplit.forecast,
                   borderColor: COMPARISON_COLORS.forecastB,
                   borderDash: [6, 5],
@@ -1658,7 +1684,7 @@ const MadridDashboardV2: React.FC = () => {
                       if (context.datasetIndex === 4) {
                         return [
                           `Media Madrid: ${valFormatted} ${unit}`,
-                          `Referencia oficial de la capital`
+                          `Media estadística de Madrid (no es dato oficial si es estimación)`
                         ];
                       }
 
@@ -1670,7 +1696,7 @@ const MadridDashboardV2: React.FC = () => {
 
                       const found = currentDataset.find(d => d.mes === idx + 1);
                       const isPred = context.datasetIndex === 1 || context.datasetIndex === 3 || (found ? Boolean(found.is_prediction) : false);
-                      const tipoDato = isPred ? 'Proyección' : 'Dato real';
+                      const tipoDato = isPred ? 'Estimación' : 'Dato real';
 
                       const lines: string[] = [
                         `${currentZone}: ${valFormatted} ${unit} (${tipoDato})`
@@ -1950,35 +1976,19 @@ const MadridDashboardV2: React.FC = () => {
           };
         });
 
-        // Sort points by ROI descending to make the bar chart clean and sorted
-        const sortedPoints = points.sort((a, b) => b.y - a.y);
-
         chartsRef.current.push(new ChartJS(ctxRiskReturn, {
           data: {
-            labels: sortedPoints.map(p => p.name),
             datasets: [
               {
-                type: 'bar',
-                label: 'Rentabilidad esperada (%)',
-                data: sortedPoints.map(p => p.y),
-                backgroundColor: sortedPoints.map(p => p.isSelected ? 'var(--coral)' : p.color),
-                borderRadius: 4,
-                yAxisID: 'yROI',
-                barThickness: sortedPoints.length > 15 ? 12 : 20
-              },
-              {
-                type: 'line',
-                label: 'Volatilidad (Riesgo)',
-                data: sortedPoints.map(p => p.x),
-                borderColor: 'var(--precio-subida)',
-                borderWidth: 2.5,
-                tension: 0.3,
-                yAxisID: 'yVolatilidad',
-                pointRadius: sortedPoints.map(p => p.isSelected ? 7 : 3),
-                pointBackgroundColor: sortedPoints.map(p => p.isSelected ? 'var(--coral)' : 'var(--precio-subida)'),
-                pointBorderColor: sortedPoints.map(p => p.isSelected ? 'var(--blanco-humo)' : 'transparent'),
-                pointBorderWidth: sortedPoints.map(p => p.isSelected ? 2 : 0),
-                fill: false
+                type: 'scatter',
+                label: 'Zonas · índice de riesgo vs rentabilidad',
+                data: points.map(p => ({ x: p.x, y: p.y, name: p.name })),
+                backgroundColor: points.map(p => p.isSelected ? 'var(--coral)' : p.color),
+                borderColor: 'var(--blanco-humo)',
+                borderWidth: points.map(p => p.isSelected ? 2 : 0),
+                pointRadius: points.map(p => p.isSelected ? 7 : 5),
+                pointHoverRadius: 8,
+                showLine: false
               }
             ]
           },
@@ -2008,52 +2018,30 @@ const MadridDashboardV2: React.FC = () => {
                 callbacks: {
                   label: (context: any) => {
                     const idx = context.dataIndex;
-                    const p = sortedPoints[idx];
-                    if (context.datasetIndex === 0) {
-                      return `${p.name} (ROI): ${p.y.toFixed(2)}%${p.isSelected ? ' ★ (Seleccionado)' : ''}`;
-                    } else {
-                      return `${p.name} (Volatilidad): ${p.x.toFixed(1)}%`;
-                    }
+                    const p = points[idx];
+                    return `${p.name}: riesgo ${p.x.toFixed(1)} · rentabilidad ${p.y.toFixed(2)}%${p.isSelected ? ' ★ (Seleccionado)' : ''}`;
                   }
                 }
               }
             },
             scales: {
               x: {
-                grid: { display: false },
+                title: { display: true, text: 'Índice de riesgo histórico (10–90)', font: { size: 10, weight: 'bold' } },
+                min: 0,
+                max: 100,
                 ticks: {
                   color: 'var(--azul-linea)',
-                  font: { size: 8, weight: 'bold' },
-                  maxRotation: 45,
-                  minRotation: 45
+                  font: { size: 9, weight: 'bold' }
                 }
               },
-              yROI: {
+              y: {
                 type: 'linear',
-                position: 'left',
-                title: { display: true, text: 'Rentabilidad esperada (%)', font: { size: 10, weight: 'bold' } },
+                title: { display: true, text: 'Rentabilidad bruta observada (%)', font: { size: 10, weight: 'bold' } },
                 ticks: {
                   callback: (val) => val + '%',
                   font: { size: 9 }
                 },
                 grid: { color: 'color-mix(in srgb, var(--azul-noche) 5%, transparent)' }
-              },
-              yVolatilidad: {
-                type: 'linear',
-                position: 'right',
-                min: 0,
-                max: 100,
-                title: { display: true, text: 'Volatilidad (Riesgo)', font: { size: 10, weight: 'bold' } },
-                ticks: {
-                  callback: (val) => {
-                    if (val === 20) return 'Bajo';
-                    if (val === 50) return 'Medio';
-                    if (val === 80) return 'Alto';
-                    return '';
-                  },
-                  font: { size: 9 }
-                },
-                grid: { drawOnChartArea: false }
               }
             }
           }
@@ -2321,34 +2309,34 @@ const MadridDashboardV2: React.FC = () => {
                             letterSpacing: '0.4px',
                             display: 'inline-block'
                           }}
-                          title="Dato oficial del Ayuntamiento de Madrid"
+                          title="Dato observado en la serie histórica del Ayuntamiento de Madrid"
                         >
-                          ✓ DATO OFICIAL
+                          ✓ DATO REAL
                         </span>
                       )}
                     </div>
                     <div className="v2-val">
                       {activeProfile.id === 'inversion'
                         ? (kpiData.p_m2 * 100).toFixed(2) + '%'
-                        : new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiData.p_m2 || 0) + '€'}
+                        : new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiData.p_m2 || 0) + ' €/m²'}
                     </div>
                   </div>
 
                   <div className="v2-kpi-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <label>{activeProfile.id === 'inversion' ? 'Ticket de Inversión' : 'Ticket Medio'}</label>
+                        <label>{activeProfile.id === 'inversion' ? 'Precio de inversión' : activeProfile.id === 'alquiler' ? 'Alquiler medio' : 'Precio medio de vivienda'}</label>
                         <InfoTooltip
-                          title={activeProfile.id === 'inversion' ? 'Ticket de Inversión' : 'Ticket Medio de Vivienda'}
-                          description="El coste total estimado de una vivienda completa estándar en este distrito o barrio (para un piso tipo de 75 a 85 m²)."
-                          example="En lugar de calcular el coste por metro, te indica directamente cuánto dinero necesitas en total para comprar o alquilar un piso típico en esta zona."
-                          ruleOfThumb="Te ayuda a saber de un vistazo si la zona entra dentro de tu presupuesto global."
+                          title={activeProfile.id === 'inversion' ? 'Precio de inversión' : activeProfile.id === 'alquiler' ? 'Alquiler medio mensual' : 'Precio medio de vivienda'}
+                          description="Estimación del coste total mensual o de compra, según el perfil seleccionado, a partir del valor por metro cuadrado y la superficie media observada."
+                          example="Sirve para interpretar el valor total de una vivienda tipo, además del precio unitario por m²."
+                          ruleOfThumb="Comprueba siempre la superficie y el periodo antes de comparar dos zonas."
                         />
                       </div>
-                      {kpiData.is_prediction && <span style={predBadgeStyle}>Proyección</span>}
+                      {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                     </div>
                     <div className="v2-val">
-                      {new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiData.p_vivienda || 0)}€
+                      {new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiData.p_vivienda || 0)} {activeProfile.id === 'alquiler' ? '€/mes' : '€'}
                     </div>
                   </div>
 
@@ -2364,7 +2352,7 @@ const MadridDashboardV2: React.FC = () => {
                             ruleOfThumb="Para inversión los bancos suelen financiar el 60%-70%; para vivienda habitual hasta el 80%."
                           />
                         </div>
-                        {kpiData.is_prediction && <span style={predBadgeStyle}>Proyección</span>}
+                        {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                       </div>
 
                       <div className="v2-val" style={{ fontSize: '24px', margin: '4px 0 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -2486,7 +2474,7 @@ const MadridDashboardV2: React.FC = () => {
                             ruleOfThumb="En 'Crecimiento', los precios tienden a subir si esperas; en 'Ajuste', hay más margen para negociar."
                           />
                         </div>
-                        {kpiData.is_prediction && <span style={predBadgeStyle}>Proyección</span>}
+                        {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                       </div>
                       <div className="v2-val" style={{ fontSize: '24px' }}>
                         {kpiData.estado_mercado} {kpiData.estado_mercado === 'Crecimiento' ? '(+)' : kpiData.estado_mercado === 'Ajuste' ? '(-)' : ''}
@@ -2507,7 +2495,7 @@ const MadridDashboardV2: React.FC = () => {
                               ruleOfThumb="Permite detectar aceleraciones o cambios rápidos de tendencia en el corto plazo."
                             />
                           </div>
-                          {kpiData.is_prediction && <span style={predBadgeStyle}>Proyección</span>}
+                          {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                         </div>
                         <div className={`v2-val accent ${kpiData.v_mes < 0 ? 'negative' : ''}`}>
                           {kpiData.v_mes > 0 ? '+' : ''}{kpiData.v_mes?.toFixed(1)}%
@@ -2525,7 +2513,7 @@ const MadridDashboardV2: React.FC = () => {
                               ruleOfThumb="Es el indicador más robusto para medir la tendencia real de fondo y la revalorización patrimonial."
                             />
                           </div>
-                          {kpiData.is_prediction && <span style={predBadgeStyle}>Proyección</span>}
+                          {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                         </div>
                         <div className={`v2-val accent ${kpiData.v_anual < 0 ? 'negative' : ''}`}>
                           {kpiData.v_anual > 0 ? '+' : ''}{kpiData.v_anual?.toFixed(1)}%
@@ -2546,7 +2534,7 @@ const MadridDashboardV2: React.FC = () => {
                               ruleOfThumb="Cuanto menor sea el número de años, más rápida es la amortización y más atractiva la inversión (lo ideal es por debajo de 20 años)."
                             />
                           </div>
-                          {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                          {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                         </div>
                         <div className="v2-val" style={{ color: activeProfile.color }}>
                           {amortizacionAnios > 0 ? amortizacionAnios.toFixed(1) + ' años' : '-'}
@@ -2628,7 +2616,7 @@ const MadridDashboardV2: React.FC = () => {
                               ruleOfThumb="Menos de 5 años se considera asequible; entre 5 y 8 años moderado; más de 8 años supone un esfuerzo elevado."
                             />
                           </div>
-                          {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                          {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
                           Precio medio vivienda: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(precioMedio)}€</strong>
@@ -2736,7 +2724,7 @@ const MadridDashboardV2: React.FC = () => {
                               ruleOfThumb="El Banco de España recomienda no superar el 30%-35% del sueldo neto. Superar el 40% se considera sobreesfuerzo crítico."
                             />
                           </div>
-                          {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                          {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
                           Alquiler medio {selectedBarrio !== 'Todos' ? 'en el barrio' : (selectedDistrict !== 'Todos' ? 'en el distrito' : 'en Madrid')}: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(alquiler)}€/mes</strong>
@@ -2828,7 +2816,7 @@ const MadridDashboardV2: React.FC = () => {
                               ruleOfThumb="A mayor liquidez (más de 300 transacciones/año), menor riesgo de quedarte atrapado con el inmueble en caso de querer venderlo."
                             />
                           </div>
-                          {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                          {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
                           GRM {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ fontSize: '15px', color: '#FFFFFF', display: 'block', marginTop: '2px' }}>{grm > 0 ? grm.toFixed(1) : '-'} años <span style={{ fontSize: '10px', fontWeight: 'normal', color: '#00F0FF' }}>(recuperación)</span></strong>
@@ -2879,7 +2867,7 @@ const MadridDashboardV2: React.FC = () => {
 
                         {hasInvSim && (
                           <div style={{ marginTop: '6px', padding: '10px', background: 'var(--blanco-humo)', borderRadius: '8px', fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '6px', animation: 'v2FadeIn 0.2s ease', maxHeight: '180px', overflowY: 'auto' }}>
-                            <strong style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--azul-linea)' }}>Proyección Simulada</strong>
+                            <strong style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--azul-linea)' }}>Estimación simulada</strong>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', borderBottom: '1px solid var(--humo-2)', paddingBottom: '6px' }}>
                               {projectionRows.map(row => (
                                 <div key={row.year} style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -2946,7 +2934,7 @@ const MadridDashboardV2: React.FC = () => {
                                 ruleOfThumb="Menos de 2 meses indica un mercado rápido con compradores activos; más de 3 meses exige fijar un precio muy competitivo."
                               />
                             </div>
-                            {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                            {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                           </div>
                           <div className="v2-val" style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
                             <span>{velocity > 0 ? (velocity % 1 === 0 ? velocity.toFixed(0) : velocity.toFixed(1)) + ' ' + (velocity === 1 ? 'mes' : 'meses') : '-'}</span>
@@ -2964,13 +2952,13 @@ const MadridDashboardV2: React.FC = () => {
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                               <label>¿Hay demanda en la zona?</label>
                               <InfoTooltip
-                                title="Demanda y Liquidez Local"
-                                description="Número de operaciones de compraventa cerradas en el último año según los registros notariales oficiales."
-                                example="Más de 300 transacciones anuales indican un barrio muy dinámico con compradores buscando activamente piso cada semana."
-                                ruleOfThumb="Alta demanda facilita cerrar operaciones a precio de mercado sin necesidad de aplicar grandes rebajas."
+                                title="Actividad y demanda local"
+                                description="Número de operaciones de compraventa cerradas en el último año según los registros disponibles. Es un indicador de actividad, no un plazo garantizado de venta."
+                                example="Más de 300 transacciones anuales indican un mercado más activo; no significa que cualquier vivienda vaya a venderse en un plazo concreto."
+                                ruleOfThumb="Usa esta cifra junto al precio y a la demanda de la zona; no la interpretes como una promesa de velocidad."
                               />
                             </div>
-                            {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                            {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                           </div>
                           <div className="v2-val" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span>{transacciones > 0 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(transacciones) + ' trans./año' : '-'}</span>
@@ -2995,7 +2983,7 @@ const MadridDashboardV2: React.FC = () => {
                                 ruleOfThumb="En fases alcistas, posponer la venta puede aumentar el margen; en fases de ajuste, vender pronto protege tu beneficio."
                               />
                             </div>
-                            {kpiData.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                            {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                           </div>
                           <div className="v2-val" style={{ color: 'var(--azul-linea)' }}>
                             {appRate > 0 ? `+${gain6m}%` : appRate < 0 ? `${gain6m}%` : '0.0%'}
@@ -3016,7 +3004,7 @@ const MadridDashboardV2: React.FC = () => {
                     <div className="v2-pill">Mapas Interactivos</div>
                     <div className={`v2-data-status ${isProjectionPeriod ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
                       <span className="v2-data-status-dot" aria-hidden="true" />
-                      <span><strong>{periodStatusLabel}</strong> · Datos reales hasta {latestRealMonth} de {latestRealYear} · proyección desde {firstProjectionMonth} · Actualizado el 9 de noviembre de 2026</span>
+                      <span><strong>{periodStatusLabel}</strong> · Datos observados hasta {latestRealMonth} de {latestRealYear} · estimaciones desde {firstProjectionMonth} · última carga disponible</span>
                     </div>
                     <button
                       onClick={() => setShowMapHelpModal(true)}
@@ -3072,7 +3060,7 @@ const MadridDashboardV2: React.FC = () => {
                           selectedProfile={activeProfile.label}
                           selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
                           selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
-                          onDistrictClick={(d) => setSelectedDistrict(d || 'Todos')}
+                          onDistrictClick={(d) => { setSelectedDistrict(d || 'Todos'); setSelectedBarrio('Todos'); }}
                         />
                       </div>
                     </div>
@@ -3087,21 +3075,26 @@ const MadridDashboardV2: React.FC = () => {
                           selectedProfile={activeProfile.label}
                           selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
                           selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
-                          onDistrictClick={(d) => setSelectedDistrict(d || 'Todos')}
+                          onDistrictClick={(d) => { setSelectedDistrict(d || 'Todos'); setSelectedBarrio('Todos'); }}
+                          onBarrioClick={(b) => setSelectedBarrio(b || 'Todos')}
                         />
                       </div>
                     </div>
                   </div>
                   <div className="v2-map-legend" aria-label="Leyenda del mapa por precio por metro cuadrado">
-                    <div className="v2-map-legend-title">Intensidad de precio · {activeProfile.id === 'inversion' ? '%' : '€/m²'}</div>
-                    <div className="v2-map-legend-scale">
-                      <span>Más bajo</span>
+                    <div className="v2-map-legend-title">Intensidad de precio · {activeProfile.id === 'inversion' ? '%' : activeProfile.id === 'venta' || activeProfile.id === 'compra' ? '€ / m²' : '€/m²'}</div>
+                    <div className="v2-map-legend-scale" aria-label="Tramos de la escala de color">
+                      <span>{getMapLegendLabels(activeProfile.id)[0]}</span>
                       <div className="v2-map-legend-swatches" aria-hidden="true">
                         <i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" />
                       </div>
-                      <span>Más alto</span>
+                      <span>{getMapLegendLabels(activeProfile.id)[4]}</span>
                     </div>
-                    <small>Los tonos comparan las zonas del periodo seleccionado.</small>
+                    <div className="v2-map-legend-labels">
+                      {getMapLegendLabels(activeProfile.id).map(label => <span key={label}>{label}</span>)}
+                      <span className="no-data-label"><i /> Sin datos</span>
+                    </div>
+                    <small>Los tonos comparan las zonas del periodo seleccionado. Las áreas rayadas no tienen observación.</small>
                   </div>
                 </div>
               </div>
@@ -3174,7 +3167,7 @@ const MadridDashboardV2: React.FC = () => {
                       <span style={{ fontSize: '15px', fontWeight: '700', color: '#FFFFFF' }}>
                         {rankingLevel === 'Distritos' ? 'Distritos más asequibles' : 'Barrios más asequibles'}
                       </span>
-                        <span className="v2-rank-sub" style={{ color: '#BACCD6', fontSize: '11px' }}>Top 10 por alquiler medio mensual (€)</span>
+                        <span className="v2-rank-sub" style={{ color: '#BACCD6', fontSize: '11px' }}>Top 10 por alquiler mensual estimado (€)</span>
                     </div>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                       <thead>
@@ -3286,12 +3279,12 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                   {Number(selectedYear) === 2026 && (
                     <div style={{ fontSize: '11px', color: 'var(--azul-linea)', marginBottom: '12px', paddingLeft: '4px' }}>
-                      * Nota: los datos reales llegan hasta <strong>{latestRealMonth} de {latestRealYear}</strong>; desde <strong>{firstProjectionMonth}</strong> son <strong>proyecciones</strong>. El color más brillante indica un valor €/m² más alto.
+                      * Nota: los datos reales llegan hasta <strong>{latestRealMonth} de {latestRealYear}</strong>; desde <strong>{firstProjectionMonth}</strong> son <strong>estimaciones</strong>. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un valor €/m² más alto.'}
                     </div>
                   )}
                   {Number(selectedYear) > 2026 && (
                     <div style={{ fontSize: '11px', color: 'var(--azul-linea)', marginBottom: '12px', paddingLeft: '4px' }}>
-                      * Nota: Los meses de {selectedYear} se muestran como <strong>proyecciones</strong> basadas en datos históricos. El color más brillante indica un valor €/m² más alto.
+                      * Nota: Los meses de {selectedYear} se muestran como <strong>estimaciones</strong> basadas en datos históricos. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un valor €/m² más alto.'}
                     </div>
                   )}
                   <div className="v2-heatmap-scroll">
@@ -3299,16 +3292,12 @@ const MadridDashboardV2: React.FC = () => {
                       <thead>
                         <tr>
                           <th>{rankingLevel === 'Distritos' ? 'Distrito' : 'Barrio'}</th>
-                          {[...Array(12)].map((_, i) => <th key={i+1}>{i+1}</th>)}
+                          {MONTHS_ES.map((month) => <th key={month}>{month.slice(0, 3)}</th>)}
                         </tr>
                       </thead>
                       <tbody>
                         {Array.isArray(heatmapData) && heatmapData.length > 0 ? (
                           heatmapData.map((row, idx) => {
-                            const vals = Object.keys(row).filter(k => k.startsWith('m')).map(k => row[k]).filter(v => v > 0);
-                            const min = Math.min(...vals);
-                            const max = Math.max(...vals);
-
                             let cellColor = 'var(--azul-linea)';
                             if (activeProfile.id === 'venta') cellColor = 'var(--coral)';
                             else if (activeProfile.id === 'inversion') cellColor = 'var(--azul-linea)';
@@ -3318,15 +3307,15 @@ const MadridDashboardV2: React.FC = () => {
                                 <td className="zona-name">{row.zona}</td>
                                 {[...Array(12)].map((_, i) => {
                                   const val = row[`m${i+1}`];
-                                  const opacity = val > 0 ? 0.2 + ((val - min) / (max - min || 1)) * 0.8 : 0;
+                                  const opacity = val > 0 ? 0.22 + ((val - heatmapMin) / (heatmapMax - heatmapMin || 1)) * 0.78 : 0;
                                   const bgColor = val > 0 ? colorWithAlpha(cellColor, opacity) : 'transparent';
                                   const textColor = opacity > 0.65 ? 'var(--blanco-humo)' : 'var(--azul-noche)';
                                   return (
                                     <td key={i+1} style={{ backgroundColor: bgColor, color: textColor }}>
                                       {val > 0
                                         ? activeProfile.id === 'inversion'
-                                          ? (val * 100).toFixed(1) + '%'
-                                          : val.toFixed(1) + '€'
+                                          ? `${formatNumber(val * 100, 1)} %`
+                                          : `${formatNumber(val, 1)} €/m²`
                                         : '-'}
                                     </td>
                                   );
@@ -3352,7 +3341,7 @@ const MadridDashboardV2: React.FC = () => {
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                       <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>
-                        Liquidez por {liquidityLevel === 'distrito' ? 'Distrito' : 'Barrio'}
+                        Actividad de mercado por {liquidityLevel === 'distrito' ? 'Distrito' : 'Barrio'}
                       </h3>
                       <div className="v2-tabs-bg small">
                         <span className="v2-indicator" style={{ transform: `translateX(${liquidityLevel === 'distrito' ? '0' : '100%'})`, width: '80px' }} />
@@ -3361,7 +3350,7 @@ const MadridDashboardV2: React.FC = () => {
                       </div>
                     </div>
                     <div style={{ fontSize: '13px', fontWeight: '600', color: '#BACCD6', marginBottom: '20px' }}>
-                      Responde: ¿Si necesito vender, cuánto tardo?
+                      Responde: ¿Dónde se cierran más operaciones?
                     </div>
 
                     <div className="v2-connectivity-list">
@@ -3370,7 +3359,7 @@ const MadridDashboardV2: React.FC = () => {
                           <tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}>
                             <th style={{ paddingBottom: '8px', fontWeight: '600' }}>{liquidityLevel === 'distrito' ? 'DISTRITO' : 'BARRIO'}</th>
                             <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'center' }}>TRANSACCIONES/AÑO</th>
-                            <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>¿PUEDO VENDER RÁPIDO?</th>
+                            <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>ACTIVIDAD OBSERVADA</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -3384,7 +3373,7 @@ const MadridDashboardV2: React.FC = () => {
                                   {item.transactions}
                                 </td>
                                 <td style={{ padding: '12px 0', textAlign: 'right' }}>
-                                  {renderLightningBolts(item.stars, item.speed, item.color)}
+                                  {renderLightningBolts(item.stars, getActivityLabel(item.speed), item.color)}
                                 </td>
                               </tr>
                             ))
@@ -3416,13 +3405,13 @@ const MadridDashboardV2: React.FC = () => {
                       <canvas id="v2-chart-euribor"></canvas>
                     </div>
 
-                    {/* Matriz Riesgo-Retorno */}
+                    {/* Scatter de riesgo y retorno */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(186, 204, 214, 0.16)' }}>
                       <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>
-                        Matriz Riesgo-Retorno
+                        Riesgo y retorno por zona
                       </h3>
                       <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--azul-linea)', marginBottom: '8px' }}>
-                        Volatilidad histórica vs. ROI esperado
+                        Cada punto es una zona: índice de riesgo histórico frente a rentabilidad bruta observada.
                       </span>
                       <div style={{ position: 'relative', height: '240px', width: '100%' }}>
                         <canvas id="v2-chart-risk-return"></canvas>
@@ -3547,7 +3536,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 RENTABILIDAD NETA {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -3562,7 +3551,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 GRM {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -3596,7 +3585,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -3611,7 +3600,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 RENTABILIDAD BRUTA {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -3645,7 +3634,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -3660,7 +3649,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PODER ADQUISITIVO {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -3675,7 +3664,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 VARIACIÓN ANUAL {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                           </div>
@@ -3705,7 +3694,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -3720,7 +3709,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 VELOCIDAD DE VENTA {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -3735,7 +3724,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 VARIACIÓN ANUAL {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                           </div>
@@ -3770,7 +3759,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 RENTABILIDAD NETA {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -3785,7 +3774,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 GRM {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -3819,7 +3808,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -3834,7 +3823,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 RENTABILIDAD BRUTA {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -3868,7 +3857,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -3883,7 +3872,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PODER ADQUISITIVO {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -3898,7 +3887,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 VARIACIÓN ANUAL {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                           </div>
@@ -3928,7 +3917,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -3943,7 +3932,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 VELOCIDAD DE VENTA {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -3958,7 +3947,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 VARIACIÓN ANUAL {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Predicción</span>}
+                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
                               </div>
                             </div>
                           </div>
@@ -4063,7 +4052,7 @@ const MadridDashboardV2: React.FC = () => {
                     Datos reales hasta {latestRealMonth} de {latestRealYear}
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
-                    Son precios fácticos extraídos directamente del Banco de Datos oficial del Ayuntamiento de Madrid. Si ves la etiqueta <strong style={{ color: 'var(--precio-subida)' }}>✓ DATO OFICIAL</strong>, ese es el precio real registrado de los contratos y ventas.
+                    Son precios observados extraídos del Banco de Datos del Ayuntamiento de Madrid. La etiqueta <strong style={{ color: 'var(--precio-subida)' }}>✓ DATO REAL</strong> identifica un registro histórico; las estimaciones del modelo se muestran separadas.
                   </div>
                 </div>
               </div>
@@ -4094,7 +4083,7 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.4 }}>
                     <div>
-                      <strong style={{ color: 'var(--azul-linea)' }}>Zonas Muy Estables</strong> (ej. Retiro, Salamanca, Chamberí): Precios firmes y continuos. La previsión estimada es altamente fiable.
+                      <strong style={{ color: 'var(--azul-linea)' }}>Zonas Muy Estables</strong> (ej. Retiro, Salamanca, Chamberí): Precios firmes y continuos. La estimación del modelo presenta una tendencia estable.
                     </div>
                     <div>
                       <strong style={{ color: 'var(--coral-texto)' }}>Zonas Rápidas o en Auge</strong> (ej. Centro, Usera, Moncloa, Villaverde): Barrios con gran rotación turística o familias mudándose desde el centro. Los precios reales se mueven con mayor dinamismo.
@@ -4205,7 +4194,7 @@ const MadridDashboardV2: React.FC = () => {
                     Escala de Colores
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
-                    Los <strong>colores más oscuros e intensos</strong> representan las zonas con precios por m² o rentabilidades más elevadas (ej. Salamanca, Chamberí, Centro). Los <strong>tonos claros o pasteles</strong> señalan barrios más económicos y accesibles.
+                    Los <strong>tonos más brillantes y cian</strong> representan valores más altos según la métrica activa. Los <strong>tonos oscuros</strong> representan valores más bajos; el patrón rayado identifica zonas sin dato.
                   </div>
                 </div>
               </div>
@@ -4235,7 +4224,7 @@ const MadridDashboardV2: React.FC = () => {
                     Precios al pasar el cursor
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
-                    Apoya el puntero del ratón sobre cualquier barrio o distrito para ver su precio exacto por m², el coste estimado de una vivienda y si es un dato oficial certificado o una previsión.
+                    Apoya el puntero o pulsa cualquier barrio o distrito para ver su precio por m², el coste estimado de una vivienda, su ranking y si es un dato real o una estimación.
                   </div>
                 </div>
               </div>
@@ -4388,7 +4377,11 @@ const MadridDashboardV2: React.FC = () => {
                     Datos Reales y Estimaciones
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
-                    En el año <strong>2026</strong>, los meses del 1 al 6 muestran cifras reales oficiales registradas por el Ayuntamiento de Madrid. A partir del mes 7 y en años posteriores, se muestran <strong>proyecciones estimadas</strong> calculadas mediante modelos predictivos para anticipar el comportamiento del mercado.
+                    {Number(selectedYear) === latestRealYear ? (
+                      <>En <strong>{latestRealYear}</strong>, los datos observados llegan hasta <strong>{latestRealMonth}</strong>. Desde <strong>{firstProjectionMonth}</strong>, los valores se muestran como <strong>estimaciones</strong> calculadas mediante modelos predictivos. La fecha de última carga se indica arriba y no equivale a la fecha del último dato observado.</>
+                    ) : (
+                      <>Para <strong>{selectedYear}</strong>, los meses sin observación histórica se muestran como <strong>estimaciones</strong> calculadas mediante modelos predictivos. Los datos observados llegan hasta <strong>{latestRealMonth} de {latestRealYear}</strong>.</>
+                    )}
                   </div>
                 </div>
               </div>

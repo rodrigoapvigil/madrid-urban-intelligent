@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+
 :root {
   /* Typography — Font Families (Matter / Inter / DM Sans) */
   --font-matter: 'Matter', 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
