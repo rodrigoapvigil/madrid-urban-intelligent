@@ -3364,6 +3364,7 @@ const MadridDashboardV2: React.FC = () => {
                       }}>i</span>
                       <span>¿Cómo usar el mapa?</span>
                     </button>
+                    <FullscreenToggle targetSelector=".v2-map-card" />
                   </div>
 
                   <div className="v2-mobile-map-switch" role="group" aria-label="Nivel del mapa">
@@ -3464,7 +3465,6 @@ const MadridDashboardV2: React.FC = () => {
 
               {/* COL 2: AFFORDABILITY / RENTABILITY / DEMAND RANKINGS */}
               <div className="v2-explorer-col v2-rankings-stack" data-dashboard-section="ranking" style={{ minWidth: '260px' }}>
-                <FullscreenToggle targetSelector=".v2-rankings-stack" />
                 {activeProfile.id === 'venta' ? (
                   <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
                     <div className="v2-rank-head" style={{ marginBottom: '16px' }}>

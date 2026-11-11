@@ -3328,6 +3328,34 @@ body.v2-fullscreen-open .v2-panel.v2-active { transform: none !important; }
   .v2-root .v2-mobile-filter-trigger > span { font-size: 13px !important; }
 }
 
+@media (max-width: 768px) {
+  .v2-root .v2-is-fullscreen.v2-map-card { gap: 8px !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-header { flex: 0 0 auto; margin-bottom: 0 !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-data-status,
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-mobile-map-switch { display: none !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-dual-maps {
+    display: grid !important; grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 8px !important;
+    width: 100%; min-width: 0 !important; min-height: 0 !important; height: calc(100dvh - 170px) !important; flex: 1 1 auto !important; margin: 0 !important;
+  }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-sub { display: flex !important; flex-direction: column; min-width: 0; width: 100%; height: 100% !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-sub > span { margin: 0 0 5px !important; font-size: 11px !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-placeholder { min-width: 0; min-height: 0; width: 100%; flex: 1 1 auto; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend { flex: 0 0 auto; margin-top: 0; padding: 7px 9px; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend small { display: none; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend-labels { grid-template-columns: repeat(5,minmax(0,1fr)); font-size: 9px; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend-labels .no-data-label { display: none; }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .v2-root .v2-is-fullscreen.v2-chart-card .v2-chart-wrap,
+  .v2-root .v2-is-fullscreen.v2-overlay-wrapper .v2-chart-wrap { height: calc(100dvh - 104px) !important; margin-top: 24px; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-dual-maps { height: calc(100dvh - 128px) !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend { padding-block: 4px; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend-labels { display: flex; gap: 8px; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend-labels .no-data-label { display: inline-flex; }
+  .v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-scroll { max-height: calc(100dvh - 100px) !important; }
+}
+
 /* Keep the landing header and dashboard filter context pinned on mobile. */
 @media (max-width: 768px) {
   .v2-root .site-header { position: sticky !important; inset-block-start: 0 !important; z-index: 1500 !important; }
