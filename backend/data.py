@@ -168,6 +168,27 @@ def get_months_for_year(anio: int) -> list:
     except:
         return list(MONTH_NAMES.values())
 
+def get_latest_observed_period() -> dict:
+    """Último mes con operaciones observadas; excluye periodos futuros vacíos."""
+    if not os.path.exists(DB_PATH):
+        return {"year": 2026, "month": "Junio"}
+    conn = _conn()
+    try:
+        row = conn.execute("""
+            SELECT t.anio, t.mes
+            FROM Fact_Operacion f
+            JOIN Dim_Tiempo t ON t.id_tiempo = f.id_tiempo
+            WHERE f.tipo_operacion IN ('alquiler', 'venta')
+            GROUP BY t.anio, t.mes
+            ORDER BY t.anio DESC, t.mes DESC
+            LIMIT 1
+        """).fetchone()
+        if row:
+            return {"year": int(row[0]), "month": MONTH_NAMES.get(int(row[1]), "Junio")}
+        return {"year": 2026, "month": "Junio"}
+    finally:
+        conn.close()
+
 
 def get_districts() -> list:
     if not os.path.exists(DB_PATH):
@@ -980,7 +1001,7 @@ def get_rankings(anio: int, mes: str, op: str, level: str = "barrio", category: 
     """
     Retorna el Top 5 de zonas para una categoría dada.
     level: 'barrio' | 'distrito'
-    category: 'Precio' | 'Rentabilidad' | 'Conectividad' | 'Estabilidad'
+    category: 'Precio' | 'Precio m²' | 'Rentabilidad' | 'Conectividad' | 'Estabilidad'
     """
     if not os.path.exists(DB_PATH): return pd.DataFrame()
     conn = _conn()
@@ -1009,8 +1030,9 @@ def get_rankings(anio: int, mes: str, op: str, level: str = "barrio", category: 
             base_q = f"FROM Fact_Operacion f {join_chain} JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo WHERE t.anio = ? AND t.mes = ? AND f.tipo_operacion = ?"
 
         renta_select = 'AVG(b.renta_media_hogar)' if level == 'barrio' else 'AVG(d.renta_media_hogar)'
-        if category == "Precio":
-            q = f"SELECT {group_col} as name, AVG(f.precio_promedio_vivienda) as value, {renta_select} as renta_hogar {base_q} GROUP BY name ORDER BY value DESC"
+        if category in ("Precio", "Precio m²"):
+            price_column = "f.precio_m2" if category == "Precio m²" else "f.precio_promedio_vivienda"
+            q = f"SELECT {group_col} as name, AVG({price_column}) as value, {renta_select} as renta_hogar {base_q} GROUP BY name ORDER BY value DESC"
             df = pd.read_sql(q, conn, params=params_base)
         elif category == "Rentabilidad":
             q = f"SELECT {group_col} as name, AVG(f.rentabilidad_bruta) as value, {renta_select} as renta_hogar {base_q} GROUP BY name ORDER BY value DESC"
@@ -1087,6 +1109,8 @@ def get_rankings(anio: int, mes: str, op: str, level: str = "barrio", category: 
                     
                     if category == "Precio":
                         df_pred_full['value'] = df_pred_full['precio_m2_predicho'] * df_pred_full['superficie_media_vivienda']
+                    elif category == "Precio m²":
+                        df_pred_full['value'] = df_pred_full['precio_m2_predicho']
                     elif category == "Rentabilidad":
                         df_pred_full['value'] = df_pred_full['precio_m2_predicho']
                     elif category == "Estabilidad":
@@ -1097,6 +1121,8 @@ def get_rankings(anio: int, mes: str, op: str, level: str = "barrio", category: 
                 else: # distrito
                     if category == "Precio":
                         df_pred_full['value'] = df_pred_full['precio_m2_predicho'] * df_pred_full['superficie_media_vivienda']
+                    elif category == "Precio m²":
+                        df_pred_full['value'] = df_pred_full['precio_m2_predicho']
                     elif category == "Rentabilidad":
                         df_pred_full['value'] = df_pred_full['precio_m2_predicho']
                     elif category == "Estabilidad":
@@ -1116,7 +1142,7 @@ def get_rankings(anio: int, mes: str, op: str, level: str = "barrio", category: 
                 df['renta_hogar'] = df['renta_hogar'].fillna(0.0)
                 
             # Calcular score (0-100) para la barra visual, pero mantener 'value' intacto para el texto
-            if category in ["Precio", "Rentabilidad"]:
+            if category in ["Precio", "Precio m²", "Rentabilidad"]:
                 max_val = df['value'].max()
                 df['score'] = (df['value'] / max_val * 100) if (pd.notnull(max_val) and max_val > 0) else 0
             else:

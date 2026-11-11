@@ -88,6 +88,7 @@ def get_filters():
         "months": latest_months,
         "months_by_year": months_by_year,
         "districts": districts,
+        "latest_observed_period": data.get_latest_observed_period(),
         "latest_period": {
             "year": latest_year,
             "month": latest_months[-1] if latest_months else "Diciembre",

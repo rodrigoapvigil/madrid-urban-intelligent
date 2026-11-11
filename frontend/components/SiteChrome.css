@@ -855,3 +855,25 @@ body:has(.editorial-page--methodology) { background: #02142B !important; }
     padding-top: clamp(44px, 10vw, 64px) !important;
   }
 }
+
+/* Final shared footer palette overrides legacy declarations above. */
+.auros-footer__statement,
+.auros-footer__cta-label,
+.auros-footer__nav a,
+.auros-footer__social-btn,
+.auros-footer__bottom { color: #FFFFFF !important; }
+.auros-footer__cta-button,
+.auros-footer__cta-button:hover {
+  color: #071B33 !important;
+  background: linear-gradient(115deg, #D9F8FF 0%, #E9E8FF 58%, #F0E3FF 100%) !important;
+  border-color: rgba(220, 232, 255, .72) !important;
+  box-shadow: 0 8px 24px rgba(0, 15, 38, .24) !important;
+}
+
+main.editorial-page:not(.editorial-page--methodology) { padding-bottom: 40px !important; }
+.editorial-page + .auros-footer { margin-top: 32px !important; padding-top: 36px !important; }
+@media (max-width: 600px) {
+  .auros-footer__nav { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; width: 100%; }
+  .auros-footer__nav a { font-size: 12px !important; }
+  .editorial-page + .auros-footer { margin-top: 24px !important; padding-top: 28px !important; }
+}

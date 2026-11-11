@@ -22,9 +22,9 @@ export default function CookiesPage() {
           <p>La aplicación puede utilizar <code>sessionStorage</code> para recordar temporalmente que has cerrado este aviso de privacidad durante la sesión. No se utiliza para crear perfiles ni para publicidad.</p>
         </section>
         <section className="editorial-page__section"><h2>2. Inventario conocido</h2>
-          <div style={{ overflowX: 'auto', margin: '20px 0' }}><table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', lineHeight: '1.6' }}><thead><tr style={{ borderBottom: '2px solid #0E6E8E', textAlign: 'left', color: '#0E6E8E' }}><th style={{ padding: '10px 12px' }}>Elemento</th><th style={{ padding: '10px 12px' }}>Proveedor</th><th style={{ padding: '10px 12px' }}>Finalidad</th><th style={{ padding: '10px 12px' }}>Duración</th></tr></thead><tbody>
-            <tr style={{ borderBottom: '1px solid #E2E8F0' }}><td style={{ padding: '10px 12px', fontWeight: '600' }}><code>sessionStorage</code></td><td style={{ padding: '10px 12px' }}>DMIYC</td><td style={{ padding: '10px 12px' }}>Recordar filtros y preferencias durante la sesión.</td><td style={{ padding: '10px 12px' }}>Hasta cerrar la pestaña</td></tr>
-            <tr style={{ borderBottom: '1px solid #E2E8F0' }}><td style={{ padding: '10px 12px', fontWeight: '600' }}>Cookies técnicas del proveedor</td><td style={{ padding: '10px 12px' }}>Vercel / Render o su red de distribución</td><td style={{ padding: '10px 12px' }}>Seguridad, entrega y funcionamiento de la infraestructura.</td><td style={{ padding: '10px 12px' }}>La fijada por el proveedor</td></tr>
+          <div className="editorial-page__table-wrap"><table className="editorial-page__table"><thead><tr><th>Elemento</th><th>Proveedor</th><th>Finalidad</th><th>Duración</th></tr></thead><tbody>
+            <tr><td><code>sessionStorage</code></td><td>DMIYC</td><td>Recordar filtros y preferencias durante la sesión.</td><td>Hasta cerrar la pestaña</td></tr>
+            <tr><td>Cookies técnicas del proveedor</td><td>Vercel / Render o su red de distribución</td><td>Seguridad, entrega y funcionamiento de la infraestructura.</td><td>La fijada por el proveedor</td></tr>
           </tbody></table></div>
           <p>Este inventario debe verificarse en cada despliegue. Si se incorpora una cookie o tecnología no necesaria, deberá bloquearse hasta obtener consentimiento previo y añadirse aquí con proveedor, finalidad, duración y mecanismo de revocación.</p>
         </section>

@@ -303,7 +303,7 @@ export function SiteFooter() {
         <div className="auros-footer__mid">
           <nav className="auros-footer__nav" aria-label="Enlaces institucionales y legales">
             <Link href="/madrid">CUADRO DE MANDO</Link>
-            <Link href="/madrid/chat">AMBI</Link>
+            <Link href="/madrid/chat">ASISTENTE AMBI</Link>
             <Link href="/madrid/veredicto">EL VEREDICTO</Link>
             <Link href="/metodologia">METODOLOGÍA</Link>
             <Link href="/sobre-el-proyecto">SOBRE EL PROYECTO</Link>

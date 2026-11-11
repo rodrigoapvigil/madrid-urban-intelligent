@@ -838,6 +838,64 @@
   }
 
 }
+
+@media (max-width: 768px) {
+  .v2-root .site-header { display: none !important; }
+  .v2-root .v2-custom-select::after { display: none !important; }
+  .v2-root .v2-compare-viewport { display: flex; flex-direction: column; gap: 14px; }
+  .v2-root .v2-overlay-wrapper { order: 0; }
+  .v2-root .v2-compare-grid { order: 1; }
+  .v2-root .v2-heatmap-scroll { max-height: none !important; overflow-x: auto !important; overflow-y: clip !important; }
+  .v2-root .v2-mobile-filter-bar { top: 0; min-height: 58px; }
+  .v2-mobile-filter-chips { display: flex; min-width: 0; gap: 5px; overflow-x: auto; }
+  .v2-mobile-filter-chips button { min-height: 32px; padding: 0 9px; border: 1px solid rgba(186,204,214,.25); border-radius: 999px; background: rgba(255,255,255,.06); color: #fff; white-space: nowrap; font-size: 12px; }
+  .v2-mobile-filter-trigger b { min-width: 19px; height: 19px; display: grid; place-items: center; border-radius: 50%; background: #00e5ee; color: #03172b; font-size: 11px; }
+  .v2-mobile-section-nav { position: sticky; top: 58px; z-index: 1250; display: flex; gap: 4px; overflow-x: auto; padding: 0 10px; border-bottom: 1px solid rgba(186,204,214,.14); background: rgba(2,20,43,.88); backdrop-filter: blur(14px); transform: translateY(-110%); opacity: 0; pointer-events: none; transition: transform .18s ease, opacity .18s ease; scrollbar-width: none; }
+  .v2-mobile-section-nav.is-visible { transform: translateY(0); opacity: 1; pointer-events: auto; }
+  .v2-mobile-section-nav button { flex: 0 0 auto; min-height: 42px; padding: 0 10px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #eaf5ff; font-size: 12px; font-weight: 650; }
+  .v2-mobile-section-nav button:active { border-bottom-color: #00e5ee; }
+  .v2-root:has(.v2-mobile-filters-open) .v2-mobile-profile-nav,
+  .v2-root:has(.v2-mobile-filters-open) .v2-mobile-section-nav { display: none !important; }
+  .v2-root .v2-filter-group > .v2-dropdown-container { padding: 8px 12px !important; }
+  .v2-root .v2-filter-label { font-size: 12px !important; }
+  .v2-root .v2-custom-select { min-height: 42px !important; font-size: 14px !important; }
+  .v2-root .v2-custom-select:disabled { opacity: .55; }
+  .v2-root .v2-dropdown-item { min-height: 44px; font-size: 14px; }
+  .v2-root .v2-dropdown-item[aria-selected="true"]::before { content: '●'; display: inline-block; width: 22px; color: #00e5ee; }
+  .v2-root .v2-mobile-filter-commit { display: none; }
+  .v2-root .v2-mobile-filters-open .v2-mobile-filter-commit { position: sticky; bottom: 0; z-index: 5; display: grid; gap: 8px; grid-column: 1 / -1; margin: 4px -16px -8px; padding: 12px 16px max(12px, env(safe-area-inset-bottom)); background: #071b33; border-top: 1px solid rgba(186,204,214,.16); }
+  .v2-mobile-filter-apply, .v2-mobile-filter-reset { min-height: 46px; border-radius: 12px; font-size: 14px; font-weight: 750; }
+  .v2-mobile-filter-apply { border: 0; color: #03172b; background: linear-gradient(115deg,#D9F8FF,#E9E8FF 58%,#F0E3FF); }
+  .v2-mobile-filter-reset { border: 1px solid rgba(186,204,214,.3); color: #fff; background: transparent; }
+  .v2-mobile-profile-nav { grid-template-columns: repeat(5, minmax(0,1fr)) !important; }
+  .v2-mobile-profile-nav button, .v2-mobile-profile-nav a { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; min-height: 48px; font-size: 12px !important; text-decoration: none; }
+  .v2-mobile-profile-nav button span, .v2-mobile-verdict-link span { font-size: 17px; line-height: 1; }
+  .v2-mobile-verdict-link { border-radius: 11px; color: #dffaff; background: rgba(0,229,238,.1); font-weight: 700; }
+  .v2-root .v2-mobile-map-switch { display: flex; width: fit-content; gap: 4px; margin: 0 0 12px; padding: 4px; border: 1px solid rgba(186,204,214,.2); border-radius: 999px; background: rgba(1,16,36,.7); }
+  .v2-mobile-map-switch button { min-height: 38px; padding: 0 15px; border: 0; border-radius: 999px; background: transparent; color: #d7e8ef; font-size: 12px; font-weight: 700; }
+  .v2-mobile-map-switch button.active { background: #00e5ee; color: #03172b; }
+  .v2-root .v2-dual-maps { display: block; height: auto; }
+  .v2-root .v2-map-sub { display: none; height: min(58vh, 480px); }
+  .v2-root .v2-map-sub[data-map-level="districts"] { display: flex; }
+  .v2-root .v2-kpi-card .v2-val { font-size: clamp(17px, 5vw, 22px) !important; line-height: 1.15; overflow-wrap: normal; }
+  .v2-root .v2-kpi-card label { font-size: 12px !important; line-height: 1.25; }
+  .v2-root .v2-kpi-card [title*="DATO REAL"] { font-size: 10px !important; white-space: nowrap; }
+  .v2-root .v2-heatmap-scroll { max-height: none !important; overflow-x: auto !important; overflow-y: clip !important; }
+  .v2-root .v2-heatmap-table td { white-space: nowrap; font-size: 12px; }
+  .v2-root .v2-heatmap-table td:not(.zona-name) { min-width: 40px; }
+  .v2-root .v2-heatmap-table .zona-name { position: sticky; left: 0; z-index: 1; min-width: 96px; }
+  .v2-root .v2-mobile-filter-bar .v2-mobile-filter-summary span { font-size: 12px; }
+  .v2-root .v2-info-tooltip-trigger { width: 40px !important; height: 40px !important; min-width: 40px !important; }
+  .v2-root .auros-footer { padding-bottom: calc(88px + env(safe-area-inset-bottom)) !important; }
+  .v2-root .auros-footer__nav { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 14px 18px; width: 100%; }
+  .v2-root .auros-footer__nav a { font-size: 12px; }
+}
+
+@media (max-width: 768px) {
+  .v2-root .v2-map-sub[data-map-level="neighborhoods"] { display: none; }
+  .v2-root:has(.v2-mobile-map-switch button:nth-child(2).active) .v2-map-sub[data-map-level="districts"] { display: none; }
+  .v2-root:has(.v2-mobile-map-switch button:nth-child(2).active) .v2-map-sub[data-map-level="neighborhoods"] { display: flex; }
+}
 /* 8. MARKET EXPLORER (3 COLUMNS) */
 .v2-explorer-grid {
   display: grid;
@@ -3013,6 +3071,49 @@
   }
 }
 
+/* Final mobile overrides for the dashboard navigation and single-map switch. */
+@media (max-width: 768px) {
+  .v2-root .site-header { display: none !important; }
+  .v2-root .v2-mobile-filter-summary { padding: 0; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+  .v2-root .v2-mobile-profile-picker::after { content: '⌄'; margin-left: 6px; color: #8cebf4; }
+  .v2-mobile-profile-menu { position: sticky; top: 58px; z-index: 1350; display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 6px; padding: 8px 12px; background: #071b33; border-bottom: 1px solid rgba(186,204,214,.16); }
+  .v2-mobile-profile-menu button { min-height: 42px; border: 1px solid rgba(186,204,214,.2); border-radius: 10px; background: rgba(255,255,255,.04); color: #fff; font-size: 12px; }
+  .v2-mobile-profile-menu button.active { border-color: #00e5ee; background: rgba(0,229,238,.14); }
+  .v2-root .v2-mobile-section-nav { height: 0; padding-top: 0; padding-bottom: 0; border: 0; }
+  .v2-root .v2-mobile-section-nav.is-visible { height: 44px; padding-top: 0; padding-bottom: 0; border-bottom: 1px solid rgba(186,204,214,.14); }
+  .v2-root .v2-mobile-section-nav.is-visible + .v2-mobile-profile-nav { margin-top: 0; }
+  .v2-root .v2-mobile-profile-nav { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+  .v2-root .v2-mobile-profile-nav { min-height: 64px; }
+  .v2-root .v2-mobile-profile-nav button, .v2-root .v2-mobile-profile-nav a { color: #d9eaf2; }
+  .v2-root .v2-mobile-profile-nav button > span, .v2-root .v2-mobile-profile-nav a > span { color: #8cebf4; }
+  .v2-root .v2-mobile-map-switch { display: flex; width: fit-content; gap: 4px; margin: 0 0 12px; padding: 4px; border: 1px solid rgba(186,204,214,.2); border-radius: 999px; background: rgba(1,16,36,.7); }
+  .v2-root .v2-mobile-map-switch button { min-height: 38px; padding: 0 15px; border: 0; border-radius: 999px; background: transparent; color: #d7e8ef; font-size: 12px; font-weight: 700; }
+  .v2-root .v2-mobile-map-switch button.active { background: #00e5ee; color: #03172b; }
+  .v2-root .v2-dual-maps { display: block !important; height: auto !important; }
+  .v2-root .v2-map-sub { display: none !important; height: min(58vh, 480px) !important; }
+  .v2-root .v2-map-sub[data-map-level="districts"] { display: flex !important; }
+  .v2-root:has(.v2-mobile-map-switch button:nth-child(2).active) .v2-map-sub[data-map-level="districts"] { display: none !important; }
+  .v2-root:has(.v2-mobile-map-switch button:nth-child(2).active) .v2-map-sub[data-map-level="neighborhoods"] { display: flex !important; }
+  .v2-root .v2-dual-maps:has(.v2-map-sub[data-map-level="districts"]) { grid-template-columns: 1fr; }
+  .v2-root .v2-mobile-filters-open { overscroll-behavior: contain; touch-action: pan-y; }
+  .v2-root .v2-filter-actions { align-items: stretch !important; }
+  .v2-root .v2-mobile-filter-commit { width: calc(100% + 32px); }
+  .v2-root .v2-info-tooltip-trigger > button { width: 40px !important; height: 40px !important; min-width: 40px !important; font-size: 15px !important; }
+  .v2-root .v2-effort-card { grid-column: 1 / -1; }
+  .v2-root .v2-kpi-card > div:first-child { flex-wrap: wrap; row-gap: 4px; }
+  .v2-root .v2-kpi-card label { font-size: 12px !important; }
+  .v2-root .v2-heatmap-scroll { max-height: none !important; overflow-x: auto !important; overflow-y: clip !important; }
+  .v2-root .v2-heatmap-table td { white-space: nowrap; font-size: 12px; }
+  .v2-root .v2-heatmap-table td:not(.zona-name) { min-width: 40px; }
+  .v2-root .v2-heatmap-table .zona-name { position: sticky; left: 0; z-index: 1; min-width: 96px; }
+  .v2-root .v2-map-legend-labels { flex-wrap: nowrap; gap: 10px; overflow-x: auto; white-space: nowrap; }
+  .v2-root .v2-map-legend-labels > span { font-size: 12px; }
+  .v2-root .v2-ranking-metric { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 10px 0; color: #fff; font-size: 12px; }
+  .v2-root .v2-ranking-metric button { min-height: 36px; padding: 0 12px; border: 1px solid rgba(186,204,214,.22); border-radius: 999px; background: rgba(255,255,255,.04); color: #fff; font-size: 12px; }
+  .v2-root .v2-ranking-metric button.active { color: #03172b; background: #00e5ee; }
+  .v2-root .auros-footer { padding-bottom: calc(88px + env(safe-area-inset-bottom)) !important; }
+}
+
 /* Compact dashboard controls designed for thumb reach on phones. */
 .v2-mobile-filter-bar,
 .v2-mobile-filter-heading,
@@ -3044,14 +3145,16 @@
   }
   .v2-mobile-filter-backdrop { position: fixed; inset: 0; z-index: 1600; width: 100%; height: 100%; border: 0; background: rgba(0, 8, 19, .68); }
   .v2-root .v2-filters {
-    position: fixed; inset: auto 0 0; z-index: 1601; display: block; width: 100%; max-height: 86dvh;
-    overflow: auto; padding: 0 0 max(18px, env(safe-area-inset-bottom)) !important;
+    position: fixed; inset: auto 0 0; z-index: 1601; display: flex; flex-direction: column; width: 100%;
+    height: min(86dvh, 680px); min-height: min(480px, 72dvh); max-height: 86dvh;
+    overflow: hidden; padding: 0 0 env(safe-area-inset-bottom) !important;
     border: 1px solid rgba(186, 204, 214, .18) !important; border-radius: 22px 22px 0 0;
     background: #071b33 !important; box-shadow: 0 -20px 60px rgba(0, 0, 0, .48);
     transform: translateY(105%); visibility: hidden; transition: transform .24s ease, visibility .24s;
   }
   .v2-root .v2-filters.v2-mobile-filters-open { transform: translateY(0); visibility: visible; }
-  .v2-mobile-filter-heading { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 18px 14px; background: #071b33; border-bottom: 1px solid rgba(186, 204, 214, .12); }
+  .v2-root .v2-filter-group { flex: 1 1 auto; min-height: 0; align-content: start; overflow-y: auto; overscroll-behavior: contain; }
+  .v2-mobile-filter-heading { position: relative; flex: 0 0 auto; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 18px 14px; background: #071b33; border-bottom: 1px solid rgba(186, 204, 214, .12); }
   .v2-mobile-filter-heading > div { display: grid; gap: 4px; }
   .v2-mobile-filter-heading strong { color: #fff; font-size: 17px; }
   .v2-mobile-filter-heading span { color: #a9c0ce; font-size: 12px; }

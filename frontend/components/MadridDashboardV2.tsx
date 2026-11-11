@@ -667,8 +667,14 @@ const MadridDashboardV2: React.FC = () => {
   // State: Custom Dropdowns
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [mapLevel, setMapLevel] = useState<'districts' | 'neighborhoods'>('districts');
+  const [sectionNavVisible, setSectionNavVisible] = useState(true);
+  const [isProfilePickerOpen, setIsProfilePickerOpen] = useState(false);
+  const [draftFilters, setDraftFilters] = useState({ year: '', month: '', district: 'Todos', barrio: 'Todos' });
+  const [draftBarrios, setDraftBarrios] = useState<string[]>(['Todos']);
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
+  const [latestAvailablePeriod, setLatestAvailablePeriod] = useState({ year: '2026', month: 'Junio' });
   const [selectedDistrict, setSelectedDistrict] = useState('Todos');
   const [selectedBarrio, setSelectedBarrio] = useState('Todos');
   const [selectedZoneA, setSelectedZoneA] = useState('Salamanca');
@@ -711,6 +717,7 @@ const MadridDashboardV2: React.FC = () => {
   const [seasonalTrend, setSeasonalTrend] = useState<any[]>([]);
   const [heatmapData, setHeatmapData] = useState<any[]>([]);
   const [rankingLevel, setRankingLevel] = useState<'Distritos' | 'Barrios'>('Distritos');
+  const [rankingMetric, setRankingMetric] = useState<'total' | 'unit'>('total');
   const [scatterData, setScatterData] = useState<any[]>([]);
   const [connectivityData, setConnectivityData] = useState<any>(null);
   const [liquidityLevel, setLiquidityLevel] = useState<'distrito' | 'barrio'>('distrito');
@@ -741,15 +748,17 @@ const MadridDashboardV2: React.FC = () => {
 
   const activeProfile = PROFILES[profileIdx];
   const selectedMonthIndex = MONTHS_ES.indexOf(selectedMonth);
-  const isProjectionPeriod = Number(selectedYear) > 2026 || (Number(selectedYear) === 2026 && selectedMonthIndex >= 6);
+  const latestObservedMonthIndex = MONTHS_ES.indexOf(latestAvailablePeriod.month);
+  const isProjectionPeriod = Number(selectedYear) > Number(latestAvailablePeriod.year) || (Number(selectedYear) === Number(latestAvailablePeriod.year) && selectedMonthIndex > latestObservedMonthIndex);
   const periodStatusLabel = isProjectionPeriod ? 'Estimación' : 'Dato real';
   const realSeriesPoints = seriesMadrid.filter(point => point && !point.is_prediction);
   const latestRealPoint = realSeriesPoints[realSeriesPoints.length - 1];
-  const latestRealMonth = latestRealPoint?.mes_nombre || 'junio';
-  const latestRealYear = Number(latestRealPoint?.anio || selectedYear || '2026');
+  const latestRealMonth = latestRealPoint?.mes_nombre || latestAvailablePeriod.month;
+  const latestRealYear = Number(latestRealPoint?.anio || latestAvailablePeriod.year);
+  const visibleFilters = isMobileFiltersOpen ? draftFilters : { year: selectedYear, month: selectedMonth, district: selectedDistrict, barrio: selectedBarrio };
   const firstProjectionMonth = latestRealPoint
-    ? MONTHS_ES[Number(latestRealPoint.mes) || 6] || 'julio'
-    : 'julio';
+    ? MONTHS_ES[Number(latestRealPoint.mes)] || 'Enero'
+    : MONTHS_ES[latestObservedMonthIndex + 1] || 'Enero';
   const heatmapValues = useMemo(
     () => heatmapData.flatMap(row => Object.keys(row)
       .filter(key => key.startsWith('m'))
@@ -795,16 +804,20 @@ const MadridDashboardV2: React.FC = () => {
         const years = (data.years || []).map(String);
         const allYears = years.sort((a, b) => Number(a) - Number(b));
         const months = { ...(data.months_by_year || {}) } as Record<string, string[]>;
+        const observedPeriod = data.latest_observed_period;
+        if (observedPeriod?.year && observedPeriod?.month) {
+          setLatestAvailablePeriod({ year: String(observedPeriod.year), month: String(observedPeriod.month) });
+        }
         if (allYears.length) setAvailableYears(allYears);
         setMonthsByYear(months);
         if (data.districts) setAvailableDistricts(['Todos', ...data.districts]);
-        const preferredYear = allYears.includes('2026') ? '2026' : allYears[allYears.length - 1] || '2026';
+        const preferredYear = String(observedPeriod?.year || (allYears.includes('2026') ? '2026' : allYears[allYears.length - 1] || '2026'));
         const preferredMonths = months[preferredYear] || MONTHS_ES;
         // En 2026 el último corte observado publicado es junio; abrir ahí evita
         // presentar una estimación como si fuera el dato actual por defecto.
-        const preferredMonth = preferredYear === '2026' && preferredMonths.includes('Junio')
+        const preferredMonth = observedPeriod?.month || (preferredYear === '2026' && preferredMonths.includes('Junio')
           ? 'Junio'
-          : preferredMonths[preferredMonths.length - 1] || 'Diciembre';
+          : preferredMonths[preferredMonths.length - 1] || 'Diciembre');
         setSelectedYear(preferredYear);
         setSelectedMonth(preferredMonth);
         setFiltersReady(true);
@@ -823,23 +836,82 @@ const MadridDashboardV2: React.FC = () => {
       .then(res => res.json())
       .then(data => {
         setAvailableBarrios(data);
-        setSelectedBarrio('Todos');
+        setSelectedBarrio(current => current !== 'Todos' && !data.includes(current) ? 'Todos' : current);
       })
       .catch(err => console.error("Error loading neighborhoods:", err));
   }, [selectedDistrict, filtersReady]);
+
+  useEffect(() => {
+    if (!isMobileFiltersOpen) return;
+    apiFetch(`/neighborhoods?district=${encodeURIComponent(draftFilters.district)}`)
+      .then(res => res.json())
+      .then((data: string[]) => {
+        setDraftBarrios(data);
+        if (draftFilters.barrio !== 'Todos' && !data.includes(draftFilters.barrio)) {
+          setDraftFilters(current => ({ ...current, barrio: 'Todos' }));
+        }
+      })
+      .catch(() => setDraftBarrios(['Todos']));
+  }, [draftFilters.district, draftFilters.barrio, isMobileFiltersOpen]);
+
+  useEffect(() => {
+    if (!isMobileFiltersOpen) return;
+    window.history.pushState({ mobileFiltersOpen: true }, '', `${window.location.pathname}${window.location.search}#filtros`);
+    const handleBack = () => { setIsMobileFiltersOpen(false); setActiveDropdown(null); };
+    window.addEventListener('popstate', handleBack);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('popstate', handleBack);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMobileFiltersOpen]);
+
+  useEffect(() => {
+    let previousY = window.scrollY;
+    const handleScroll = () => {
+      const currentY = window.scrollY;
+      setSectionNavVisible(currentY < 140 || currentY < previousY - 4);
+      previousY = currentY;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Fetch KPIs and Series
   useEffect(() => {
     if (!filtersReady || !selectedYear || !selectedMonth) return;
     const op = activeProfile.op;
     const requestId = ++latestDashboardRequest.current;
+    const isLatestRequest = () => requestId === latestDashboardRequest.current;
+    const rejectInvalidRentalSeries = (rows: any[]) => {
+      const containsOutlier = Array.isArray(rows) && rows.some((row: any) => Number(row.precio_m2) > 100);
+      if (activeProfile.id === 'alquiler' && containsOutlier) {
+        setDashboardLoadError('La serie de alquiler contiene precios por m² fuera de escala. Se ha detenido su visualización para evitar mezclar datos de compra y alquiler.');
+        return true;
+      }
+      return false;
+    };
     if (!hasLoadedPrimaryKpis.current) setIsDashboardLoading(true);
     setDashboardLoadError(null);
+    // Never leave data from the previous operation visible while a new profile loads.
+    setKpiData({});
+    setKpiDataA({});
+    setKpiDataB({});
+    setSeriesMadrid([]);
+    setSeriesA([]);
+    setSeriesB([]);
+    setMapData({ districts: [], neighborhoods: [] });
+    setRankings({ topDist: [], botDist: [], topBarr: [], botBarr: [] });
+    setHeatmapData([]);
 
     apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
       .then(res => res.json())
       .then(data => {
-        if (requestId !== latestDashboardRequest.current) return;
+        if (!isLatestRequest()) return;
+        if (activeProfile.id === 'alquiler' && Number(data.precio_m2) > 100) {
+          throw new Error('El precio de alquiler recibido está fuera de escala. Hemos detenido la actualización para no mezclar datos de compra y alquiler.');
+        }
         hasLoadedPrimaryKpis.current = true;
         setKpiData({
         p_m2: data.precio_m2,
@@ -865,98 +937,125 @@ const MadridDashboardV2: React.FC = () => {
     // Series Madrid (Average)
     apiFetch(`/series?year=${selectedYear}&op=${op}`)
       .then(res => res.json())
-      .then(data => setSeriesMadrid(data));
+      .then(data => { if (isLatestRequest() && !rejectInvalidRentalSeries(data)) setSeriesMadrid(data); });
 
     // Series Zone A
     apiFetch(`/series?year=${selectedYear}&op=${op}&zona=${encodeURIComponent(selectedZoneA)}&tipo_zona=${compareLevel.toLowerCase().slice(0, -1)}`)
       .then(res => res.json())
-      .then(data => setSeriesA(data));
+      .then(data => { if (isLatestRequest() && !rejectInvalidRentalSeries(data)) setSeriesA(data); });
 
     // Series Zone B
     apiFetch(`/series?year=${selectedYear}&op=${op}&zona=${encodeURIComponent(selectedZoneB)}&tipo_zona=${compareLevel.toLowerCase().slice(0, -1)}`)
       .then(res => res.json())
-      .then(data => setSeriesB(data));
+      .then(data => { if (isLatestRequest() && !rejectInvalidRentalSeries(data)) setSeriesB(data); });
 
     // KPIs Zone A
     const zoneAParam = compareLevel === 'Distritos' ? `district=${encodeURIComponent(selectedZoneA)}` : `barrio=${encodeURIComponent(selectedZoneA)}`;
     apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneAParam}`)
       .then(res => res.json())
-      .then(data => setKpiDataA({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra }));
+      .then(data => {
+        if (!isLatestRequest()) return;
+        if (activeProfile.id === 'alquiler' && Number(data.precio_m2) > 100) return;
+        setKpiDataA({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra });
+      });
 
     // KPIs Zone B
     const zoneBParam = compareLevel === 'Distritos' ? `district=${encodeURIComponent(selectedZoneB)}` : `barrio=${encodeURIComponent(selectedZoneB)}`;
     apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneBParam}`)
       .then(res => res.json())
-      .then(data => setKpiDataB({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra }));
+      .then(data => {
+        if (!isLatestRequest()) return;
+        if (activeProfile.id === 'alquiler' && Number(data.precio_m2) > 100) return;
+        setKpiDataB({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra });
+      });
 
     // Map Data
     apiFetch(`/map?year=${selectedYear}&month=${selectedMonth}&interest=${activeProfile.id === 'alquiler' ? 'Alquiler' : activeProfile.id === 'compra' ? 'Compra-venta' : activeProfile.id === 'venta' ? 'Venta' : 'Inversión'}`)
       .then(res => res.json())
-      .then(data => setMapData(data))
+      .then(data => {
+        if (!isLatestRequest()) return;
+        const mapPrices = [...(data.districts || []), ...(data.neighborhoods || [])].map((item: any) => Number(item.precio_m2)).filter(Number.isFinite);
+        if (activeProfile.id === 'alquiler' && mapPrices.some((price: number) => price > 100)) {
+          setDashboardLoadError('La API devolvió valores de compraventa en el mapa de alquiler. Se han ocultado para evitar una escala engañosa.');
+          return;
+        }
+        setMapData(data);
+      })
       .catch(err => console.error("Error loading map data:", err));
-
-    // Rankings Data
-    if (activeProfile.id === 'venta') {
-      Promise.all([
-        apiFetch(`/liquidity?year=${selectedYear}&level=distrito`).then(r => r.ok ? r.json() : []).catch(() => []),
-        apiFetch(`/liquidity?year=${selectedYear}&level=barrio`).then(r => r.ok ? r.json() : []).catch(() => []),
-      ]).then(([dist, barr]) => {
-        const mapLiquidity = (list: any[]) => list.map(item => ({
-          name: item.name,
-          value: item.transactions
-        }));
-        setRankings({
-          topDist: mapLiquidity(dist || []).slice(0, 10),
-          botDist: mapLiquidity(dist || []).slice(0, 10),
-          topBarr: mapLiquidity(barr || []).slice(0, 10),
-          botBarr: mapLiquidity(barr || []).slice(0, 10)
-        });
-      }).catch(err => console.error("Error loading rankings:", err));
-    } else {
-      const category = activeProfile.id === 'inversion' ? 'Rentabilidad' : 'Precio';
-      Promise.all([
-        apiFetch(`/rankings?year=${selectedYear}&month=${selectedMonth}&op=${op}&level=distrito&category=${category}`).then(r => r.ok ? r.json() : []).catch(() => []),
-        apiFetch(`/rankings?year=${selectedYear}&month=${selectedMonth}&op=${op}&level=barrio&category=${category}`).then(r => r.ok ? r.json() : []).catch(() => []),
-      ]).then(([dist, barr]) => {
-        setRankings({
-          topDist: (dist || []).slice(0, 10),
-          botDist: [...(dist || [])].sort((a: any, b: any) => a.value - b.value).slice(0, 10),
-          topBarr: (barr || []).slice(0, 10),
-          botBarr: [...(barr || [])].sort((a: any, b: any) => a.value - b.value).slice(0, 10)
-        });
-      }).catch(err => console.error("Error loading rankings:", err));
-    }
 
     if (activeProfile.id === 'alquiler') {
       apiFetch(`/affordability?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.id}`)
         .then(res => res.ok ? res.json() : [])
-        .then(data => setAffordabilityData(Array.isArray(data) ? data : []))
-        .catch(err => { console.error("Error loading affordability:", err); setAffordabilityData([]); });
+        .then(data => { if (isLatestRequest()) setAffordabilityData(Array.isArray(data) ? data : []); })
+        .catch(err => { console.error("Error loading affordability:", err); if (isLatestRequest()) setAffordabilityData([]); });
 
       apiFetch(`/seasonal-trend?anio=${selectedYear}&op=${activeProfile.id}`)
         .then(res => res.ok ? res.json() : [])
-        .then(data => setSeasonalTrend(Array.isArray(data) ? data : []))
-        .catch(err => { console.error("Error loading seasonal trend:", err); setSeasonalTrend([]); });
+        .then(data => { if (isLatestRequest()) setSeasonalTrend(Array.isArray(data) ? data : []); })
+        .catch(err => { console.error("Error loading seasonal trend:", err); if (isLatestRequest()) setSeasonalTrend([]); });
     }
 
     if (activeProfile.id !== 'inversion') {
       apiFetch(`/scatter-opportunity?year=${selectedYear}&month=${selectedMonth}&op=${op}&level=${rankingLevel.toLowerCase().slice(0, -1)}`)
         .then(res => res.ok ? res.json() : [])
-        .then(data => setScatterData(Array.isArray(data) ? data : []))
-        .catch(() => setScatterData([]));
+        .then(data => { if (isLatestRequest()) setScatterData(Array.isArray(data) ? data : []); })
+        .catch(() => { if (isLatestRequest()) setScatterData([]); });
     }
 
     apiFetch(`/heatmap?year=${selectedYear}&op=${activeProfile.id}&level=${rankingLevel.toLowerCase().slice(0, -1)}`)
       .then(res => res.ok ? res.json() : [])
-      .then(data => setHeatmapData(Array.isArray(data) ? data : []))
-      .catch(() => setHeatmapData([]));
+      .then(data => {
+        if (!isLatestRequest()) return;
+        const values = (Array.isArray(data) ? data : []).flatMap((row: any) => Object.keys(row).filter(key => /^m\d+$/.test(key)).map(key => Number(row[key]))).filter(Number.isFinite);
+        if (activeProfile.id === 'alquiler' && values.some((value: number) => value > 100)) {
+          setDashboardLoadError('La API devolvió valores de compraventa en la tabla de alquiler. Se han ocultado para evitar una escala engañosa.');
+          return;
+        }
+        setHeatmapData(Array.isArray(data) ? data : []);
+      })
+      .catch(() => { if (isLatestRequest()) setHeatmapData([]); });
 
     apiFetch(`/connectivity-analysis?district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
       .then(res => res.ok ? res.json() : null)
-      .then(data => setConnectivityData(data))
-      .catch(err => { console.error("Error loading connectivity:", err); setConnectivityData(null); });
+      .then(data => { if (isLatestRequest()) setConnectivityData(data); })
+      .catch(err => { console.error("Error loading connectivity:", err); if (isLatestRequest()) setConnectivityData(null); });
 
   }, [selectedYear, selectedMonth, profileIdx, selectedDistrict, selectedBarrio, selectedZoneA, selectedZoneB, compareLevel, rankingLevel, filtersReady, loadAttempt, activeProfile.id, activeProfile.op]);
+
+  useEffect(() => {
+    if (!filtersReady || !selectedYear || !selectedMonth) return;
+    let isCurrent = true;
+    setRankings({ topDist: [], botDist: [], topBarr: [], botBarr: [] });
+    if (activeProfile.id === 'venta') {
+      Promise.all([
+        apiFetch(`/liquidity?year=${selectedYear}&level=distrito`).then(r => r.ok ? r.json() : []).catch(() => []),
+        apiFetch(`/liquidity?year=${selectedYear}&level=barrio`).then(r => r.ok ? r.json() : []).catch(() => []),
+      ]).then(([dist, barr]) => {
+        if (!isCurrent) return;
+        const mapLiquidity = (list: any[]) => list.map(item => ({ name: item.name, value: item.transactions }));
+        setRankings({ topDist: mapLiquidity(dist || []).slice(0, 10), botDist: mapLiquidity(dist || []).slice(0, 10), topBarr: mapLiquidity(barr || []).slice(0, 10), botBarr: mapLiquidity(barr || []).slice(0, 10) });
+      });
+    } else {
+      const category = activeProfile.id === 'inversion' ? 'Rentabilidad' : rankingMetric === 'unit' ? 'Precio m²' : 'Precio';
+      const district = `&district=${encodeURIComponent(selectedDistrict)}`;
+      Promise.all([
+        apiFetch(`/rankings?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&level=distrito&category=${encodeURIComponent(category)}`).then(r => r.ok ? r.json() : []).catch(() => []),
+        apiFetch(`/rankings?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&level=barrio&category=${encodeURIComponent(category)}${district}`).then(r => r.ok ? r.json() : []).catch(() => []),
+      ]).then(([dist, barr]) => {
+        if (!isCurrent) return;
+        if (activeProfile.id === 'alquiler') {
+          const maxAllowed = rankingMetric === 'unit' ? 100 : 10000;
+          const values = [...(dist || []), ...(barr || [])].map((item: any) => Number(item.value)).filter(Number.isFinite);
+          if (values.some((value: number) => value > maxAllowed)) {
+            setDashboardLoadError('El ranking de alquiler contiene valores de compraventa. Se ha ocultado para evitar una escala engañosa.');
+            return;
+          }
+        }
+        setRankings({ topDist: (dist || []).slice(0, 10), botDist: [...(dist || [])].sort((a: any, b: any) => a.value - b.value).slice(0, 10), topBarr: (barr || []).slice(0, 10), botBarr: [...(barr || [])].sort((a: any, b: any) => a.value - b.value).slice(0, 10) });
+      });
+    }
+    return () => { isCurrent = false; };
+  }, [filtersReady, selectedYear, selectedMonth, activeProfile.id, activeProfile.op, rankingMetric, selectedDistrict]);
 
   // Fetch liquidity data (for Inversión profile only)
   useEffect(() => {
@@ -2070,6 +2169,40 @@ const MadridDashboardV2: React.FC = () => {
     setTimeout(() => setIsTransitioning(false), 480);
   };
 
+  const openMobileFilters = () => {
+    setDraftFilters({ year: selectedYear, month: selectedMonth, district: selectedDistrict, barrio: selectedBarrio });
+    setDraftBarrios(availableBarrios);
+    setIsMobileFiltersOpen(true);
+  };
+
+  const closeMobileFilters = () => {
+    setIsMobileFiltersOpen(false);
+    setActiveDropdown(null);
+    if (window.location.hash === '#filtros') window.history.back();
+  };
+
+  const applyMobileFilters = () => {
+    setSelectedYear(draftFilters.year);
+    setSelectedMonth(draftFilters.month);
+    setSelectedDistrict(draftFilters.district);
+    setSelectedBarrio(draftFilters.barrio);
+    closeMobileFilters();
+  };
+
+  const resetMobileFilters = () => {
+    const reset = { year: latestAvailablePeriod.year, month: latestAvailablePeriod.month, district: 'Todos', barrio: 'Todos' };
+    setDraftFilters(reset);
+    setSelectedYear(reset.year);
+    setSelectedMonth(reset.month);
+    setSelectedDistrict(reset.district);
+    setSelectedBarrio(reset.barrio);
+    closeMobileFilters();
+  };
+
+  const scrollToDashboardSection = (section: string) => {
+    activePanelRef.current?.querySelector<HTMLElement>(`[data-dashboard-section="${section}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const handleLevelToggle = (level: 'Distritos' | 'Barrios') => {
     if (level === compareLevel) return;
     const availableZones = (level === 'Distritos' ? availableDistricts : availableBarrios).filter(zone => zone !== 'Todos');
@@ -2120,23 +2253,30 @@ const MadridDashboardV2: React.FC = () => {
 
 
       <div className="v2-mobile-filter-bar">
-        <div className="v2-mobile-filter-summary">
+        <button type="button" className="v2-mobile-filter-summary v2-mobile-profile-picker" aria-expanded={isProfilePickerOpen} onClick={() => setIsProfilePickerOpen(value => !value)}>
           <strong>{activeProfile.label}</strong>
           <span>{selectedDistrict === 'Todos' ? 'Madrid' : formatZoneOption(selectedDistrict)} · {selectedMonth} {selectedYear}</span>
+        </button>
+        <div className="v2-mobile-filter-chips">
+          {selectedDistrict !== 'Todos' && <button type="button" onClick={() => { setSelectedDistrict('Todos'); setSelectedBarrio('Todos'); }}>‹ {formatZoneOption(selectedDistrict)} ×</button>}
+          {selectedBarrio !== 'Todos' && <button type="button" onClick={() => setSelectedBarrio('Todos')}>{formatZoneOption(selectedBarrio)} ×</button>}
+          {(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month) && <button type="button" onClick={() => { setSelectedYear(latestAvailablePeriod.year); setSelectedMonth(latestAvailablePeriod.month); }}>{selectedMonth.slice(0, 3)} {selectedYear} ×</button>}
         </div>
-        <button type="button" className="v2-mobile-filter-trigger" aria-expanded={isMobileFiltersOpen} aria-controls="v2-filter-panel" onClick={() => setIsMobileFiltersOpen(true)}>
+        <button type="button" className="v2-mobile-filter-trigger" aria-expanded={isMobileFiltersOpen} aria-controls="v2-filter-panel" onClick={openMobileFilters}>
           <SlidersHorizontal size={17} aria-hidden="true" />
-          <span>Filtros</span>
+          <span>Filtros</span><b>{Number(selectedDistrict !== 'Todos') + Number(selectedBarrio !== 'Todos') + Number(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month)}</b>
         </button>
       </div>
 
-      {isMobileFiltersOpen && <button type="button" className="v2-mobile-filter-backdrop" aria-label="Cerrar filtros" onClick={() => { setIsMobileFiltersOpen(false); setActiveDropdown(null); }} />}
+      {isProfilePickerOpen && <div className="v2-mobile-profile-menu" role="group" aria-label="Cambiar perfil de mercado">{PROFILES.map((profile, index) => <button key={profile.id} type="button" className={profileIdx === index ? 'active' : ''} onClick={() => { handleProfileChange(index); setIsProfilePickerOpen(false); }}>{profile.label}</button>)}</div>}
+
+      {isMobileFiltersOpen && <button type="button" className="v2-mobile-filter-backdrop" aria-label="Cerrar filtros" onClick={closeMobileFilters} />}
 
       {/* 2. FILTROS REFINADOS (CUSTOM APPLE DROPDOWNS) */}
       <div id="v2-filter-panel" className={`v2-filters ${isMobileFiltersOpen ? 'v2-mobile-filters-open' : ''} ${['year', 'month', 'dist', 'barrio'].includes(activeDropdown || '') ? 'v2-filters-open' : ''}`}>
         <div className="v2-mobile-filter-heading">
-          <div><strong>Filtrar mercado</strong><span>{activeProfile.label} · {selectedDistrict === 'Todos' ? 'Madrid' : formatZoneOption(selectedDistrict)}</span></div>
-          <button type="button" aria-label="Cerrar filtros" onClick={() => { setIsMobileFiltersOpen(false); setActiveDropdown(null); }}><X size={20} /></button>
+          <div><strong>Filtrar</strong><span>{activeProfile.label} · {visibleFilters.district === 'Todos' ? 'Madrid' : formatZoneOption(visibleFilters.district)} · {visibleFilters.month} {visibleFilters.year}</span></div>
+          <button type="button" aria-label="Cerrar filtros" onClick={closeMobileFilters}><X size={20} /></button>
         </div>
         <div className="v2-filter-group">
 
@@ -2144,13 +2284,13 @@ const MadridDashboardV2: React.FC = () => {
           <div className={`v2-dropdown-container ${activeDropdown === 'year' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Año</span>
             <button type="button" className={`v2-custom-select ${activeDropdown === 'year' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'year'} onClick={() => setActiveDropdown(activeDropdown === 'year' ? null : 'year')}>
-              <span>{selectedYear}</span>
+              <span>{visibleFilters.year}</span>
               <ChevronDown size={14} className="v2-select-chevron" />
             </button>
             {activeDropdown === 'year' && (
               <div className="v2-dropdown-menu" role="listbox" aria-label="Año">
                 {availableYears.map(y => (
-                  <button type="button" key={y} className="v2-dropdown-item" role="option" aria-selected={selectedYear === y} onClick={(e) => { e.stopPropagation(); setSelectedYear(y); const months = monthsByYear[y] || []; setSelectedMonth(months[months.length - 1] || 'Diciembre'); setActiveDropdown(null); }}>{y}</button>
+                  <button type="button" key={y} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.year === y} onClick={(e) => { e.stopPropagation(); const months = monthsByYear[y] || []; const month = months[months.length - 1] || 'Diciembre'; if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, year: y, month })); else { setSelectedYear(y); setSelectedMonth(month); } setActiveDropdown(null); }}>{y}</button>
                 ))}
               </div>
             )}
@@ -2160,13 +2300,13 @@ const MadridDashboardV2: React.FC = () => {
           <div className={`v2-dropdown-container ${activeDropdown === 'month' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Mes</span>
             <button type="button" className={`v2-custom-select ${activeDropdown === 'month' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'month'} onClick={() => setActiveDropdown(activeDropdown === 'month' ? null : 'month')}>
-              <span>{selectedMonth}</span>
+              <span>{visibleFilters.month}</span>
               <ChevronDown size={14} className="v2-select-chevron" />
             </button>
             {activeDropdown === 'month' && (
               <div className="v2-dropdown-menu" role="listbox" aria-label="Mes">
-                {(monthsByYear[selectedYear] || ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']).map(m => (
-                  <button type="button" key={m} className="v2-dropdown-item" role="option" aria-selected={selectedMonth === m} onClick={(e) => { e.stopPropagation(); setSelectedMonth(m); setActiveDropdown(null); }}>{m}</button>
+                {(monthsByYear[visibleFilters.year] || ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']).map(m => (
+                  <button type="button" key={m} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.month === m} onClick={(e) => { e.stopPropagation(); if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, month: m })); else setSelectedMonth(m); setActiveDropdown(null); }}>{m}</button>
                 ))}
               </div>
             )}
@@ -2176,13 +2316,13 @@ const MadridDashboardV2: React.FC = () => {
           <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Distrito</span>
             <button type="button" className={`v2-custom-select ${activeDropdown === 'dist' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'dist'} onClick={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')}>
-              <span>{formatZoneOption(selectedDistrict)}</span>
+              <span>{formatZoneOption(visibleFilters.district)}</span>
               <ChevronDown size={14} className="v2-select-chevron" />
             </button>
             {activeDropdown === 'dist' && (
               <div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
                 {availableDistricts.map(d => (
-                  <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={selectedDistrict === d} onClick={(e) => { e.stopPropagation(); setSelectedDistrict(d); setActiveDropdown(null); }}>{formatZoneOption(d)}</button>
+                  <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.district === d} onClick={(e) => { e.stopPropagation(); if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, district: d, barrio: 'Todos' })); else setSelectedDistrict(d); setActiveDropdown(null); }}>{formatZoneOption(d)}</button>
                 ))}
               </div>
             )}
@@ -2191,8 +2331,8 @@ const MadridDashboardV2: React.FC = () => {
           {/* BARRIO */}
           <div className={`v2-dropdown-container ${activeDropdown === 'barrio' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Barrio</span>
-            <button type="button" className={`v2-custom-select ${activeDropdown === 'barrio' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'barrio'} onClick={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')}>
-                    <span>{formatZoneOption(selectedBarrio)}</span>
+            <button type="button" disabled={visibleFilters.district === 'Todos'} className={`v2-custom-select ${activeDropdown === 'barrio' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'barrio'} onClick={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')}>
+                    <span>{visibleFilters.district === 'Todos' ? 'Elige un distrito' : formatZoneOption(visibleFilters.barrio)}</span>
               <ChevronDown size={14} className="v2-select-chevron" />
             </button>
             {activeDropdown === 'barrio' && (
@@ -2210,8 +2350,8 @@ const MadridDashboardV2: React.FC = () => {
                     });
                   }}
                 />
-                {availableBarrios.map(b => (
-                  <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={selectedBarrio === b} onClick={(e) => { e.stopPropagation(); setSelectedBarrio(b); setActiveDropdown(null); }}>{formatZoneOption(b)}</button>
+                {(isMobileFiltersOpen ? draftBarrios : availableBarrios).map(b => (
+                  <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.barrio === b} onClick={(e) => { e.stopPropagation(); if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, barrio: b })); else setSelectedBarrio(b); setActiveDropdown(null); }}>{formatZoneOption(b)}</button>
                 ))}
               </div>
             )}
@@ -2262,13 +2402,28 @@ const MadridDashboardV2: React.FC = () => {
               <span style={{ color: '#FFFFFF', fontWeight: '700' }}>¿Cómo entender estos precios?</span>
             </button>
 
+            <div className="v2-mobile-filter-commit">
+              <button type="button" className="v2-mobile-filter-apply" onClick={applyMobileFilters}>Aplicar ({Number(draftFilters.district !== 'Todos') + Number(draftFilters.barrio !== 'Todos') + Number(draftFilters.year !== latestAvailablePeriod.year || draftFilters.month !== latestAvailablePeriod.month)})</button>
+              <button type="button" className="v2-mobile-filter-reset" onClick={resetMobileFilters}>Restablecer al último dato real</button>
+            </div>
+
           </div>
 
         </div>
       </div>
 
-      <nav className="v2-mobile-profile-nav" aria-label="Perfiles de mercado">
-        {PROFILES.map((profile, index) => <button key={profile.id} type="button" className={profileIdx === index ? 'active' : ''} aria-current={profileIdx === index ? 'page' : undefined} onClick={() => handleProfileChange(index)}>{profile.label}</button>)}
+      <nav className={`v2-mobile-section-nav ${sectionNavVisible ? 'is-visible' : ''}`} aria-label="Secciones del cuadro de mando">
+        {[
+          ['Resumen', 'summary'], ['Mapa', 'map'], ['Ranking', 'ranking'], ['Heatmap', 'heatmap'], ['Comparar', 'compare'],
+        ].map(([label, section]) => <button key={section} type="button" onClick={() => scrollToDashboardSection(section)}>{label}</button>)}
+      </nav>
+
+      <nav className="v2-mobile-profile-nav" aria-label="Secciones principales">
+        <button type="button" onClick={() => scrollToDashboardSection('summary')}><span aria-hidden="true">⌂</span>Resumen</button>
+        <button type="button" onClick={() => scrollToDashboardSection('map')}><span aria-hidden="true">⌖</span>Mapa</button>
+        <button type="button" onClick={() => scrollToDashboardSection('ranking')}><span aria-hidden="true">▤</span>Ranking</button>
+        <button type="button" onClick={() => scrollToDashboardSection('compare')}><span aria-hidden="true">⇄</span>Comparar</button>
+        <Link href="/madrid/veredicto" className="v2-mobile-verdict-link"><span aria-hidden="true">◇</span>Veredicto</Link>
       </nav>
 
 
@@ -2278,7 +2433,7 @@ const MadridDashboardV2: React.FC = () => {
           <div key={p.id} ref={i === profileIdx ? activePanelRef : null} className={`v2-panel ${getSlideClass(i)}`}>
 
             {/* KPI & MAPA SECTION */}
-            <div className="v2-grid-main">
+            <div className="v2-grid-main" data-dashboard-section="summary">
               <div className="v2-kpi-col">
                 <div className="v2-kpi-stack">
 
@@ -2735,7 +2890,7 @@ const MadridDashboardV2: React.FC = () => {
                     }
 
                     return (
-                      <div className="v2-kpi-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div className="v2-kpi-card v2-effort-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--azul-linea)', letterSpacing: '0.5px' }}>ESFUERZO DE ALQUILER</label>
@@ -3021,12 +3176,12 @@ const MadridDashboardV2: React.FC = () => {
               </div>
 
               <div className="v2-map-col">
-                <div className="v2-map-card">
+                <div className="v2-map-card" data-dashboard-section="map">
                   <div className="v2-map-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
                     <div className="v2-pill">Mapas Interactivos</div>
                     <div className={`v2-data-status ${isProjectionPeriod ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
                       <span className="v2-data-status-dot" aria-hidden="true" />
-                      <span><strong>{periodStatusLabel}</strong> · Datos observados hasta {latestRealMonth} de {latestRealYear} · estimaciones desde {firstProjectionMonth} · última carga disponible</span>
+          <span><strong>{periodStatusLabel}</strong> · Último dato observado: {latestAvailablePeriod.month} de {latestAvailablePeriod.year} · estimaciones desde {MONTHS_ES[latestObservedMonthIndex + 1] || 'Enero'}</span>
                     </div>
                     <button
                       onClick={() => setShowMapHelpModal(true)}
@@ -3070,8 +3225,12 @@ const MadridDashboardV2: React.FC = () => {
                     </button>
                   </div>
 
+                  <div className="v2-mobile-map-switch" role="group" aria-label="Nivel del mapa">
+                    <button type="button" className={mapLevel === 'districts' ? 'active' : ''} aria-pressed={mapLevel === 'districts'} onClick={() => setMapLevel('districts')}>Distritos</button>
+                    <button type="button" className={mapLevel === 'neighborhoods' ? 'active' : ''} aria-pressed={mapLevel === 'neighborhoods'} onClick={() => setMapLevel('neighborhoods')}>Barrios</button>
+                  </div>
                   <div className="v2-dual-maps">
-                    <div className="v2-map-sub">
+                    <div className="v2-map-sub" data-map-level="districts">
                       <span>Distritos</span>
                       <div className="v2-map-placeholder" style={{ border: 'none' }}>
                         <MadridMap
@@ -3086,7 +3245,7 @@ const MadridDashboardV2: React.FC = () => {
                         />
                       </div>
                     </div>
-                    <div className="v2-map-sub">
+                    <div className="v2-map-sub" data-map-level="neighborhoods">
                       <span>Barrios</span>
                       <div className="v2-map-placeholder" style={{ border: 'none' }}>
                         <MadridMap
@@ -3106,11 +3265,9 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-map-legend" aria-label="Leyenda del mapa por precio por metro cuadrado">
                     <div className="v2-map-legend-title">Intensidad de precio · {activeProfile.id === 'inversion' ? '%' : activeProfile.id === 'venta' || activeProfile.id === 'compra' ? '€ / m²' : '€/m²'}</div>
                     <div className="v2-map-legend-scale" aria-label="Tramos de la escala de color">
-                      <span>{getMapLegendLabels(activeProfile.id)[0]}</span>
                       <div className="v2-map-legend-swatches" aria-hidden="true">
                         <i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" />
                       </div>
-                      <span>{getMapLegendLabels(activeProfile.id)[4]}</span>
                     </div>
                     <div className="v2-map-legend-labels">
                       {getMapLegendLabels(activeProfile.id).map(label => <span key={label}>{label}</span>)}
@@ -3141,6 +3298,13 @@ const MadridDashboardV2: React.FC = () => {
                     <button type="button" aria-pressed={rankingLevel === 'Barrios'} className={`v2-tab-btn ${rankingLevel === 'Barrios' ? 'active' : ''}`} onClick={() => setRankingLevel('Barrios')}>Barrios</button>
                   </div>
                 </div>
+                {activeProfile.id !== 'venta' && activeProfile.id !== 'inversion' && (
+                  <div className="v2-ranking-metric" role="group" aria-label="Unidad de precio del ranking">
+                    <span>Ordenar por</span>
+                    <button type="button" className={rankingMetric === 'unit' ? 'active' : ''} aria-pressed={rankingMetric === 'unit'} onClick={() => setRankingMetric('unit')}>€/m²</button>
+                    <button type="button" className={rankingMetric === 'total' ? 'active' : ''} aria-pressed={rankingMetric === 'total'} onClick={() => setRankingMetric('total')}>{activeProfile.id === 'alquiler' ? '€/mes' : 'Precio'}</button>
+                  </div>
+                )}
                 <div className="v2-rank-desc">
                   {activeProfile.id === 'venta'
                     ? `Analiza el volumen de transacciones y encuentra las zonas con mayor demanda para el año ${selectedYear}.`
@@ -3151,7 +3315,7 @@ const MadridDashboardV2: React.FC = () => {
               </div>
 
               {/* COL 2: AFFORDABILITY / RENTABILITY / DEMAND RANKINGS */}
-              <div className="v2-explorer-col v2-rankings-stack" style={{ minWidth: '260px' }}>
+              <div className="v2-explorer-col v2-rankings-stack" data-dashboard-section="ranking" style={{ minWidth: '260px' }}>
                 {activeProfile.id === 'venta' ? (
                   <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
                     <div className="v2-rank-head" style={{ marginBottom: '16px' }}>
@@ -3187,15 +3351,17 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
                     <div className="v2-rank-head" style={{ marginBottom: '16px' }}>
                       <span style={{ fontSize: '15px', fontWeight: '700', color: '#FFFFFF' }}>
-                        {rankingLevel === 'Distritos' ? 'Distritos más asequibles' : 'Barrios más asequibles'}
+                        {activeProfile.id === 'alquiler'
+                          ? `${rankingLevel === 'Distritos' ? 'Distritos' : 'Barrios'} ${rankingMetric === 'total' ? 'con menor alquiler mensual' : 'con menor precio por m²'}`
+                          : `${rankingLevel === 'Distritos' ? 'Distritos' : 'Barrios'} ${rankingMetric === 'total' ? 'con menor precio de compra' : 'con menor precio por m²'}`}
                       </span>
-                        <span className="v2-rank-sub" style={{ color: '#BACCD6', fontSize: '11px' }}>Top 10 por alquiler mensual estimado (€)</span>
+                      <span className="v2-rank-sub" style={{ color: '#BACCD6', fontSize: '12px' }}>{activeProfile.id === 'alquiler' ? (rankingMetric === 'total' ? 'Alquiler medio mensual (€)' : 'Precio de alquiler (€/m²)') : (rankingMetric === 'total' ? 'Precio medio de vivienda (€)' : 'Precio de compra (€/m²)')}</span>
                     </div>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}>
                           <th style={{ paddingBottom: '8px', fontWeight: '600' }}>{rankingLevel === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th>
-                          <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>ALQUILER €/MES</th>
+                          <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>{activeProfile.id === 'alquiler' ? (rankingMetric === 'total' ? 'ALQUILER €/MES' : 'ALQUILER €/M²') : (rankingMetric === 'total' ? 'PRECIO €' : 'PRECIO €/M²')}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -3208,7 +3374,7 @@ const MadridDashboardV2: React.FC = () => {
                                 {i+1}. {formatMadridName(item.name)}
                               </td>
                               <td style={{ padding: '8px 0', textAlign: 'right', color: '#00F0FF', fontWeight: '700' }}>
-                                {formatEuro(price)}
+                                {rankingMetric === 'unit' ? `${formatNumber(price, 0)} €/m²` : activeProfile.id === 'alquiler' ? `${formatEuro(price)}/mes` : formatEuro(price)}
                               </td>
                             </tr>
                           );
@@ -3252,10 +3418,10 @@ const MadridDashboardV2: React.FC = () => {
               </div>
 
               {/* COL 3: HEATMAP */}
-              <div className="v2-explorer-col v2-heatmap-area">
+              <div className="v2-explorer-col v2-heatmap-area" data-dashboard-section="heatmap">
                 <div className="v2-heatmap-card">
                   <div className="v2-heatmap-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                    <span>{activeProfile.id === 'inversion' ? 'Evolución Mensual de Rentabilidad (Heatmap)' : 'Evolución Mensual de Precios (Heatmap)'}</span>
+                    <span>{activeProfile.id === 'inversion' ? 'Evolución mensual de rentabilidad (%)' : activeProfile.id === 'alquiler' ? 'Evolución mensual del alquiler (€/m²)' : 'Evolución mensual de venta (€/m²)'}</span>
                     <button
                       onClick={() => setShowHeatmapHelpModal(true)}
                       style={{
@@ -3320,9 +3486,8 @@ const MadridDashboardV2: React.FC = () => {
                       <tbody>
                         {Array.isArray(heatmapData) && heatmapData.length > 0 ? (
                           heatmapData.map((row, idx) => {
-                            let cellColor = 'var(--azul-linea)';
-                            if (activeProfile.id === 'venta') cellColor = 'var(--coral)';
-                            else if (activeProfile.id === 'inversion') cellColor = 'var(--azul-linea)';
+                            let cellColor = '#00DDF0';
+                            if (activeProfile.id === 'venta' || activeProfile.id === 'compra') cellColor = '#FF8B6A';
 
                             return (
                               <tr key={idx}>
@@ -3336,8 +3501,8 @@ const MadridDashboardV2: React.FC = () => {
                                     <td key={i+1} style={{ backgroundColor: bgColor, color: textColor }}>
                                       {val > 0
                                         ? activeProfile.id === 'inversion'
-                                          ? `${formatNumber(val * 100, 1)} %`
-                                          : `${formatNumber(val, 1)} €/m²`
+                                          ? `${formatNumber(val * 100, 0)} %`
+                                          : `${formatNumber(val, 0)}`
                                         : '-'}
                                     </td>
                                   );
@@ -3445,7 +3610,7 @@ const MadridDashboardV2: React.FC = () => {
             )}
 
              {/* COMPARATIVAS SECTION */}
-            <section className="v2-compare-section">
+            <section className="v2-compare-section" data-dashboard-section="compare">
               <div className="v2-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                   <h2 style={{ margin: 0 }}>Comparación de zonas</h2>
