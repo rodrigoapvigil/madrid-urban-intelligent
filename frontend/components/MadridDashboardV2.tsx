@@ -3278,12 +3278,12 @@ const MadridDashboardV2: React.FC = () => {
                     </button>
                   </div>
                   {Number(selectedYear) === 2026 && (
-                    <div style={{ fontSize: '11px', color: 'var(--azul-linea)', marginBottom: '12px', paddingLeft: '4px' }}>
+                    <div style={{ fontSize: '12px', color: '#dbe9f2', marginBottom: '12px', paddingLeft: '4px' }}>
                       * Nota: los datos reales llegan hasta <strong>{latestRealMonth} de {latestRealYear}</strong>; desde <strong>{firstProjectionMonth}</strong> son <strong>estimaciones</strong>. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un valor €/m² más alto.'}
                     </div>
                   )}
                   {Number(selectedYear) > 2026 && (
-                    <div style={{ fontSize: '11px', color: 'var(--azul-linea)', marginBottom: '12px', paddingLeft: '4px' }}>
+                    <div style={{ fontSize: '12px', color: '#dbe9f2', marginBottom: '12px', paddingLeft: '4px' }}>
                       * Nota: Los meses de {selectedYear} se muestran como <strong>estimaciones</strong> basadas en datos históricos. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un valor €/m² más alto.'}
                     </div>
                   )}

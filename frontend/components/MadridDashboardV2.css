@@ -2893,3 +2893,122 @@
   .v2-root .v2-filters { top: 68px; }
   .v2-data-status { font-size: 10px; }
 }
+
+/* Mobile dashboard refinements: single-column controls and a bounded heatmap. */
+@media (max-width: 768px) {
+  .v2-root .v2-filters {
+    background: rgba(2, 20, 42, 0.96) !important;
+    border-bottom-color: rgba(186, 204, 214, 0.18) !important;
+    padding: 10px 0 12px !important;
+  }
+
+  .v2-root .v2-filter-group {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 8px !important;
+    padding: 0 14px !important;
+  }
+
+  .v2-root .v2-filter-group > .v2-dropdown-container {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 7px 12px 6px !important;
+    border: 1px solid rgba(186, 204, 214, 0.22) !important;
+    border-radius: 10px !important;
+    background: rgba(1, 16, 36, 0.78) !important;
+    box-shadow: none !important;
+  }
+
+  .v2-root .v2-filter-group > .v2-dropdown-container:focus-within {
+    border-color: rgba(0, 229, 255, 0.58) !important;
+    background: rgba(1, 16, 36, 0.94) !important;
+  }
+
+  .v2-root .v2-filter-group .v2-filter-label {
+    margin-bottom: 1px !important;
+    color: #eaf5ff !important;
+    font-size: 11px !important;
+  }
+
+  .v2-root .v2-filter-group .v2-custom-select {
+    width: 100% !important;
+    min-height: 34px !important;
+    padding: 2px 20px 2px 0 !important;
+    color: #fff !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .v2-root .v2-filter-actions {
+    grid-column: 1 / -1 !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 8px 0 0 !important;
+    border-top: 1px solid rgba(186, 204, 214, 0.18) !important;
+  }
+
+  .v2-root .v2-filter-actions > button,
+  .v2-root .v2-filter-actions > a {
+    flex: none !important;
+    width: 100% !important;
+    min-height: 40px !important;
+    justify-content: center !important;
+  }
+
+  .v2-root .v2-compare-zone-selectors {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .v2-root .v2-compare-zone-select {
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    padding: 7px 12px 6px !important;
+    border: 1px solid rgba(186, 204, 214, 0.22) !important;
+    border-radius: 10px !important;
+    background: rgba(1, 16, 36, 0.78) !important;
+    box-shadow: none !important;
+  }
+
+  .v2-root .v2-compare-zone-select .v2-filter-label {
+    color: #f1f7ff !important;
+    font-size: 11px !important;
+  }
+
+  .v2-root .v2-compare-zone-select .v2-custom-select {
+    width: 100% !important;
+    min-height: 34px !important;
+    color: #fff !important;
+  }
+
+  .v2-root .v2-heatmap-card {
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  .v2-root .v2-heatmap-scroll {
+    max-height: min(64vh, 560px) !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .v2-root .v2-heatmap-head {
+    color: #edf6ff !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .v2-root .v2-heatmap-scroll {
+    max-height: 560px !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+}
