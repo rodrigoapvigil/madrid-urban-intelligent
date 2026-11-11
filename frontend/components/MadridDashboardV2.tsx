@@ -723,6 +723,7 @@ const MadridDashboardV2: React.FC = () => {
 
   // User simulation states
   const [userRentSalary, setUserRentSalary] = useState<string>('');
+  const [showRentCalculator, setShowRentCalculator] = useState(false);
   const [userPurchaseIncome, setUserPurchaseIncome] = useState<string>('');
   const [userPurchaseSavings, setUserPurchaseSavings] = useState<string>('');
   const [showPurchaseSim, setShowPurchaseSim] = useState<boolean>(false);
@@ -2205,7 +2206,7 @@ const MadridDashboardV2: React.FC = () => {
   };
 
   return (
-    <div className="v2-root">
+    <div className="v2-root" data-profile={activeProfile.id}>
       <div className="mi-atmosphere" aria-hidden="true"/>
       {showDashboardLoader && (
         <LoadingScreen
@@ -2424,6 +2425,76 @@ const MadridDashboardV2: React.FC = () => {
             <div className="v2-grid-main" data-dashboard-section="summary">
               <div className="v2-kpi-col">
                 <div className="v2-kpi-stack">
+
+                  {activeProfile.id === 'alquiler' && (() => {
+                    const points = seriesMadrid
+                      .filter(point => point && Number.isFinite(Number(point.precio_m2)))
+                      .slice(-12);
+                    const values = points.map(point => Number(point.precio_m2));
+                    const low = values.length ? Math.min(...values) : 0;
+                    const high = values.length ? Math.max(...values) : 1;
+                    const sparkline = values.map((value, index) => {
+                      const x = values.length < 2 ? 0 : (index / (values.length - 1)) * 100;
+                      const y = 30 - ((value - low) / Math.max(1, high - low)) * 24;
+                      return `${x},${y}`;
+                    }).join(' ');
+                    const rent = kpiData.p_vivienda || 0;
+                    const incomeMonthly = (kpiData.renta_media || 0) / 12;
+                    const effort = incomeMonthly > 0 ? (rent / incomeMonthly) * 100 : 0;
+                    const effortColor = effort <= 30 ? '#00E5EE' : effort <= 40 ? '#F4B860' : '#F08080';
+                    const salary = Number.parseFloat(userRentSalary);
+                    const personalEffort = salary > 0 ? (rent / salary) * 100 : 0;
+                    const money = (value: number) => new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(value);
+                    return (
+                      <div className="v2-mobile-rent-summary">
+                        <section className="v2-rent-hero">
+                          <div className="v2-rent-hero-heading">
+                            <div>
+                              <span className="v2-rent-eyebrow">Precio medio · alquiler</span>
+                              <span className="v2-rent-real"><i />{periodStatusLabel} · {selectedMonth} {selectedYear}</span>
+                            </div>
+                            <InfoTooltip
+                              title="Precio de alquiler por metro cuadrado"
+                              description="Precio medio mensual por metro cuadrado para el periodo y zona seleccionados."
+                              example="21,62 €/m² equivale aproximadamente a 1.958 € al mes para una vivienda media."
+                              ruleOfThumb="Compara siempre la misma zona y el mismo periodo."
+                            />
+                          </div>
+                          <div className="v2-rent-main-value">
+                            <strong>{new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiData.p_m2 || 0)}</strong>
+                            <span>€/m²</span>
+                          </div>
+                          <div className="v2-rent-chips">
+                            <span>{Number(kpiData.v_mes || 0) < 0 ? '↘' : '↗'} {kpiData.v_mes > 0 ? '+' : ''}{Number(kpiData.v_mes || 0).toFixed(1)}% mes</span>
+                            <span>{Number(kpiData.v_anual || 0) < 0 ? '↘' : '↗'} {kpiData.v_anual > 0 ? '+' : ''}{Number(kpiData.v_anual || 0).toFixed(1)}% año</span>
+                            <span className="v2-rent-market">{kpiData.estado_mercado || 'Mercado estable'}</span>
+                          </div>
+                          <div className="v2-rent-sparkline" aria-label="Evolución de los últimos doce meses">
+                            <svg viewBox="0 0 100 34" preserveAspectRatio="none" role="img"><polyline points={sparkline} /></svg>
+                          </div>
+                        </section>
+                        <section className="v2-rent-secondary">
+                          <div className="v2-rent-secondary-card">
+                            <span className="v2-rent-eyebrow">Alquiler medio</span>
+                            <strong>{money(rent)} <small>€/mes</small></strong>
+                          </div>
+                          <div className="v2-rent-secondary-card v2-rent-effort">
+                            <div className="v2-rent-effort-head"><span className="v2-rent-eyebrow">Esfuerzo de alquiler</span><strong style={{ color: effortColor }}>{effort > 0 ? `${effort.toFixed(0)}%` : '—'}</strong></div>
+                            <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(effort, 100)}%`, background: effortColor }} /><b style={{ left: '30%' }} /></div>
+                            <span className="v2-rent-effort-caption">{money(rent)} € de alquiler · {money(incomeMonthly)} € de renta (INE)</span>
+                            <span className="v2-rent-effort-note">30% recomendado</span>
+                            <button className="v2-rent-calc-toggle" type="button" onClick={() => setShowRentCalculator(value => !value)} aria-expanded={showRentCalculator}>
+                              {showRentCalculator ? 'Cerrar cálculo' : 'Calcula con tu sueldo'} <span aria-hidden="true">{showRentCalculator ? '↑' : '→'}</span>
+                            </button>
+                            {showRentCalculator && <div className="v2-rent-calculator">
+                              <input type="number" value={userRentSalary} onChange={event => setUserRentSalary(event.target.value)} placeholder="Sueldo neto mensual (€)" aria-label="Sueldo neto mensual" />
+                              {salary > 0 && <span>Tu esfuerzo sería <strong style={{ color: personalEffort <= 30 ? '#00E5EE' : personalEffort <= 40 ? '#F4B860' : '#F08080' }}>{personalEffort.toFixed(0)}%</strong></span>}
+                            </div>}
+                          </div>
+                        </section>
+                      </div>
+                    );
+                  })()}
 
                   <div className="v2-kpi-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
