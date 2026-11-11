@@ -3346,7 +3346,7 @@ body.v2-fullscreen-open .v2-panel.v2-active { transform: none !important; }
   .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend-labels .no-data-label { display: none; }
 }
 
-@media (max-width: 768px) and (orientation: landscape) {
+@media (orientation: landscape) and (max-height: 600px) {
   .v2-root .v2-is-fullscreen.v2-chart-card .v2-chart-wrap,
   .v2-root .v2-is-fullscreen.v2-overlay-wrapper .v2-chart-wrap { height: calc(100dvh - 104px) !important; margin-top: 24px; }
   .v2-root .v2-is-fullscreen.v2-map-card .v2-dual-maps { height: calc(100dvh - 128px) !important; }
@@ -3381,7 +3381,6 @@ body.v2-fullscreen-open .v2-panel.v2-active { transform: none !important; }
 .v2-root .v2-rank-head .v2-expand-button.has-label span { font-size: inherit; }
 .v2-root .v2-highlighted-zone { display: inline-flex; margin: -3px 0 8px; padding: 3px 7px; border-radius: 999px; background: rgba(0,229,255,.1); color: #8eeeff; font-size: 10px; font-weight: 650; }
 .v2-root .v2-ranking-table tbody tr:nth-child(n+11) { display: none; }
-.v2-root .v2-is-fullscreen .v2-ranking-table tbody tr:nth-child(n+11) { display: table-row; }
 .v2-root .v2-ranking-table tbody tr.is-filtered { background: rgba(0,229,255,.12); box-shadow: inset 3px 0 #00e5ff; }
 .v2-root .v2-ranking-value { position: relative; overflow: hidden; isolation: isolate; white-space: nowrap; }
 .v2-root .v2-ranking-value > i { position: absolute; z-index: -1; top: 18%; right: 0; bottom: 18%; display: block; border-radius: 5px; background: rgba(0,229,255,.22); }
@@ -3425,6 +3424,45 @@ body.v2-fullscreen-open .v2-panel.v2-active { transform: none !important; }
 .v2-root .v2-zone-picker-options button { min-height: 44px; padding: 0 12px; border: 0; border-radius: 9px; background: transparent; color: #d5e1eb; text-align: left; }
 .v2-root .v2-zone-picker-options button[aria-selected="true"],
 .v2-root .v2-zone-picker-options button:hover { background: rgba(0,229,255,.12); color: #00e5ff; }
+
+/* Fullscreen is a CSS modal with a best-effort native landscape lock on mobile. */
+.v2-root .v2-fullscreen-zoom { display: inline-flex; align-items: center; gap: 3px; padding-right: 6px; border-right: 1px solid rgba(186,204,214,.16); }
+.v2-root .v2-fullscreen-zoom button { display: inline-grid; place-items: center; width: 34px; height: 34px; padding: 0; }
+.v2-root .v2-fullscreen-rotate-hint { display: none; }
+.v2-root .v2-is-fullscreen .v2-fullscreen-control > .v2-expand-button { position: fixed; top: max(12px, env(safe-area-inset-top)); right: 12px; z-index: 5002; width: 40px; height: 40px; border: 1px solid rgba(186,204,214,.2); border-radius: 12px; background: rgba(4,20,39,.92); color: #f3f8fc; }
+.v2-root .v2-is-fullscreen .v2-fullscreen-toolbar { z-index: 5001; }
+.v2-root .v2-heatmap-head > button:not(.v2-expand-button) { display: none !important; }
+.v2-root .v2-is-fullscreen.v2-heatmap-card { position: fixed !important; padding: max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(72px,calc(72px + env(safe-area-inset-bottom))) max(12px,env(safe-area-inset-left)) !important; }
+.v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-head { align-items: center; margin-bottom: 4px !important; padding-right: 48px; }
+.v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-scroll { margin-top: 0; }
+.v2-root .v2-is-fullscreen.v2-map-card .v2-mobile-map-switch { display: flex !important; flex: 0 0 auto; }
+@media (max-width: 768px) and (orientation: portrait) {
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-dual-maps { display: block !important; height: calc(100dvh - 230px) !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-sub { display: none !important; height: 100% !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-sub[data-map-level="districts"] { display: flex !important; }
+  .v2-root:has(.v2-is-fullscreen.v2-map-card .v2-mobile-map-switch button:nth-child(2).active) .v2-is-fullscreen.v2-map-card .v2-map-sub[data-map-level="districts"] { display: none !important; }
+  .v2-root:has(.v2-is-fullscreen.v2-map-card .v2-mobile-map-switch button:nth-child(2).active) .v2-is-fullscreen.v2-map-card .v2-map-sub[data-map-level="neighborhoods"] { display: flex !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend { margin-top: 4px; padding: 6px 8px; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend-title { font-size: 10px; }
+}
+@media (max-width: 768px) and (orientation: portrait) {
+  .v2-root .v2-fullscreen-rotate-hint { position: fixed; top: max(12px,env(safe-area-inset-top)); left: 50%; z-index: 5003; display: inline-flex; align-items: center; gap: 7px; max-width: calc(100vw - 110px); padding: 8px 12px; transform: translateX(-50%); border: 1px solid rgba(186,204,214,.16); border-radius: 999px; background: rgba(255,255,255,.09); color: #eaf5ff; font-size: 12px; white-space: nowrap; }
+  .v2-root .v2-fullscreen-rotate-hint svg { animation: v2-rotate-hint 1.6s ease-in-out infinite; }
+  .v2-root .v2-is-fullscreen .v2-fullscreen-toolbar { max-height: 31dvh; overflow-y: auto; }
+}
+@keyframes v2-rotate-hint { 0%,100% { transform: rotate(0deg); } 50% { transform: rotate(90deg); } }
+@media (orientation: landscape) and (max-height: 600px) {
+  .v2-root .v2-is-fullscreen { padding: max(8px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(54px,calc(54px + env(safe-area-inset-bottom))) max(10px,env(safe-area-inset-left)) !important; }
+  .v2-root .v2-is-fullscreen .v2-chart-wrap { height: calc(100dvh - 105px) !important; margin-top: 20px; }
+  .v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-scroll { max-height: calc(100dvh - 74px) !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-mobile-map-switch { display: none !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-dual-maps { display: grid !important; grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr) !important; gap: 10px !important; height: calc(100dvh - 82px) !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-sub { display: flex !important; height: 100% !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend { position: fixed; right: max(10px,env(safe-area-inset-right)); bottom: max(8px,env(safe-area-inset-bottom)); z-index: 5002; width: min(300px,38vw); margin: 0; padding: 5px 8px; background: rgba(4,20,39,.92); }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend-title { font-size: 9px; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend-labels { display: flex; flex-wrap: wrap; gap: 3px 7px; font-size: 8px; }
+  .v2-root .v2-fullscreen-rotate-hint { display: none !important; }
+}
 
 @media (max-width: 768px) {
   .v2-root .v2-compare-section .v2-section-header { align-items: flex-start !important; }

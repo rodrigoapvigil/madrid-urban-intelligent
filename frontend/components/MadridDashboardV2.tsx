@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { cssColorResolverPlugin, colorWithAlpha, resolveCssColor } from '../lib/colors';
-import { Activity, Building2, ChevronDown, Database, Home, MapPinned, Maximize2, RotateCcw, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Activity, Building2, ChevronDown, Database, Home, MapPinned, Maximize2, RotateCcw, RotateCw, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
 import './MadridDashboardV2.css';
 import { apiFetch } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
@@ -69,6 +69,7 @@ const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?:
   const [expanded, setExpanded] = useState(false);
   const [toolbarRevision, setToolbarRevision] = useState(0);
   const targetRef = useRef<HTMLElement | null>(null);
+  const nativeFullscreenRef = useRef(false);
 
   useEffect(() => {
     if (!expanded || !targetRef.current) return;
@@ -88,14 +89,30 @@ const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?:
     window.setTimeout(() => chart?.resize(), 80);
     const onBack = () => setExpanded(false);
     const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') window.history.back(); };
+    const onResize = () => chart?.resize();
+    const onFullscreenChange = () => {
+      if (nativeFullscreenRef.current && !document.fullscreenElement) {
+        nativeFullscreenRef.current = false;
+        window.history.back();
+      }
+    };
     window.addEventListener('popstate', onBack);
     window.addEventListener('keydown', onKey);
+    window.addEventListener('resize', onResize);
+    document.addEventListener('fullscreenchange', onFullscreenChange);
     return () => {
       target.classList.remove('v2-is-fullscreen');
       document.body.classList.remove('v2-fullscreen-open');
       document.body.style.overflow = oldOverflow;
       window.removeEventListener('popstate', onBack);
       window.removeEventListener('keydown', onKey);
+      window.removeEventListener('resize', onResize);
+      document.removeEventListener('fullscreenchange', onFullscreenChange);
+      screen.orientation?.unlock?.();
+      if (nativeFullscreenRef.current && document.fullscreenElement) {
+        void document.exitFullscreen?.().catch(() => {});
+        nativeFullscreenRef.current = false;
+      }
       window.setTimeout(() => chart?.resize(), 80);
     };
   }, [expanded, chartId]);
@@ -143,25 +160,33 @@ const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?:
   const open = (event: React.MouseEvent<HTMLButtonElement>) => {
     const scope = event.currentTarget.closest('.v2-panel') || document;
     targetRef.current = (targetSelector ? scope.querySelector(targetSelector) : event.currentTarget.closest('.v2-chart-card, .v2-overlay-wrapper')) as HTMLElement | null;
-    if (targetRef.current) setExpanded(true);
+    if (!targetRef.current) return;
+    if (window.matchMedia('(max-width: 768px)').matches) {
+      const fullscreenRequest = document.documentElement.requestFullscreen?.();
+      fullscreenRequest?.then(async () => {
+        nativeFullscreenRef.current = true;
+        const orientation = screen.orientation as ScreenOrientation & { lock?: (value: 'landscape') => Promise<void> };
+        try { await orientation?.lock?.('landscape'); } catch { /* Keep the CSS fullscreen view usable when locking is unsupported. */ }
+      }).catch(() => {});
+    }
+    setExpanded(true);
   };
 
   return <div className="v2-fullscreen-control">
     <button type="button" className={`v2-expand-button${label ? ' has-label' : ''}`} aria-label={expanded ? 'Cerrar pantalla completa' : label || 'Ampliar a pantalla completa'} title={expanded ? 'Cerrar' : label || 'Pantalla completa'} onClick={expanded ? close : open}>{expanded ? <X size={17} /> : <Maximize2 size={17} />}{!expanded && label && <span>{label}</span>}</button>
     {expanded && <div className="v2-fullscreen-toolbar" role="toolbar" aria-label="Herramientas de pantalla completa">
+      {chartId && <div className="v2-fullscreen-zoom" role="group" aria-label="Zoom del gráfico"><button type="button" title="Acercar" aria-label="Acercar gráfica" onClick={() => updateChartZoom(chartId, 'in')}><ZoomIn size={16} /></button><button type="button" title="Alejar" aria-label="Alejar gráfica" onClick={() => updateChartZoom(chartId, 'out')}><ZoomOut size={16} /></button><button type="button" title="Restablecer vista" aria-label="Restablecer zoom de la gráfica" onClick={() => updateChartZoom(chartId, 'reset')}><RotateCcw size={15} /></button></div>}
       {chartId && <div className="v2-fullscreen-ranges">{(['6M', '12M', 'Todo'] as const).map(range => <button key={range} type="button" onClick={() => setRange(range)}>{range}</button>)}</div>}
       {chart?.data.datasets.map((dataset: any, index: number) => <button key={`${dataset.label}-${index}`} type="button" className="v2-fullscreen-series" aria-pressed={chart.isDatasetVisible(index)} onClick={() => { chart.setDatasetVisibility(index, !chart.isDatasetVisible(index)); chart.update('none'); setToolbarRevision(value => value + 1); }}><i style={{ background: dataset.borderColor || dataset.backgroundColor }} />{dataset.label}</button>)}
-      <button type="button" onClick={exportPng}>PNG</button><button type="button" onClick={exportCsv}>CSV</button>
+      {(chartId || targetRef.current?.querySelector('table')) && <><button type="button" onClick={exportPng}>PNG</button><button type="button" onClick={exportCsv}>CSV</button></>}
       <span hidden>{toolbarRevision}</span>
     </div>}
+    {expanded && <div className="v2-fullscreen-rotate-hint" role="status"><RotateCw size={16} /><span>Gira el móvil para verlo mejor</span></div>}
   </div>;
 };
 
 const ChartZoomControls = ({ chartId }: { chartId: string }) => (
   <div className="v2-chart-controls" role="group" aria-label="Controles de zoom de la gráfica">
-    <button type="button" title="Acercar" aria-label="Acercar gráfica" onClick={() => updateChartZoom(chartId, 'in')}><ZoomIn size={17} /></button>
-    <button type="button" title="Alejar" aria-label="Alejar gráfica" onClick={() => updateChartZoom(chartId, 'out')}><ZoomOut size={17} /></button>
-    <button type="button" title="Restablecer vista" aria-label="Restablecer zoom de la gráfica" onClick={() => updateChartZoom(chartId, 'reset')}><RotateCcw size={16} /></button>
     <FullscreenToggle chartId={chartId} />
   </div>
 );
@@ -3480,7 +3505,6 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
                     <div className="v2-rank-head">
                       <span>Top 10 · {rankingLevel === 'Distritos' ? 'distritos' : 'barrios'} con más demanda</span>
-                      <FullscreenToggle targetSelector=".v2-rank-mini-card" label={`Ver los ${rankingRows.length} ${rankingLevel.toLowerCase()} →`} />
                     </div>
                     {selectedRankingZone && <span className="v2-highlighted-zone">{formatZoneOption(selectedRankingZone)} resaltada</span>}
                     <table className="v2-ranking-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
@@ -3515,7 +3539,6 @@ const MadridDashboardV2: React.FC = () => {
                           <button type="button" className={rankingMetric === 'total' ? 'active' : ''} aria-pressed={rankingMetric === 'total'} onClick={() => setRankingMetric('total')}>{activeProfile.id === 'alquiler' ? '€/mes' : '€'}</button>
                           <button type="button" className={rankingMetric === 'unit' ? 'active' : ''} aria-pressed={rankingMetric === 'unit'} onClick={() => setRankingMetric('unit')}>€/m²</button>
                         </div>}
-                        <FullscreenToggle targetSelector=".v2-rank-mini-card" label={`Ver los ${rankingRows.length} ${rankingLevel.toLowerCase()} →`} />
                       </div>
                     </div>
                     {selectedRankingZone && <span className="v2-highlighted-zone">{formatZoneOption(selectedRankingZone)} resaltada</span>}
@@ -3548,7 +3571,6 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
                     <div className="v2-rank-head">
                       <span>Top 10 · amortización por {rankingLevel === 'Distritos' ? 'distrito' : 'barrio'}</span>
-                      <FullscreenToggle targetSelector=".v2-rank-mini-card" label={`Ver los ${rankingRows.length} ${rankingLevel.toLowerCase()} →`} />
                     </div>
                     {selectedRankingZone && <span className="v2-highlighted-zone">{formatZoneOption(selectedRankingZone)} resaltada</span>}
                     <table className="v2-ranking-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
