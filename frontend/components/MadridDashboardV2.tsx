@@ -67,9 +67,14 @@ const updateChartZoom = (canvasId: string, action: 'in' | 'out' | 'reset') => {
 
 const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?: string; chartId?: string; label?: string }) => {
   const [expanded, setExpanded] = useState(false);
+  const [awaitingLandscape, setAwaitingLandscape] = useState(false);
+  const [rotateScreenVisible, setRotateScreenVisible] = useState(false);
+  const [showOrientationHelp, setShowOrientationHelp] = useState(false);
   const [toolbarRevision, setToolbarRevision] = useState(0);
   const targetRef = useRef<HTMLElement | null>(null);
   const nativeFullscreenRef = useRef(false);
+  const allowPortraitRef = useRef(false);
+  const rotateScreenVisibleRef = useRef(false);
 
   useEffect(() => {
     if (!expanded || !targetRef.current) return;
@@ -90,6 +95,36 @@ const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?:
     const chartResizeObserver = chartContainer && chart ? new ResizeObserver(() => chart.resize()) : null;
     if (chartContainer) chartResizeObserver?.observe(chartContainer);
     const resizeChart = () => window.setTimeout(() => chart?.resize(), 180);
+    let rotateHelpTimer: number | undefined;
+    let rotateScreenTimer: number | undefined;
+    const updateOrientationView = () => {
+      const phonePortrait = window.matchMedia('(pointer: coarse) and (max-width: 600px) and (orientation: portrait)').matches;
+      const shouldWait = phonePortrait && !allowPortraitRef.current;
+      setAwaitingLandscape(shouldWait);
+      if (rotateHelpTimer) window.clearTimeout(rotateHelpTimer);
+      if (shouldWait) {
+        if (rotateScreenTimer) window.clearTimeout(rotateScreenTimer);
+        rotateScreenVisibleRef.current = true;
+        setRotateScreenVisible(true);
+        setShowOrientationHelp(false);
+        rotateHelpTimer = window.setTimeout(() => {
+          if (window.matchMedia('(pointer: coarse) and (max-width: 600px) and (orientation: portrait)').matches) setShowOrientationHelp(true);
+        }, 4500);
+      } else {
+        setShowOrientationHelp(false);
+        if (rotateScreenVisibleRef.current) {
+          if (rotateScreenTimer) window.clearTimeout(rotateScreenTimer);
+          rotateScreenTimer = window.setTimeout(() => {
+            rotateScreenVisibleRef.current = false;
+            setRotateScreenVisible(false);
+          }, 250);
+        }
+        window.requestAnimationFrame(() => chart?.resize());
+      }
+    };
+    updateOrientationView();
+    window.addEventListener('orientationchange', updateOrientationView);
+    window.addEventListener('resize', updateOrientationView);
     window.setTimeout(() => chart?.resize(), 120);
     window.addEventListener('orientationchange', resizeChart);
     const onBack = () => setExpanded(false);
@@ -113,6 +148,11 @@ const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?:
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('orientationchange', resizeChart);
+      window.removeEventListener('orientationchange', updateOrientationView);
+      window.removeEventListener('resize', updateOrientationView);
+      if (rotateHelpTimer) window.clearTimeout(rotateHelpTimer);
+      if (rotateScreenTimer) window.clearTimeout(rotateScreenTimer);
+      rotateScreenVisibleRef.current = false;
       chartResizeObserver?.disconnect();
       document.removeEventListener('fullscreenchange', onFullscreenChange);
       screen.orientation?.unlock?.();
@@ -168,7 +208,11 @@ const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?:
     const scope = event.currentTarget.closest('.v2-panel') || document;
     targetRef.current = (targetSelector ? scope.querySelector(targetSelector) : event.currentTarget.closest('.v2-chart-card, .v2-overlay-wrapper')) as HTMLElement | null;
     if (!targetRef.current) return;
-    if (window.matchMedia('(max-width: 768px), (orientation: landscape) and (max-height: 600px)').matches) {
+    allowPortraitRef.current = false;
+    rotateScreenVisibleRef.current = false;
+    setRotateScreenVisible(false);
+    setShowOrientationHelp(false);
+    if (window.matchMedia('(pointer: coarse) and ((max-width: 600px) or (max-height: 600px))').matches) {
       const fullscreenRequest = document.documentElement.requestFullscreen?.();
       fullscreenRequest?.then(async () => {
         nativeFullscreenRef.current = true;
@@ -191,7 +235,12 @@ const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?:
       <button type="button" onClick={exportPng}>PNG</button><button type="button" onClick={exportCsv}>CSV</button>
       <span hidden>{toolbarRevision}</span>
     </div>}
-    {expanded && <div className="v2-fullscreen-rotate-hint" role="status"><RotateCw size={16} /><span>Gira el móvil para verlo mejor</span></div>}
+    {expanded && rotateScreenVisible && <div className={`v2-rotate-screen${awaitingLandscape ? '' : ' is-fading'}`} role="status">
+      <button type="button" className="v2-rotate-close" aria-label="Cerrar vista ampliada" onClick={close}><X size={22} /></button>
+      <RotateCw className="v2-rotate-screen-icon" size={72} aria-hidden="true" />
+      <p>Gira el móvil para verlo en grande</p>
+      {showOrientationHelp && <div className="v2-rotate-help"><span>¿No gira? Revisa el bloqueo de orientación.</span><button type="button" onClick={() => { allowPortraitRef.current = true; setAwaitingLandscape(false); if (rotateScreenVisibleRef.current) window.setTimeout(() => { rotateScreenVisibleRef.current = false; setRotateScreenVisible(false); }, 250); window.requestAnimationFrame(() => chart?.resize()); }}>Verlo en vertical</button></div>}
+    </div>}
   </div>;
 };
 

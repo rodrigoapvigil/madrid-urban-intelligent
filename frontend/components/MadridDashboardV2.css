@@ -3527,6 +3527,16 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-head > button:not(.v2-expand-button) { display: none !important; }
 .v2-root .v2-is-fullscreen.v2-map-card { z-index: 2147483000 !important; }
 .v2-root .v2-is-fullscreen.v2-overlay-wrapper { z-index: 2147483000 !important; }
+.v2-root .v2-is-fullscreen .v2-expand-button { z-index: 2147483601 !important; }
+.v2-root .v2-rotate-screen { position: fixed; inset: 0; z-index: 2147483500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; padding: max(24px,env(safe-area-inset-top)) max(24px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left)); background: #061426; color: #f3f8fc; text-align: center; transition: opacity 250ms ease; }
+.v2-root .v2-rotate-screen.is-fading { opacity: 0; pointer-events: none; }
+.v2-root .v2-rotate-screen-icon { color: #00e5ff; animation: v2-phone-turn 2.2s ease-in-out infinite; transform-origin: center; }
+.v2-root .v2-rotate-screen > p { margin: 0; font-size: 17px; font-weight: 700; }
+.v2-root .v2-rotate-close { position: absolute; top: max(12px,env(safe-area-inset-top)); right: max(12px,env(safe-area-inset-right)); z-index: 1; display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid rgba(186,204,214,.2); border-radius: 12px; background: rgba(255,255,255,.06); color: #f3f8fc; }
+.v2-root .v2-rotate-help { display: grid; gap: 10px; justify-items: center; color: #9fb3c7; font-size: 12px; }
+.v2-root .v2-rotate-help button { min-height: 40px; padding: 0 14px; border: 1px solid rgba(186,204,214,.24); border-radius: 10px; background: rgba(255,255,255,.06); color: #d8e7f1; font-weight: 650; }
+@keyframes v2-phone-turn { 0%,15% { transform: rotate(0); } 55%,80% { transform: rotate(-90deg); } 100% { transform: rotate(0); } }
+@media (prefers-reduced-motion: reduce) { .v2-root .v2-rotate-screen-icon { animation: none; transform: rotate(-90deg); } .v2-root .v2-rotate-screen { transition: none; } }
 @media (max-width: 768px) {
   .v2-root .v2-map-bottom-sheet { position: relative; inset: auto; display: grid; width: 100%; max-width: 100%; margin-top: 10px; }
 }
