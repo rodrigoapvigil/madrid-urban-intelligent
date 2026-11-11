@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { cssColorResolverPlugin, colorWithAlpha, resolveCssColor } from '../lib/colors';
-import { Activity, ChevronDown, Database, MapPinned, RotateCcw, ZoomIn, ZoomOut } from 'lucide-react';
+import { Activity, ChevronDown, Database, MapPinned, RotateCcw, SlidersHorizontal, X, ZoomIn, ZoomOut } from 'lucide-react';
 import './MadridDashboardV2.css';
 import { apiFetch } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
@@ -666,6 +666,7 @@ const MadridDashboardV2: React.FC = () => {
 
   // State: Custom Dropdowns
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [selectedYear, setSelectedYear] = useState('');
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedDistrict, setSelectedDistrict] = useState('Todos');
@@ -2118,8 +2119,25 @@ const MadridDashboardV2: React.FC = () => {
       />
 
 
+      <div className="v2-mobile-filter-bar">
+        <div className="v2-mobile-filter-summary">
+          <strong>{activeProfile.label}</strong>
+          <span>{selectedDistrict === 'Todos' ? 'Madrid' : formatZoneOption(selectedDistrict)} · {selectedMonth} {selectedYear}</span>
+        </div>
+        <button type="button" className="v2-mobile-filter-trigger" aria-expanded={isMobileFiltersOpen} aria-controls="v2-filter-panel" onClick={() => setIsMobileFiltersOpen(true)}>
+          <SlidersHorizontal size={17} aria-hidden="true" />
+          <span>Filtros</span>
+        </button>
+      </div>
+
+      {isMobileFiltersOpen && <button type="button" className="v2-mobile-filter-backdrop" aria-label="Cerrar filtros" onClick={() => { setIsMobileFiltersOpen(false); setActiveDropdown(null); }} />}
+
       {/* 2. FILTROS REFINADOS (CUSTOM APPLE DROPDOWNS) */}
-      <div className={`v2-filters ${['year', 'month', 'dist', 'barrio'].includes(activeDropdown || '') ? 'v2-filters-open' : ''}`}>
+      <div id="v2-filter-panel" className={`v2-filters ${isMobileFiltersOpen ? 'v2-mobile-filters-open' : ''} ${['year', 'month', 'dist', 'barrio'].includes(activeDropdown || '') ? 'v2-filters-open' : ''}`}>
+        <div className="v2-mobile-filter-heading">
+          <div><strong>Filtrar mercado</strong><span>{activeProfile.label} · {selectedDistrict === 'Todos' ? 'Madrid' : formatZoneOption(selectedDistrict)}</span></div>
+          <button type="button" aria-label="Cerrar filtros" onClick={() => { setIsMobileFiltersOpen(false); setActiveDropdown(null); }}><X size={20} /></button>
+        </div>
         <div className="v2-filter-group">
 
           {/* AÑO */}
@@ -2248,6 +2266,10 @@ const MadridDashboardV2: React.FC = () => {
 
         </div>
       </div>
+
+      <nav className="v2-mobile-profile-nav" aria-label="Perfiles de mercado">
+        {PROFILES.map((profile, index) => <button key={profile.id} type="button" className={profileIdx === index ? 'active' : ''} aria-current={profileIdx === index ? 'page' : undefined} onClick={() => handleProfileChange(index)}>{profile.label}</button>)}
+      </nav>
 
 
       {/* 4. CONTENIDO PRINCIPAL */}

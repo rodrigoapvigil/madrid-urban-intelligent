@@ -3012,3 +3012,64 @@
     overscroll-behavior: contain;
   }
 }
+
+/* Compact dashboard controls designed for thumb reach on phones. */
+.v2-mobile-filter-bar,
+.v2-mobile-filter-heading,
+.v2-mobile-profile-nav { display: none; }
+
+@media (max-width: 768px) {
+  .v2-root .v2-mobile-filter-bar {
+    position: sticky;
+    top: 0;
+    z-index: 1300;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 58px;
+    padding: 8px 14px;
+    border-bottom: 1px solid rgba(186, 204, 214, .14);
+    background: rgba(2, 20, 43, .92);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+  }
+  .v2-mobile-filter-summary { display: grid; min-width: 0; gap: 2px; }
+  .v2-mobile-filter-summary strong { color: #fff; font-size: 14px; }
+  .v2-mobile-filter-summary span { overflow: hidden; color: #baccd6; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+  .v2-mobile-filter-trigger {
+    display: inline-flex; flex: 0 0 auto; align-items: center; justify-content: center; gap: 7px;
+    min-height: 40px; padding: 0 13px; border: 1px solid rgba(0, 240, 255, .55); border-radius: 12px;
+    background: rgba(0, 240, 255, .1); color: #eaffff; font-size: 12px; font-weight: 700;
+  }
+  .v2-mobile-filter-backdrop { position: fixed; inset: 0; z-index: 1600; width: 100%; height: 100%; border: 0; background: rgba(0, 8, 19, .68); }
+  .v2-root .v2-filters {
+    position: fixed; inset: auto 0 0; z-index: 1601; display: block; width: 100%; max-height: 86dvh;
+    overflow: auto; padding: 0 0 max(18px, env(safe-area-inset-bottom)) !important;
+    border: 1px solid rgba(186, 204, 214, .18) !important; border-radius: 22px 22px 0 0;
+    background: #071b33 !important; box-shadow: 0 -20px 60px rgba(0, 0, 0, .48);
+    transform: translateY(105%); visibility: hidden; transition: transform .24s ease, visibility .24s;
+  }
+  .v2-root .v2-filters.v2-mobile-filters-open { transform: translateY(0); visibility: visible; }
+  .v2-mobile-filter-heading { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 18px 14px; background: #071b33; border-bottom: 1px solid rgba(186, 204, 214, .12); }
+  .v2-mobile-filter-heading > div { display: grid; gap: 4px; }
+  .v2-mobile-filter-heading strong { color: #fff; font-size: 17px; }
+  .v2-mobile-filter-heading span { color: #a9c0ce; font-size: 12px; }
+  .v2-mobile-filter-heading button { display: grid; place-items: center; width: 40px; height: 40px; border: 1px solid rgba(186, 204, 214, .2); border-radius: 12px; background: rgba(255,255,255,.05); color: #fff; }
+  .v2-root .v2-filter-group { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px !important; padding: 14px 16px 18px !important; }
+  .v2-root .v2-filter-group > .v2-dropdown-container { min-height: 70px !important; }
+  .v2-root .v2-filter-actions { grid-column: 1 / -1 !important; }
+  .v2-root .v2-dropdown-menu { position: absolute; inset: auto 0 0; z-index: 4; width: 100%; max-height: 42dvh; border-radius: 14px; padding: 8px; }
+  .v2-root .v2-panel { padding: 18px 14px calc(92px + env(safe-area-inset-bottom)); }
+  .v2-root .v2-grid-main { grid-template-columns: minmax(0, 1fr); gap: 14px; margin-bottom: 22px; }
+  .v2-root .v2-kpi-stack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .v2-root .v2-kpi-card { min-width: 0; padding: 12px !important; }
+  .v2-root .v2-map-card { min-height: 0; padding: 14px; }
+  .v2-root .v2-mobile-profile-nav {
+    position: fixed; inset: auto 0 0; z-index: 1400; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px; padding: 8px 8px max(8px, env(safe-area-inset-bottom)); border-top: 1px solid rgba(186, 204, 214, .16);
+    background: rgba(2, 20, 43, .94); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  }
+  .v2-mobile-profile-nav button { min-height: 44px; padding: 4px; border: 0; border-radius: 11px; background: transparent; color: #baccd6; font-size: 11px; font-weight: 650; }
+  .v2-mobile-profile-nav button.active { background: #00e5ee; color: #03172b; }
+}
