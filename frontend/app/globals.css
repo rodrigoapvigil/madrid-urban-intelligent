@@ -5,8 +5,30 @@
 @tailwind utilities;
 
 html, body {
-  max-width: 100vw;
-  overflow-x: hidden;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+html, body { min-height: 100%; background: #02142B; }
+body {
+  position: relative;
+  isolation: isolate;
+  color: #F4EDE0;
+  font-family: var(--font-matter, 'Inter', 'DM Sans', sans-serif);
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 75% 85% at 12% 30%, rgba(22, 132, 167, .38) 0%, rgba(14, 110, 142, .24) 40%, rgba(2, 20, 43, .08) 72%, transparent 88%),
+    radial-gradient(circle 600px at 6% 14%, rgba(36, 160, 199, .28) 0%, rgba(14, 110, 142, .12) 50%, transparent 75%),
+    radial-gradient(ellipse 55% 42% at 92% 78%, rgba(22, 132, 167, .16) 0%, rgba(121, 40, 202, .08) 38%, transparent 72%),
+    linear-gradient(108deg, transparent 28%, rgba(1, 16, 36, .45) 50%, rgba(1, 16, 36, .88) 74%, #010B19 96%),
+    radial-gradient(ellipse 120% 105% at 50% 50%, transparent 58%, rgba(0, 6, 14, .65) 100%),
+    #02142B;
 }
 
 

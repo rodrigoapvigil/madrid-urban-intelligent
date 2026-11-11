@@ -5,7 +5,7 @@ import MadridLanding from './MadridLanding';
 
 const MadridPage: React.FC = () => {
   return (
-    <main style={{ minHeight: '100vh', backgroundColor: 'var(--blanco-humo)' }}>
+    <main style={{ minHeight: '100vh', backgroundColor: 'transparent' }}>
       <MadridLanding />
     </main>
   );

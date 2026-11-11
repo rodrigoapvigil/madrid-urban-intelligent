@@ -167,7 +167,8 @@
 /* ==========================================================================
    AUROS FOOTER UNIFICADO (Idéntico en todas las páginas - CERO líneas divisorias)
    ========================================================================== */
-.auros-footer {
+.auros-footer, .mi-home .auros-footer, .v2-root .auros-footer,
+.veredicto-root .auros-footer, .editorial-page .auros-footer {
   width: 100%;
   background: transparent !important;
   background-color: transparent !important;
@@ -811,4 +812,46 @@
   background: linear-gradient(110deg, #e8fdff 0%, #f0f5ff 72%, #f7edff 100%) !important;
   color: #06162d !important;
   box-shadow: 0 7px 22px rgba(140, 198, 232, 0.24) !important;
+}
+
+/* Global site chrome: every route shares the same pinned header and footer rhythm. */
+html, body { overflow-x: clip !important; }
+.site-header, .mi-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1200 !important;
+  flex-shrink: 0;
+}
+.auros-footer, .mi-home .auros-footer, .v2-root .auros-footer,
+.veredicto-root .auros-footer, .editorial-page .auros-footer {
+  margin-top: clamp(88px, 12vw, 176px) !important;
+  padding-top: clamp(52px, 7vw, 96px) !important;
+  background: transparent !important;
+  font-family: var(--font-matter, 'Inter', 'DM Sans', sans-serif) !important;
+}
+
+/* Page shells stay transparent so the shared landing atmosphere shows through. */
+.mi-home, .v2-root, .veredicto-root, .editorial-page {
+  background: transparent !important;
+  background-color: transparent !important;
+  font-family: var(--font-matter, 'Inter', 'DM Sans', sans-serif) !important;
+}
+.mi-home > .mi-atmosphere, .v2-root > .mi-atmosphere { display: none !important; }
+.editorial-page, .veredicto-root { overflow-x: clip !important; overflow-y: visible !important; }
+.editorial-page { color: #F4EDE0 !important; }
+.editorial-page__inner {
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #F4EDE0 !important;
+}
+.editorial-page h1, .editorial-page h2, .editorial-page h3 { color: #F4EDE0 !important; }
+.editorial-page p, .editorial-page li { color: #BACCD6; }
+body:has(.editorial-page--methodology) { background: #02142B !important; }
+
+@media (max-width: 600px) {
+  .auros-footer, .mi-home .auros-footer, .v2-root .auros-footer,
+  .veredicto-root .auros-footer, .editorial-page .auros-footer {
+    margin-top: clamp(64px, 18vw, 112px) !important;
+    padding-top: clamp(44px, 10vw, 64px) !important;
+  }
 }
