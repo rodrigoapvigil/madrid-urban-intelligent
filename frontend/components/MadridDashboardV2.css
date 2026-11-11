@@ -3205,7 +3205,7 @@
   .v2-rent-chips > .v2-rent-market { background: rgba(0,229,238,.12); color: #9cecf0; }
   .v2-rent-secondary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .v2-rent-secondary-card { min-width: 0; padding: 17px 15px; border: 0; border-radius: 18px; background: rgba(255,255,255,.045); }
-  .v2-rent-secondary-card > strong { display: block; margin-top: 9px; color: #fff; font-size: clamp(17px, 5vw, 21px); font-weight: 700; white-space: nowrap; }
+  .v2-rent-secondary-card > strong { display: block; margin-top: 9px; color: #fff; font-size: clamp(24px, 7vw, 28px); font-weight: 750; white-space: nowrap; }
   .v2-rent-secondary-card > strong small { color: #baccd6; font-size: 12px; font-weight: 550; }
   .v2-rent-effort-head { display: flex; align-items: center; justify-content: space-between; gap: 3px; }
   .v2-rent-effort-head .v2-rent-eyebrow { font-size: 10px; }
