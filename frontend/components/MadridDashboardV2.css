@@ -3790,6 +3790,11 @@ body.v2-fullscreen-open footer { display: none !important; }
 
 /* Desktop-only ranking readability; mobile keeps its existing compact rows. */
 @media (min-width: 769px) and (hover: hover) {
+  .v2-root .v2-overlay-chart-stack { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .v2-root .v2-overlay-chart-stack .v2-chart-wrap.large { display: flex; flex-direction: column; gap: 8px; height: 500px; margin-top: 0; }
+  .v2-root .v2-overlay-chart-stack .v2-chart-wrap.large > canvas { flex: 1 1 auto; height: 0 !important; min-height: 0; }
+  .v2-root .v2-overlay-chart-stack .v2-comparison-zoom-controls { margin-left: auto; }
+
   .v2-root .v2-comparison-chart-meta { display: flex; flex: 0 0 auto; flex-direction: column; align-items: stretch; gap: 6px; }
   .v2-root .v2-comparison-line-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; min-height: 24px; }
   .v2-root .v2-comparison-line-legend button { display: inline-flex; align-items: center; gap: 7px; padding: 2px 0; border: 0; background: transparent; color: #eaf5ff; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
