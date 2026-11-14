@@ -3739,6 +3739,19 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-ranking-table tbody { height: 100%; }
 .v2-root .v2-ranking-table tbody tr { height: 10%; }
 .v2-root .v2-ranking-table td { vertical-align: middle; }
+@media (min-width: 769px) and (pointer: fine) {
+  .v2-root .v2-ranking-table tbody td:first-child {
+    display: grid;
+    grid-template-columns: minmax(1.75em, auto) minmax(0, 1fr);
+    align-items: center;
+    column-gap: 6px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.25;
+  }
+  .v2-root .v2-ranking-position { font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .v2-root .v2-ranking-name { min-width: 0; white-space: normal; overflow: visible; text-overflow: clip; }
+}
 .v2-root .v2-heatmap-area { grid-area: heatmap; display: flex; min-width: 0; min-height: 0; }
 .v2-root .v2-heatmap-card { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; min-height: 0; height: 100%; }
 .v2-root .v2-heatmap-head { flex: 0 0 auto; }

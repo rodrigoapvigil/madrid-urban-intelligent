@@ -1075,6 +1075,7 @@ const MadridDashboardV2: React.FC = () => {
   const [affordabilityData, setAffordabilityData] = useState<any[]>([]);
   const [seasonalTrend, setSeasonalTrend] = useState<any[]>([]);
   const [heatmapData, setHeatmapData] = useState<any[]>([]);
+  const [heatmapDataSourceKey, setHeatmapDataSourceKey] = useState('');
   const [heatmapSearch, setHeatmapSearch] = useState('');
   const [heatmapVisibleCount, setHeatmapVisibleCount] = useState(15);
   const [rankingLevel, setRankingLevel] = useState<'Distritos' | 'Barrios'>('Distritos');
@@ -1341,6 +1342,7 @@ const MadridDashboardV2: React.FC = () => {
     setSeriesB([]);
     setMapData({ districts: [], neighborhoods: [] });
     setHeatmapData([]);
+    setHeatmapDataSourceKey('');
 
     apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
       .then(res => res.json())
@@ -1449,6 +1451,7 @@ const MadridDashboardV2: React.FC = () => {
           return;
         }
         setHeatmapData(Array.isArray(data) ? data : []);
+        setHeatmapDataSourceKey(`${selectedYear}|${activeProfile.id}|${rankingLevel}`);
       })
       .catch(() => { if (isLatestRequest()) setHeatmapData([]); });
 
@@ -2589,9 +2592,21 @@ const MadridDashboardV2: React.FC = () => {
 
   const rankingRows = useMemo(() => {
     const isTopRanking = activeProfile.id === 'venta' || activeProfile.id === 'inversion';
-    if (rankingLevel === 'Distritos') return isTopRanking ? rankings.topDist : rankings.botDist;
-    return isTopRanking ? rankings.topBarr : rankings.botBarr;
-  }, [rankingLevel, rankingMetric, selectedYear, selectedMonth, rankings, activeProfile.id]);
+    const rows = rankingLevel === 'Distritos'
+      ? isTopRanking ? rankings.topDist : rankings.botDist
+      : isTopRanking ? rankings.topBarr : rankings.botBarr;
+
+    // For €/m², use the selected month's heatmap cell as the ranking value so
+    // the two views always show and sort the same source observation.
+    const expectedHeatmapKey = `${selectedYear}|${activeProfile.id}|${rankingLevel}`;
+    if (rankingMetric !== 'unit' || activeProfile.id === 'inversion' || selectedMonthIndex < 0 || heatmapData.length === 0 || heatmapDataSourceKey !== expectedHeatmapKey) return rows;
+    const heatmapByZone = new Map(heatmapData.map(row => [normalizeZoneLabel(String(row.zona || '')), Number(row[`m${selectedMonthIndex + 1}`]) || 0]));
+    const exactRows = rows
+      .map(item => ({ ...item, value: heatmapByZone.get(normalizeZoneLabel(String(item.name || ''))) || 0 }))
+      .filter(item => Number.isFinite(item.value) && item.value > 0);
+    exactRows.sort((a, b) => isTopRanking ? b.value - a.value : a.value - b.value);
+    return exactRows;
+  }, [rankingLevel, rankingMetric, selectedYear, selectedMonth, selectedMonthIndex, rankings, heatmapData, heatmapDataSourceKey, activeProfile.id]);
   const rankingLoadingRows = Array.from({ length: 10 }, (_, index) => (
     <tr key={`ranking-skeleton-${index}`} aria-hidden="true" style={{ height: '34px', borderBottom: '1px solid rgba(186, 204, 214, 0.08)' }}>
       <td><span style={{ display: 'block', width: `${54 + (index % 4) * 8}%`, height: '10px', borderRadius: '6px', background: 'rgba(143, 163, 184, 0.14)' }} /></td>
@@ -3783,7 +3798,9 @@ const MadridDashboardV2: React.FC = () => {
                     ? 'Zonas con más demanda'
                     : activeProfile.id === 'inversion'
                       ? 'Vivienda más rentable'
-                      : 'Zonas más asequibles'}
+                      : activeProfile.id === 'compra'
+                        ? 'Zonas con menor precio'
+                        : 'Zonas más asequibles'}
                 </div>
                 <div className="v2-rank-settings">
                   {isMobile ? (
@@ -3824,7 +3841,7 @@ const MadridDashboardV2: React.FC = () => {
                           return (
                             <tr key={i} className={normalizeZoneName(item.name) === normalizeZoneName(highlightedRankingZone) ? 'is-filtered' : ''} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
                               <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
-                                {i+1}. {formatMadridName(item.name)}
+                                {isMobile ? `${i+1}. ${formatMadridName(item.name)}` : <><span className="v2-ranking-position">{i+1}.</span><span className="v2-ranking-name">{formatMadridName(item.name)}</span></>}
                               </td>
                               <td className="v2-ranking-value" style={{ padding: '8px 0', textAlign: 'right', color: '#00E5FF', fontWeight: '700' }}>
                                 <i style={{ width: `${Math.max(0, Math.min(100, (Number(item.value) || 0) / rankingValueMax * 100))}%` }} /><span>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(item.value)} trans.</span>
@@ -3838,7 +3855,7 @@ const MadridDashboardV2: React.FC = () => {
                 ) : activeProfile.id !== 'inversion' ? (
                   <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
                     <div className="v2-rank-head">
-                      <span>Top 10 · {rankingLevel === 'Distritos' ? 'distritos' : 'barrios'} más asequibles</span>
+                      <span>Top 10 · {rankingLevel === 'Distritos' ? 'distritos' : 'barrios'} {activeProfile.id === 'compra' ? 'con menor precio' : 'más asequibles'}</span>
                       <div className="v2-ranking-head-actions">
                         {activeProfile.id !== 'inversion' && (isMobile ? (
                           <div className="v2-ranking-unit-switch" role="group" aria-label="Unidad mostrada">
@@ -3867,14 +3884,19 @@ const MadridDashboardV2: React.FC = () => {
                       <tbody>
                         {rankingRows.length === 0 && isRankingsLoading ? rankingLoadingRows : rankingRows.map((item, i) => {
                           const price = item.value || 0;
+                          const priceLabel = rankingMetric === 'unit'
+                            ? `${formatNumber(price, Number.isInteger(Number(price)) ? 0 : 1)} €/m²`
+                            : activeProfile.id === 'alquiler'
+                              ? `${formatEuro(price, 0)}/mes`
+                              : formatEuro(price, 0);
 
                           return (
                             <tr key={i} className={normalizeZoneName(item.name) === normalizeZoneName(highlightedRankingZone) ? 'is-filtered' : ''} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
                               <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
-                                <span className="v2-ranking-position">{i+1}.</span><span className="v2-ranking-name">{formatMadridName(item.name)}</span>
+                                {isMobile ? `${i+1}. ${formatMadridName(item.name)}` : <><span className="v2-ranking-position">{i+1}.</span><span className="v2-ranking-name">{formatMadridName(item.name)}</span></>}
                               </td>
                               <td className="v2-ranking-value" style={{ padding: '8px 0', textAlign: 'right', color: '#00F0FF', fontWeight: '700' }}>
-                                <span>{rankingMetric === 'unit' ? `${formatNumber(price, 0)} €/m²` : formatEuro(price)}</span>
+                                <span>{priceLabel}</span>
                               </td>
                             </tr>
                           );
@@ -3901,7 +3923,7 @@ const MadridDashboardV2: React.FC = () => {
                           return (
                             <tr key={i} className={normalizeZoneName(item.name) === normalizeZoneName(highlightedRankingZone) ? 'is-filtered' : ''} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
                               <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
-                                {i+1}. {formatMadridName(item.name)}
+                                <span className="v2-ranking-position">{i+1}.</span><span className="v2-ranking-name">{formatMadridName(item.name)}</span>
                               </td>
                               <td className="v2-ranking-value" style={{ padding: '8px 0', textAlign: 'right', color: '#00F0FF', fontWeight: '700' }}>
                                 <i style={{ width: `${Math.max(0, Math.min(100, (Number(item.value) || 0) / rankingValueMax * 100))}%` }} /><span>{yearsVal}</span>
