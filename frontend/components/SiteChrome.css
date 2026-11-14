@@ -310,9 +310,10 @@
 
 .auros-footer__bottom {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-top: 24px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-top: 20px;
   border: none !important;
   border-top: none !important;
   font-size: 11px;
@@ -320,6 +321,19 @@
   letter-spacing: 0.08em;
   color: rgba(186, 204, 214, 0.65);
   text-transform: uppercase;
+}
+
+.auros-footer__disclaimer {
+  display: block;
+  max-width: min(72ch, 76%);
+  color: #eaf5ff;
+  line-height: 1.65;
+}
+
+.auros-footer__copyright {
+  flex: 0 0 auto;
+  color: #eaf5ff;
+  white-space: nowrap;
 }
 
 @media (max-width: 900px) {
@@ -348,8 +362,18 @@
     gap: 28px;
   }
   .auros-footer__bottom {
-    justify-content: flex-start;
+    align-items: flex-start;
+    justify-content: space-between;
   }
+}
+
+@media (max-width: 600px) {
+  .auros-footer__bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .auros-footer__disclaimer { max-width: 100%; }
 }
 
 /* ==========================================================================

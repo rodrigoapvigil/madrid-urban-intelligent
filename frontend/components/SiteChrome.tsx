@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { ReactNode } from 'react';
-import { ArrowUpRight, Linkedin, Github, X } from 'lucide-react';
+import { ArrowUpRight, Linkedin, X } from 'lucide-react';
 
 type SiteHeaderProps = {
   activePath?: string;
@@ -262,15 +262,6 @@ export function SiteHeader({
                 >
                   <Linkedin size={20} />
                 </a>
-                <a
-                  href="https://github.com/rodrigoapvigil/madrid-urban-intelligent"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Repositorio del proyecto en GitHub"
-                  className="mi-mobile-drawer__social-btn"
-                >
-                  <Github size={20} />
-                </a>
               </div>
             </div>
           </div>
@@ -323,22 +314,13 @@ export function SiteFooter() {
             >
               <Linkedin size={18} />
             </a>
-            <a
-              href="https://github.com/rodrigoapvigil/madrid-urban-intelligent"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Repositorio del proyecto en GitHub"
-              className="auros-footer__social-btn"
-            >
-              <Github size={18} />
-            </a>
           </div>
         </div>
 
         {/* Fila inferior: Copyright */}
         <div className="auros-footer__bottom">
           <span className="auros-footer__disclaimer">
-            Proyecto personal e independiente. No es una plataforma del Ayuntamiento de Madrid ni cuenta con su aval.
+            PROYECTO PERSONAL E INDEPENDIENTE.<br />NO ES UNA PLATAFORMA DEL AYUNTAMIENTO DE MADRID NI CUENTA CON SU AVAL.
           </span>
           <span className="auros-footer__copyright">
             © 2026 DMIYC
