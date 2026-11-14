@@ -34,6 +34,7 @@ export default function PrivacyPage() {
               <li><strong>Datos técnicos:</strong> dirección IP, fecha y hora, navegador, páginas solicitadas y datos necesarios para servir la web, protegerla y evitar abusos.</li>
               <li><strong>El Veredicto:</strong> los datos del inmueble que introduces —precio, superficie, zona y modalidad— para calcular la comparación solicitada.</li>
               <li><strong>AMBI:</strong> el texto que escribes para generar la respuesta a tu consulta.</li>
+              <li><strong>Formulario de contacto:</strong> nombre, email, motivo y mensaje, además de la organización si decides indicarla. Se utilizan para gestionar y responder tu consulta o propuesta. Al enviarlo, confirmas que has leído esta política.</li>
               <li><strong>Preferencias:</strong> filtros y opciones guardados temporalmente en el navegador.</li>
             </ul>
             <p>La base jurídica aplicable es, según el tratamiento, el interés legítimo para la seguridad y funcionamiento del servicio y la prestación del servicio solicitado por el usuario.</p>
@@ -52,7 +53,7 @@ export default function PrivacyPage() {
 
           <section className="editorial-page__section">
             <h2>4. Conservación</h2>
-            <p>Los datos introducidos en El Veredicto y AMBI se procesan para prestar la función solicitada y no se almacenan en una base de datos propia con fines de perfilado. Los proveedores de infraestructura pueden conservar registros técnicos conforme a su configuración y condiciones aplicables.</p>
+            <p>Los datos introducidos en El Veredicto y AMBI se procesan para prestar la función solicitada y no se almacenan en una base de datos propia con fines de perfilado. Los mensajes del formulario de contacto se envían al servicio de recepción configurado por DMIYC para poder atenderlos; ese servicio puede conservarlos conforme a su configuración. Los proveedores de infraestructura también pueden conservar registros técnicos conforme a su configuración y condiciones aplicables.</p>
             <p>Las preferencias de sesión permanecen en el navegador y pueden eliminarse desde sus ajustes.</p>
           </section>
 
