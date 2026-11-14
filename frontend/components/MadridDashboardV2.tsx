@@ -3808,7 +3808,7 @@ const MadridDashboardV2: React.FC = () => {
                           return (
                             <tr key={i} className={normalizeZoneName(item.name) === normalizeZoneName(highlightedRankingZone) ? 'is-filtered' : ''} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
                               <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
-                                {i+1}. {formatMadridName(item.name)}
+                                <span className="v2-ranking-position">{i+1}.</span><span className="v2-ranking-name">{formatMadridName(item.name)}</span>
                               </td>
                               <td className="v2-ranking-value" style={{ padding: '8px 0', textAlign: 'right', color: '#00F0FF', fontWeight: '700' }}>
                                 <span>{rankingMetric === 'unit' ? `${formatNumber(price, 0)} €/m²` : formatEuro(price)}</span>

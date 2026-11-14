@@ -3788,6 +3788,20 @@ body.v2-fullscreen-open footer { display: none !important; }
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-legend small { display: none; }
 }
 
+/* Desktop-only ranking readability; mobile keeps its existing compact rows. */
+@media (min-width: 769px) and (hover: hover) {
+  .v2-root .v2-affordability-ranking-table { table-layout: fixed; }
+  .v2-root .v2-affordability-ranking-table th:first-child,
+  .v2-root .v2-affordability-ranking-table td:first-child { width: 62%; padding-left: 12px !important; overflow: visible; white-space: nowrap; }
+  .v2-root .v2-affordability-ranking-table th:last-child,
+  .v2-root .v2-affordability-ranking-table td:last-child { width: 38%; padding-right: 10px !important; white-space: nowrap; }
+  .v2-root .v2-affordability-ranking-table tbody tr { height: 42px; }
+  .v2-root .v2-affordability-ranking-table tbody td { padding-top: 5px !important; padding-bottom: 5px !important; font-size: 1.0125rem; line-height: 1.2; }
+  .v2-root .v2-affordability-ranking-table tbody td:first-child { display: flex; align-items: center; gap: 6px; }
+  .v2-root .v2-affordability-ranking-table .v2-ranking-position { flex: 0 0 1.5rem; font-variant-numeric: tabular-nums; }
+  .v2-root .v2-affordability-ranking-table .v2-ranking-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
 @media (max-width: 768px) and (orientation: landscape) {
   .v2-root .v2-fullscreen-chart-readout { top: max(92px,calc(env(safe-area-inset-top) + 86px)); max-height: 30px; padding-block: 4px; }
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper .v2-chart-wrap.large { height: calc(100% - 138px) !important; margin-top: 138px !important; }
