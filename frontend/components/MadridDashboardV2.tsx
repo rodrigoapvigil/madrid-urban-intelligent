@@ -3646,12 +3646,10 @@ const MadridDashboardV2: React.FC = () => {
                     {isMobile ? (
                       <span><strong>{periodStatusLabel}</strong> · Último dato observado: {latestAvailablePeriod.month} de {latestAvailablePeriod.year} · estimaciones desde {MONTHS_ES[latestObservedMonthIndex + 1] || 'Enero'}. Estimación estadística basada en datos oficiales hasta {latestAvailablePeriod.month}; no es una tasación ni una garantía de precios futuros.</span>
                     ) : (
-                      <span className="v2-map-data-copy">
-                        <strong className="v2-map-data-chip">Dato real · hasta {latestRealMonth} de {latestRealYear}</strong>
-                        <span className="v2-map-data-note">Desde {firstProjectionMonth}: estimación estadística basada en datos oficiales. No es una tasación ni una garantía de precios futuros.</span>
-                      </span>
+                      <strong className="v2-map-data-chip">Dato real · hasta {latestRealMonth} de {latestRealYear}</strong>
                     )}
                     </div>
+                    {!isMobile && <span className="v2-map-data-note">Desde {firstProjectionMonth}: estimación estadística basada en datos oficiales. No es una tasación ni una garantía de precios futuros.</span>}
                     <button
                       className="v2-map-help-button"
                       onClick={() => setShowMapHelpModal(true)}
@@ -4089,11 +4087,21 @@ const MadridDashboardV2: React.FC = () => {
                       <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>
                         Actividad de mercado por {liquidityLevel === 'distrito' ? 'Distrito' : 'Barrio'}
                       </h3>
-                      <div className="v2-tabs-bg small">
-                        <span className="v2-indicator" style={{ transform: `translateX(${liquidityLevel === 'distrito' ? '0' : '100%'})`, width: '80px' }} />
-                        <button className={`v2-tab-btn ${liquidityLevel === 'distrito' ? 'active' : ''}`} style={{ minWidth: '80px' }} onClick={() => setLiquidityLevel('distrito')}>Distritos</button>
-                        <button className={`v2-tab-btn ${liquidityLevel === 'barrio' ? 'active' : ''}`} style={{ minWidth: '80px' }} onClick={() => setLiquidityLevel('barrio')}>Barrios</button>
-                      </div>
+                      {isMobile ? (
+                        <div className="v2-tabs-bg small">
+                          <span className="v2-indicator" style={{ transform: `translateX(${liquidityLevel === 'distrito' ? '0' : '100%'})`, width: '80px' }} />
+                          <button type="button" className={`v2-tab-btn ${liquidityLevel === 'distrito' ? 'active' : ''}`} style={{ minWidth: '80px' }} onClick={() => setLiquidityLevel('distrito')}>Distritos</button>
+                          <button type="button" className={`v2-tab-btn ${liquidityLevel === 'barrio' ? 'active' : ''}`} style={{ minWidth: '80px' }} onClick={() => setLiquidityLevel('barrio')}>Barrios</button>
+                        </div>
+                      ) : (
+                        <SegmentedControl<'distrito' | 'barrio'>
+                          label="Nivel de actividad de mercado"
+                          size="md"
+                          value={liquidityLevel}
+                          options={[{ value: 'distrito', label: 'Distritos' }, { value: 'barrio', label: 'Barrios' }] as const}
+                          onChange={setLiquidityLevel}
+                        />
+                      )}
                     </div>
                     <div style={{ fontSize: '13px', fontWeight: '600', color: '#BACCD6', marginBottom: '20px' }}>
                       Responde: ¿Dónde se cierran más operaciones?
