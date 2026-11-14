@@ -1029,6 +1029,7 @@ const MadridDashboardV2: React.FC = () => {
   const [rankings, setRankings] = useState<{ topDist: any[], botDist: any[], topBarr: any[], botBarr: any[] }>({
     topDist: [], botDist: [], topBarr: [], botBarr: []
   });
+  const [isRankingsLoading, setIsRankingsLoading] = useState(true);
   const [affordabilityData, setAffordabilityData] = useState<any[]>([]);
   const [seasonalTrend, setSeasonalTrend] = useState<any[]>([]);
   const [heatmapData, setHeatmapData] = useState<any[]>([]);
@@ -1297,7 +1298,6 @@ const MadridDashboardV2: React.FC = () => {
     setSeriesA([]);
     setSeriesB([]);
     setMapData({ districts: [], neighborhoods: [] });
-    setRankings({ topDist: [], botDist: [], topBarr: [], botBarr: [] });
     setHeatmapData([]);
 
     apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
@@ -1420,7 +1420,7 @@ const MadridDashboardV2: React.FC = () => {
   useEffect(() => {
     if (!filtersReady || !selectedYear || !selectedMonth) return;
     let isCurrent = true;
-    setRankings({ topDist: [], botDist: [], topBarr: [], botBarr: [] });
+    setIsRankingsLoading(true);
     if (activeProfile.id === 'venta') {
       Promise.all([
         apiFetch(`/liquidity?year=${selectedYear}&level=distrito`).then(r => r.ok ? r.json() : []).catch(() => []),
@@ -1429,6 +1429,7 @@ const MadridDashboardV2: React.FC = () => {
         if (!isCurrent) return;
         const mapLiquidity = (list: any[]) => list.map(item => ({ name: item.name, value: item.transactions }));
         setRankings({ topDist: mapLiquidity(dist || []), botDist: mapLiquidity(dist || []), topBarr: mapLiquidity(barr || []), botBarr: mapLiquidity(barr || []) });
+        setIsRankingsLoading(false);
       });
     } else {
       const category = activeProfile.id === 'inversion' ? 'Rentabilidad' : rankingMetric === 'unit' ? 'Precio m²' : 'Precio';
@@ -1443,6 +1444,7 @@ const MadridDashboardV2: React.FC = () => {
           const values = [...(dist || []), ...(barr || [])].map((item: any) => Number(item.value)).filter(Number.isFinite);
           if (values.some((value: number) => value > maxAllowed)) {
             setDashboardLoadError('El ranking de alquiler contiene valores de compraventa. Se ha ocultado para evitar una escala engañosa.');
+            setIsRankingsLoading(false);
             return;
           }
         }
@@ -1450,10 +1452,11 @@ const MadridDashboardV2: React.FC = () => {
         const observedDist = withObservedValue(dist);
         const observedBarr = withObservedValue(barr);
         setRankings({ topDist: observedDist, botDist: [...observedDist].sort((a: any, b: any) => a.value - b.value), topBarr: observedBarr, botBarr: [...observedBarr].sort((a: any, b: any) => a.value - b.value) });
+        setIsRankingsLoading(false);
       });
     }
     return () => { isCurrent = false; };
-  }, [filtersReady, selectedYear, selectedMonth, activeProfile.id, activeProfile.op, rankingMetric, selectedDistrict]);
+  }, [filtersReady, selectedYear, selectedMonth, activeProfile.id, activeProfile.op, rankingMetric, rankingLevel, selectedDistrict]);
 
   // Fetch liquidity data (for Inversión profile only)
   useEffect(() => {
@@ -2542,9 +2545,17 @@ const MadridDashboardV2: React.FC = () => {
     return profileIdx > idx ? 'v2-before' : 'v2-after';
   };
 
-  const rankingRows = rankingLevel === 'Distritos'
-    ? (activeProfile.id === 'venta' || activeProfile.id === 'inversion' ? rankings.topDist : rankings.botDist)
-    : (activeProfile.id === 'venta' || activeProfile.id === 'inversion' ? rankings.topBarr : rankings.botBarr);
+  const rankingRows = useMemo(() => {
+    const isTopRanking = activeProfile.id === 'venta' || activeProfile.id === 'inversion';
+    if (rankingLevel === 'Distritos') return isTopRanking ? rankings.topDist : rankings.botDist;
+    return isTopRanking ? rankings.topBarr : rankings.botBarr;
+  }, [rankingLevel, rankingMetric, selectedYear, selectedMonth, rankings, activeProfile.id]);
+  const rankingLoadingRows = Array.from({ length: 10 }, (_, index) => (
+    <tr key={`ranking-skeleton-${index}`} aria-hidden="true" style={{ height: '34px', borderBottom: '1px solid rgba(186, 204, 214, 0.08)' }}>
+      <td><span style={{ display: 'block', width: `${54 + (index % 4) * 8}%`, height: '10px', borderRadius: '6px', background: 'rgba(143, 163, 184, 0.14)' }} /></td>
+      <td><span style={{ display: 'block', width: `${40 + (index % 3) * 10}%`, height: '10px', marginLeft: 'auto', borderRadius: '6px', background: 'rgba(0, 229, 255, 0.13)' }} /></td>
+    </tr>
+  ));
   const rankingValueMax = Math.max(1, ...rankingRows.map(item => Number(item.value) || 0));
   const normalizeZoneName = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
   const highlightedRankingZone = rankingLevel === 'Distritos' ? selectedDistrict : selectedBarrio;
@@ -3756,7 +3767,7 @@ const MadridDashboardV2: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {(rankingLevel === 'Distritos' ? rankings.topDist : rankings.topBarr).map((item, i) => {
+                        {rankingRows.length === 0 && isRankingsLoading ? rankingLoadingRows : rankingRows.map((item, i) => {
                           return (
                             <tr key={i} className={normalizeZoneName(item.name) === normalizeZoneName(highlightedRankingZone) ? 'is-filtered' : ''} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
                               <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
@@ -3791,7 +3802,7 @@ const MadridDashboardV2: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {(rankingLevel === 'Distritos' ? rankings.botDist : rankings.botBarr).map((item, i) => {
+                        {rankingRows.length === 0 && isRankingsLoading ? rankingLoadingRows : rankingRows.map((item, i) => {
                           const price = item.value || 0;
 
                           return (
@@ -3822,7 +3833,7 @@ const MadridDashboardV2: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {(rankingLevel === 'Distritos' ? rankings.topDist : rankings.topBarr).map((item, i) => {
+                        {rankingRows.length === 0 && isRankingsLoading ? rankingLoadingRows : rankingRows.map((item, i) => {
                           const yearsVal = item.value > 0 ? (1 / item.value).toFixed(1) + ' años' : '-';
                           return (
                             <tr key={i} className={normalizeZoneName(item.name) === normalizeZoneName(highlightedRankingZone) ? 'is-filtered' : ''} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
