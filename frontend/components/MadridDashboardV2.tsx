@@ -3640,9 +3640,17 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-map-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
                     <div className={`v2-data-status ${isProjectionPeriod ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
                       <span className="v2-data-status-dot" aria-hidden="true" />
-          <span><strong>{periodStatusLabel}</strong> · Último dato observado: {latestAvailablePeriod.month} de {latestAvailablePeriod.year} · estimaciones desde {MONTHS_ES[latestObservedMonthIndex + 1] || 'Enero'}. Estimación estadística basada en datos oficiales hasta {latestAvailablePeriod.month}; no es una tasación ni una garantía de precios futuros.</span>
+                    {isMobile ? (
+                      <span><strong>{periodStatusLabel}</strong> · Último dato observado: {latestAvailablePeriod.month} de {latestAvailablePeriod.year} · estimaciones desde {MONTHS_ES[latestObservedMonthIndex + 1] || 'Enero'}. Estimación estadística basada en datos oficiales hasta {latestAvailablePeriod.month}; no es una tasación ni una garantía de precios futuros.</span>
+                    ) : (
+                      <span className="v2-map-data-copy">
+                        <strong className="v2-map-data-chip">Dato real · hasta {latestRealMonth} de {latestRealYear}</strong>
+                        <span className="v2-map-data-note">Desde {firstProjectionMonth}: estimación estadística basada en datos oficiales. No es una tasación ni una garantía de precios futuros.</span>
+                      </span>
+                    )}
                     </div>
                     <button
+                      className="v2-map-help-button"
                       onClick={() => setShowMapHelpModal(true)}
                       style={{
                         background: 'rgba(1, 16, 36, 0.92)',

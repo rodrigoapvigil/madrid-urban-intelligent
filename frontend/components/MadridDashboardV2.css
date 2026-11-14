@@ -2935,6 +2935,26 @@
   margin-left: auto;
 }
 
+@media (min-width: 901px) and (pointer: fine) {
+  .v2-root .v2-map-card > .v2-map-header {
+    gap: 16px !important;
+    margin-bottom: 24px !important;
+  }
+  .v2-root .v2-map-header .v2-map-data-status {
+    display: flex;
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+    align-items: flex-start;
+    gap: 10px;
+    margin: 0;
+  }
+  .v2-root .v2-map-data-copy { display: grid; min-width: 0; gap: 4px; }
+  .v2-root .v2-map-data-chip { color: #00e5ff; font-size: 12px; font-weight: 750; }
+  .v2-root .v2-map-data-note { color: #c7d8e0; font-size: 11px; line-height: 1.4; }
+  .v2-root .v2-map-help-button { flex: 0 0 auto; white-space: nowrap; }
+}
+
 @media (max-width: 900px) {
   .v2-map-header { flex-wrap: wrap; }
   .v2-map-header .v2-data-status { order: 3; flex-basis: 100%; max-width: none; margin-left: 0; }
