@@ -1,6 +1,7 @@
 'use client';
 
 import { SiteFooter, SiteHeader } from './SiteChrome';
+import BackgroundAurora from './BackgroundAurora';
 
 import { useState } from 'react';
 import Link from 'next/link';
@@ -26,7 +27,7 @@ export default function MadridLanding() {
   const [trendHighlight, setTrendHighlight] = useState<'real' | 'prediction' | 'all'>('all');
   return (
     <div className="mi-home" id="inicio">
-      <div className="mi-atmosphere" aria-hidden="true"/>
+      <BackgroundAurora />
       <SiteHeader activePath="/" ctaText="Colabora con nosotros" ctaHref="/contacto" appearance="aurora" />
 
       <main id="contenido-principal">

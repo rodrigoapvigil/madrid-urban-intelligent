@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { SiteFooter, SiteHeader } from '../../components/SiteChrome';
 import ContactForm from './ContactForm';
+import BackgroundAurora from '../../components/BackgroundAurora';
 import './contacto.css';
 
 export const metadata: Metadata = {
@@ -12,7 +13,8 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <>
+    <div className="contact-page-shell">
+      <BackgroundAurora />
       <SiteHeader activePath="/contacto" ctaText="Volver al dashboard" ctaHref="/madrid" appearance="aurora" />
       <main className="contact-page">
         <div className="contact-page__inner">
@@ -26,6 +28,6 @@ export default function ContactPage() {
         </div>
       </main>
       <SiteFooter />
-    </>
+    </div>
   );
 }

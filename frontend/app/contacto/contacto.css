@@ -1,9 +1,15 @@
+.contact-page-shell {
+  position: relative;
+  isolation: isolate;
+  min-height: 100vh;
+  overflow: clip;
+  background: transparent;
+}
+
 .contact-page {
   min-height: min(900px, 100vh);
   padding: clamp(36px, 6vw, 76px) 24px 88px;
-  background:
-    radial-gradient(ellipse at 50% 0%, rgba(0, 229, 255, .1), transparent 46%),
-    #061426;
+  background: transparent;
   color: #eef7ff;
 }
 
