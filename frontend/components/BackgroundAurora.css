@@ -11,7 +11,7 @@
   position: absolute;
   display: block;
   border-radius: 50%;
-  filter: blur(90px);
+  filter: blur(72px);
   opacity: .42;
   will-change: transform;
 }
@@ -57,7 +57,7 @@
 }
 
 @media (max-width: 768px) {
-  .bg-aurora__blob { filter: blur(60px); }
+  .bg-aurora__blob { filter: blur(48px); }
   .bg-aurora__blob--violet { display: none; }
 }
 
