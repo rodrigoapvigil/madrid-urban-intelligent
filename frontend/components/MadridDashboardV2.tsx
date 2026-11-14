@@ -1175,25 +1175,37 @@ const MadridDashboardV2: React.FC = () => {
   const handleMapDistrictClick = useCallback((district: string | null) => {
     const hoverContext = desktopZoneHoverRef.current;
     const matchesHover = !isMobile && district && hoverContext && normalizeZoneLabel(district) === normalizeZoneLabel(hoverContext.zoneId);
-    selectZone(matchesHover ? hoverContext!.zoneId : district);
+    const isAlreadySelected = Boolean(district && normalizeZoneLabel(selectedDistrict) === normalizeZoneLabel(district));
+    selectZone(!isMobile && (isAlreadySelected || !district) ? null : matchesHover ? hoverContext!.zoneId : district);
     if (!isMobile) {
-      setDesktopPinnedZone(matchesHover ? hoverContext : null);
+      setDesktopPinnedZone(!isAlreadySelected && matchesHover ? hoverContext : null);
+      setSelectedDistrict(isAlreadySelected || !district ? 'Todos' : district);
+      setSelectedBarrio('Todos');
     }
     if (isMobile) {
       setSelectedDistrict(district || 'Todos');
       setSelectedBarrio('Todos');
       setMapLevel(district ? 'neighborhoods' : 'districts');
     }
-  }, [isMobile, selectZone]);
+  }, [isMobile, selectZone, selectedDistrict]);
   const handleMapBarrioClick = useCallback((barrio: string | null) => {
     const hoverContext = desktopZoneHoverRef.current;
     const matchesHover = !isMobile && barrio && hoverContext && normalizeZoneLabel(barrio) === normalizeZoneLabel(hoverContext.zoneId);
-    selectZone(matchesHover ? hoverContext!.zoneId : barrio);
+    const isAlreadySelected = Boolean(barrio && normalizeZoneLabel(selectedBarrio) === normalizeZoneLabel(barrio));
+    selectZone(!isMobile && (isAlreadySelected || !barrio) ? null : matchesHover ? hoverContext!.zoneId : barrio);
     if (!isMobile) {
-      setDesktopPinnedZone(matchesHover ? hoverContext : null);
+      setDesktopPinnedZone(!isAlreadySelected && matchesHover ? hoverContext : null);
+      if (isAlreadySelected || !barrio) {
+        setSelectedBarrio('Todos');
+        setSelectedDistrict('Todos');
+      } else {
+        const feature = mapData.neighborhoods.find((item: any) => normalizeZoneLabel(String(item.barrio || '')) === normalizeZoneLabel(barrio));
+        setSelectedDistrict(feature?.distrito || 'Todos');
+        setSelectedBarrio(barrio);
+      }
     }
     if (isMobile) setSelectedBarrio(barrio || 'Todos');
-  }, [isMobile, selectZone]);
+  }, [isMobile, selectZone, selectedBarrio, mapData.neighborhoods]);
   const handleDesktopZoneHover = useCallback((zone: string | null, context?: MapZoneHoverContext) => {
     if (!zone || !context) {
       hoverZone(null);
