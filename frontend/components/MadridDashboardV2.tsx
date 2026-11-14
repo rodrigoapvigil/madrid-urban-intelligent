@@ -2721,6 +2721,7 @@ const MadridDashboardV2: React.FC = () => {
             )}
           </div>
 
+          {isMobile && <>
           {/* DISTRITO */}
           <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Distrito</span>
@@ -2765,6 +2766,7 @@ const MadridDashboardV2: React.FC = () => {
               </div>
             )}
           </div>
+          </>}
           {/* BOTONES DE ACCIÓN EN ALTO CONTRASTE */}
           <div className="v2-filter-actions">
             <button
@@ -2841,6 +2843,31 @@ const MadridDashboardV2: React.FC = () => {
 
             {/* KPI & MAPA SECTION */}
             <div className="v2-grid-main" data-dashboard-section="summary">
+              {!isMobile && <div className="v2-zone-filter-row" aria-label="Filtros de zona">
+                <span className="v2-zone-filter-title">Zona</span>
+                <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
+                  <span className="v2-filter-label">Distrito</span>
+                  <button type="button" className={`v2-custom-select ${activeDropdown === 'dist' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'dist'} onClick={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')}>
+                    <span>{formatZoneOption(selectedDistrict)}</span><ChevronDown size={14} className="v2-select-chevron" />
+                  </button>
+                  {activeDropdown === 'dist' && <div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
+                    {availableDistricts.map(d => <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={selectedDistrict === d} onClick={event => { event.stopPropagation(); setSelectedDistrict(d); setSelectedBarrio('Todos'); setActiveDropdown(null); }}>{formatZoneOption(d)}</button>)}
+                  </div>}
+                </div>
+                <div className={`v2-dropdown-container ${activeDropdown === 'barrio' ? 'v2-z-up' : ''}`}>
+                  <span className="v2-filter-label">Barrio</span>
+                  <button type="button" disabled={selectedDistrict === 'Todos'} className={`v2-custom-select ${activeDropdown === 'barrio' ? 'open' : ''}`} aria-haspopup="listbox" aria-expanded={activeDropdown === 'barrio'} onClick={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')}>
+                    <span>{selectedDistrict === 'Todos' ? 'Elige un distrito' : formatZoneOption(selectedBarrio)}</span><ChevronDown size={14} className="v2-select-chevron" />
+                  </button>
+                  {activeDropdown === 'barrio' && selectedDistrict !== 'Todos' && <div className="v2-dropdown-menu" role="listbox" aria-label="Barrio">
+                    <input className="v2-dropdown-search" aria-label="Buscar barrio" placeholder="Buscar barrio…" onClick={event => event.stopPropagation()} onChange={event => {
+                      const query = event.currentTarget.value.toLocaleLowerCase('es-ES');
+                      event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('.v2-dropdown-item').forEach(item => { item.hidden = query.length > 0 && !item.textContent?.toLocaleLowerCase('es-ES').includes(query); });
+                    }} />
+                    {availableBarrios.map(b => <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={selectedBarrio === b} onClick={event => { event.stopPropagation(); setSelectedBarrio(b); setActiveDropdown(null); }}>{formatZoneOption(b)}</button>)}
+                  </div>}
+                </div>
+              </div>}
               <div className="v2-kpi-col">
                 <div className="v2-kpi-stack">
 
