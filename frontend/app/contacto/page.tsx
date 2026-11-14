@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 export default function ContactPage() {
   return (
     <>
-      <SiteHeader activePath="/contacto" ctaText="Volver al dashboard" ctaHref="/madrid" />
+      <SiteHeader activePath="/contacto" ctaText="Volver al dashboard" ctaHref="/madrid" appearance="aurora" />
       <main className="contact-page">
         <div className="contact-page__inner">
           <Link className="contact-page__back" href="/" aria-label="Volver al inicio">← <span>Volver</span></Link>

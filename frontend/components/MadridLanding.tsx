@@ -27,7 +27,7 @@ export default function MadridLanding() {
   return (
     <div className="mi-home" id="inicio">
       <div className="mi-atmosphere" aria-hidden="true"/>
-      <SiteHeader activePath="/" ctaText="Colabora con nosotros" ctaHref="/contacto" />
+      <SiteHeader activePath="/" ctaText="Colabora con nosotros" ctaHref="/contacto" appearance="aurora" />
 
       <main id="contenido-principal">
         {/* 0. HERO: Claridad en 3 segundos */}

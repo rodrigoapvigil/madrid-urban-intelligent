@@ -14,6 +14,7 @@ type SiteHeaderProps = {
   onSelectProfile?: (id: string) => void;
   ctaText?: string;
   ctaHref?: string;
+  appearance?: 'default' | 'aurora';
 };
 
 export function SiteHeader({
@@ -24,6 +25,7 @@ export function SiteHeader({
   onSelectProfile,
   ctaText,
   ctaHref,
+  appearance = 'default',
 }: SiteHeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -56,7 +58,7 @@ export function SiteHeader({
 
   return (
     <>
-      <header className="mi-header site-header" role="banner">
+      <header className={`mi-header site-header${appearance === 'aurora' ? ' site-header--aurora' : ''}`} role="banner">
         {/* Brand: Logo + Title */}
         <Link href="/" className="mi-brand site-brand" aria-label="DMIYC - Decide Madrid: Invierte Y Compra">
           <span className="mi-brand__mark">

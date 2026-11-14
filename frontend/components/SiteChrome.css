@@ -249,6 +249,20 @@
   transform: translateY(-2px) !important;
 }
 
+/* Landing and contact share a distinct, higher-contrast glass navigation. */
+.site-header--aurora {
+  background: rgba(10, 42, 79, .85) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, .06) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.site-header--aurora .site-navigation a,
+.site-header--aurora .mi-nav a { color: #E6F0FA; }
+.site-header--aurora .site-navigation a:hover,
+.site-header--aurora .mi-nav a:hover { color: #FFFFFF; }
+.site-header--aurora .site-navigation a.active,
+.site-header--aurora .mi-nav a.active { color: #00F0FF; }
+
 .auros-footer__mid {
   display: flex;
   align-items: center;
