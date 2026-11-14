@@ -252,6 +252,50 @@
 }
 
 .contact-form__submit:hover { filter: brightness(1.04); }
+.contact-form__submit:focus-visible,
+.contact-reasons__chip:focus-visible,
+.contact-reasons:focus-visible,
+.contact-page__back:focus-visible,
+.contact-privacy__checkbox:focus-visible,
+.contact-field__control:focus-visible,
+.contact-privacy a:focus-visible,
+.contact-form__privacy-note a:focus-visible {
+  outline: 2px solid #00E5FF;
+  outline-offset: 4px;
+}
+.contact-form { opacity: 1; transform: translateY(0); transition: opacity .24s ease, transform .24s ease; }
+.contact-form.is-fading { opacity: 0; transform: translateY(5px); pointer-events: none; }
+.contact-form__spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid rgba(6, 22, 45, .3);
+  border-top-color: #06162d;
+  border-radius: 50%;
+  animation: contact-spin .72s linear infinite;
+}
+@keyframes contact-spin { to { transform: rotate(360deg); } }
+.contact-form__success {
+  min-height: 300px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  animation: contact-success-in .28s ease both;
+}
+.contact-form__success-mark {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 22px;
+  border: 1px solid rgba(0, 229, 255, .5);
+  border-radius: 50%;
+  color: #00E5FF;
+  font-size: 22px;
+}
+.contact-form__success h2 { margin: 0; color: #E6F0FA; font-size: clamp(28px, 3vw, 38px); letter-spacing: -.03em; }
+.contact-form__success p { margin: 12px 0 0; color: #9FB4C8; font-size: 16px; line-height: 1.5; }
+@keyframes contact-success-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 .contact-form__privacy-note { max-width: 58ch; margin: 12px 0 0; color: #8299AD; font-size: 12px; line-height: 1.55; }
 .contact-form__privacy-note a { color: #8FE9F3; text-underline-offset: 3px; }
 .contact-form__submit:disabled { opacity: .65; cursor: wait; }
@@ -277,6 +321,8 @@
   .contact-intro::after { display: none; }
   .contact-intro h1 { font-size: clamp(56px, 11vw, 76px); }
   .contact-form-panel { padding-top: 0; }
+  .contact-form__grid { grid-template-columns: minmax(0, 1fr); }
+  .contact-field--full { grid-column: auto; }
 }
 
 @media (max-width: 640px) {
@@ -284,5 +330,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .contact-field__control, .contact-field__label, .contact-field::after { transition: none; }
+  .contact-field__control, .contact-field__label, .contact-field::after,
+  .contact-form, .contact-form__success { transition: none; animation: none; }
+  .contact-form__spinner { animation: none; border-right-color: #06162d; }
 }
