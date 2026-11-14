@@ -68,13 +68,16 @@ const updateChartZoom = (canvasId: string, action: 'in' | 'out' | 'reset') => {
   chart.update('none');
 };
 
-const FullscreenToggle = ({ targetSelector, chartId, label, mobileOnly = false }: { targetSelector?: string; chartId?: string; label?: string; mobileOnly?: boolean }) => {
+const FullscreenToggle = ({ targetSelector, chartId, label, mobileOnly = false, mobilePlatform = false }: { targetSelector?: string; chartId?: string; label?: string; mobileOnly?: boolean; mobilePlatform?: boolean }) => {
   const [expanded, setExpanded] = useState(false);
   const [awaitingLandscape, setAwaitingLandscape] = useState(false);
   const [rotateScreenVisible, setRotateScreenVisible] = useState(false);
   const [showOrientationHelp, setShowOrientationHelp] = useState(false);
   const [toolbarRevision, setToolbarRevision] = useState(0);
   const targetRef = useRef<HTMLElement | null>(null);
+  const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const placeholderRef = useRef<Comment | null>(null);
+  const [chartReadout, setChartReadout] = useState('Toca un mes · línea continua: dato real · discontinua: estimación');
   const nativeFullscreenRef = useRef(false);
   const allowPortraitRef = useRef(false);
   const rotateScreenVisibleRef = useRef(false);
@@ -83,11 +86,49 @@ const FullscreenToggle = ({ targetSelector, chartId, label, mobileOnly = false }
     if (!expanded || !targetRef.current) return;
     const target = targetRef.current;
     const oldOverflow = document.body.style.overflow;
+    const dialog = dialogRef.current;
     target.classList.add('v2-is-fullscreen');
+    if (dialog) target.classList.add('v2-in-dialog');
     document.body.classList.add('v2-fullscreen-open');
     document.body.style.overflow = 'hidden';
     window.history.pushState({ v2Fullscreen: true }, '', `${window.location.pathname}${window.location.search}#pantalla-completa`);
     const chart = chartId ? ChartJS.getChart(chartId) as any : null;
+    const canvas = chart?.canvas as HTMLCanvasElement | undefined;
+    const originalTooltipEnabled = chart?.options.plugins?.tooltip?.enabled;
+    const updateReadout = (event: PointerEvent) => {
+      if (!chart) return;
+      const points = chart.getElementsAtEventForMode(event, 'index', { intersect: false }, true);
+      const index = points[0]?.index;
+      if (index === undefined) return;
+      const label = String(chart.data.labels?.[index] ?? '');
+      const values = chart.data.datasets.map((dataset: any, datasetIndex: number) => ({
+        index: datasetIndex,
+        name: dataset.label || `Serie ${datasetIndex + 1}`,
+        value: dataset.data?.[index],
+        visible: chart.isDatasetVisible(datasetIndex),
+      })).filter((entry: any) => entry.visible && Number.isFinite(Number(entry.value)) && Number(entry.value) > 0);
+      const format = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const readoutValues = chart.data.datasets.length === 5
+        ? [[0, 1], [2, 3]].map(indexes => values.find((entry: any) => indexes.includes(entry.index))).filter(Boolean)
+        : values;
+      if (readoutValues.length === 2 && chart.data.datasets.length === 5) {
+        const a = Number((readoutValues[0] as any).value);
+        const b = Number((readoutValues[1] as any).value);
+        const difference = a - b;
+        const relative = b ? difference / b * 100 : 0;
+        setChartReadout(`${label} · ${(readoutValues[0] as any).name.replace(/\s*[·-]\s*(Dato real|Estimación).*$/i, '')} ${format(a)} · ${(readoutValues[1] as any).name.replace(/\s*[·-]\s*(Dato real|Estimación).*$/i, '')} ${format(b)} · Dif. ${difference > 0 ? '+' : ''}${format(difference)} (${relative > 0 ? '+' : ''}${format(relative)}%)`);
+        return;
+      }
+      const formattedValues = readoutValues.map((entry: any) => `${entry.name}: ${format(Number(entry.value))}`)
+      /* For comparison charts, pair real and estimated values so the readout
+         never treats the empty half of a split series as a zero. */
+      setChartReadout(`${label} · ${formattedValues.join(' · ')}`);
+    };
+    if (mobilePlatform && chart && canvas) {
+      chart.options.plugins.tooltip.enabled = false;
+      canvas.addEventListener('pointerup', updateReadout);
+      chart.update('none');
+    }
     if (chart && !chart.$v2FullscreenOriginal) {
       chart.$v2FullscreenOriginal = {
         labels: [...(chart.data.labels || [])],
@@ -145,6 +186,12 @@ const FullscreenToggle = ({ targetSelector, chartId, label, mobileOnly = false }
     document.addEventListener('fullscreenchange', onFullscreenChange);
     return () => {
       target.classList.remove('v2-is-fullscreen');
+      target.classList.remove('v2-in-dialog');
+      if (mobilePlatform && chart && canvas) {
+        canvas.removeEventListener('pointerup', updateReadout);
+        chart.options.plugins.tooltip.enabled = originalTooltipEnabled ?? true;
+        chart.update('none');
+      }
       document.body.classList.remove('v2-fullscreen-open');
       document.body.style.overflow = oldOverflow;
       window.removeEventListener('popstate', onBack);
@@ -163,9 +210,17 @@ const FullscreenToggle = ({ targetSelector, chartId, label, mobileOnly = false }
         void document.exitFullscreen?.().catch(() => {});
         nativeFullscreenRef.current = false;
       }
+      if (dialog) {
+        if (dialog.open) dialog.close();
+        const placeholder = placeholderRef.current;
+        if (placeholder?.parentNode) placeholder.parentNode.replaceChild(target, placeholder);
+        placeholderRef.current = null;
+        dialog.remove();
+        dialogRef.current = null;
+      }
       window.setTimeout(() => chart?.resize(), 80);
     };
-  }, [expanded, chartId]);
+  }, [expanded, chartId, mobilePlatform]);
 
   const close = () => window.history.back();
   const exportCsv = () => {
@@ -215,13 +270,34 @@ const FullscreenToggle = ({ targetSelector, chartId, label, mobileOnly = false }
     rotateScreenVisibleRef.current = false;
     setRotateScreenVisible(false);
     setShowOrientationHelp(false);
-    if (window.matchMedia('(pointer: coarse) and ((max-width: 600px) or (max-height: 600px))').matches) {
+    if (!mobilePlatform && window.matchMedia('(pointer: coarse) and ((max-width: 600px) or (max-height: 600px))').matches) {
       const fullscreenRequest = document.documentElement.requestFullscreen?.();
       fullscreenRequest?.then(async () => {
         nativeFullscreenRef.current = true;
         const orientation = screen.orientation as ScreenOrientation & { lock?: (value: 'landscape') => Promise<void> };
         try { await orientation?.lock?.('landscape'); } catch { /* Keep the CSS fullscreen view usable when locking is unsupported. */ }
       }).catch(() => {});
+    }
+    if (mobilePlatform) {
+      const target = targetRef.current;
+      const appRoot = target.closest('.v2-root');
+      const parent = target.parentNode;
+      if (!appRoot || !parent) return;
+      const placeholder = document.createComment('fullscreen-target');
+      parent.insertBefore(placeholder, target);
+      const dialog = document.createElement('dialog');
+      dialog.className = 'v2-fullscreen-dialog';
+      const body = document.createElement('div');
+      body.className = 'v2-fullscreen-dialog-body';
+      dialog.appendChild(body);
+      appRoot.appendChild(dialog);
+      body.appendChild(target);
+      dialog.addEventListener('cancel', event => { event.preventDefault(); window.history.back(); });
+      dialogRef.current = dialog;
+      placeholderRef.current = placeholder;
+      dialog.showModal();
+      window.requestAnimationFrame(() => window.setTimeout(() => window.dispatchEvent(new Event('v2:fullscreen-open')), 80));
+      setChartReadout('Toca un mes · línea continua: dato real · discontinua: estimación');
     }
     setExpanded(true);
   };
@@ -238,6 +314,7 @@ const FullscreenToggle = ({ targetSelector, chartId, label, mobileOnly = false }
       <button type="button" onClick={exportPng}>PNG</button><button type="button" onClick={exportCsv}>CSV</button>
       <span hidden>{toolbarRevision}</span>
     </div>}
+    {expanded && mobilePlatform && chartId && <div className="v2-fullscreen-chart-readout" role="status" aria-live="polite">{chartReadout}</div>}
     {expanded && rotateScreenVisible && <div className={`v2-rotate-screen${awaitingLandscape ? '' : ' is-fading'}`} role="status">
       <button type="button" className="v2-rotate-close" aria-label="Cerrar vista ampliada" onClick={close}><X size={22} /></button>
       <RotateCw className="v2-rotate-screen-icon" size={72} aria-hidden="true" />
@@ -247,14 +324,14 @@ const FullscreenToggle = ({ targetSelector, chartId, label, mobileOnly = false }
   </div>;
 };
 
-const ChartZoomControls = ({ chartId }: { chartId: string }) => (
+const ChartZoomControls = ({ chartId, mobilePlatform = true }: { chartId: string; mobilePlatform?: boolean }) => (
   <div className="v2-chart-controls" role="group" aria-label="Controles de zoom de la gráfica">
-    <FullscreenToggle chartId={chartId} />
+    <FullscreenToggle chartId={chartId} mobilePlatform={mobilePlatform} />
   </div>
 );
 
 const ComparisonChartControls = ({ chartId, isMobile }: { chartId: string; isMobile: boolean }) => isMobile
-  ? <ChartZoomControls chartId={chartId} />
+  ? <ChartZoomControls chartId={chartId} mobilePlatform={isMobile} />
   : <div className="v2-comparison-zoom-controls" role="group" aria-label="Controles de zoom de la gráfica">
       <button type="button" title="Acercar" aria-label="Acercar gráfica" onClick={() => updateChartZoom(chartId, 'in')}><ZoomIn size={15} /></button>
       <button type="button" title="Alejar" aria-label="Alejar gráfica" onClick={() => updateChartZoom(chartId, 'out')}><ZoomOut size={15} /></button>
@@ -986,6 +1063,14 @@ const MadridDashboardV2: React.FC = () => {
   const mapFeatureItem = selectedMapFeature
     ? [...mapData.districts, ...mapData.neighborhoods].find(item => [item.distrito, item.barrio].filter(Boolean).some(name => normalizeZoneLabel(String(name)) === normalizeZoneLabel(selectedMapFeature)))
     : null;
+  const mapFeaturePrimary = activeProfile.id === 'inversion'
+    ? mapFeatureItem?.rentabilidad ? `${(Number(mapFeatureItem.rentabilidad) * 100).toFixed(1)}%` : 'Sin dato'
+    : mapFeatureItem?.precio_m2 ? `${formatNumber(Number(mapFeatureItem.precio_m2), 1)} €/m²` : 'Sin dato';
+  const mapFeatureSecondary = activeProfile.id === 'inversion'
+    ? `Alquiler estimado ${mapFeatureItem?.precio_alquiler || mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_alquiler || mapFeatureItem.precio_vivienda), 0)} €/mes` : '—'}`
+    : activeProfile.id === 'alquiler'
+      ? `Alquiler medio ${mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_vivienda), 0)} €/mes` : '—'}`
+      : `Precio vivienda ${mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_vivienda), 0)} €` : '—'}`;
   const mapFeatureIsDistrict = Boolean(selectedMapFeature && mapData.districts.some(item => normalizeZoneLabel(String(item.distrito || '')) === normalizeZoneLabel(selectedMapFeature)));
   const mapFeatureRows = mapFeatureIsDistrict ? mapData.districts : mapData.neighborhoods;
   const mapFeatureRank = mapFeatureItem ? [...mapFeatureRows].sort((a, b) => Number(b.precio_m2 || 0) - Number(a.precio_m2 || 0)).findIndex(item => normalizeZoneLabel(String(mapFeatureIsDistrict ? item.distrito : item.barrio || '')) === normalizeZoneLabel(selectedMapFeature)) + 1 : 0;
@@ -3452,7 +3537,13 @@ const MadridDashboardV2: React.FC = () => {
                       }}>i</span>
                       <span>¿Cómo usar el mapa?</span>
                     </button>
-                    <FullscreenToggle targetSelector=".v2-map-card" mobileOnly />
+                    <FullscreenToggle targetSelector=".v2-map-card" mobileOnly mobilePlatform={isMobile} />
+                  </div>
+
+                  <div className="v2-map-fullscreen-info" aria-live="polite">
+                    {selectedMapFeature
+                      ? `${selectedMapFeature} · ${mapFeaturePrimary} · ${mapFeatureSecondary}`
+                      : 'Toca un distrito o barrio para ver sus datos'}
                   </div>
 
                   <div className="v2-mobile-map-switch" role="group" aria-label="Nivel del mapa">
@@ -3644,7 +3735,7 @@ const MadridDashboardV2: React.FC = () => {
                 <div className="v2-heatmap-card">
                   <div className="v2-heatmap-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
                     <span>{activeProfile.id === 'inversion' ? 'Evolución mensual de rentabilidad (%)' : activeProfile.id === 'alquiler' ? 'Evolución mensual del alquiler (€/m²)' : 'Evolución mensual de venta (€/m²)'}</span>
-                    <FullscreenToggle targetSelector=".v2-heatmap-card" />
+                    <FullscreenToggle targetSelector=".v2-heatmap-card" mobilePlatform={isMobile} />
                     <button
                       onClick={() => setShowHeatmapHelpModal(true)}
                       style={{

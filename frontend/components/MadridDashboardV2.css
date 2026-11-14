@@ -3676,3 +3676,39 @@ body.v2-fullscreen-open footer { display: none !important; }
   .v2-root .v2-explorer-nav .v2-level-switch { width: fit-content !important; height: 36px !important; gap: 2px !important; padding: 2px !important; border-radius: 999px !important; }
   .v2-root .v2-explorer-nav .v2-level-switch .v2-tab-btn { min-width: 76px !important; min-height: 30px !important; padding: 4px 11px !important; font-size: 11px !important; }
 }
+
+.v2-root .v2-map-fullscreen-info { display: none; }
+/* Mobile expanded views use the browser top layer, outside clipped dashboard cards. */
+@media (max-width: 768px), (pointer: coarse) and (max-height: 500px) {
+  .v2-root dialog.v2-fullscreen-dialog { position: fixed; inset: 0; width: 100vw; height: 100dvh; max-width: none; max-height: none; margin: 0; padding: 0; overflow: hidden; border: 0; background: #061426; color: #f3f8fc; }
+  .v2-root dialog.v2-fullscreen-dialog::backdrop { background: #061426; }
+  .v2-root dialog.v2-fullscreen-dialog[open] { display: block; }
+  .v2-root .v2-fullscreen-dialog-body { position: relative; width: 100%; height: 100%; min-width: 0; min-height: 0; overflow: hidden; }
+  .v2-root dialog.v2-fullscreen-dialog > .v2-fullscreen-dialog-body > .v2-in-dialog.v2-is-fullscreen { position: relative !important; inset: auto !important; z-index: 1 !important; width: 100% !important; height: 100dvh !important; max-height: 100dvh !important; padding: max(8px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(56px,calc(56px + env(safe-area-inset-bottom))) max(12px,env(safe-area-inset-left)) !important; overflow: hidden !important; border: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+  .v2-root .v2-fullscreen-chart-readout { position: fixed; top: max(104px,calc(env(safe-area-inset-top) + 98px)); left: max(12px,env(safe-area-inset-left)); right: max(12px,env(safe-area-inset-right)); z-index: 2147483600; max-height: 42px; overflow: hidden; padding: 6px 10px; border: 1px solid rgba(0,229,255,.22); border-radius: 10px; background: rgba(6,22,45,.94); color: #d8e7f1; font-size: 11px; line-height: 1.35; text-overflow: ellipsis; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper { grid-template-rows: 38px minmax(0,1fr) !important; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper .v2-compare-legend { position: fixed; top: max(48px,calc(env(safe-area-inset-top) + 42px)); left: max(12px,env(safe-area-inset-left)); right: max(12px,env(safe-area-inset-right)); z-index: 2147483599; display: flex !important; justify-content: flex-start; overflow-x: auto; scrollbar-width: none; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper .v2-compare-legend::-webkit-scrollbar { display: none; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper .v2-compare-legend .v2-series-chip { flex: 0 0 auto; min-height: 30px; font-size: 10px; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper .v2-chart-wrap.large { height: calc(100% - 160px) !important; margin-top: 160px !important; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper .v2-compare-legend::after { position: fixed; top: max(82px,calc(env(safe-area-inset-top) + 76px)); left: max(14px,env(safe-area-inset-left)); right: max(14px,env(safe-area-inset-right)); content: 'Continua: dato real · discontinua: estimación'; display: block; overflow: hidden; color: #9fb3c7; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper .v2-fullscreen-toolbar .v2-fullscreen-series { display: none; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card { padding-bottom: max(48px,calc(48px + env(safe-area-inset-bottom))) !important; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-header { min-height: 36px; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-data-status,
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-header > button:not(.v2-expand-button),
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-mobile-map-switch,
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-bottom-sheet { display: none !important; }
+  .v2-root .v2-map-fullscreen-info { display: none; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-fullscreen-info { display: block; min-width: 0; max-width: 100%; overflow: hidden; padding: 6px 9px; border: 1px solid rgba(0,229,255,.2); border-radius: 9px; color: #c7d8e5; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-dual-maps { height: calc(100dvh - 186px) !important; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-legend-labels { display: flex !important; flex-wrap: nowrap !important; justify-content: center; gap: 5px 9px; overflow: hidden; white-space: nowrap; font-size: 9px; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-legend-labels .no-data-label { display: inline-flex; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-legend small { display: none; }
+}
+
+@media (max-width: 768px) and (orientation: landscape) {
+  .v2-root .v2-fullscreen-chart-readout { top: max(92px,calc(env(safe-area-inset-top) + 86px)); max-height: 30px; padding-block: 4px; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper .v2-chart-wrap.large { height: calc(100% - 138px) !important; margin-top: 138px !important; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper .v2-compare-legend::after { top: max(70px,calc(env(safe-area-inset-top) + 64px)); font-size: 8px; }
+}

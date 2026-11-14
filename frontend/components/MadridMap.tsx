@@ -278,7 +278,8 @@ const MadridMap: React.FC<MapProps> = ({
   }, [data, selectedDistrict, selectedBarrio, type, selectedProfile, compareZoneA, compareZoneB]);
 
   useEffect(() => {
-    if (!mapRef.current) {
+    const initializeMap = () => {
+      if (mapRef.current) return;
       mapRef.current = L.map(containerId, {
         center: [40.440, -3.680],
         zoom: 11.0,
@@ -300,7 +301,8 @@ const MadridMap: React.FC<MapProps> = ({
       mapRef.current.scrollWheelZoom?.disable();
       mapRef.current.boxZoom?.disable();
       mapRef.current.keyboard?.disable();
-    }
+    };
+    initializeMap();
 
     const handleResize = () => {
       const map = mapRef.current;
@@ -338,6 +340,20 @@ const MadridMap: React.FC<MapProps> = ({
     const resizeObserver = new ResizeObserver(() => {
       handleResize();
     });
+
+    const redrawAfterFullscreenOpen = () => {
+      if (!container?.closest('dialog')) return;
+      window.requestAnimationFrame(() => {
+        // Recreate the Leaflet instance after a hidden panel enters the dialog.
+        // Some initial zero-size renders keep empty SVG paths after invalidateSize.
+        mapRef.current?.remove();
+        mapRef.current = null;
+        geoJsonLayerRef.current = null;
+        initializeMap();
+        window.setTimeout(() => { void loadGeoJson(); }, 40);
+      });
+    };
+    window.addEventListener('v2:fullscreen-open', redrawAfterFullscreenOpen);
 
     if (container) {
       resizeObserver.observe(container);
@@ -507,6 +523,7 @@ const MadridMap: React.FC<MapProps> = ({
 
     return () => {
       resizeObserver.disconnect();
+      window.removeEventListener('v2:fullscreen-open', redrawAfterFullscreenOpen);
     };
   }, [type, data, selectedProfile, selectedDistrict, selectedBarrio, containerId, selectedMonth, selectedYear, onDistrictClick, onBarrioClick, style, accentColor]);
 
