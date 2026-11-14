@@ -24,6 +24,8 @@ const initialValues: ContactValues = {
   privacy: false,
 };
 
+const reasons = ['Colaboración', 'Prensa y medios', 'Datos y metodología', 'Sugerencia o error'];
+
 function validate(values: ContactValues): FormErrors {
   const errors: FormErrors = {};
   if (!values.name.trim()) errors.name = 'Escribe tu nombre.';
@@ -105,15 +107,15 @@ export default function ContactForm() {
           <label htmlFor="contact-organization" className="contact-field__label">Organización <em>Opcional</em></label>
         </div>
 
-        <div className={`contact-field${errors.reason ? ' has-error' : ''}`}>
-          <select id="contact-reason" className="contact-field__control" name="reason" value={values.reason} onChange={event => update('reason', event.target.value)} aria-invalid={Boolean(errors.reason)} aria-describedby={errors.reason ? 'contact-reason-error' : undefined} required>
-            <option value="">Selecciona un motivo</option>
-            <option value="Colaboración">Colaboración</option>
-            <option value="Prensa y medios">Prensa y medios</option>
-            <option value="Datos y metodología">Datos y metodología</option>
-            <option value="Sugerencia o error">Sugerencia o error</option>
-          </select>
-          <label htmlFor="contact-reason" className="contact-field__label">Motivo <b>*</b></label>
+        <div className={`contact-field contact-field--full contact-reasons${errors.reason ? ' has-error' : ''}`} role="group" aria-labelledby="contact-reason-label" aria-describedby={errors.reason ? 'contact-reason-error' : undefined}>
+          <span id="contact-reason-label" className="contact-reasons__label">Motivo <b>*</b></span>
+          <div className="contact-reasons__chips">
+            {reasons.map(reason => (
+              <button key={reason} type="button" className="contact-reasons__chip" aria-pressed={values.reason === reason} onClick={() => update('reason', reason)}>
+                {reason}
+              </button>
+            ))}
+          </div>
           {errors.reason && <small id="contact-reason-error" className="contact-field__error">{errors.reason}</small>}
         </div>
 
@@ -125,14 +127,15 @@ export default function ContactForm() {
       </div>
 
       <label className="contact-privacy">
-        <input type="checkbox" checked={values.privacy} onChange={event => update('privacy', event.target.checked)} aria-invalid={Boolean(errors.privacy)} aria-describedby={errors.privacy ? 'contact-privacy-error' : undefined} />
+        <input className="contact-privacy__checkbox" type="checkbox" checked={values.privacy} onChange={event => update('privacy', event.target.checked)} aria-invalid={Boolean(errors.privacy)} aria-describedby={errors.privacy ? 'contact-privacy-error' : undefined} />
         <span>He leído la <Link href="/privacidad" target="_blank">Política de privacidad</Link> <b>*</b>.</span>
       </label>
       {errors.privacy && <small id="contact-privacy-error" className="contact-field__error contact-privacy__error">{errors.privacy}</small>}
 
       <button className="contact-form__submit" type="submit" disabled={status === 'sending'}>
-        {status === 'sending' ? 'Enviando…' : status === 'error' ? 'Reintentar envío' : 'Enviar mensaje'}
+        {status === 'sending' ? 'Enviando…' : status === 'error' ? 'Reintentar envío ↗' : 'Enviar mensaje ↗'}
       </button>
+      <p className="contact-form__privacy-note">Tus datos se usarán únicamente para gestionar y responder tu consulta. Consulta la <Link href="/privacidad" target="_blank">Política de privacidad</Link>.</p>
 
       <div className="contact-form__status" aria-live="polite" role="status">
         {status === 'sent' && <p className="is-success">Hemos recibido tu mensaje. Gracias por escribirnos.</p>}
