@@ -1,6 +1,12 @@
 /* ==========================================================================
    SITE HEADER UNIFICADO (Idéntico a MadridLanding en todas las páginas)
    ========================================================================== */
+:root {
+  --page-max: 1600px;
+  --page-gutter: 24px;
+  --page-content-max: calc(var(--page-max) - 2 * var(--page-gutter));
+}
+
 .site-header,
 .mi-header {
   position: sticky;
@@ -930,4 +936,24 @@ main.editorial-page:not(.editorial-page--methodology) { padding-bottom: 40px !im
   .auros-footer__nav { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 18px; width: 100%; }
   .auros-footer__nav a { font-size: 12px !important; }
   .editorial-page + .auros-footer { margin-top: 24px !important; padding-top: 28px !important; }
+}
+
+/* Shared desktop alignment grid for DMIYC dashboard and site pages. */
+@media (min-width: 1201px) {
+  .site-header, .mi-header {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 32px;
+    padding-inline: max(var(--page-gutter), calc((100vw - var(--page-max)) / 2 + var(--page-gutter)));
+  }
+
+  .site-header .site-brand,
+  .mi-header .mi-brand { justify-self: start; }
+  .site-header .site-navigation,
+  .mi-header .site-navigation { justify-self: center; }
+  .site-header .mi-header__cta,
+  .mi-header .mi-header__cta { justify-self: end; }
+
+  .auros-footer__inner {
+    width: min(var(--page-content-max), calc(100% - 2 * var(--page-gutter)));
+  }
 }

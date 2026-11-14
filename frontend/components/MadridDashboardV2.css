@@ -3945,3 +3945,33 @@ body.v2-fullscreen-open footer { display: none !important; }
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper .v2-chart-wrap.large { height: calc(100% - 138px) !important; margin-top: 138px !important; }
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper .v2-compare-legend::after { top: max(70px,calc(env(safe-area-inset-top) + 64px)); font-size: 8px; }
 }
+
+/* Paso 8: one desktop content grid shared by chrome, filters and dashboard sections. */
+@media (min-width: 1201px) {
+  .v2-root .v2-viewport {
+    width: 100%;
+    max-width: var(--page-max);
+  }
+
+  .v2-root .v2-panel {
+    padding-inline: var(--page-gutter) !important;
+  }
+
+  .v2-root .v2-filter-group {
+    width: 100%;
+    max-width: var(--page-max);
+    margin-inline: auto;
+    padding-inline: var(--page-gutter);
+    box-sizing: border-box;
+    align-items: center;
+  }
+
+  .v2-root .v2-filter-actions { align-items: center; }
+  .v2-root .v2-map-card { padding: 26px; }
+  .v2-root .v2-map-header > .v2-map-help-button { margin-left: auto; }
+  .v2-root .v2-explorer-grid { padding-inline: 28px; }
+  .v2-root .v2-explorer-header { margin-inline: -28px; }
+  .v2-root .v2-compare-section { width: 100%; }
+  .v2-root .v2-compare-desktop-toolbar { margin-left: auto; }
+  .v2-root .v2-kpi-stack { gap: 16px; }
+}
