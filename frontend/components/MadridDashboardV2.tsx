@@ -341,6 +341,28 @@ const ComparisonChartControls = ({ chartId, isMobile }: { chartId: string; isMob
       <button type="button" title="Restablecer zoom" aria-label="Restablecer zoom de la gráfica" onClick={() => updateChartZoom(chartId, 'reset')}><RotateCcw size={14} /></button>
     </div>;
 
+const ComparisonLineLegend = ({ chartId, zone, color }: { chartId: string; zone: string; color: string }) => {
+  const [, setRevision] = useState(0);
+  const series = [
+    { index: 0, label: 'Media Madrid', kind: 'madrid' },
+    { index: 1, label: `${zone} · Dato real`, kind: 'real' },
+    { index: 2, label: `${zone} · Estimación`, kind: 'estimated' },
+  ];
+  return <div className="v2-comparison-line-legend" aria-label={`Leyenda de ${zone}`}>
+    {series.map(item => {
+      const chart = ChartJS.getChart(chartId) as any;
+      const visible = chart ? chart.isDatasetVisible(item.index) : true;
+      const lineColor = item.kind === 'madrid' ? '#dce8f2' : color;
+      return <button key={item.index} type="button" aria-pressed={visible} onClick={() => {
+        if (!chart) return;
+        chart.setDatasetVisibility(item.index, !visible);
+        chart.update('none');
+        setRevision(value => value + 1);
+      }}><i className={`line-${item.kind}`} style={{ borderColor: lineColor }} />{item.label}</button>;
+    })}
+  </div>;
+};
+
 const ComparisonSeriesChips = ({ chartId, zoneA, zoneB }: { chartId: string; zoneA: string; zoneB: string }) => {
   const [, setRevision] = useState(0);
   const groups = [
@@ -1729,7 +1751,7 @@ const MadridDashboardV2: React.FC = () => {
               layout: { padding: { top: 15, right: 30, bottom: 20, left: 0 } },
               plugins: {
                 legend: {
-                  display: true,
+                  display: isMobile,
                   position: 'top',
                   align: 'end',
                   labels: {
@@ -4149,7 +4171,7 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneA}
                       </div>
-                      <div className="v2-chart-wrap">{comparisonAHasData ? <><ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={isMobile} /><canvas id={`v2-chartA-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />}</div>
+                      <div className="v2-chart-wrap">{comparisonAHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonLineLegend chartId={`v2-chartA-${p.id}`} zone={selectedZoneA} color={COMPARISON_COLORS.zoneA} /><ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartA-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />}</div>
                     </div>
                     {(() => {
                       if (!comparisonAHasData) return null;
@@ -4373,7 +4395,7 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneB}
                       </div>
-                      <div className="v2-chart-wrap">{comparisonBHasData ? <><ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={isMobile} /><canvas id={`v2-chartB-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />}</div>
+                      <div className="v2-chart-wrap">{comparisonBHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonLineLegend chartId={`v2-chartB-${p.id}`} zone={selectedZoneB} color={COMPARISON_COLORS.zoneB} /><ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartB-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />}</div>
                     </div>
                     {(() => {
                       if (!comparisonBHasData) return null;

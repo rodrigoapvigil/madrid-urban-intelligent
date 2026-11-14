@@ -3790,6 +3790,19 @@ body.v2-fullscreen-open footer { display: none !important; }
 
 /* Desktop-only ranking readability; mobile keeps its existing compact rows. */
 @media (min-width: 769px) and (hover: hover) {
+  .v2-root .v2-comparison-chart-meta { display: flex; flex: 0 0 auto; flex-direction: column; align-items: stretch; gap: 6px; }
+  .v2-root .v2-comparison-line-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; min-height: 24px; }
+  .v2-root .v2-comparison-line-legend button { display: inline-flex; align-items: center; gap: 7px; padding: 2px 0; border: 0; background: transparent; color: #eaf5ff; font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .v2-root .v2-comparison-line-legend button[aria-pressed="false"] { opacity: .42; }
+  .v2-root .v2-comparison-line-legend i { display: inline-block; width: 22px; height: 0; border-top: 3px solid; }
+  .v2-root .v2-comparison-line-legend i.line-estimated { border-top-style: dashed; }
+  .v2-root .v2-comparison-line-legend i.line-madrid { border-top-style: dotted; }
+  .v2-root .v2-comparison-zoom-controls { display: flex; justify-content: flex-end; align-self: flex-end; gap: 4px; }
+  .v2-root .v2-comparison-zoom-controls button { display: inline-flex; width: 34px; height: 30px; align-items: center; justify-content: center; padding: 0; border: 1px solid rgba(186,204,214,.18); border-radius: 8px; background: rgba(255,255,255,.04); color: #c8d8e6; cursor: pointer; }
+  .v2-root .v2-comparison-zoom-controls button:hover { background: rgba(0,229,255,.12); color: #00e5ff; }
+  .v2-root .v2-compare-grid .v2-chart-wrap { display: flex; flex-direction: column; gap: 8px; height: 460px; margin-top: 0; }
+  .v2-root .v2-compare-grid .v2-chart-wrap > canvas { flex: 1 1 auto; height: 0 !important; min-height: 0; }
+
   .v2-root .v2-map-card { padding: 18px !important; gap: 6px; }
   .v2-root .v2-dual-maps { gap: 16px; margin-top: 4px; min-height: 600px; }
   .v2-root .v2-map-sub > span { display: none !important; }
