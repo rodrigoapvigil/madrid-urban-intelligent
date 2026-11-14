@@ -12,10 +12,13 @@ interface MapProps {
   selectedProfile: string;
   selectedDistrict: string | null;
   selectedBarrio?: string | null;
+  selectedZone?: string | null;
+  drillDownOnSelection?: boolean;
   compareZoneA?: string;
   compareZoneB?: string;
   onDistrictClick: (districtName: string | null) => void;
   onBarrioClick?: (barrioName: string | null) => void;
+  onZoneHover?: (zoneName: string | null) => void;
 }
 
 const normalize = (str: string) => {
@@ -220,13 +223,16 @@ let cachedBarriosGeoJson: any = null;
 
 const MadridMap: React.FC<MapProps> = ({ 
   type, data, selectedYear, selectedMonth, selectedProfile, 
-  selectedDistrict, selectedBarrio, compareZoneA, compareZoneB, onDistrictClick, onBarrioClick
+  selectedDistrict, selectedBarrio, selectedZone = null, drillDownOnSelection = true, compareZoneA, compareZoneB, onDistrictClick, onBarrioClick, onZoneHover
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
+  const onZoneHoverRef = useRef(onZoneHover);
+  const hasInitialViewRef = useRef(false);
   const containerId = useRef(`map-${type}-${Math.random().toString(36).slice(2, 11)}`).current;
   const accentColor = getProfileAccentColor(selectedProfile);
   const profileKey = getProfileKey(selectedProfile);
+  onZoneHoverRef.current = onZoneHover;
 
   useEffect(() => () => {
     mapRef.current?.remove();
@@ -249,9 +255,9 @@ const MadridMap: React.FC<MapProps> = ({
       }
     }
 
-    const isSelected = type === 'districts'
+    const isSelected = Boolean(selectedZone && normalize(name) === normalize(selectedZone)) || (type === 'districts'
       ? Boolean(selectedDistrict && normalize(name) === normalize(selectedDistrict))
-      : Boolean(selectedBarrio && normalize(name) === normalize(selectedBarrio));
+      : Boolean(selectedBarrio && normalize(name) === normalize(selectedBarrio)));
     const isCompareA = Boolean(compareZoneA && normalize(name) === normalize(compareZoneA));
     const isCompareB = Boolean(compareZoneB && normalize(name) === normalize(compareZoneB));
 
@@ -275,7 +281,7 @@ const MadridMap: React.FC<MapProps> = ({
       color: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
       fillOpacity: isExcluded ? 0.25 : 1.0,
     };
-  }, [data, selectedDistrict, selectedBarrio, type, selectedProfile, compareZoneA, compareZoneB]);
+  }, [data, selectedDistrict, selectedBarrio, selectedZone, type, selectedProfile, compareZoneA, compareZoneB]);
 
   useEffect(() => {
     const initializeMap = () => {
@@ -349,6 +355,7 @@ const MadridMap: React.FC<MapProps> = ({
         mapRef.current?.remove();
         mapRef.current = null;
         geoJsonLayerRef.current = null;
+        hasInitialViewRef.current = false;
         initializeMap();
         window.setTimeout(() => { void loadGeoJson(); }, 40);
       });
@@ -434,23 +441,10 @@ const MadridMap: React.FC<MapProps> = ({
           popupContent += `</div>`;
           
           const hasHoverPointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-          if (hasHoverPointer) {
-            layer.bindPopup(popupContent, {
-              className: 'apple-popup',
-              closeButton: true,
-              offset: L.point(0, -10),
-              autoPan: true,
-              keepInView: true,
-              autoPanPaddingTopLeft: L.point(24, 24),
-              autoPanPaddingBottomRight: L.point(24, 24),
-              maxWidth: 320,
-              minWidth: 220
-            });
-          }
-          
           layer.on({
             mouseover: (e) => {
               if (!hasHoverPointer) return;
+              onZoneHoverRef.current?.(name);
               const l = e.target;
               l.setStyle({
                 weight: 2,
@@ -458,12 +452,11 @@ const MadridMap: React.FC<MapProps> = ({
                 fillColor: '#00F0FF',
                 fillOpacity: 1
               });
-              l.openPopup();
             },
             mouseout: (e) => {
               if (hasHoverPointer) {
+                onZoneHoverRef.current?.(null);
                 geoJsonLayerRef.current?.resetStyle(e.target);
-                e.target.closePopup();
               }
             },
             click: () => {
@@ -482,7 +475,7 @@ const MadridMap: React.FC<MapProps> = ({
       injectPatternsIntoLeaflet(mapRef.current, containerId);
 
       // Zoom logic
-      if (selectedBarrio && type === 'neighborhoods') {
+      if (drillDownOnSelection && selectedBarrio && type === 'neighborhoods') {
         const bounds = L.latLngBounds([]);
         geoJsonLayerRef.current.eachLayer((layer: any) => {
           const props = layer.feature.properties;
@@ -494,7 +487,7 @@ const MadridMap: React.FC<MapProps> = ({
         if (bounds.isValid()) {
           mapRef.current?.flyToBounds(bounds, { padding: [40, 40], duration: 1.5 });
         }
-      } else if (selectedDistrict) {
+      } else if (drillDownOnSelection && selectedDistrict) {
         const bounds = L.latLngBounds([]);
         geoJsonLayerRef.current.eachLayer((layer: any) => {
           const props = layer.feature.properties;
@@ -506,7 +499,7 @@ const MadridMap: React.FC<MapProps> = ({
         if (bounds.isValid()) {
           mapRef.current?.flyToBounds(bounds, { padding: [20, 20], duration: 1.5 });
         }
-      } else {
+      } else if (!hasInitialViewRef.current) {
         if (type === 'districts') {
           const urbanBounds = L.latLngBounds([40.285, -3.890], [40.640, -3.470]);
           mapRef.current?.flyToBounds(urbanBounds, { padding: [20, 15], duration: 1 });
@@ -516,6 +509,7 @@ const MadridMap: React.FC<MapProps> = ({
             mapRef.current?.flyToBounds(bounds, { padding: [10, 10], duration: 1 });
           }
         }
+        hasInitialViewRef.current = true;
       }
     };
 
@@ -525,7 +519,7 @@ const MadridMap: React.FC<MapProps> = ({
       resizeObserver.disconnect();
       window.removeEventListener('v2:fullscreen-open', redrawAfterFullscreenOpen);
     };
-  }, [type, data, selectedProfile, selectedDistrict, selectedBarrio, containerId, selectedMonth, selectedYear, onDistrictClick, onBarrioClick, style, accentColor]);
+  }, [type, data, selectedProfile, selectedDistrict, selectedBarrio, selectedZone, drillDownOnSelection, containerId, selectedMonth, selectedYear, onDistrictClick, onBarrioClick, style, accentColor]);
 
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%', minWidth: 0, minHeight: 0, borderRadius: '12px', overflow: 'hidden', background: 'transparent', border: 0 }}>

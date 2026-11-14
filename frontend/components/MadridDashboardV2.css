@@ -3698,7 +3698,8 @@ body.v2-fullscreen-open footer { display: none !important; }
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-data-status,
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-header > button:not(.v2-expand-button),
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-mobile-map-switch,
-  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-bottom-sheet { display: none !important; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-bottom-sheet,
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .zona-panel-movil { display: none !important; }
   .v2-root .v2-map-fullscreen-info { display: none; }
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-fullscreen-info { display: block; min-width: 0; max-width: 100%; overflow: hidden; padding: 6px 9px; border: 1px solid rgba(0,229,255,.2); border-radius: 9px; color: #c7d8e5; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-dual-maps { height: calc(100dvh - 186px) !important; }
