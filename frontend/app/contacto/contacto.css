@@ -64,6 +64,18 @@
   gap: 20px 16px;
 }
 
+.contact-form__trap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .contact-field { display: flex; min-width: 0; flex-direction: column; gap: 8px; }
 .contact-field--full { grid-column: 1 / -1; }
 .contact-field > span { color: #dbe8f1; font-size: 13px; font-weight: 650; }

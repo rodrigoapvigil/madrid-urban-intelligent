@@ -48,6 +48,8 @@ export default function ContactForm() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
+    const honeypot = (new FormData(form).get('website') as string | null)?.trim() ?? '';
     const nextErrors = validate(values);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) {
@@ -67,6 +69,7 @@ export default function ContactForm() {
           reason: values.reason,
           message: values.message.trim(),
           privacyAccepted: values.privacy,
+          website: honeypot,
         }),
       });
       if (!response.ok) throw new Error('No se pudo enviar el mensaje.');
@@ -80,6 +83,10 @@ export default function ContactForm() {
 
   return (
     <form className="contact-form" onSubmit={submit} noValidate>
+      <div className="contact-form__trap" aria-hidden="true">
+        <label htmlFor="contact-website">Deja este campo vacío</label>
+        <input id="contact-website" type="text" name="website" tabIndex={-1} autoComplete="off" />
+      </div>
       <div className="contact-form__grid">
         <label className="contact-field">
           <span>Nombre <b>*</b></span>
