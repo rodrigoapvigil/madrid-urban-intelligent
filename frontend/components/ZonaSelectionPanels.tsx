@@ -12,6 +12,9 @@ type ZonaPanelProps = {
   delta?: string | null;
   onClose?: () => void;
   children?: React.ReactNode;
+  zoneType?: 'DISTRITO' | 'BARRIO';
+  noData?: boolean;
+  projectionWithoutHistory?: boolean;
 };
 
 type DesktopCardPosition = {
@@ -26,7 +29,15 @@ type DesktopZonaPanelProps = ZonaPanelProps & {
   style?: React.CSSProperties;
 };
 
-export function FichaZonaDesktop({ zone, rank, primaryLabel, primaryValue, secondaryLabel, secondaryValue, delta, onClose, zoneType, position, pinned, style }: DesktopZonaPanelProps) {
+function AvisoSinDatosDesktop({ projectionWithoutHistory }: { projectionWithoutHistory?: boolean }) {
+  return <div className="zona-panel-no-data"><h3>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</h3><p>El Ayuntamiento de Madrid no publica datos de alquiler para esta zona. Preferimos no inventarlos.</p>{projectionWithoutHistory && <p>No hay base suficiente para proyectar esta zona, y no aproximamos valores sin datos.</p>}</div>;
+}
+
+function AvisoSinDatosMovil({ zoneType = 'BARRIO', zone, projectionWithoutHistory }: { zoneType?: 'DISTRITO' | 'BARRIO'; zone: string; projectionWithoutHistory?: boolean }) {
+  return <div className="zona-panel-no-data"><span className="zona-panel-kind">{zoneType}</span><strong>{zone}</strong><h3>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</h3><p>El Ayuntamiento de Madrid no publica datos de alquiler para esta zona. Preferimos no inventarlos.</p>{projectionWithoutHistory && <p>No hay base suficiente para proyectar esta zona, y no aproximamos valores sin datos.</p>}</div>;
+}
+
+export function FichaZonaDesktop({ zone, rank, primaryLabel, primaryValue, secondaryLabel, secondaryValue, delta, onClose, zoneType, position, pinned, style, noData, projectionWithoutHistory }: DesktopZonaPanelProps & Pick<ZonaPanelProps, 'noData' | 'projectionWithoutHistory'>) {
   const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
   useEffect(() => setMounted(true), []);
@@ -51,23 +62,23 @@ export function FichaZonaDesktop({ zone, rank, primaryLabel, primaryValue, secon
   if (!mounted || typeof document === 'undefined' || !position) return null;
   return createPortal(<aside ref={panelRef} className="zona-panel zona-panel-desktop" style={style} role="status" aria-live="polite">
     <div className="zona-panel-top"><div className="zona-panel-heading"><span className="zona-panel-kind">{zoneType}</span><strong>{zone}</strong>{rank && <span>{rank}</span>}</div>{pinned && <button type="button" className="zona-panel-close" aria-label="Quitar zona seleccionada" onClick={onClose}>×</button>}</div>
-    <dl>
+    {noData ? <AvisoSinDatosDesktop projectionWithoutHistory={projectionWithoutHistory} /> : <><dl>
       <div><dt>{primaryLabel}</dt><dd>{primaryValue}</dd></div>
       <div><dt>{secondaryLabel}</dt><dd>{secondaryValue}</dd></div>
     </dl>
-    {delta && <p>{delta}</p>}
+    {delta && <p>{delta}</p>}</>}
   </aside>, document.body);
 }
 
-export function FichaZonaMovil({ zone, rank, primaryLabel, primaryValue, secondaryLabel, secondaryValue, delta, onClose, children }: ZonaPanelProps) {
+export function FichaZonaMovil({ zone, rank, primaryLabel, primaryValue, secondaryLabel, secondaryValue, delta, onClose, children, zoneType, noData, projectionWithoutHistory }: ZonaPanelProps) {
   return <aside className="zona-panel zona-panel-movil" role="status" aria-live="polite">
     <button type="button" className="zona-panel-close" aria-label="Cerrar ficha de zona" onClick={onClose}>×</button>
-    <div className="zona-panel-heading"><strong>{zone}</strong>{rank && <span>{rank}</span>}</div>
-    <dl>
+    {!noData && <div className="zona-panel-heading"><strong>{zone}</strong>{rank && <span>{rank}</span>}</div>}
+    {noData ? <AvisoSinDatosMovil zoneType={zoneType} zone={zone} projectionWithoutHistory={projectionWithoutHistory} /> : <dl>
       <div><dt>{primaryLabel}</dt><dd>{primaryValue}</dd></div>
       <div><dt>{secondaryLabel}</dt><dd>{secondaryValue}</dd></div>
-    </dl>
-    {delta && <p>{delta}</p>}
-    {children}
+    </dl>}
+    {!noData && delta && <p>{delta}</p>}
+    {!noData && children}
   </aside>;
 }

@@ -33,6 +33,24 @@ def _get_predictions_df():
             return pd.DataFrame()
     return pd.DataFrame()
 
+
+def _keep_predictions_for_observed_zones(pred_df, op, conn):
+    """Discard forecasts for zones that have no real observation for this operation."""
+    if pred_df is None or pred_df.empty:
+        return pd.DataFrame() if pred_df is None else pred_df
+    observed = pd.read_sql(
+        "SELECT DISTINCT id_distrito, id_barrio FROM Fact_Operacion WHERE tipo_operacion = ?",
+        conn,
+        params=[_clean_op(op)],
+    )
+    if observed.empty:
+        return pred_df.iloc[0:0].copy()
+    observed_districts = set(observed['id_distrito'].dropna().astype(int))
+    observed_neighborhoods = set(observed.loc[observed['id_barrio'] != -1, 'id_barrio'].dropna().astype(int))
+    district_rows = pred_df['id_barrio'].eq(-1) & pred_df['id_distrito'].isin(observed_districts)
+    neighborhood_rows = pred_df['id_barrio'].ne(-1) & pred_df['id_barrio'].isin(observed_neighborhoods)
+    return pred_df[district_rows | neighborhood_rows].copy()
+
 # ── Ruta al CSV de Transacciones ─────────────────────────────────────────────
 TRANSACTIONS_CSV_PATH = os.path.normpath(os.path.join(_ROOT_DIR, '..', '02_fuente_operativa_modelo', 'transactions_clean.csv'))
 _transactions_df = None
@@ -292,7 +310,7 @@ def get_map_data(anio: int, mes: str, interest: str = "Compra-venta"):
         df_barrio = pd.read_sql(q_barrio, conn, params=[anio_int, month_id, op_base])
 
         if df_barrio.empty and anio >= 2026:
-            pred_df = _get_predictions_df()
+            pred_df = _keep_predictions_for_observed_zones(_get_predictions_df(), op_base, conn)
             if not pred_df.empty:
                 filtered_pred = pred_df[(pred_df['anio'] == anio) & (pred_df['mes'] == month_id) & (pred_df['tipo_operacion'] == op_base)]
                 
@@ -339,7 +357,7 @@ def get_map_data(anio: int, mes: str, interest: str = "Compra-venta"):
 
         # Query DISTRITOS
         if anio >= 2026:
-            pred_df = _get_predictions_df()
+            pred_df = _keep_predictions_for_observed_zones(_get_predictions_df(), op_base, conn)
             if not pred_df.empty:
                 filtered_pred = pred_df[(pred_df['anio'] == anio) & (pred_df['mes'] == month_id) & (pred_df['tipo_operacion'] == op_base) & (pred_df['id_barrio'] == -1)]
                 df_dist_names = pd.read_sql("SELECT id_distrito, nombre as distrito, superficie_media_vivienda, renta_media_hogar FROM Dim_Distrito WHERE id_distrito != -1", conn)
@@ -564,7 +582,7 @@ def get_kpi_data(anio: int, mes: str, op: str, distrito: str = "Todos", barrio: 
         is_pred = False
         if (res_df.empty or res_df.iloc[0]['p_m2'] is None) and anio >= 2023:
             is_pred = True
-            pred_df = _get_predictions_df()
+            pred_df = _keep_predictions_for_observed_zones(_get_predictions_df(), real_op, conn)
             if not pred_df.empty:
                 avg_p_m2 = 0.0
                 avg_sup = 90.0
@@ -806,10 +824,10 @@ def get_monthly_series(anio: int, op: str, zona_nombre: str,
 
         # 2. Obtener Predicciones desde CSV
         if op_l == "inversion":
-            pred_df = _get_predictions_df()
-            if not pred_df.empty:
-                df_alq = pred_df[pred_df['tipo_operacion'] == 'alquiler']
-                df_vta = pred_df[pred_df['tipo_operacion'] == 'venta']
+            all_predictions = _get_predictions_df()
+            df_alq = _keep_predictions_for_observed_zones(all_predictions[all_predictions['tipo_operacion'] == 'alquiler'], 'alquiler', conn) if not all_predictions.empty else all_predictions
+            df_vta = _keep_predictions_for_observed_zones(all_predictions[all_predictions['tipo_operacion'] == 'venta'], 'venta', conn) if not all_predictions.empty else all_predictions
+            if not df_alq.empty and not df_vta.empty:
                 df_merged = pd.merge(df_alq, df_vta, on=['id_distrito', 'id_barrio', 'anio', 'mes'], suffixes=('_alq', '_vta'))
                 df_merged['precio_m2_predicho'] = (df_merged['precio_m2_predicho_alq'] * 12) / df_merged['precio_m2_predicho_vta']
                 
@@ -826,7 +844,7 @@ def get_monthly_series(anio: int, op: str, zona_nombre: str,
             else:
                 df_pred = pd.DataFrame(columns=['mes', 'precio_m2'])
         elif zona_tipo == "barrio":
-            pred_df = _get_predictions_df()
+            pred_df = _keep_predictions_for_observed_zones(_get_predictions_df(), real_op, conn)
             if not pred_df.empty:
                 df_barr_names = pd.read_sql("SELECT id_barrio, nombre FROM Dim_Barrio WHERE id_barrio != -1", conn)
                 df_pred_b = pd.merge(pred_df, df_barr_names, on='id_barrio', how='inner')
@@ -835,7 +853,7 @@ def get_monthly_series(anio: int, op: str, zona_nombre: str,
             else:
                 df_pred = pd.DataFrame(columns=['mes', 'precio_m2'])
         else:
-            pred_df = _get_predictions_df()
+            pred_df = _keep_predictions_for_observed_zones(_get_predictions_df(), real_op, conn)
             if not pred_df.empty:
                 df_dist_names = pd.read_sql("SELECT id_distrito, nombre FROM Dim_Distrito WHERE id_distrito != -1", conn)
                 df_pred_d = pd.merge(pred_df, df_dist_names, on='id_distrito', how='inner')
@@ -968,10 +986,10 @@ def get_madrid_average_series(anio: int, op: str) -> pd.DataFrame:
 
         # 2. Predicción desde CSV
         if op_l == "inversion":
-            pred_df = _get_predictions_df()
-            if not pred_df.empty:
-                df_alq = pred_df[pred_df['tipo_operacion'] == 'alquiler']
-                df_vta = pred_df[pred_df['tipo_operacion'] == 'venta']
+            all_predictions = _get_predictions_df()
+            df_alq = _keep_predictions_for_observed_zones(all_predictions[all_predictions['tipo_operacion'] == 'alquiler'], 'alquiler', conn) if not all_predictions.empty else all_predictions
+            df_vta = _keep_predictions_for_observed_zones(all_predictions[all_predictions['tipo_operacion'] == 'venta'], 'venta', conn) if not all_predictions.empty else all_predictions
+            if not df_alq.empty and not df_vta.empty:
                 df_merged = pd.merge(df_alq, df_vta, on=['id_distrito', 'id_barrio', 'anio', 'mes'], suffixes=('_alq', '_vta'))
                 df_merged['precio_m2_predicho'] = (df_merged['precio_m2_predicho_alq'] * 12) / df_merged['precio_m2_predicho_vta']
                 
@@ -980,7 +998,7 @@ def get_madrid_average_series(anio: int, op: str) -> pd.DataFrame:
             else:
                 df_pred = pd.DataFrame(columns=['mes', 'precio_m2'])
         else:
-            pred_df = _get_predictions_df()
+            pred_df = _keep_predictions_for_observed_zones(_get_predictions_df(), op_l, conn)
             if not pred_df.empty:
                 filtered = pred_df[(pred_df['anio'] == anio) & (pred_df['tipo_operacion'] == op_l) & (pred_df['id_barrio'] != -1)]
                 df_pred = filtered.groupby('mes')['precio_m2_predicho'].mean().reset_index().rename(columns={'precio_m2_predicho': 'precio_m2'}).sort_values('mes')
@@ -1085,7 +1103,14 @@ def get_rankings(anio: int, mes: str, op: str, level: str = "barrio", category: 
         
         # FALLBACK A PREDICCIONES
         if df.empty and anio >= 2026:
-            pred_df = _get_predictions_df()
+            all_predictions = _get_predictions_df()
+            if category == "Rentabilidad" and not all_predictions.empty:
+                pred_df = pd.concat([
+                    _keep_predictions_for_observed_zones(all_predictions[all_predictions['tipo_operacion'] == 'alquiler'], 'alquiler', conn),
+                    _keep_predictions_for_observed_zones(all_predictions[all_predictions['tipo_operacion'] == 'venta'], 'venta', conn),
+                ])
+            else:
+                pred_df = _keep_predictions_for_observed_zones(all_predictions, real_op, conn)
             if not pred_df.empty:
                 if category == "Rentabilidad":
                     # Para Rentabilidad, calculamos a partir de alquiler y venta
@@ -1149,6 +1174,9 @@ def get_rankings(anio: int, mes: str, op: str, level: str = "barrio", category: 
                 # Para porcentajes o índices 0-100, usamos el valor directamente como score
                 df['score'] = df['value'].clip(0, 100).fillna(50)
 
+            # Zonas sin una métrica observada no forman parte del ranking.
+            df = df[pd.to_numeric(df['value'], errors='coerce').gt(0)]
+
             # Rellenar cualquier otro NaN que pudiera existir en cualquier columna (por ejemplo, score)
             df = df.fillna(0.0)
 
@@ -1171,7 +1199,7 @@ def get_predictions(zona_nombre: str, zona_tipo: str = "barrio", op: str = "vent
     conn = _conn()
     op_l = _clean_op(op)
     try:
-        pred_df = _get_predictions_df()
+        pred_df = _keep_predictions_for_observed_zones(_get_predictions_df(), op_l, conn)
         if pred_df.empty:
             return pd.DataFrame()
             
@@ -1248,7 +1276,14 @@ def get_heatmap_data(year: int, op: str, level: str = "distrito"):
             
         # FALLBACK A PREDICCIONES
         if int(year) >= 2026:
-            pred_df = _get_predictions_df()
+            all_predictions = _get_predictions_df()
+            if op_l == 'inversion' and not all_predictions.empty:
+                pred_df = pd.concat([
+                    _keep_predictions_for_observed_zones(all_predictions[all_predictions['tipo_operacion'] == 'alquiler'], 'alquiler', conn),
+                    _keep_predictions_for_observed_zones(all_predictions[all_predictions['tipo_operacion'] == 'venta'], 'venta', conn),
+                ])
+            else:
+                pred_df = _keep_predictions_for_observed_zones(all_predictions, real_op, conn)
             if not pred_df.empty:
                 if op_l == 'inversion':
                     # Para inversión, calculamos la rentabilidad a partir de alquiler y venta
@@ -1328,7 +1363,7 @@ def get_affordability_data(anio: int, mes: str, op: str) -> pd.DataFrame:
         df = pd.read_sql(q, conn, params=[int(anio), int(month_id), real_op])
         if df.empty or df['ticket_medio'].isnull().all():
             # Fallback to predictions
-            pred_df = _get_predictions_df()
+            pred_df = _keep_predictions_for_observed_zones(_get_predictions_df(), real_op, conn)
             if not pred_df.empty:
                 filtered_pred = pred_df[(pred_df['anio'] == anio) & (pred_df['mes'] == month_id) & (pred_df['tipo_operacion'] == real_op)]
                 df_dist_names = pd.read_sql("SELECT id_distrito, nombre as distrito, renta_media_hogar as renta_anual, superficie_media_vivienda FROM Dim_Distrito WHERE id_distrito != -1", conn)

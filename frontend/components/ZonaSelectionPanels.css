@@ -14,6 +14,9 @@
 .zona-panel dt { color: #9fb3c7; font-size: 11px; }
 .zona-panel dd { margin: 0; color: #eaf5ff; font-size: 13px; font-weight: 700; text-align: right; }
 .zona-panel > p { margin: 10px 0 0; color: #00e5ff; font-size: 11px; font-weight: 700; }
+.zona-panel-no-data { display: grid; gap: 7px; margin-top: 10px; }
+.zona-panel-no-data h3 { margin: 0; color: #fff; font-size: 14px; }
+.zona-panel-no-data p { margin: 0; color: #c4d5e4; font-size: 12px; line-height: 1.45; }
 
 .zona-panel-desktop { position: fixed; top: 0; left: 0; z-index: 2147482000; width: 260px; max-width: calc(100vw - 16px); padding: 12px; border-radius: 14px; pointer-events: none; visibility: hidden; will-change: transform; }
 .zona-panel-desktop .zona-panel-kind { width: fit-content; color: #00e5ff; font-size: 9px; font-weight: 800; letter-spacing: .08em; }

@@ -284,6 +284,14 @@ for _, row in df_transactions_future.iterrows():
 
 # Lista para guardar los registros resultantes
 predictions_list = []
+observed_districts_by_op = {
+    op: set(df_history.loc[df_history['tipo_operacion'] == op, 'id_distrito'].dropna().astype(int))
+    for op in ('venta', 'alquiler')
+}
+observed_neighborhoods_by_op = {
+    op: set(df_history.loc[df_history['tipo_operacion'] == op, 'id_barrio'].dropna().astype(int))
+    for op in ('venta', 'alquiler')
+}
 
 future_periods = []
 for m in range(1, 13):
@@ -300,6 +308,8 @@ for y, m in future_periods:
         # A. PREDICCIÓN DE DISTRITO
         for _, d_row in dim_distrito.iterrows():
             d_id = int(d_row['id_distrito'])
+            if d_id not in observed_districts_by_op[op]:
+                continue
             lag_1, lag_3, lag_12, rolling_mean_6 = compute_lags(-1, d_id, op, y, m)
             
             static = distrito_static_info[d_id]
@@ -339,6 +349,8 @@ for y, m in future_periods:
         for _, b_row in dim_barrio.iterrows():
             b_id = int(b_row['id_barrio'])
             d_id = int(b_row['id_distrito'])
+            if b_id not in observed_neighborhoods_by_op[op]:
+                continue
             
             if b_id in poor_barrios:
                 pred_val = price_tracker[(-1, d_id, op, y, m)]

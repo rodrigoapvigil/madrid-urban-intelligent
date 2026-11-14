@@ -347,7 +347,7 @@ const ComparisonSeriesChips = ({ chartId, zoneA, zoneB }: { chartId: string; zon
     { key: 'A', label: zoneA, indexes: [0, 1], color: '#00e5ff' },
     { key: 'B', label: zoneB, indexes: [2, 3], color: '#ffb65c' },
     { key: 'Madrid', label: 'Media Madrid', indexes: [4], color: '#dce8f2' },
-  ];
+  ].filter(group => Boolean(group.label));
   return <div className="v2-compare-legend" aria-label="Series de la comparación">
     {groups.map(group => {
       const chart = ChartJS.getChart(chartId) as any;
@@ -933,6 +933,17 @@ const getComparisonKpiInfo = (metric: string, zoneName: string) => {
   }
 };
 
+const NO_OFFICIAL_DATA_COPY = 'El Ayuntamiento de Madrid no publica datos de alquiler para esta zona. Preferimos no inventarlos.';
+const NO_PROJECTION_COPY = 'No hay base suficiente para proyectar esta zona, y no aproximamos valores sin datos.';
+
+function AvisoComparacionDesktop({ zone, projectionWithoutHistory }: { zone: string; projectionWithoutHistory: boolean }) {
+  return <div className="v2-no-data-notice"><span>{zone}</span><strong>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</strong><p>{NO_OFFICIAL_DATA_COPY}</p>{projectionWithoutHistory && <p>{NO_PROJECTION_COPY}</p>}</div>;
+}
+
+function AvisoComparacionMovil({ zone, projectionWithoutHistory }: { zone: string; projectionWithoutHistory: boolean }) {
+  return <div className="v2-no-data-notice"><span>{zone}</span><strong>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</strong><p>{NO_OFFICIAL_DATA_COPY}</p>{projectionWithoutHistory && <p>{NO_PROJECTION_COPY}</p>}</div>;
+}
+
 const MadridDashboardV2: React.FC = () => {
   const isMobile = useIsMobile();
   const predBadgeStyle: React.CSSProperties = {
@@ -980,9 +991,11 @@ const MadridDashboardV2: React.FC = () => {
   const [kpiData, setKpiData] = useState<any>({});
   const [kpiDataA, setKpiDataA] = useState<any>({});
   const [kpiDataB, setKpiDataB] = useState<any>({});
-  const [seriesA, setSeriesA] = useState<any[]>(() => DEFAULT_BASELINE_SERIES.alquiler.salamanca);
-  const [seriesB, setSeriesB] = useState<any[]>(() => DEFAULT_BASELINE_SERIES.alquiler.centro);
+  const [seriesA, setSeriesA] = useState<any[]>([]);
+  const [seriesB, setSeriesB] = useState<any[]>([]);
   const [seriesMadrid, setSeriesMadrid] = useState<any[]>(() => DEFAULT_BASELINE_SERIES.alquiler.madrid);
+  const comparisonAHasData = seriesA.some(point => Number(point?.precio_m2) > 0);
+  const comparisonBHasData = seriesB.some(point => Number(point?.precio_m2) > 0);
 
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
   const [isDashboardLoading, setIsDashboardLoading] = useState(true);
@@ -1088,26 +1101,30 @@ const MadridDashboardV2: React.FC = () => {
   const mapFeatureIsDistrict = displayedZoneData?.isDistrict ?? !displayedMapFeature;
   const mapFeatureRows = mapFeatureIsDistrict ? mapData.districts : mapData.neighborhoods;
   const mapFeatureItem = displayedZoneData?.item || null;
+  const mapFeatureHasData = Boolean(mapFeatureItem && (activeProfile.id === 'inversion' ? Number(mapFeatureItem.rentabilidad) > 0 : Number(mapFeatureItem.precio_m2) > 0));
+  const mapFeatureNoData = Boolean(displayedMapFeature && !mapFeatureHasData);
+  const mapFeatureRankRows = mapFeatureRows.filter((item: any) => Number(activeProfile.id === 'inversion' ? item.rentabilidad : item.precio_m2) > 0);
   const mapFeatureRank = !isMobile && desktopDisplayedZone
     ? desktopDisplayedZone.rank
     : mapFeatureItem && displayedMapFeature
-      ? [...mapFeatureRows].sort((a, b) => Number(b.precio_m2 || 0) - Number(a.precio_m2 || 0)).findIndex(item => normalizeZoneLabel(String(mapFeatureIsDistrict ? item.distrito : item.barrio || '')) === normalizeZoneLabel(displayedMapFeature)) + 1
+      ? [...mapFeatureRankRows].sort((a, b) => Number(activeProfile.id === 'inversion' ? b.rentabilidad || 0 : b.precio_m2 || 0) - Number(activeProfile.id === 'inversion' ? a.rentabilidad || 0 : a.precio_m2 || 0)).findIndex(item => normalizeZoneLabel(String(mapFeatureIsDistrict ? item.distrito : item.barrio || '')) === normalizeZoneLabel(displayedMapFeature)) + 1
       : 0;
-  const mapFeatureTotal = !isMobile && desktopDisplayedZone ? desktopDisplayedZone.total : mapFeatureRows.length;
-  const mapFeatureAverage = mapFeatureRows.length ? mapFeatureRows.reduce((sum, item) => sum + Number(item.precio_m2 || 0), 0) / mapFeatureRows.length : 0;
+  const mapFeatureTotal = !isMobile && desktopDisplayedZone ? desktopDisplayedZone.total : mapFeatureRankRows.length;
+  const mapFeatureAverage = mapFeatureRankRows.length ? mapFeatureRankRows.reduce((sum, item) => sum + Number(item.precio_m2 || 0), 0) / mapFeatureRankRows.length : 0;
   const mapFeatureDelta = mapFeatureAverage && mapFeatureItem ? (Number(mapFeatureItem.precio_m2 || 0) - mapFeatureAverage) / mapFeatureAverage * 100 : null;
-  const madridDistrictAverage = mapData.districts.length ? mapData.districts.reduce((sum, item) => sum + Number(item.precio_m2 || 0), 0) / mapData.districts.length : 0;
+  const observedDistrictRows = mapData.districts.filter((item: any) => Number(item.precio_m2) > 0);
+  const madridDistrictAverage = observedDistrictRows.length ? observedDistrictRows.reduce((sum, item) => sum + Number(item.precio_m2 || 0), 0) / observedDistrictRows.length : 0;
   const madridMonthlyAverage = mapData.districts.length ? mapData.districts.reduce((sum, item) => sum + Number(item.precio_vivienda || 0), 0) / mapData.districts.length : 0;
   const mapFeaturePrimaryLabel = activeProfile.id === 'inversion' ? 'Rentabilidad' : 'Precio medio';
   const mapFeaturePrimary = activeProfile.id === 'inversion'
-    ? mapFeatureItem?.rentabilidad ? `${(Number(mapFeatureItem.rentabilidad) * 100).toFixed(1)}%` : displayedMapFeature ? 'Sin dato' : `${(Number(mapData.districts.reduce((sum, item) => sum + Number(item.rentabilidad || 0), 0)) / Math.max(1, mapData.districts.length) * 100).toFixed(1)}%`
-    : mapFeatureItem?.precio_m2 ? `${formatNumber(Number(mapFeatureItem.precio_m2), 1)} €/m²` : displayedMapFeature ? 'Sin dato' : `${formatNumber(madridDistrictAverage, 1)} €/m²`;
+    ? mapFeatureHasData ? `${(Number(mapFeatureItem!.rentabilidad) * 100).toFixed(1)}%` : displayedMapFeature ? '' : `${(Number(mapData.districts.reduce((sum, item) => sum + Number(item.rentabilidad || 0), 0)) / Math.max(1, mapData.districts.length) * 100).toFixed(1)}%`
+    : mapFeatureHasData ? `${formatNumber(Number(mapFeatureItem!.precio_m2), 1)} €/m²` : displayedMapFeature ? '' : `${formatNumber(madridDistrictAverage, 1)} €/m²`;
   const mapFeatureSecondaryLabel = activeProfile.id === 'inversion' || activeProfile.id === 'alquiler' ? 'Alquiler medio' : 'Precio vivienda';
   const mapFeatureSecondary = activeProfile.id === 'inversion'
-    ? mapFeatureItem?.precio_alquiler || mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_alquiler || mapFeatureItem.precio_vivienda), 0)} €/mes` : displayedMapFeature ? '—' : `${formatNumber(madridMonthlyAverage, 0)} €/mes`
+    ? mapFeatureHasData && (mapFeatureItem?.precio_alquiler || mapFeatureItem?.precio_vivienda) ? `${formatNumber(Number(mapFeatureItem.precio_alquiler || mapFeatureItem.precio_vivienda), 0)} €/mes` : displayedMapFeature ? '' : `${formatNumber(madridMonthlyAverage, 0)} €/mes`
     : activeProfile.id === 'alquiler'
-      ? mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_vivienda), 0)} €/mes` : displayedMapFeature ? '—' : `${formatNumber(madridMonthlyAverage, 0)} €/mes`
-      : mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_vivienda), 0)} €` : displayedMapFeature ? '—' : '—';
+      ? mapFeatureHasData && mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_vivienda), 0)} €/mes` : displayedMapFeature ? '' : `${formatNumber(madridMonthlyAverage, 0)} €/mes`
+      : mapFeatureHasData && mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_vivienda), 0)} €` : displayedMapFeature ? '' : '';
   const handleMapDistrictClick = useCallback((district: string | null) => {
     const hoverContext = desktopZoneHoverRef.current;
     const matchesHover = !isMobile && district && hoverContext && normalizeZoneLabel(district) === normalizeZoneLabel(hoverContext.zoneId);
@@ -1429,7 +1446,10 @@ const MadridDashboardV2: React.FC = () => {
             return;
           }
         }
-        setRankings({ topDist: dist || [], botDist: [...(dist || [])].sort((a: any, b: any) => a.value - b.value), topBarr: barr || [], botBarr: [...(barr || [])].sort((a: any, b: any) => a.value - b.value) });
+        const withObservedValue = (rows: any[]) => (rows || []).filter((item: any) => Number.isFinite(Number(item.value)) && Number(item.value) > 0);
+        const observedDist = withObservedValue(dist);
+        const observedBarr = withObservedValue(barr);
+        setRankings({ topDist: observedDist, botDist: [...observedDist].sort((a: any, b: any) => a.value - b.value), topBarr: observedBarr, botBarr: [...observedBarr].sort((a: any, b: any) => a.value - b.value) });
       });
     }
     return () => { isCurrent = false; };
@@ -1593,10 +1613,8 @@ const MadridDashboardV2: React.FC = () => {
           const forecastColor = mainColor;
           const multiplier = comparisonMetric.multiplier;
 
-          // Use effective data or robust baseline so chart is NEVER empty
-          const effectiveData = (rawData && rawData.length > 0 && rawData.some(d => d && d.precio_m2 != null))
-            ? rawData
-            : resolveFallbackSeries(activeProfile.id, label);
+          // Zone series stay empty when the source has no official observations.
+          const effectiveData = Array.isArray(rawData) ? rawData : [];
 
           const effectiveMadridSeries = (seriesMadrid && seriesMadrid.length > 0 && seriesMadrid.some(d => d && d.precio_m2 != null))
             ? seriesMadrid
@@ -1871,19 +1889,17 @@ const MadridDashboardV2: React.FC = () => {
         };
 
         const chartMultiplier = comparisonMetric.multiplier;
-        const chartSeries = (raw: any[], zone: string) => {
-          const effective = (raw && raw.length > 0 && raw.some(d => d && d.precio_m2 != null))
-            ? raw
-            : resolveFallbackSeries(activeProfile.id, zone);
+        const chartSeries = (raw: any[]) => {
+          const effective = Array.isArray(raw) ? raw : [];
           return Array.from({ length: 12 }, (_, i) => {
             const found = effective.find(d => Number(d.mes) === i + 1);
             return found ? found.precio_m2 * chartMultiplier : null;
           });
         };
         const sharedComparisonScale = getNiceChartScale([
-          chartSeries(seriesA, selectedZoneA),
-          chartSeries(seriesB, selectedZoneB),
-          chartSeries(seriesMadrid, 'madrid'),
+          chartSeries(seriesA),
+          chartSeries(seriesB),
+          chartSeries(seriesMadrid),
         ]);
 
         if (ctxA) {
@@ -1909,12 +1925,8 @@ const MadridDashboardV2: React.FC = () => {
             const prevO = ChartJS.getChart(ctxOverlay);
             if (prevO) prevO.destroy();
           const overlayMultiplier = comparisonMetric.multiplier;
-          const effA = (seriesA && seriesA.length > 0 && seriesA.some(d => d && d.precio_m2 != null))
-            ? seriesA
-            : resolveFallbackSeries(activeProfile.id, selectedZoneA);
-          const effB = (seriesB && seriesB.length > 0 && seriesB.some(d => d && d.precio_m2 != null))
-            ? seriesB
-            : resolveFallbackSeries(activeProfile.id, selectedZoneB);
+          const effA = comparisonAHasData ? seriesA : [];
+          const effB = comparisonBHasData ? seriesB : [];
           const effMad = (seriesMadrid && seriesMadrid.length > 0 && seriesMadrid.some(d => d && d.precio_m2 != null))
             ? seriesMadrid
             : resolveFallbackSeries(activeProfile.id, 'madrid');
@@ -3661,12 +3673,14 @@ const MadridDashboardV2: React.FC = () => {
                   {!isMobile && desktopDisplayedZone && <FichaZonaDesktop
                     zone={desktopDisplayedZone.zoneId}
                     zoneType={desktopDisplayedZone.zoneType === 'districts' ? 'DISTRITO' : 'BARRIO'}
+                    noData={mapFeatureNoData}
+                    projectionWithoutHistory={mapFeatureNoData && isProjectionPeriod}
                     position={{ point: desktopDisplayedZone.point, bounds: desktopDisplayedZone.bounds }}
                     style={{ maxWidth: Math.max(120, desktopDisplayedZone.bounds.right - desktopDisplayedZone.bounds.left - 16) }}
                     pinned={Boolean(desktopPinnedZone && normalizeZoneLabel(selectedMapFeature || '') === normalizeZoneLabel(desktopPinnedZone.zoneId))}
-                    rank={mapFeatureRank
+                    rank={mapFeatureNoData ? undefined : mapFeatureRank
                       ? `Puesto ${mapFeatureRank} de ${mapFeatureTotal} ${mapFeatureIsDistrict ? 'distritos' : 'barrios'}`
-                      : `Sin posición · ${mapFeatureTotal} ${mapFeatureIsDistrict ? 'distritos' : 'barrios'} con datos`}
+                      : undefined}
                     primaryLabel={mapFeaturePrimaryLabel}
                     primaryValue={mapFeaturePrimary}
                     secondaryLabel={mapFeatureSecondaryLabel}
@@ -3676,7 +3690,10 @@ const MadridDashboardV2: React.FC = () => {
                   />}
                   {isMobile && selectedMapFeature && <FichaZonaMovil
                     zone={selectedMapFeature}
-                    rank={mapFeatureRank ? `Puesto ${mapFeatureRank} de ${mapFeatureRows.length}` : 'Zona seleccionada'}
+                    zoneType={mapFeatureIsDistrict ? 'DISTRITO' : 'BARRIO'}
+                    noData={mapFeatureNoData}
+                    projectionWithoutHistory={mapFeatureNoData && isProjectionPeriod}
+                    rank={mapFeatureNoData ? undefined : mapFeatureRank ? `Puesto ${mapFeatureRank} de ${mapFeatureRows.length}` : undefined}
                     primaryLabel={mapFeaturePrimaryLabel}
                     primaryValue={mapFeaturePrimary}
                     secondaryLabel={mapFeatureSecondaryLabel}
@@ -3697,7 +3714,8 @@ const MadridDashboardV2: React.FC = () => {
                       {getMapLegendLabels(activeProfile.id).map(label => <span key={label}>{label}</span>)}
                       <span className="no-data-label"><i /> Sin datos</span>
                     </div>
-                    <small>Los tonos comparan las zonas del periodo seleccionado. Las áreas rayadas no tienen observación.</small>
+                    <small>Los tonos comparan las zonas del periodo seleccionado. Rayado: sin datos oficiales del Ayuntamiento. No los estimamos.</small>
+                    <small>{mapData.neighborhoods.filter((item: any) => Number(item.precio_m2) > 0).length} de {availableBarrios.filter(zone => zone !== 'Todos').length || 131} barrios con datos.</small>
                   </div>
                 </div>
               </div>
@@ -3906,12 +3924,12 @@ const MadridDashboardV2: React.FC = () => {
                                   const bgColor = val > 0 ? colorWithAlpha(cellColor, opacity) : 'transparent';
                                   const textColor = opacity > 0.65 ? 'var(--blanco-humo)' : 'var(--azul-noche)';
                                   return (
-                                    <td key={i+1} style={{ backgroundColor: bgColor, color: textColor }}>
+                                    <td key={i+1} className={val > 0 ? undefined : 'v2-heatmap-no-data'} title={val > 0 ? undefined : 'Sin datos oficiales del Ayuntamiento'} style={{ backgroundColor: bgColor, color: textColor }}>
                                       {val > 0
                                         ? activeProfile.id === 'inversion'
                                           ? formatNumber(val * 100, 1)
                                           : formatNumber(val, 1)
-                                        : '-'}
+                                        : 'n/d'}
                                     </td>
                                   );
                                 })}
@@ -4102,9 +4120,10 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneA}
                       </div>
-                      <div className="v2-chart-wrap"><ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={isMobile} /><canvas id={`v2-chartA-${p.id}`}></canvas></div>
+                      <div className="v2-chart-wrap">{comparisonAHasData ? <><ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={isMobile} /><canvas id={`v2-chartA-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />}</div>
                     </div>
                     {(() => {
+                      if (!comparisonAHasData) return null;
                       if (p.id === 'inversion') {
                         return (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
@@ -4325,9 +4344,10 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneB}
                       </div>
-                      <div className="v2-chart-wrap"><ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={isMobile} /><canvas id={`v2-chartB-${p.id}`}></canvas></div>
+                      <div className="v2-chart-wrap">{comparisonBHasData ? <><ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={isMobile} /><canvas id={`v2-chartB-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />}</div>
                     </div>
                     {(() => {
+                      if (!comparisonBHasData) return null;
                       if (p.id === 'inversion') {
                         return (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
@@ -4552,8 +4572,10 @@ const MadridDashboardV2: React.FC = () => {
                       <ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile={isMobile} />
                       <canvas id={`v2-overlay-${p.id}`}></canvas>
                     </div>
-                    <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={formatZoneOption(selectedZoneA)} zoneB={formatZoneOption(selectedZoneB)} />
-                    {p.id === 'alquiler' && (() => {
+                    <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={comparisonAHasData ? formatZoneOption(selectedZoneA) : ''} zoneB={comparisonBHasData ? formatZoneOption(selectedZoneB) : ''} />
+                    {!comparisonAHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />)}
+                    {!comparisonBHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />)}
+                    {comparisonAHasData && comparisonBHasData && p.id === 'alquiler' && (() => {
                       const priceA = Number(kpiDataA.precio_m2) || 0;
                       const priceB = Number(kpiDataB.precio_m2) || 0;
                       const yieldA = Number(kpiDataA.rentabilidad) || 0;

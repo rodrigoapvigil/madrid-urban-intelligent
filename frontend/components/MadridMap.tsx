@@ -279,18 +279,19 @@ const MadridMap: React.FC<MapProps> = ({
     const item = data.find(d => {
       const dName = normalize(type === 'districts' ? d.distrito : d.barrio);
       const geoName = normalize(name);
-      return dName === geoName || dName.includes(geoName) || geoName.includes(dName);
+      return dName === geoName;
     });
 
     let val = 0;
     if (item) {
       val = selectedProfile === 'Inversión' ? (item.rentabilidad || 0) : (item.precio_m2 || 0);
     }
+    const hasObservedValue = Number.isFinite(Number(val)) && Number(val) > 0;
 
     const tier = getChoroplethTier(val, selectedProfile);
     return {
       // Use five solid choropleth steps so the map reads as data, not texture.
-      fillColor: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#00F0FF' : item ? TIER_CONFIGS[tier].baseFill : `url(#no-data-pat-${containerId})`,
+      fillColor: !hasObservedValue ? `url(#no-data-pat-${containerId})` : isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#00F0FF' : TIER_CONFIGS[tier].baseFill,
       weight: isCompareA || isCompareB ? 2.5 : isSelected ? 2.5 : type === 'districts' ? 1.2 : 0.85,
       opacity: isExcluded ? 0.20 : 0.95,
       color: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
@@ -395,8 +396,8 @@ const MadridMap: React.FC<MapProps> = ({
         mapRef.current?.removeLayer(geoJsonLayerRef.current);
       }
       const rankedMapRows = data
-        .filter(entry => Number.isFinite(Number(entry.precio_m2)) && Number(entry.precio_m2) > 0)
-        .sort((a, b) => Number(b.precio_m2) - Number(a.precio_m2));
+        .filter(entry => Number.isFinite(Number(selectedProfile === 'Inversión' ? entry.rentabilidad : entry.precio_m2)) && Number(selectedProfile === 'Inversión' ? entry.rentabilidad : entry.precio_m2) > 0)
+        .sort((a, b) => Number(selectedProfile === 'Inversión' ? b.rentabilidad : b.precio_m2) - Number(selectedProfile === 'Inversión' ? a.rentabilidad : a.precio_m2));
 
       geoJsonLayerRef.current = L.geoJSON(geoData, {
         style: style,
@@ -406,9 +407,6 @@ const MadridMap: React.FC<MapProps> = ({
           const name = formatMadridName(rawName);
           const rawZoneId = String(type === 'districts' ? props.distrito || props.distrito_nombre || props.nombre || props.name || rawName : props.barrio || props.nombre || props.name || rawName);
           const districtName = props.distrito || props.nombre || props.name || props.distrito_nombre;
-          
-          const isDatePredicted = selectedYear > 2026 || (selectedYear === 2026 && !['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'].includes(selectedMonth));
-          const periodLabel = isDatePredicted ? 'Estimación' : 'Dato real';
           
           const exactItem = data.find(d => normalize(type === 'districts' ? d.distrito : d.barrio) === normalize(rawZoneId));
           const item = exactItem;
@@ -431,49 +429,6 @@ const MadridMap: React.FC<MapProps> = ({
               bounds: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom },
             };
           };
-          
-          let popupContent = `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 6px; min-width: 190px; border-radius: 12px; color: #FFFFFF;">`;
-          popupContent += `<strong style="font-size: 14px; font-weight: 600; color: #FFFFFF; display: block; margin-bottom: 8px; border-bottom: 1px solid rgba(186, 204, 214, 0.2); padding-bottom: 4px;">${name}</strong>`;
-          
-          if (item) {
-            const fmtPrice = (v: number) => new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(v);
-            const fmtYield = (v: number) => (v * 100).toFixed(2) + '%';
-            const comparable = data
-              .map(entry => Number(entry.precio_m2))
-              .filter(value => Number.isFinite(value) && value > 0)
-              .sort((a, b) => b - a);
-            const itemValue = Number(item.precio_m2);
-            const rank = comparable.findIndex(value => value <= itemValue) + 1;
-            const madridMean = comparable.length
-              ? comparable.reduce((sum, value) => sum + value, 0) / comparable.length
-              : 0;
-            const delta = madridMean > 0 ? ((itemValue - madridMean) / madridMean) * 100 : 0;
-            
-            popupContent += `<div style="color: rgba(186, 204, 214, 0.9); font-size: 13px; line-height: 1.6;">`;
-            if (rank > 0) {
-              const deltaLabel = `${delta >= 0 ? '+' : ''}${delta.toFixed(1)}% frente a la media`;
-              popupContent += `<div style="color: #BACCD6; margin-bottom: 5px; font-size: 12px;">Puesto ${rank} de ${comparable.length} · ${deltaLabel.replace('frente a la media', 'vs media')}</div>`;
-            }
-            
-            if (selectedProfile === 'Alquiler') {
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² Alquiler:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtPrice(item.precio_m2)} €/m² (${periodLabel})</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Alquiler Promedio:</span> <span style="color: #FFFFFF; font-weight: 600;">${fmtPrice(item.precio_vivienda)} €/mes (${periodLabel})</span></div>`;
-            } else if (selectedProfile === 'Compra' || selectedProfile === 'Venta') {
-              const label = selectedProfile === 'Compra' ? 'Compra' : 'Venta';
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² ${label}:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtPrice(item.precio_m2)} €/m² (${periodLabel})</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Precio Vivienda:</span> <span style="color: #FFFFFF; font-weight: 600;">${fmtPrice(item.precio_vivienda)} € (${periodLabel})</span></div>`;
-            } else if (selectedProfile === 'Inversión') {
-              const buyPriceM2 = item.precio_venta_m2 || item.precio_m2;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px;"><span>Precio m² Compra:</span> <span style="color: rgba(186, 204, 214, 0.95); font-weight: 600;">${fmtPrice(buyPriceM2)} €/m² (${periodLabel})</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Rentabilidad:</span> <span style="color: ${accentColor}; font-weight: 600;">${fmtYield(item.rentabilidad)} (${periodLabel})</span></div>`;
-              popupContent += `<div style="display: flex; justify-content: space-between; gap: 8px; margin-top: 2px;"><span>Alquiler Estimado:</span> <span style="color: #00F0FF; font-weight: 600;">${fmtPrice(item.precio_alquiler || item.precio_vivienda)} €/mes (${periodLabel})</span></div>`;
-            }
-            
-            popupContent += `</div>`;
-          } else {
-            popupContent += `<div style="color: rgba(186, 204, 214, 0.6); font-size: 12px; font-style: italic; margin-top: 4px;">Sin datos registrados por el Ayuntamiento de Madrid</div>`;
-          }
-          popupContent += `</div>`;
           
           const hasHoverPointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
           layer.on({

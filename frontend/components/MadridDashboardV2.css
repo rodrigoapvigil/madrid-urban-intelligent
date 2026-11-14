@@ -3515,6 +3515,11 @@ body.v2-fullscreen-open .v2-root .v2-filters { display: none !important; }
 .v2-root .v2-heatmap-table th:first-child, .v2-root .v2-heatmap-table td:first-child { position: sticky; left: 0; z-index: 2; width: 120px; min-width: 120px; max-width: 120px; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
 .v2-root .v2-heatmap-table th:first-child { z-index: 4; }
 .v2-root .v2-heatmap-table .zona-name { background: #061426 !important; text-decoration: none !important; }
+.v2-root .v2-heatmap-table td.v2-heatmap-no-data { color: #d3deea !important; background: repeating-linear-gradient(135deg, rgba(8, 27, 48, .98) 0 6px, rgba(104, 129, 151, .45) 6px 7px) !important; font-size: 10px; }
+.v2-no-data-notice { display: grid; align-content: center; gap: 7px; min-height: 100%; padding: 16px; border: 1px solid rgba(143, 163, 184, .24); border-radius: 12px; background: repeating-linear-gradient(135deg, rgba(8, 27, 48, .9) 0 8px, rgba(104, 129, 151, .12) 8px 9px); color: #dce8f2; }
+.v2-no-data-notice > span { color: #00e5ff; font-size: 11px; font-weight: 700; }
+.v2-no-data-notice > strong { color: #fff; font-size: 15px; }
+.v2-no-data-notice > p { margin: 0; font-size: 12px; line-height: 1.45; }
 .v2-root .v2-heatmap-extra-row { display: none; }
 .v2-root .v2-heatmap-more { min-height: 38px; margin: 8px 0; padding: 0 12px; border: 1px solid rgba(0,229,238,.32); border-radius: 10px; background: rgba(0,229,238,.08); color: #8ef5ff; font-weight: 700; }
 body.v2-fullscreen-open .v2-mobile-profile-nav,
