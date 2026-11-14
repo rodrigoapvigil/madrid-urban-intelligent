@@ -849,7 +849,7 @@
   .v2-mobile-filter-chips { display: flex; min-width: 0; gap: 5px; overflow-x: auto; }
   .v2-mobile-filter-chips button { min-height: 32px; padding: 0 9px; border: 1px solid rgba(186,204,214,.25); border-radius: 999px; background: rgba(255,255,255,.06); color: #fff; white-space: nowrap; font-size: 12px; }
   .v2-mobile-filter-trigger b { min-width: 19px; height: 19px; display: grid; place-items: center; border-radius: 50%; background: #00e5ee; color: #03172b; font-size: 11px; }
-  .v2-mobile-section-nav { position: relative; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); height: 44px; gap: 0; overflow: visible; padding: 0 8px; border-bottom: 1px solid rgba(186,204,214,.14); background: rgba(2,20,43,.96); }
+  .v2-mobile-section-nav { position: relative; display: grid !important; grid-template-columns: repeat(5, minmax(0, 1fr)); height: 44px; gap: 0; overflow: visible; padding: 0 8px; border-bottom: 1px solid rgba(186,204,214,.14); background: rgba(2,20,43,.96); }
   .v2-mobile-section-nav.is-visible { height: 44px; transform: none; opacity: 1; pointer-events: auto; }
   .v2-mobile-section-nav button { min-width: 0; min-height: 42px; padding: 0 3px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #eaf5ff; font-size: 11px; font-weight: 650; white-space: nowrap; }
   .v2-mobile-section-nav button:active { border-bottom-color: #00e5ee; }
@@ -861,14 +861,13 @@
   .v2-root .v2-custom-select:disabled { opacity: .55; }
   .v2-root .v2-dropdown-item { min-height: 44px; font-size: 14px; }
   .v2-root .v2-dropdown-item[aria-selected="true"]::before { content: '●'; display: inline-block; width: 22px; color: #00e5ee; }
-  .v2-root .v2-mobile-filter-commit { display: none; }
-  .v2-root .v2-mobile-filters-open .v2-mobile-filter-commit { position: sticky; bottom: 0; z-index: 5; display: grid; gap: 8px; grid-column: 1 / -1; margin: 4px -16px -8px; padding: 12px 16px max(12px, env(safe-area-inset-bottom)); background: #071b33; border-top: 1px solid rgba(186,204,214,.16); }
+  .v2-root .v2-mobile-filters-open .v2-mobile-filter-commit { position: sticky; bottom: 0; z-index: 5; display: grid !important; gap: 8px; grid-column: 1 / -1; margin: 4px -16px -8px; padding: 12px 16px max(12px, env(safe-area-inset-bottom)); background: #071b33; border-top: 1px solid rgba(186,204,214,.16); }
   .v2-mobile-filter-apply, .v2-mobile-filter-reset { min-height: 46px; border-radius: 12px; font-size: 14px; font-weight: 750; }
   .v2-mobile-filter-apply { border: 0; color: #03172b; background: linear-gradient(115deg,#D9F8FF,#E9E8FF 58%,#F0E3FF); }
   .v2-mobile-filter-reset { border: 1px solid rgba(186,204,214,.3); color: #fff; background: transparent; }
   .v2-mobile-profile-nav { grid-template-columns: repeat(4, minmax(0,1fr)) !important; }
   .v2-mobile-profile-nav button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 48px; font-size: 12px !important; text-decoration: none; }
-  .v2-root .v2-mobile-map-switch { display: flex; width: fit-content; gap: 4px; margin: 0 0 12px; padding: 4px; border: 1px solid rgba(186,204,214,.2); border-radius: 999px; background: rgba(1,16,36,.7); }
+  .v2-root .v2-mobile-map-switch { display: flex !important; width: fit-content; gap: 4px; margin: 0 0 12px; padding: 4px; border: 1px solid rgba(186,204,214,.2); border-radius: 999px; background: rgba(1,16,36,.7); }
   .v2-mobile-map-switch button { min-height: 38px; padding: 0 15px; border: 0; border-radius: 999px; background: transparent; color: #d7e8ef; font-size: 12px; font-weight: 700; }
   .v2-mobile-map-switch button.active { background: #00e5ee; color: #03172b; }
   .v2-root .v2-dual-maps { display: block; height: auto; }
@@ -3111,7 +3110,11 @@
 /* Compact dashboard controls designed for thumb reach on phones. */
 .v2-mobile-filter-bar,
 .v2-mobile-filter-heading,
-.v2-mobile-profile-nav { display: none; }
+.v2-mobile-profile-nav,
+.v2-mobile-section-nav,
+.v2-mobile-filter-backdrop,
+.v2-mobile-filter-commit,
+.v2-mobile-map-switch { display: none !important; }
 
 @media (max-width: 768px) {
   .v2-root .v2-mobile-filter-bar {
@@ -3437,7 +3440,6 @@ body.v2-fullscreen-open .v2-panel.v2-active { transform: none !important; }
 .v2-root .v2-is-fullscreen.v2-heatmap-card { position: fixed !important; padding: max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(72px,calc(72px + env(safe-area-inset-bottom))) max(12px,env(safe-area-inset-left)) !important; }
 .v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-head { align-items: center; margin-bottom: 4px !important; padding-right: 48px; }
 .v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-scroll { margin-top: 0; }
-.v2-root .v2-is-fullscreen.v2-map-card .v2-mobile-map-switch { display: flex !important; flex: 0 0 auto; }
 @media (max-width: 768px) and (orientation: portrait) {
   .v2-root .v2-fullscreen-rotate-hint { position: fixed; top: max(12px,env(safe-area-inset-top)); left: 50%; z-index: 5003; display: inline-flex; align-items: center; gap: 7px; max-width: calc(100vw - 110px); padding: 8px 12px; transform: translateX(-50%); border: 1px solid rgba(186,204,214,.16); border-radius: 999px; background: rgba(255,255,255,.09); color: #eaf5ff; font-size: 12px; white-space: nowrap; }
   .v2-root .v2-fullscreen-rotate-hint svg { animation: v2-rotate-hint 1.6s ease-in-out infinite; }
@@ -3616,6 +3618,16 @@ body.v2-fullscreen-open footer { display: none !important; }
   .v2-root .v2-is-fullscreen.v2-overlay-wrapper { grid-template-rows: 34px minmax(0,1fr) !important; padding-top: max(4px,env(safe-area-inset-top)) !important; }
   .v2-root .v2-is-fullscreen.v2-overlay-wrapper .v2-overlay-header { font-size: 11px; }
   .v2-root .v2-is-fullscreen.v2-overlay-wrapper .v2-compare-legend { gap: 4px 8px; font-size: 9px; }
+}
+
+/* Re-apply mobile-only controls after all desktop and shared component rules. */
+@media (max-width: 768px) {
+  .v2-root .v2-mobile-section-nav { display: grid !important; }
+  .v2-root .v2-mobile-map-switch { display: flex !important; }
+  .v2-root .v2-mobile-filter-backdrop { display: block !important; }
+  .v2-root .v2-mobile-filters-open .v2-mobile-filter-commit { display: grid !important; }
+  .v2-root:has(.v2-mobile-filters-open) .v2-mobile-profile-nav,
+  .v2-root:has(.v2-mobile-filters-open) .v2-mobile-section-nav { display: none !important; }
 }
 @media (max-width: 768px) and (orientation: portrait) {
   .v2-root .v2-is-fullscreen.v2-map-card .v2-dual-maps { grid-template-columns: minmax(0,.78fr) minmax(0,1.22fr) !important; gap: 6px !important; }
