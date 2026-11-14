@@ -3281,6 +3281,7 @@
 .v2-chart-controls > .v2-fullscreen-control { display: contents; }
 .v2-chart-controls .v2-expand-button,
 .v2-fullscreen-control > .v2-expand-button { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 0; border-radius: 8px; background: transparent; color: #baccd6; cursor: pointer; }
+.v2-mobile-only-expand { display: none !important; }
 .v2-fullscreen-control > .v2-expand-button:hover,
 .v2-fullscreen-control > .v2-expand-button:focus-visible { color: #00e5ee; background: rgba(0,229,238,.12); }
 .v2-rankings-stack { position: relative; }
@@ -3624,6 +3625,7 @@ body.v2-fullscreen-open footer { display: none !important; }
 @media (max-width: 768px) {
   .v2-root .v2-mobile-section-nav { display: grid !important; }
   .v2-root .v2-mobile-map-switch { display: flex !important; }
+  .v2-root .v2-mobile-only-expand { display: inline-flex !important; }
   .v2-root .v2-mobile-filter-backdrop { display: block !important; }
   .v2-root .v2-mobile-filters-open .v2-mobile-filter-commit { display: grid !important; }
   .v2-root:has(.v2-mobile-filters-open) .v2-mobile-profile-nav,

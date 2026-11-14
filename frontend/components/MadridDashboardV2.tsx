@@ -65,7 +65,7 @@ const updateChartZoom = (canvasId: string, action: 'in' | 'out' | 'reset') => {
   chart.update('none');
 };
 
-const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?: string; chartId?: string; label?: string }) => {
+const FullscreenToggle = ({ targetSelector, chartId, label, mobileOnly = false }: { targetSelector?: string; chartId?: string; label?: string; mobileOnly?: boolean }) => {
   const [expanded, setExpanded] = useState(false);
   const [awaitingLandscape, setAwaitingLandscape] = useState(false);
   const [rotateScreenVisible, setRotateScreenVisible] = useState(false);
@@ -224,7 +224,7 @@ const FullscreenToggle = ({ targetSelector, chartId, label }: { targetSelector?:
   };
 
   return <div className="v2-fullscreen-control">
-    <button type="button" className={`v2-expand-button${label ? ' has-label' : ''}`} aria-label={expanded ? 'Cerrar pantalla completa' : label || 'Ampliar a pantalla completa'} title={expanded ? 'Cerrar' : label || 'Pantalla completa'} onClick={expanded ? close : open}>{expanded ? <X size={17} /> : <Maximize2 size={17} />}{!expanded && label && <span>{label}</span>}</button>
+    <button type="button" className={`v2-expand-button${label ? ' has-label' : ''}${mobileOnly ? ' v2-mobile-only-expand' : ''}`} aria-label={expanded ? 'Cerrar pantalla completa' : label || 'Ampliar a pantalla completa'} title={expanded ? 'Cerrar' : label || 'Pantalla completa'} onClick={expanded ? close : open}>{expanded ? <X size={17} /> : <Maximize2 size={17} />}{!expanded && label && <span>{label}</span>}</button>
     {expanded && (chartId || targetRef.current?.querySelector('table')) && <div className="v2-fullscreen-toolbar" role="toolbar" aria-label="Herramientas de pantalla completa">
       {chartId && <div className="v2-fullscreen-zoom" role="group" aria-label="Zoom del gráfico"><button type="button" title="Acercar" aria-label="Acercar gráfica" onClick={() => updateChartZoom(chartId, 'in')}><ZoomIn size={16} /></button><button type="button" title="Alejar" aria-label="Alejar gráfica" onClick={() => updateChartZoom(chartId, 'out')}><ZoomOut size={16} /></button><button type="button" title="Restablecer vista" aria-label="Restablecer zoom de la gráfica" onClick={() => updateChartZoom(chartId, 'reset')}><RotateCcw size={15} /></button></div>}
       {chartId && <div className="v2-fullscreen-ranges">{(['6M', '12M', 'Todo'] as const).map(range => <button key={range} type="button" onClick={() => setRange(range)}>{range}</button>)}</div>}
@@ -3402,7 +3402,6 @@ const MadridDashboardV2: React.FC = () => {
               <div className="v2-map-col">
                 <div className="v2-map-card" data-dashboard-section="map">
                   <div className="v2-map-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
-                    <div className="v2-pill">Mapas Interactivos</div>
                     <div className={`v2-data-status ${isProjectionPeriod ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
                       <span className="v2-data-status-dot" aria-hidden="true" />
           <span><strong>{periodStatusLabel}</strong> · Último dato observado: {latestAvailablePeriod.month} de {latestAvailablePeriod.year} · estimaciones desde {MONTHS_ES[latestObservedMonthIndex + 1] || 'Enero'}</span>
@@ -3447,7 +3446,7 @@ const MadridDashboardV2: React.FC = () => {
                       }}>i</span>
                       <span>¿Cómo usar el mapa?</span>
                     </button>
-                    <FullscreenToggle targetSelector=".v2-map-card" />
+                    <FullscreenToggle targetSelector=".v2-map-card" mobileOnly />
                   </div>
 
                   <div className="v2-mobile-map-switch" role="group" aria-label="Nivel del mapa">
@@ -4366,10 +4365,11 @@ const MadridDashboardV2: React.FC = () => {
                       const effortB = Number(kpiDataB.esfuerzo_compra) || 0;
                       const percentDifference = (a: number, b: number) => b ? `${a > b ? '+' : ''}${((a - b) / b * 100).toFixed(1)}%` : '—';
                       const pointDifference = (a: number, b: number) => `${a > b ? '+' : ''}${((a - b) * 100).toFixed(1)} pt`;
+                      const effortDifference = (a: number, b: number) => `${a > b ? '+' : ''}${(a - b).toFixed(1)} pt`;
                       const rows = [
                         { label: 'Precio m²', a: priceA ? `${formatNumber(priceA, 2)} €/m²` : '—', b: priceB ? `${formatNumber(priceB, 2)} €/m²` : '—', diff: percentDifference(priceA, priceB), aWins: priceA <= priceB },
                         { label: 'Rentabilidad', a: yieldA ? `${(yieldA * 100).toFixed(2)}%` : '—', b: yieldB ? `${(yieldB * 100).toFixed(2)}%` : '—', diff: pointDifference(yieldA, yieldB), aWins: yieldA >= yieldB },
-                        { label: 'Esfuerzo', a: effortA ? `${effortA.toFixed(1)}%` : '—', b: effortB ? `${effortB.toFixed(1)}%` : '—', diff: pointDifference(effortA, effortB), aWins: effortA <= effortB },
+                        { label: 'Esfuerzo', a: effortA ? `${effortA.toFixed(1)}%` : '—', b: effortB ? `${effortB.toFixed(1)}%` : '—', diff: effortDifference(effortA, effortB), aWins: effortA <= effortB },
                       ];
                       const pricePct = priceB ? Math.abs((priceA - priceB) / priceB * 100).toFixed(1) : null;
                       const cheaper = priceA <= priceB ? selectedZoneA : selectedZoneB;
