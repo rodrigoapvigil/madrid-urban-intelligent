@@ -17,7 +17,7 @@ ChartJS.register(ChartDataLabels, cssColorResolverPlugin);
 
 const COMPARISON_COLORS = {
   zoneA: '#00E5FF',
-  zoneB: '#FFB86B',
+  zoneB: '#FFB65C',
   forecastA: '#A78BFA',
   forecastB: '#FF7AA8',
 } as const;
@@ -249,6 +249,28 @@ const ChartZoomControls = ({ chartId }: { chartId: string }) => (
     <FullscreenToggle chartId={chartId} />
   </div>
 );
+
+const ComparisonSeriesChips = ({ chartId, zoneA, zoneB }: { chartId: string; zoneA: string; zoneB: string }) => {
+  const [, setRevision] = useState(0);
+  const groups = [
+    { key: 'A', label: zoneA, indexes: [0, 1], color: '#00e5ff' },
+    { key: 'B', label: zoneB, indexes: [2, 3], color: '#ffb65c' },
+    { key: 'Madrid', label: 'Media Madrid', indexes: [4], color: '#dce8f2' },
+  ];
+  return <div className="v2-compare-legend" aria-label="Series de la comparación">
+    {groups.map(group => {
+      const chart = ChartJS.getChart(chartId) as any;
+      const isVisible = chart ? group.indexes.some(index => chart.isDatasetVisible(index)) : true;
+      return <button key={group.key} type="button" className={`v2-series-chip series-${group.key.toLowerCase()}`} aria-pressed={isVisible} onClick={() => {
+        if (!chart) return;
+        const nextVisible = !isVisible;
+        group.indexes.forEach(index => { if (chart.data.datasets[index]) chart.setDatasetVisibility(index, nextVisible); });
+        chart.update('none');
+        setRevision(value => value + 1);
+      }}><i style={{ backgroundColor: group.color }} />{group.label}</button>;
+    })}
+  </div>;
+};
 
 const MadridMap = dynamic(() => import('./MadridMap'), { ssr: false });
 
@@ -857,7 +879,6 @@ const MadridDashboardV2: React.FC = () => {
   const [selectedZoneA, setSelectedZoneA] = useState('Salamanca');
   const [selectedZoneB, setSelectedZoneB] = useState('Centro');
   const [compareMapTarget, setCompareMapTarget] = useState<'A' | 'B'>('A');
-  const [compareDisplay, setCompareDisplay] = useState<'overlay' | 'A' | 'B'>('overlay');
   const [compareZoneSheet, setCompareZoneSheet] = useState<'A' | 'B' | null>(null);
   const [compareZoneSearch, setCompareZoneSearch] = useState('');
 
@@ -3817,17 +3838,14 @@ const MadridDashboardV2: React.FC = () => {
                     <span>Elige dos zonas y mira cómo se diferencian</span>
                   </div>
                 </div>
-                <div className="v2-tabs-container" style={{ flex: 'none' }}>
-                  <div className="v2-tabs-bg v2-level-switch" role="group" aria-label="Nivel de comparación">
-                    <span className="v2-indicator" style={{ transform: `translateX(${compareLevel === 'Distritos' ? '0' : '100%'})`, backgroundColor: activeProfile.color }} />
-                    <button type="button" aria-pressed={compareLevel === 'Distritos'} className={`v2-tab-btn ${compareLevel === 'Distritos' ? 'active' : ''}`} onClick={() => handleLevelToggle('Distritos')}>Distritos</button>
-                    <button type="button" aria-pressed={compareLevel === 'Barrios'} className={`v2-tab-btn ${compareLevel === 'Barrios' ? 'active' : ''}`} onClick={() => handleLevelToggle('Barrios')}>Barrios</button>
-                  </div>
-                </div>
+              </div>
+
+              <div className="v2-compare-level-tabs" role="tablist" aria-label="Nivel de comparación">
+                {(['Distritos', 'Barrios'] as const).map(level => <button key={level} type="button" role="tab" aria-selected={compareLevel === level} className={compareLevel === level ? 'active' : ''} onClick={() => handleLevelToggle(level)}>{level}</button>)}
               </div>
 
               <div className="v2-compare-zone-selectors v2-compare-selectors-sticky">
-                <div className={`v2-dropdown-container v2-compare-zone-select ${activeDropdown === 'zoneA' ? 'v2-z-up' : ''}`}>
+                <div className={`v2-dropdown-container v2-compare-zone-select zone-a ${activeDropdown === 'zoneA' ? 'v2-z-up' : ''}`}>
                   <span className="v2-filter-label zone-a-label"><i /> ZONA A</span>
                   <button type="button" className="v2-custom-select" aria-haspopup="dialog" aria-expanded={compareZoneSheet === 'A'} onClick={() => { setCompareZoneSearch(''); setCompareZoneSheet('A'); }}>
                     <span>{formatZoneOption(selectedZoneA)}</span>
@@ -3842,7 +3860,7 @@ const MadridDashboardV2: React.FC = () => {
                   )}
                 </div>
                 <button type="button" className="v2-compare-swap" aria-label="Intercambiar zonas A y B" title="Intercambiar zonas" onClick={() => { setSelectedZoneA(selectedZoneB); setSelectedZoneB(selectedZoneA); }}><span>⇄</span></button>
-                <div className={`v2-dropdown-container v2-compare-zone-select ${activeDropdown === 'zoneB' ? 'v2-z-up' : ''}`}>
+                <div className={`v2-dropdown-container v2-compare-zone-select zone-b ${activeDropdown === 'zoneB' ? 'v2-z-up' : ''}`}>
                   <span className="v2-filter-label zone-b-label"><i /> ZONA B</span>
                   <button type="button" className="v2-custom-select" aria-haspopup="dialog" aria-expanded={compareZoneSheet === 'B'} onClick={() => { setCompareZoneSearch(''); setCompareZoneSheet('B'); }}>
                     <span>{formatZoneOption(selectedZoneB)}</span>
@@ -3858,13 +3876,9 @@ const MadridDashboardV2: React.FC = () => {
                 </div>
               </div>
 
-              <div className="v2-compare-viewport" data-compare-view={compareDisplay}>
+              <div className="v2-compare-viewport" data-compare-view="overlay">
                 <div className="v2-compare-map-panel">
-                  <div className="v2-compare-map-heading">Selecciona zonas en el mapa</div>
-                  <div className="v2-compare-map-target" role="group" aria-label="Zona que se asignará al tocar el mapa">
-                    <button type="button" className={compareMapTarget === 'A' ? 'active zone-a' : 'zone-a'} onClick={() => setCompareMapTarget('A')}>A · {formatZoneOption(selectedZoneA)}</button>
-                    <button type="button" className={compareMapTarget === 'B' ? 'active zone-b' : 'zone-b'} onClick={() => setCompareMapTarget('B')}>B · {formatZoneOption(selectedZoneB)}</button>
-                  </div>
+                  <div className="v2-compare-map-heading">Toca dos zonas para asignar A y B</div>
                   <div className="v2-compare-map-canvas">
                     <MadridMap
                       type={compareLevel === 'Distritos' ? 'districts' : 'neighborhoods'}
@@ -3875,18 +3889,15 @@ const MadridDashboardV2: React.FC = () => {
                       onDistrictClick={(zone) => {
                         if (!zone) return;
                         if (compareMapTarget === 'A') { setSelectedZoneA(zone); setCompareMapTarget('B'); }
-                        else setSelectedZoneB(zone);
+                        else { setSelectedZoneB(zone); setCompareMapTarget('A'); }
                       }}
                       onBarrioClick={(zone) => {
                         if (!zone) return;
                         if (compareMapTarget === 'A') { setSelectedZoneA(zone); setCompareMapTarget('B'); }
-                        else setSelectedZoneB(zone);
+                        else { setSelectedZoneB(zone); setCompareMapTarget('A'); }
                       }}
                     />
                   </div>
-                </div>
-                <div className="v2-compare-view-tabs" role="tablist" aria-label="Vista de la comparación">
-                  {(['overlay', 'A', 'B'] as const).map(view => <button key={view} type="button" role="tab" aria-selected={compareDisplay === view} className={compareDisplay === view ? 'active' : ''} onClick={() => setCompareDisplay(view)}>{view === 'overlay' ? 'Superpuesto' : `Zona ${view}`}</button>)}
                 </div>
                 <div className="v2-compare-grid">
                   {/* ZONA A (IZQ) */}
@@ -4338,16 +4349,14 @@ const MadridDashboardV2: React.FC = () => {
 
                 <div className="v2-overlay-wrapper">
                   <div className="v2-overlay-header">
-                    <span>Comparativa · A {formatZoneOption(selectedZoneA)} · B {formatZoneOption(selectedZoneB)}</span>
-                    <div className="v2-compare-legend" aria-label="Leyenda del gráfico">
-                      <span><i className="zone-a" />A</span><span><i className="zone-b" />B</span><span><i className="real" />Real</span><span><i className="estimated" />Est.</span><span><i className="madrid" />Media</span>
-                    </div>
+                    <span>Comparativa superpuesta · {getComparisonMetric(p.id).label}</span>
                   </div>
                   <div className="v2-overlay-body">
                     <div className="v2-chart-wrap large">
                       <ChartZoomControls chartId={`v2-overlay-${p.id}`} />
                       <canvas id={`v2-overlay-${p.id}`}></canvas>
                     </div>
+                    <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={formatZoneOption(selectedZoneA)} zoneB={formatZoneOption(selectedZoneB)} />
                     {p.id === 'alquiler' && (() => {
                       const priceA = Number(kpiDataA.precio_m2) || 0;
                       const priceB = Number(kpiDataB.precio_m2) || 0;
@@ -4366,7 +4375,7 @@ const MadridDashboardV2: React.FC = () => {
                       const cheaper = priceA <= priceB ? selectedZoneA : selectedZoneB;
                       const lessEffort = effortA <= effortB ? selectedZoneA : selectedZoneB;
                       return <div className="v2-compare-summary">
-                        <table className="v2-compare-diff-table"><thead><tr><th>Métrica</th><th>{formatZoneOption(selectedZoneA)}</th><th>{formatZoneOption(selectedZoneB)}</th><th>Dif.</th></tr></thead>
+                        <table className="v2-compare-diff-table"><thead><tr><th>Métrica</th><th><i className="v2-compare-zone-dot zone-a" />{formatZoneOption(selectedZoneA)}</th><th><i className="v2-compare-zone-dot zone-b" />{formatZoneOption(selectedZoneB)}</th><th>Dif.</th></tr></thead>
                           <tbody>{rows.map(row => <tr key={row.label}><th>{row.label}</th><td className={row.aWins ? 'winner' : ''}>{row.a}</td><td className={!row.aWins ? 'winner' : ''}>{row.b}</td><td>{row.diff}</td></tr>)}</tbody>
                         </table>
                         {pricePct && <p>{cheaper} tiene el alquiler un {pricePct}% más bajo; {lessEffort} exige menos esfuerzo sobre la renta media.</p>}
