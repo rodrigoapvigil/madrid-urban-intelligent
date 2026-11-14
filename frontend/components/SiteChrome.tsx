@@ -51,8 +51,8 @@ export function SiteHeader({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const effectiveCtaHref = ctaHref || (activePath === '/madrid' ? '/madrid/veredicto' : '/madrid');
-  const effectiveCtaText = ctaText || (activePath === '/madrid' ? 'Resumen del análisis' : 'Ver precios');
+  const effectiveCtaHref = ctaHref || (activePath === '/madrid' ? '/madrid/veredicto' : '/contacto');
+  const effectiveCtaText = ctaText || (activePath === '/madrid' ? 'Resumen del análisis' : 'Colabora con nosotros');
 
   return (
     <>
@@ -88,7 +88,7 @@ export function SiteHeader({
           <nav className="mi-nav site-navigation" aria-label="Navegación">{children}</nav>
         ) : (
           <nav className="mi-nav site-navigation" aria-label="Navegación principal">
-            <Link href="/#plataforma">Plataforma</Link>
+            <Link href="/madrid">Plataforma</Link>
             <Link href="/#impacto">A quién ayuda</Link>
             <Link href="/madrid/chat" className={activePath === '/madrid/chat' ? 'active' : ''}>AMBI</Link>
             <Link href="/madrid/veredicto" className={activePath === '/madrid/veredicto' ? 'active' : ''}>El Veredicto</Link>
@@ -98,7 +98,7 @@ export function SiteHeader({
         {/* Desktop CTA Button (hidden on mobile) */}
         <Link
           href={effectiveCtaHref}
-          className="mi-header__cta"
+          className={`mi-header__cta${effectiveCtaHref === '/contacto' ? ' mi-header__cta--secondary' : ''}`}
         >
           {effectiveCtaText}{' '}
           <ArrowUpRight size={14} aria-hidden="true" />
@@ -188,7 +188,7 @@ export function SiteHeader({
             {/* Vertical Navigation Links - Auros Styled */}
             <nav className="mi-mobile-drawer__nav" aria-label="Enlaces principales">
               <Link
-                href="/#plataforma"
+                href="/madrid"
                 className="mi-mobile-drawer__link"
                 onClick={() => setIsMobileMenuOpen(false)}
               >

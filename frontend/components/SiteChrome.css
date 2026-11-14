@@ -809,6 +809,20 @@
   box-shadow: 0 7px 22px rgba(140, 198, 232, 0.24);
 }
 .mi-header__cta svg { stroke: #06162d; }
+.mi-header__cta--secondary {
+  min-height: 40px;
+  border-color: rgba(186, 204, 214, 0.28);
+  color: #d7e5ef !important;
+  background: rgba(255, 255, 255, 0.035);
+  box-shadow: none;
+  font-weight: 550;
+}
+.mi-header__cta--secondary:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: none;
+}
+.mi-header__cta--secondary svg { stroke: currentColor; }
 .mi-header__menu-btn {
   border: 0;
   background: rgba(24, 57, 87, 0.72);

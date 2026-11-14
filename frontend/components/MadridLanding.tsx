@@ -27,7 +27,7 @@ export default function MadridLanding() {
   return (
     <div className="mi-home" id="inicio">
       <div className="mi-atmosphere" aria-hidden="true"/>
-      <SiteHeader activePath="/" />
+      <SiteHeader activePath="/" ctaText="Colabora con nosotros" ctaHref="/contacto" />
 
       <main id="contenido-principal">
         {/* 0. HERO: Claridad en 3 segundos */}
@@ -36,7 +36,7 @@ export default function MadridLanding() {
             <p className="mi-hero__kicker">DMIYC</p>
             <h1 id="mi-title">No adivines.<br/><span>Decide con datos.</span></h1>
             <p className="mi-hero__lead">Compra o alquila con precios de cierre oficial en los 131 barrios de Madrid, sin caer en precios inflados.</p>
-            <Link href="/madrid" className="mi-hero__cta-main">Explorar precios de cierre <ArrowUpRight aria-hidden="true"/></Link>
+            <Link href="/madrid" className="mi-hero__cta-main">Explorar precios de Madrid <ArrowUpRight aria-hidden="true"/></Link>
           </div>
           <MadridHeroArtwork />
           <div className="mi-hero__meta"><span>21 distritos</span><i/><span>131 barrios auditados</span></div>
