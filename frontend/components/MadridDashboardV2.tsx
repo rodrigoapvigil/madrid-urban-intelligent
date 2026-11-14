@@ -3883,13 +3883,16 @@ const MadridDashboardV2: React.FC = () => {
                       <button type="button" aria-pressed={rankingLevel === 'Barrios'} className={`v2-tab-btn ${rankingLevel === 'Barrios' ? 'active' : ''}`} onClick={() => setRankingLevel('Barrios')}>Barrios</button>
                     </div>
                   ) : (
-                    <SegmentedControl<'Distritos' | 'Barrios'>
-                      label="Nivel de zonas"
-                      size="md"
-                      value={rankingLevel}
-                      options={[{ value: 'Distritos', label: 'Distritos' }, { value: 'Barrios', label: 'Barrios' }] as const}
-                      onChange={setRankingLevel}
-                    />
+                    <div className="v2-segmented-with-label">
+                      <span>Ver por:</span>
+                      <SegmentedControl<'Distritos' | 'Barrios'>
+                        label="Nivel de zonas"
+                        size="md"
+                        value={rankingLevel}
+                        options={[{ value: 'Distritos', label: 'Distritos' }, { value: 'Barrios', label: 'Barrios' }] as const}
+                        onChange={setRankingLevel}
+                      />
+                    </div>
                   )}
                 </div>
               </div>
@@ -4227,13 +4230,16 @@ const MadridDashboardV2: React.FC = () => {
                 </div>
                 {!isMobile && <div className="v2-compare-desktop-toolbar">
                   <button type="button" className="v2-compare-help" onClick={() => setShowCompareHelpModal(true)}><HelpCircle size={15} /> ¿Cómo usar la comparación?</button>
-                  <SegmentedControl<'Distritos' | 'Barrios'>
-                    label="Nivel de comparación"
-                    size="md"
-                    value={compareLevel}
-                    options={[{ value: 'Distritos', label: 'Distritos' }, { value: 'Barrios', label: 'Barrios' }] as const}
-                    onChange={handleLevelToggle}
-                  />
+                  <div className="v2-segmented-with-label">
+                    <span>Ver por:</span>
+                    <SegmentedControl<'Distritos' | 'Barrios'>
+                      label="Nivel de comparación"
+                      size="md"
+                      value={compareLevel}
+                      options={[{ value: 'Distritos', label: 'Distritos' }, { value: 'Barrios', label: 'Barrios' }] as const}
+                      onChange={handleLevelToggle}
+                    />
+                  </div>
                 </div>}
               </div>
 
