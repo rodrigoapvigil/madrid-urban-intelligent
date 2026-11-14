@@ -18,6 +18,7 @@ import { useComparacion } from '../hooks/useComparacion';
 import { useZonaSeleccionada } from '../hooks/useZonaSeleccionada';
 import { FichaZonaDesktop, FichaZonaMovil } from './ZonaSelectionPanels';
 import SegmentedControl from './SegmentedControl';
+import ZoneDropdownList from './ZoneDropdownList';
 import type { MapZoneHoverContext } from './MadridMap';
 
 ChartJS.register(ChartDataLabels, cssColorResolverPlugin);
@@ -4138,32 +4139,20 @@ const MadridDashboardV2: React.FC = () => {
               <div className="v2-compare-zone-selectors v2-compare-selectors-sticky">
                 <div className={`v2-dropdown-container v2-compare-zone-select zone-a ${activeDropdown === 'zoneA' ? 'v2-z-up' : ''}`}>
                   <span className="v2-filter-label zone-a-label"><i /> ZONA A</span>
-                  <button type="button" className="v2-custom-select" aria-haspopup={isMobile ? 'dialog' : 'listbox'} aria-expanded={isMobile ? compareZoneSheet === 'A' : activeDropdown === 'zoneA'} onClick={() => { if (isMobile) { setCompareZoneSearch(''); setCompareZoneSheet('A'); } else setActiveDropdown(activeDropdown === 'zoneA' ? null : 'zoneA'); }}>
+                  <button type="button" className="v2-custom-select" aria-haspopup={isMobile ? 'dialog' : 'listbox'} aria-controls={!isMobile ? 'compare-zone-a-menu' : undefined} aria-expanded={isMobile ? compareZoneSheet === 'A' : activeDropdown === 'zoneA'} onClick={() => { if (isMobile) { setCompareZoneSearch(''); setCompareZoneSheet('A'); } else { setCompareZoneSearch(''); setActiveDropdown(activeDropdown === 'zoneA' ? null : 'zoneA'); } }}>
                     <span>{formatZoneOption(selectedZoneA)}</span>
                     <ChevronDown size={14} className="v2-select-chevron" />
                   </button>
-                  {activeDropdown === 'zoneA' && (
-                    <div className="v2-dropdown-menu" role="listbox" aria-label="Seleccionar Zona A">
-                      {(compareLevel === 'Distritos' ? availableDistricts : availableBarrios).map(z => (
-                        <button type="button" key={z} className="v2-dropdown-item" role="option" aria-selected={selectedZoneA === z} onClick={() => { setSelectedZoneA(z); setActiveDropdown(null); }}>{formatZoneOption(z)}</button>
-                      ))}
-                    </div>
-                  )}
+                  {!isMobile && activeDropdown === 'zoneA' && <ZoneDropdownList id="compare-zone-a" label="Seleccionar Zona A" zones={compareLevel === 'Distritos' ? availableDistricts : availableBarrios} selectedZone={selectedZoneA} formatZone={formatZoneOption} onSelect={zone => { setSelectedZoneA(zone); setActiveDropdown(null); }} />}
                 </div>
                 {isMobile && <button type="button" className="v2-compare-swap" aria-label="Intercambiar zonas A y B" title="Intercambiar zonas" onClick={() => { setSelectedZoneA(selectedZoneB); setSelectedZoneB(selectedZoneA); }}><span>⇄</span></button>}
                 <div className={`v2-dropdown-container v2-compare-zone-select zone-b ${activeDropdown === 'zoneB' ? 'v2-z-up' : ''}`}>
                   <span className="v2-filter-label zone-b-label"><i /> ZONA B</span>
-                  <button type="button" className="v2-custom-select" aria-haspopup={isMobile ? 'dialog' : 'listbox'} aria-expanded={isMobile ? compareZoneSheet === 'B' : activeDropdown === 'zoneB'} onClick={() => { if (isMobile) { setCompareZoneSearch(''); setCompareZoneSheet('B'); } else setActiveDropdown(activeDropdown === 'zoneB' ? null : 'zoneB'); }}>
+                  <button type="button" className="v2-custom-select" aria-haspopup={isMobile ? 'dialog' : 'listbox'} aria-controls={!isMobile ? 'compare-zone-b-menu' : undefined} aria-expanded={isMobile ? compareZoneSheet === 'B' : activeDropdown === 'zoneB'} onClick={() => { if (isMobile) { setCompareZoneSearch(''); setCompareZoneSheet('B'); } else { setCompareZoneSearch(''); setActiveDropdown(activeDropdown === 'zoneB' ? null : 'zoneB'); } }}>
                     <span>{formatZoneOption(selectedZoneB)}</span>
                     <ChevronDown size={14} className="v2-select-chevron" />
                   </button>
-                  {activeDropdown === 'zoneB' && (
-                    <div className="v2-dropdown-menu" role="listbox" aria-label="Seleccionar Zona B">
-                      {(compareLevel === 'Distritos' ? availableDistricts : availableBarrios).map(z => (
-                        <button type="button" key={z} className="v2-dropdown-item" role="option" aria-selected={selectedZoneB === z} onClick={() => { setSelectedZoneB(z); setActiveDropdown(null); }}>{formatZoneOption(z)}</button>
-                      ))}
-                    </div>
-                  )}
+                  {!isMobile && activeDropdown === 'zoneB' && <ZoneDropdownList id="compare-zone-b" label="Seleccionar Zona B" zones={compareLevel === 'Distritos' ? availableDistricts : availableBarrios} selectedZone={selectedZoneB} formatZone={formatZoneOption} onSelect={zone => { setSelectedZoneB(zone); setActiveDropdown(null); }} />}
                 </div>
               </div>
 

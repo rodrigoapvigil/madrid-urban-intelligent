@@ -2717,7 +2717,34 @@
   top: calc(100% + 8px) !important;
   left: 0 !important;
   width: 100% !important;
-  max-width: 380px !important;
+  max-width: none !important;
+}
+
+.v2-root .v2-compare-zone-select .v2-zone-dropdown-list {
+  z-index: 10001 !important;
+  max-height: 320px !important;
+  padding: 8px !important;
+}
+.v2-root .v2-compare-zone-select .v2-zone-dropdown-list [role="listbox"] {
+  max-height: 248px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.v2-root .v2-compare-zone-select.zone-a .v2-zone-dropdown-list .v2-dropdown-item:hover,
+.v2-root .v2-compare-zone-select.zone-a .v2-zone-dropdown-list .v2-dropdown-item[aria-selected="true"] {
+  background: rgba(0, 229, 255, .16) !important;
+  color: #00e5ff !important;
+}
+.v2-root .v2-compare-zone-select.zone-b .v2-zone-dropdown-list .v2-dropdown-item:hover,
+.v2-root .v2-compare-zone-select.zone-b .v2-zone-dropdown-list .v2-dropdown-item[aria-selected="true"] {
+  background: rgba(255, 182, 92, .16) !important;
+  color: #ffb65c !important;
+}
+.v2-root .v2-zone-dropdown-empty {
+  margin: 0;
+  padding: 10px 12px;
+  color: #9fb4c8;
+  font-size: 13px;
 }
 
 /* 5. Segmented Control / Toggle Buttons (Distritos vs Barrios) */
