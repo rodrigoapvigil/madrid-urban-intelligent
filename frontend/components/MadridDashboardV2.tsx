@@ -3662,8 +3662,7 @@ const MadridDashboardV2: React.FC = () => {
 
             {/* 3. EXPLORACIÓN DE MERCADO (HEATMAP & RANKINGS) */}
             <div className="v2-explorer-grid">
-              {/* COL 1: TITLE & TOGGLE */}
-              <div className="v2-explorer-col v2-explorer-nav">
+              <div className="v2-explorer-header">
                 <div className="v2-rank-title">
                   {activeProfile.id === 'venta'
                     ? 'Zonas con más demanda'
@@ -3681,7 +3680,7 @@ const MadridDashboardV2: React.FC = () => {
               </div>
 
               {/* COL 2: AFFORDABILITY / RENTABILITY / DEMAND RANKINGS */}
-              <div className="v2-explorer-col v2-rankings-stack" data-dashboard-section="ranking" style={{ minWidth: '260px' }}>
+              <div className="v2-explorer-col v2-rankings-stack" data-dashboard-section="ranking">
                 {activeProfile.id === 'venta' ? (
                   <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
                     <div className="v2-rank-head">
@@ -3723,7 +3722,7 @@ const MadridDashboardV2: React.FC = () => {
                       </div>
                     </div>
                     {selectedRankingZone && <span className="v2-highlighted-zone">{formatZoneOption(selectedRankingZone)} resaltada</span>}
-                    <table className="v2-ranking-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                    <table className="v2-ranking-table v2-affordability-ranking-table" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                       <thead>
                         <tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}>
                           <th style={{ paddingBottom: '8px', fontWeight: '600' }}>{rankingLevel === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th>
@@ -3740,7 +3739,7 @@ const MadridDashboardV2: React.FC = () => {
                                 {i+1}. {formatMadridName(item.name)}
                               </td>
                               <td className="v2-ranking-value" style={{ padding: '8px 0', textAlign: 'right', color: '#00F0FF', fontWeight: '700' }}>
-                                <i style={{ width: `${Math.max(0, Math.min(100, price / rankingValueMax * 100))}%` }} /><span>{rankingMetric === 'unit' ? `${formatNumber(price, 0)} €/m²` : activeProfile.id === 'alquiler' ? `${formatEuro(price)}/mes` : formatEuro(price)}</span>
+                                <span>{rankingMetric === 'unit' ? `${formatNumber(price, 0)} €/m²` : formatEuro(price)}</span>
                               </td>
                             </tr>
                           );
