@@ -106,6 +106,10 @@ export async function POST(request: NextRequest) {
 
   const endpoint = process.env.CONTACT_ENDPOINT?.trim();
   if (!endpoint) return jsonError('El envío de contacto no está configurado.', 503);
+  const recipient = process.env.CONTACT_TO?.trim();
+  if (!recipient || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient)) {
+    return jsonError('El destinatario de contacto no está configurado.', 503);
+  }
 
   let endpointUrl: URL;
   try {
@@ -118,16 +122,38 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const name = contact.name.trim();
+    const email = contact.email.trim();
+    const organization = contact.organization.trim();
+    const message = contact.message.trim();
+    const subject = `${contact.reason} | DMIYC | Nuevo mensaje de ${name}`;
+    const text = [
+      `Motivo: ${contact.reason}`,
+      `Nombre: ${name}`,
+      `Email: ${email}`,
+      'Mensaje:',
+      message,
+      ...(organization ? [`Organización: ${organization}`] : []),
+      '',
+      'Origen: formulario de contacto de DMIYC (Decide Madrid: Invierte y Compra).',
+    ].join('\n');
+
     const response = await fetch(endpointUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: contact.name.trim(),
-        email: contact.email.trim(),
-        organization: contact.organization.trim(),
+        to: recipient,
+        fromName: 'DMIYC · Decide Madrid: Invierte y Compra',
+        replyTo: email,
+        subject,
+        text,
+        name,
+        email,
+        organization,
         reason: contact.reason,
-        message: contact.message.trim(),
+        message,
         privacyAccepted: true,
+        source: 'DMIYC — Decide Madrid: Invierte y Compra',
       }),
       signal: AbortSignal.timeout(10_000),
       cache: 'no-store',
