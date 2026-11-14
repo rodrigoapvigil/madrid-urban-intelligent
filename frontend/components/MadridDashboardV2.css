@@ -3790,6 +3790,31 @@ body.v2-fullscreen-open footer { display: none !important; }
 
 /* Desktop-only ranking readability; mobile keeps its existing compact rows. */
 @media (min-width: 769px) and (hover: hover) {
+  /* Keep the explorer as the single framed surface; its two panels are content. */
+  .v2-root .v2-explorer-grid { padding: 24px !important; }
+  .v2-root .v2-explorer-header { padding-inline: 24px; }
+  .v2-root .v2-rank-mini-card {
+    padding: 24px !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  .v2-root .v2-heatmap-card {
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  .v2-root .v2-heatmap-head,
+  .v2-root .v2-heatmap-search,
+  .v2-root .v2-heatmap-scroll { margin-inline: 24px; }
+  .v2-root .v2-heatmap-head { padding-inline: 0; }
+  .v2-root .v2-heatmap-card > div[style*="font-size: 12px"] { margin-inline: 24px !important; padding-left: 0 !important; }
+  .v2-root .v2-heatmap-scroll { border: 0; border-radius: 0; }
+  .v2-root .v2-heatmap-search { width: calc(100% - 48px); }
+
   .v2-root .v2-affordability-ranking-table { table-layout: fixed; }
   .v2-root .v2-affordability-ranking-table th:first-child,
   .v2-root .v2-affordability-ranking-table td:first-child { width: 62%; padding-left: 12px !important; overflow: visible; white-space: nowrap; }
