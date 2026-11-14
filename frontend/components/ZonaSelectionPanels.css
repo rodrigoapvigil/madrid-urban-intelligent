@@ -15,7 +15,8 @@
 .zona-panel dd { margin: 0; color: #eaf5ff; font-size: 13px; font-weight: 700; text-align: right; }
 .zona-panel > p { margin: 10px 0 0; color: #00e5ff; font-size: 11px; font-weight: 700; }
 
-.zona-panel-desktop { position: absolute; top: 64px; left: 18px; z-index: 820; width: min(250px, 34%); min-width: 190px; padding: 14px; border-radius: 14px; pointer-events: none; }
+.zona-panel-desktop { position: fixed; top: 0; left: 0; z-index: 2147482000; width: 260px; max-width: calc(100vw - 16px); padding: 12px; border-radius: 14px; pointer-events: none; visibility: hidden; will-change: transform; }
+.zona-panel-desktop .zona-panel-kind { width: fit-content; color: #00e5ff; font-size: 9px; font-weight: 800; letter-spacing: .08em; }
 .zona-panel-movil { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; width: 100%; margin: 10px 0 0; padding: 12px; border-radius: 14px; }
 .zona-panel-movil .zona-panel-heading,
 .zona-panel-movil dl,
@@ -26,12 +27,6 @@
 .zona-panel-movil .v2-map-sheet-actions { display: flex; justify-content: space-between; gap: 8px; }
 .zona-panel-movil .v2-map-sheet-actions button { min-height: 36px; padding: 0 10px; border: 1px solid rgba(0,229,255,.28); border-radius: 9px; background: rgba(0,229,255,.08); color: #8ef5ff; font-size: 11px; font-weight: 700; }
 .v2-map-card { position: relative; }
-
-@media (min-width: 769px) and (hover: hover) {
-  .v2-map-card:has(.zona-panel-desktop) .v2-map-header { flex-wrap: wrap !important; padding-left: 225px; }
-  .v2-map-card:has(.zona-panel-desktop) .v2-map-header .v2-data-status { flex: 1 1 100%; min-width: 0; }
-  .v2-map-card:has(.zona-panel-desktop) .v2-map-header > button:not(.v2-expand-button) { margin-left: auto; }
-}
 
 @media (max-width: 768px), (pointer: coarse) and (max-height: 500px) {
   .zona-panel-desktop { display: none; }

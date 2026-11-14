@@ -17,6 +17,7 @@ import { useIsMobile } from '../hooks/useIsMobile';
 import { useComparacion } from '../hooks/useComparacion';
 import { useZonaSeleccionada } from '../hooks/useZonaSeleccionada';
 import { FichaZonaDesktop, FichaZonaMovil } from './ZonaSelectionPanels';
+import type { MapZoneHoverContext } from './MadridMap';
 
 ChartJS.register(ChartDataLabels, cssColorResolverPlugin);
 
@@ -1009,6 +1010,9 @@ const MadridDashboardV2: React.FC = () => {
     neighborhoods: mapData.neighborhoods,
     normalize: normalizeZoneLabel,
   });
+  const [desktopZoneHover, setDesktopZoneHover] = useState<MapZoneHoverContext | null>(null);
+  const desktopZoneHoverRef = useRef<MapZoneHoverContext | null>(null);
+  const [desktopPinnedZone, setDesktopPinnedZone] = useState<MapZoneHoverContext | null>(null);
   const [rankings, setRankings] = useState<{ topDist: any[], botDist: any[], topBarr: any[], botBarr: any[] }>({
     topDist: [], botDist: [], topBarr: [], botBarr: []
   });
@@ -1074,12 +1078,22 @@ const MadridDashboardV2: React.FC = () => {
     const query = heatmapSearch.trim().toLocaleLowerCase('es');
     return query ? heatmapData.filter(row => String(row.zona || '').toLocaleLowerCase('es').includes(query)) : heatmapData;
   }, [heatmapData, heatmapSearch]);
-  const displayedMapFeature = isMobile ? selectedMapFeature : activeMapFeature;
-  const displayedZoneData = isMobile ? selectedZoneData : activeZoneData;
+  const desktopDisplayedZone = desktopZoneHover || desktopPinnedZone;
+  const displayedMapFeature = isMobile ? selectedMapFeature : desktopDisplayedZone?.zoneId || activeMapFeature;
+  const displayedZoneData = isMobile
+    ? selectedZoneData
+    : desktopDisplayedZone
+      ? { item: desktopDisplayedZone.item, isDistrict: desktopDisplayedZone.zoneType === 'districts' }
+      : activeZoneData;
   const mapFeatureIsDistrict = displayedZoneData?.isDistrict ?? !displayedMapFeature;
   const mapFeatureRows = mapFeatureIsDistrict ? mapData.districts : mapData.neighborhoods;
   const mapFeatureItem = displayedZoneData?.item || null;
-  const mapFeatureRank = mapFeatureItem && displayedMapFeature ? [...mapFeatureRows].sort((a, b) => Number(b.precio_m2 || 0) - Number(a.precio_m2 || 0)).findIndex(item => normalizeZoneLabel(String(mapFeatureIsDistrict ? item.distrito : item.barrio || '')) === normalizeZoneLabel(displayedMapFeature)) + 1 : 0;
+  const mapFeatureRank = !isMobile && desktopDisplayedZone
+    ? desktopDisplayedZone.rank
+    : mapFeatureItem && displayedMapFeature
+      ? [...mapFeatureRows].sort((a, b) => Number(b.precio_m2 || 0) - Number(a.precio_m2 || 0)).findIndex(item => normalizeZoneLabel(String(mapFeatureIsDistrict ? item.distrito : item.barrio || '')) === normalizeZoneLabel(displayedMapFeature)) + 1
+      : 0;
+  const mapFeatureTotal = !isMobile && desktopDisplayedZone ? desktopDisplayedZone.total : mapFeatureRows.length;
   const mapFeatureAverage = mapFeatureRows.length ? mapFeatureRows.reduce((sum, item) => sum + Number(item.precio_m2 || 0), 0) / mapFeatureRows.length : 0;
   const mapFeatureDelta = mapFeatureAverage && mapFeatureItem ? (Number(mapFeatureItem.precio_m2 || 0) - mapFeatureAverage) / mapFeatureAverage * 100 : null;
   const madridDistrictAverage = mapData.districts.length ? mapData.districts.reduce((sum, item) => sum + Number(item.precio_m2 || 0), 0) / mapData.districts.length : 0;
@@ -1095,7 +1109,12 @@ const MadridDashboardV2: React.FC = () => {
       ? mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_vivienda), 0)} €/mes` : displayedMapFeature ? '—' : `${formatNumber(madridMonthlyAverage, 0)} €/mes`
       : mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_vivienda), 0)} €` : displayedMapFeature ? '—' : '—';
   const handleMapDistrictClick = useCallback((district: string | null) => {
-    selectZone(district);
+    const hoverContext = desktopZoneHoverRef.current;
+    const matchesHover = !isMobile && district && hoverContext && normalizeZoneLabel(district) === normalizeZoneLabel(hoverContext.zoneId);
+    selectZone(matchesHover ? hoverContext!.zoneId : district);
+    if (!isMobile) {
+      setDesktopPinnedZone(matchesHover ? hoverContext : null);
+    }
     if (isMobile) {
       setSelectedDistrict(district || 'Todos');
       setSelectedBarrio('Todos');
@@ -1103,9 +1122,25 @@ const MadridDashboardV2: React.FC = () => {
     }
   }, [isMobile, selectZone]);
   const handleMapBarrioClick = useCallback((barrio: string | null) => {
-    selectZone(barrio);
+    const hoverContext = desktopZoneHoverRef.current;
+    const matchesHover = !isMobile && barrio && hoverContext && normalizeZoneLabel(barrio) === normalizeZoneLabel(hoverContext.zoneId);
+    selectZone(matchesHover ? hoverContext!.zoneId : barrio);
+    if (!isMobile) {
+      setDesktopPinnedZone(matchesHover ? hoverContext : null);
+    }
     if (isMobile) setSelectedBarrio(barrio || 'Todos');
   }, [isMobile, selectZone]);
+  const handleDesktopZoneHover = useCallback((zone: string | null, context?: MapZoneHoverContext) => {
+    if (!zone || !context) {
+      hoverZone(null);
+      desktopZoneHoverRef.current = null;
+      setDesktopZoneHover(null);
+      return;
+    }
+    hoverZone(context.zoneId);
+    desktopZoneHoverRef.current = context;
+    setDesktopZoneHover(context);
+  }, [hoverZone]);
   const loadingStages = [
     { label: 'Conectando con la API', icon: Activity },
     { label: 'Procesando datos del mercado', icon: Database },
@@ -3594,8 +3629,9 @@ const MadridDashboardV2: React.FC = () => {
                           selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
                           selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
                           selectedZone={selectedMapFeature}
+                          selectedZoneType={isMobile ? undefined : desktopPinnedZone?.zoneType}
                           drillDownOnSelection={isMobile}
-                          onZoneHover={isMobile ? undefined : hoverZone}
+                          onZoneHover={isMobile ? undefined : handleDesktopZoneHover}
                           onDistrictClick={handleMapDistrictClick}
                         />
                       </div>
@@ -3613,23 +3649,30 @@ const MadridDashboardV2: React.FC = () => {
                           selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
                           selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
                           selectedZone={selectedMapFeature}
+                          selectedZoneType={isMobile ? undefined : desktopPinnedZone?.zoneType}
                           drillDownOnSelection={isMobile}
-                          onZoneHover={isMobile ? undefined : hoverZone}
+                          onZoneHover={isMobile ? undefined : handleDesktopZoneHover}
                           onDistrictClick={handleMapDistrictClick}
                           onBarrioClick={handleMapBarrioClick}
                         />
                       </div>
                     </div>
                   </div>
-                  {!isMobile && <FichaZonaDesktop
-                    zone={displayedMapFeature || 'Madrid · Media general'}
-                    rank={displayedMapFeature ? `Puesto ${mapFeatureRank || '—'} de ${mapFeatureRows.length}` : 'Media de los distritos'}
+                  {!isMobile && desktopDisplayedZone && <FichaZonaDesktop
+                    zone={desktopDisplayedZone.zoneId}
+                    zoneType={desktopDisplayedZone.zoneType === 'districts' ? 'DISTRITO' : 'BARRIO'}
+                    position={{ point: desktopDisplayedZone.point, bounds: desktopDisplayedZone.bounds }}
+                    style={{ maxWidth: Math.max(120, desktopDisplayedZone.bounds.right - desktopDisplayedZone.bounds.left - 16) }}
+                    pinned={Boolean(desktopPinnedZone && normalizeZoneLabel(selectedMapFeature || '') === normalizeZoneLabel(desktopPinnedZone.zoneId))}
+                    rank={mapFeatureRank
+                      ? `Puesto ${mapFeatureRank} de ${mapFeatureTotal} ${mapFeatureIsDistrict ? 'distritos' : 'barrios'}`
+                      : `Sin posición · ${mapFeatureTotal} ${mapFeatureIsDistrict ? 'distritos' : 'barrios'} con datos`}
                     primaryLabel={mapFeaturePrimaryLabel}
                     primaryValue={mapFeaturePrimary}
                     secondaryLabel={mapFeatureSecondaryLabel}
                     secondaryValue={mapFeatureSecondary}
                     delta={mapFeatureDelta === null ? null : `${mapFeatureDelta > 0 ? '+' : ''}${mapFeatureDelta.toFixed(1)}% frente a la media`}
-                    onClose={clearSelection}
+                    onClose={() => { clearSelection(); desktopZoneHoverRef.current = null; setDesktopZoneHover(null); setDesktopPinnedZone(null); }}
                   />}
                   {isMobile && selectedMapFeature && <FichaZonaMovil
                     zone={selectedMapFeature}

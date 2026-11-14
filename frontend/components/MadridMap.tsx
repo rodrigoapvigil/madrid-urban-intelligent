@@ -13,13 +13,24 @@ interface MapProps {
   selectedDistrict: string | null;
   selectedBarrio?: string | null;
   selectedZone?: string | null;
+  selectedZoneType?: 'districts' | 'neighborhoods';
   drillDownOnSelection?: boolean;
   compareZoneA?: string;
   compareZoneB?: string;
   onDistrictClick: (districtName: string | null) => void;
   onBarrioClick?: (barrioName: string | null) => void;
-  onZoneHover?: (zoneName: string | null) => void;
+  onZoneHover?: (zoneName: string | null, context?: MapZoneHoverContext) => void;
 }
+
+export type MapZoneHoverContext = {
+  zoneId: string;
+  zoneType: 'districts' | 'neighborhoods';
+  item: any | null;
+  rank: number;
+  total: number;
+  point: { x: number; y: number };
+  bounds: { left: number; top: number; right: number; bottom: number };
+};
 
 const normalize = (str: string) => {
   if (!str) return '';
@@ -223,7 +234,7 @@ let cachedBarriosGeoJson: any = null;
 
 const MadridMap: React.FC<MapProps> = ({ 
   type, data, selectedYear, selectedMonth, selectedProfile, 
-  selectedDistrict, selectedBarrio, selectedZone = null, drillDownOnSelection = true, compareZoneA, compareZoneB, onDistrictClick, onBarrioClick, onZoneHover
+  selectedDistrict, selectedBarrio, selectedZone = null, selectedZoneType, drillDownOnSelection = true, compareZoneA, compareZoneB, onDistrictClick, onBarrioClick, onZoneHover
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
@@ -243,6 +254,10 @@ const MadridMap: React.FC<MapProps> = ({
   const style = useCallback((feature: any) => {
     const props = feature.properties || {};
     const name = props.barrio || props.name || props.distrito_nombre || props.nombre || props.distrito;
+    const selectedFeatureId = type === 'districts'
+      ? props.distrito || props.distrito_nombre || props.nombre || props.name
+      : props.barrio || props.nombre || props.name;
+    const nameForZoneSelection = selectedZoneType === type ? selectedFeatureId : name;
     
     // Check if this feature belongs to the selected district
     const featureDistrict = props.distrito || props.nombre || props.name || props.distrito_nombre;
@@ -255,7 +270,7 @@ const MadridMap: React.FC<MapProps> = ({
       }
     }
 
-    const isSelected = Boolean(selectedZone && normalize(name) === normalize(selectedZone)) || (type === 'districts'
+    const isSelected = Boolean(selectedZone && (!selectedZoneType || selectedZoneType === type) && normalize(nameForZoneSelection) === normalize(selectedZone)) || (type === 'districts'
       ? Boolean(selectedDistrict && normalize(name) === normalize(selectedDistrict))
       : Boolean(selectedBarrio && normalize(name) === normalize(selectedBarrio)));
     const isCompareA = Boolean(compareZoneA && normalize(name) === normalize(compareZoneA));
@@ -281,7 +296,7 @@ const MadridMap: React.FC<MapProps> = ({
       color: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
       fillOpacity: isExcluded ? 0.25 : 1.0,
     };
-  }, [data, selectedDistrict, selectedBarrio, selectedZone, type, selectedProfile, compareZoneA, compareZoneB]);
+  }, [data, selectedDistrict, selectedBarrio, selectedZone, selectedZoneType, type, selectedProfile, compareZoneA, compareZoneB]);
 
   useEffect(() => {
     const initializeMap = () => {
@@ -379,6 +394,9 @@ const MadridMap: React.FC<MapProps> = ({
       if (geoJsonLayerRef.current) {
         mapRef.current?.removeLayer(geoJsonLayerRef.current);
       }
+      const rankedMapRows = data
+        .filter(entry => Number.isFinite(Number(entry.precio_m2)) && Number(entry.precio_m2) > 0)
+        .sort((a, b) => Number(b.precio_m2) - Number(a.precio_m2));
 
       geoJsonLayerRef.current = L.geoJSON(geoData, {
         style: style,
@@ -386,16 +404,33 @@ const MadridMap: React.FC<MapProps> = ({
           const props = feature.properties || {};
           const rawName = props.barrio || props.nombre || props.name || props.distrito_nombre || props.distrito || 'Área de Madrid';
           const name = formatMadridName(rawName);
+          const rawZoneId = String(type === 'districts' ? props.distrito || props.distrito_nombre || props.nombre || props.name || rawName : props.barrio || props.nombre || props.name || rawName);
           const districtName = props.distrito || props.nombre || props.name || props.distrito_nombre;
           
           const isDatePredicted = selectedYear > 2026 || (selectedYear === 2026 && !['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'].includes(selectedMonth));
           const periodLabel = isDatePredicted ? 'Estimación' : 'Dato real';
           
-          const item = data.find(d => {
-            const dName = normalize(type === 'districts' ? d.distrito : d.barrio);
-            const geoName = normalize(name);
-            return dName === geoName || dName.includes(geoName) || geoName.includes(dName);
-          });
+          const exactItem = data.find(d => normalize(type === 'districts' ? d.distrito : d.barrio) === normalize(rawZoneId));
+          const item = exactItem;
+          const zoneId = String(item?.[type === 'districts' ? 'distrito' : 'barrio'] || rawZoneId);
+          const zoneRank = rankedMapRows.findIndex(entry => normalize(String(entry[type === 'districts' ? 'distrito' : 'barrio'] || '')) === normalize(zoneId)) + 1;
+
+          const getHoverContext = (event: any): MapZoneHoverContext | undefined => {
+            const nativeEvent = event?.originalEvent;
+            const mapElement = mapRef.current?.getContainer();
+            const mapCard = mapElement?.closest<HTMLElement>('.v2-map-sub') || mapElement;
+            if (!nativeEvent || !mapCard) return undefined;
+            const rect = mapCard.getBoundingClientRect();
+            return {
+              zoneId,
+              zoneType: type,
+              item: item || null,
+              rank: zoneRank,
+              total: rankedMapRows.length,
+              point: { x: nativeEvent.clientX, y: nativeEvent.clientY },
+              bounds: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom },
+            };
+          };
           
           let popupContent = `<div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding: 6px; min-width: 190px; border-radius: 12px; color: #FFFFFF;">`;
           popupContent += `<strong style="font-size: 14px; font-weight: 600; color: #FFFFFF; display: block; margin-bottom: 8px; border-bottom: 1px solid rgba(186, 204, 214, 0.2); padding-bottom: 4px;">${name}</strong>`;
@@ -444,7 +479,7 @@ const MadridMap: React.FC<MapProps> = ({
           layer.on({
             mouseover: (e) => {
               if (!hasHoverPointer) return;
-              onZoneHoverRef.current?.(name);
+              onZoneHoverRef.current?.(zoneId, getHoverContext(e));
               const l = e.target;
               l.setStyle({
                 weight: 2,
@@ -459,12 +494,17 @@ const MadridMap: React.FC<MapProps> = ({
                 geoJsonLayerRef.current?.resetStyle(e.target);
               }
             },
+            mousemove: (e) => {
+              if (!hasHoverPointer) return;
+              onZoneHoverRef.current?.(zoneId, getHoverContext(e));
+            },
             click: () => {
               if (type === 'districts') {
-                const targetName = districtName;
+                const targetName = drillDownOnSelection ? districtName : zoneId;
                 onDistrictClick(compareZoneA !== undefined ? targetName : normalize(targetName) === normalize(selectedDistrict) ? null : targetName);
               } else if (onBarrioClick) {
-                onBarrioClick(compareZoneA !== undefined ? name : normalize(name) === normalize(selectedBarrio) ? null : name);
+                const targetName = drillDownOnSelection ? name : zoneId;
+                onBarrioClick(compareZoneA !== undefined ? targetName : normalize(targetName) === normalize(selectedBarrio) ? null : targetName);
               }
             }
           });
