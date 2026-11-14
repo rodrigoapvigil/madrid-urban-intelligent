@@ -542,10 +542,12 @@ const getComparisonMetric = (profileId: string) => profileId === 'inversion'
   : { label: 'Precio m²', unit: '€/m²', tooltipUnit: '€/m²', multiplier: 1, decimals: profileId === 'alquiler' ? 2 : 1 };
 
 const getMapLegendLabels = (profileId: string) => {
-  if (profileId === 'inversion') return ['< 4,3 %', '4,3–5,0 %', '5,0–5,7 %', '5,7–6,5 %', '≥ 7,4 %'];
-  if (profileId === 'venta' || profileId === 'compra') return ['< 2.100 €', '2.100–3.100 €', '3.100–4.200 €', '4.200–5.400 €', '≥ 6.800 €'];
+  if (profileId === 'inversion') return ['< 4,3 %', '4,3–5,0 %', '5,0–5,7 %', '5,7–6,5 %', '≥ 6,5 %'];
+  if (profileId === 'venta' || profileId === 'compra') return ['< 2.100 €/m²', '2.100–3.100 €/m²', '3.100–4.200 €/m²', '4.200–5.400 €/m²', '≥ 5.400 €/m²'];
   return ['< 16 €/m²', '16–19 €/m²', '19–22 €/m²', '22–25 €/m²', '≥ 25 €/m²'];
 };
+
+const MAP_DATA_SOURCE = 'Banco de Datos del Ayuntamiento de Madrid';
 
 const MONTHS_ES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
@@ -3780,19 +3782,44 @@ const MadridDashboardV2: React.FC = () => {
                   >
                     <div className="v2-map-sheet-actions"><button type="button" onClick={() => { const level = mapFeatureIsDistrict ? 'Distritos' : 'Barrios'; const zones = level === 'Distritos' ? availableDistricts : availableBarrios; setCompareLevel(level); setSelectedZoneA(selectedMapFeature); if (selectedZoneB === selectedMapFeature) setSelectedZoneB(zones.find(zone => zone !== selectedMapFeature) || 'Todos'); clearSelection(); scrollToDashboardSection('compare'); }}>Ver evolución →</button><button type="button" onClick={() => { clearSelection(); setSelectedBarrio('Todos'); setSelectedDistrict('Todos'); setMapLevel('districts'); }}>Ver Madrid</button></div>
                   </FichaZonaMovil>}
-                  <div className="v2-map-legend" aria-label="Leyenda del mapa por precio por metro cuadrado">
-                    <div className="v2-map-legend-title">Intensidad de precio · {activeProfile.id === 'inversion' ? '%' : activeProfile.id === 'venta' || activeProfile.id === 'compra' ? '€ / m²' : '€/m²'}</div>
-                    <div className="v2-map-legend-scale" aria-label="Tramos de la escala de color">
-                      <div className="v2-map-legend-swatches" aria-hidden="true">
-                        <i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" />
+                  <div className="v2-map-legend" aria-label="Leyenda del mapa">
+                    {isMobile ? (
+                      <>
+                        <div className="v2-map-legend-title">Intensidad de {activeProfile.id === 'inversion' ? 'rentabilidad bruta · %' : 'precio · €/m²'}</div>
+                        <div className="v2-map-legend-scale" aria-label="Tramos de la escala de color">
+                          <div className="v2-map-legend-swatches" aria-hidden="true">
+                            <i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" />
+                          </div>
+                        </div>
+                        <div className="v2-map-legend-labels">
+                          {getMapLegendLabels(activeProfile.id).map(label => <span key={label}>{label}</span>)}
+                          <span className="no-data-label"><i /> Sin datos</span>
+                        </div>
+                        <small>Los tonos comparan las zonas del periodo seleccionado. Rayado: sin datos publicados en la fuente oficial ({MAP_DATA_SOURCE}). No los estimamos.</small>
+                        <small>{mapData.neighborhoods.filter((item: any) => Number(activeProfile.id === 'inversion' ? item.rentabilidad : item.precio_m2) > 0).length} de {neighborhoodFeatureCount || mapData.neighborhoods.length} barrios tienen dato en este periodo.</small>
+                      </>
+                    ) : (
+                      <div className="v2-map-legend-desktop">
+                        <div className="v2-map-legend-notes">
+                          <small>Rayado: sin datos publicados en la fuente oficial ({MAP_DATA_SOURCE}). No los estimamos.</small>
+                          <small>{mapData.neighborhoods.filter((item: any) => Number(activeProfile.id === 'inversion' ? item.rentabilidad : item.precio_m2) > 0).length} de {neighborhoodFeatureCount || mapData.neighborhoods.length} barrios tienen dato en este periodo.</small>
+                        </div>
+                        <div className="v2-map-legend-visual">
+                          <div className="v2-map-legend-title">Intensidad de {activeProfile.id === 'inversion' ? 'rentabilidad bruta (%)' : 'precio por m² (€/m²)'}</div>
+                          <div className="v2-map-legend-scale" aria-label="Escala de menor a mayor valor">
+                            <span>Más bajo</span>
+                            <div className="v2-map-legend-swatches" aria-hidden="true">
+                              <i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" />
+                            </div>
+                            <span>Más alto</span>
+                          </div>
+                          <div className="v2-map-legend-labels">
+                            {getMapLegendLabels(activeProfile.id).map(label => <span key={label}>{label}</span>)}
+                            <span className="no-data-label"><i /> Sin datos</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="v2-map-legend-labels">
-                      {getMapLegendLabels(activeProfile.id).map(label => <span key={label}>{label}</span>)}
-                      <span className="no-data-label"><i /> Sin datos</span>
-                    </div>
-                    <small>Los tonos comparan las zonas del periodo seleccionado. Rayado: sin datos oficiales del Ayuntamiento. No los estimamos.</small>
-                    <small>{mapData.neighborhoods.filter((item: any) => Number(activeProfile.id === 'inversion' ? item.rentabilidad : item.precio_m2) > 0).length} de {neighborhoodFeatureCount || mapData.neighborhoods.length} barrios con datos.</small>
+                    )}
                   </div>
                 </div>
               </div>

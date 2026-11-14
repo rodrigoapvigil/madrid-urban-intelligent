@@ -67,15 +67,14 @@ const getChoroplethTier = (val: number, profile: string): number => {
   const p = normalize(profile);
 
   if (p.includes('alquiler')) {
-    if (val >= 25) return 5;
-    if (val >= 22) return 4;
-    if (val >= 19) return 3;
-    if (val >= 16) return 2;
-    return 1;
+    if (val >= 25) return 4;
+    if (val >= 22) return 3;
+    if (val >= 19) return 2;
+    if (val >= 16) return 1;
+    return 0;
   }
 
   if (p.includes('compra') || p.includes('venta')) {
-    if (val >= 6800) return 5;
     if (val >= 5400) return 4;
     if (val >= 4200) return 3;
     if (val >= 3100) return 2;
@@ -84,7 +83,6 @@ const getChoroplethTier = (val: number, profile: string): number => {
   }
 
   if (p.includes('inversion')) {
-    if (val >= 0.074) return 5;
     if (val >= 0.065) return 4;
     if (val >= 0.057) return 3;
     if (val >= 0.050) return 2;
