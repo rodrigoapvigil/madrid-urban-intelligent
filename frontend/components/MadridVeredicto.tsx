@@ -16,6 +16,7 @@ import { VeredictoResponse, VeredictoEstado } from '../types/veredicto';
 import './MadridVeredicto.css';
 import { apiFetch, apiUrl } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
+import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
 
 export default function MadridVeredicto() {
   const searchParams = useSearchParams();
@@ -143,7 +144,7 @@ export default function MadridVeredicto() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail || 'Error al calcular el veredicto del inmueble.');
+        throw new Error(data.detail || 'No se pudo completar la comparación del precio.');
       }
 
       if (data.requiere_manual) {
@@ -192,13 +193,13 @@ export default function MadridVeredicto() {
 
   const badgeConfig: Record<VeredictoEstado, { label: string }> = {
     CARO: {
-      label: 'SOBREPRECIO DETECTADO',
+      label: 'POR ENCIMA DE LA REFERENCIA',
     },
     BARATO: {
-      label: 'OPORTUNIDAD DE PRECIO',
+      label: 'POR DEBAJO DE LA REFERENCIA',
     },
     EN_LINEA: {
-      label: 'EN PRECIO DE MERCADO',
+      label: 'EN EL RANGO DE REFERENCIA',
     }
   };
 
@@ -248,10 +249,10 @@ export default function MadridVeredicto() {
             <span>Auditoría basada en series oficiales de cierre del Ayuntamiento de Madrid</span>
           </div>
           <h1 className="veredicto-title">
-            El Veredicto Inmobiliario
+            {PRICE_ANALYSIS_LABEL}
           </h1>
           <p className="veredicto-subtitle">
-            Descubre si un piso tiene sobreprecio o es una oportunidad contrastándolo con las operaciones reales de cierre de su barrio.
+            Compara el precio anunciado con operaciones de cierre observadas en su zona. Es una referencia estadística informativa, no una tasación.
           </p>
         </div>
 
@@ -362,7 +363,7 @@ export default function MadridVeredicto() {
                     {isLoading ? (
                       <>
                         <div style={{ width: '14px', height: '14px', border: '2px solid color-mix(in srgb, var(--blanco-humo) 30%, transparent)', borderTopColor: 'var(--blanco-humo)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
-                        <span>Calculando veredicto...</span>
+                        <span>Calculando comparación...</span>
                       </>
                     ) : (
                       <>
@@ -389,10 +390,11 @@ export default function MadridVeredicto() {
                     {badgeConfig[resultado.estado].label}
                   </span>
                   <h2 className="veredicto-hero-title">
-                    {resultado.estado === 'CARO' && `Sobreprecio del +${resultado.desviacion_pct_barrio.toFixed(1)}%`}
-                    {resultado.estado === 'BARATO' && `Descuento del ${resultado.desviacion_pct_barrio.toFixed(1)}%`}
-                    {resultado.estado === 'EN_LINEA' && 'Alineado con el mercado oficial'}
+                    {resultado.desviacion_pct_barrio === 0
+                      ? 'En torno a la referencia estimada de la zona'
+                      : `${Math.abs(resultado.desviacion_pct_barrio).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}% ${resultado.desviacion_pct_barrio > 0 ? 'por encima de' : 'por debajo de'} la referencia estimada de la zona`}
                   </h2>
+                  <p style={{ margin: '8px 0 0', color: 'color-mix(in srgb, var(--blanco-humo) 65%, transparent)', fontSize: '12px' }}>La referencia resume operaciones de cierre observadas. No es una tasación ni una garantía de precio.</p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <p style={{ fontSize: '11px', color: 'color-mix(in srgb, var(--blanco-humo) 50%, transparent)', margin: 0 }}>Zona analizada</p>
@@ -406,13 +408,13 @@ export default function MadridVeredicto() {
                 <div className="veredicto-kpi-tile">
                   <p className="veredicto-kpi-label">Inmueble analizado</p>
                   <p className="veredicto-kpi-val">{resultado.precio_m2_inmueble.toLocaleString()} €/m²</p>
-                  <p className="veredicto-kpi-sub" style={{ color: 'color-mix(in srgb, var(--blanco-humo) 40%, transparent)' }}>Ratio resultante</p>
+                  <p className="veredicto-kpi-sub" style={{ color: 'color-mix(in srgb, var(--blanco-humo) 40%, transparent)' }}>Precio indicado por m²</p>
                 </div>
                 <div className="veredicto-kpi-tile">
-                  <p className="veredicto-kpi-label">Media en {resultado.barrio_nombre}</p>
+                  <p className="veredicto-kpi-label">Referencia de {resultado.barrio_nombre}</p>
                   <p className="veredicto-kpi-val">{resultado.precio_m2_barrio_medio.toLocaleString()} €/m²</p>
                   <p className="veredicto-kpi-sub" style={{ color: resultado.desviacion_pct_barrio > 0 ? 'var(--coral)' : 'var(--precio-subida)' }}>
-                    {resultado.desviacion_pct_barrio > 0 ? '+' : ''}{resultado.desviacion_pct_barrio.toFixed(1)}% vs barrio
+                    {resultado.desviacion_pct_barrio > 0 ? '+' : ''}{resultado.desviacion_pct_barrio.toFixed(1)}% frente a la referencia
                   </p>
                 </div>
                 <div className="veredicto-kpi-tile">
@@ -423,13 +425,11 @@ export default function MadridVeredicto() {
                   </p>
                 </div>
                 <div className="veredicto-kpi-tile">
-                  <p className="veredicto-kpi-label">Margen de negociación</p>
+                  <p className="veredicto-kpi-label">Referencia estimada para la superficie</p>
                   <p className="veredicto-kpi-val" style={{ color: 'var(--precio-subida)' }}>
-                    {resultado.margen_negociacion_estimado_eur > 0
-                      ? `${resultado.margen_negociacion_estimado_eur.toLocaleString()} €`
-                      : '0 € (En precio)'}
+                    {resultado.precio_justo_estimado_eur.toLocaleString('es-ES', { maximumFractionDigits: 0 })} {operacion === 'Alquiler' ? '€/mes' : '€'}
                   </p>
-                  <p className="veredicto-kpi-sub" style={{ color: 'color-mix(in srgb, var(--blanco-humo) 40%, transparent)' }}>Descuento objetivo sugerido</p>
+                  <p className="veredicto-kpi-sub" style={{ color: 'color-mix(in srgb, var(--blanco-humo) 40%, transparent)' }}>Cálculo basado en la media observada de la zona</p>
                 </div>
               </div>
             </div>
@@ -438,7 +438,7 @@ export default function MadridVeredicto() {
             <div className="veredicto-args-card">
               <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--blanco-humo)', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <TrendingUp style={{ width: '18px', height: '18px', color: 'var(--precio-subida)' }} />
-                <span>Argumentario para negociar con el vendedor o justificar ante el banco</span>
+                <span>Cómo leer esta comparación</span>
               </h3>
               <div>
                 {resultado.resumen_argumentos.map((arg, idx) => (

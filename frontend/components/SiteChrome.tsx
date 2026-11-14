@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { ReactNode } from 'react';
 import { ArrowUpRight, Linkedin, X } from 'lucide-react';
+import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
 
 type SiteHeaderProps = {
   activePath?: string;
@@ -54,7 +55,7 @@ export function SiteHeader({
   }, []);
 
   const effectiveCtaHref = ctaHref || (activePath === '/madrid' ? '/madrid/veredicto' : '/contacto');
-  const effectiveCtaText = ctaText || (activePath === '/madrid' ? 'Resumen del análisis' : 'Colabora con nosotros');
+  const effectiveCtaText = ctaText || (activePath === '/madrid' ? PRICE_ANALYSIS_LABEL : 'Colabora con nosotros');
 
   return (
     <>
@@ -93,7 +94,7 @@ export function SiteHeader({
             <Link href="/madrid">Plataforma</Link>
             <Link href="/#impacto">A quién ayuda</Link>
             <Link href="/madrid/chat" className={activePath === '/madrid/chat' ? 'active' : ''}>AMBI</Link>
-            <Link href="/madrid/veredicto" className={activePath === '/madrid/veredicto' ? 'active' : ''}>El Veredicto</Link>
+            <Link href="/madrid/veredicto" className={activePath === '/madrid/veredicto' ? 'active' : ''}>{PRICE_ANALYSIS_LABEL}</Link>
           </nav>
         )}
 
@@ -218,7 +219,7 @@ export function SiteHeader({
                 className={`mi-mobile-drawer__link ${activePath === '/madrid/veredicto' ? 'active' : ''}`}
                 onClick={() => setIsMobileMenuOpen(false)}
               >
-                <span>EL VEREDICTO</span>
+                <span>{PRICE_ANALYSIS_LABEL.toLocaleUpperCase('es-ES')}</span>
                 <ArrowUpRight size={18} className="mi-mobile-drawer__link-arrow" aria-hidden="true" />
               </Link>
               <Link
@@ -297,7 +298,7 @@ export function SiteFooter() {
           <nav className="auros-footer__nav" aria-label="Enlaces institucionales y legales">
             <Link href="/madrid">CUADRO DE MANDO</Link>
             <Link href="/madrid/chat">ASISTENTE AMBI</Link>
-            <Link href="/madrid/veredicto">EL VEREDICTO</Link>
+            <Link href="/madrid/veredicto">{PRICE_ANALYSIS_LABEL.toLocaleUpperCase('es-ES')}</Link>
             <Link href="/metodologia">METODOLOGÍA</Link>
             <Link href="/sobre-el-proyecto">SOBRE EL PROYECTO</Link>
             <Link href="/contacto">CONTACTO</Link>

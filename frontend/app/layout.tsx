@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     default: 'Decide Madrid: Invierte y Compra | Precios por barrio',
     template: '%s | Decide Madrid: Invierte Y Compra',
   },
-  description: 'Precios de cierre oficial de alquiler, compra e inversión en los 131 barrios de Madrid. Compara distritos, analiza tendencias reales y negocia con datos sin sobreprecios.',
+  description: 'Consulta precios de cierre de alquiler, compra e inversión en los 131 barrios de Madrid y compara zonas con referencias estadísticas informativas.',
   applicationName: 'Decide Madrid: Invierte Y Compra',
   icons: { icon: '/icon.png', shortcut: '/icon.png', apple: '/icon.png' },
   robots: { index: true, follow: true },

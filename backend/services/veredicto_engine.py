@@ -226,40 +226,40 @@ def evaluar_inmueble(
         else:
             margen_eur = 0.0
 
-        # Generacion de argumentos de negociacion
+        # Generacion de argumentos comparativos e informativos
         argumentos = []
         if estado == "CARO":
             argumentos.append(
-                f"El precio del inmueble ({precio_m2_inmueble:,.0f} €/m2) se encuentra un {desviacion_pct_barrio:+.1f}% por encima del valor medio oficial de cierre en {barrio_nombre} ({precio_m2_barrio:,.0f} €/m2)."
+                f"El precio indicado ({precio_m2_inmueble:,.0f} €/m²) está un {abs(desviacion_pct_barrio):.1f}% por encima de la referencia estimada de {barrio_nombre} ({precio_m2_barrio:,.0f} €/m²)."
             )
             argumentos.append(
-                f"Existe un margen estimado de negociacion a la baja de aproximadamente {margen_eur:,.0f} € para ajustarse al mercado real del barrio."
+                f"Para una superficie de {metros:,.0f} m², la referencia calculada con la media observada de la zona es {precio_justo_estimado:,.0f} €."
             )
             argumentos.append(
-                f"En comparacion con la media de la capital ({precio_m2_madrid:,.0f} €/m2), este inmueble presenta una diferencia del {desviacion_pct_madrid:+.1f}%."
+                f"Frente a la referencia de Madrid capital ({precio_m2_madrid:,.0f} €/m²), la diferencia es del {desviacion_pct_madrid:+.1f}%."
             )
             argumentos.append(
-                f"La evolucion de precios en la zona muestra una variacion trimestral del {tendencia_trimestral:+.2f}%, lo que desaconseja convalidar primas excesivas de salida."
+                f"La serie observada en la zona registra una variación trimestral del {tendencia_trimestral:+.2f}%."
             )
         elif estado == "BARATO":
             argumentos.append(
-                f"Oportunidad de adquisicion: el inmueble se comercializa a {precio_m2_inmueble:,.0f} €/m2, un {abs(desviacion_pct_barrio):.1f}% por debajo de la media registrada en {barrio_nombre} ({precio_m2_barrio:,.0f} €/m2)."
+                f"El precio indicado ({precio_m2_inmueble:,.0f} €/m²) está un {abs(desviacion_pct_barrio):.1f}% por debajo de la referencia estimada de {barrio_nombre} ({precio_m2_barrio:,.0f} €/m²)."
             )
             argumentos.append(
-                f"El valor estimado segun series oficiales se situaria en {precio_justo_estimado:,.0f} €, lo que representa un colchon de seguridad favorable para la compra."
+                f"Para una superficie de {metros:,.0f} m², la referencia calculada con la media observada de la zona es {precio_justo_estimado:,.0f} €."
             )
             argumentos.append(
-                "Se aconseja revisar el estado de conservacion, cargas registrales o necesidad de reforma para verificar el motivo del descuento."
+                f"Frente a la referencia de Madrid capital ({precio_m2_madrid:,.0f} €/m²), la diferencia es del {desviacion_pct_madrid:+.1f}%."
             )
         else:
             argumentos.append(
-                f"El precio se encuentra plenamente alineado con el mercado del barrio ({precio_m2_inmueble:,.0f} €/m2 frente a {precio_m2_barrio:,.0f} €/m2 de media, desviacion del {desviacion_pct_barrio:+.1f}%)."
+                f"El precio indicado ({precio_m2_inmueble:,.0f} €/m²) está dentro del rango de referencia estimado para {barrio_nombre} ({precio_m2_barrio:,.0f} €/m²; diferencia del {desviacion_pct_barrio:+.1f}%)."
             )
             argumentos.append(
-                f"Margen tactico de contraoferta sugerido: entre el 3% y el 5% ({margen_eur:,.0f} €) sobre el precio de lista."
+                f"Para una superficie de {metros:,.0f} m², la referencia calculada con la media observada de la zona es {precio_justo_estimado:,.0f} €."
             )
             argumentos.append(
-                f"Frente a la media de Madrid ({precio_m2_madrid:,.0f} €/m2), la zona de {distrito_nombre} cotiza con una prima/descuento del {desviacion_pct_madrid:+.1f}%."
+                f"Frente a la referencia de Madrid capital ({precio_m2_madrid:,.0f} €/m²), la diferencia es del {desviacion_pct_madrid:+.1f}%."
             )
 
         return VeredictoResponse(

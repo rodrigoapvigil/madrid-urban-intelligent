@@ -19,6 +19,7 @@ import { useZonaSeleccionada } from '../hooks/useZonaSeleccionada';
 import { FichaZonaDesktop, FichaZonaMovil } from './ZonaSelectionPanels';
 import SegmentedControl from './SegmentedControl';
 import ZoneDropdownList from './ZoneDropdownList';
+import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
 import type { MapZoneHoverContext } from './MadridMap';
 
 ChartJS.register(ChartDataLabels, cssColorResolverPlugin);
@@ -2652,7 +2653,7 @@ const MadridDashboardV2: React.FC = () => {
           const idx = PROFILES.findIndex(p => p.id === id);
           if (idx !== -1) handleProfileChange(idx);
         }}
-        ctaText="Resumen del análisis"
+        ctaText={PRICE_ANALYSIS_LABEL}
         ctaHref="/madrid/veredicto"
       />
 

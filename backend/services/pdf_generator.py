@@ -47,15 +47,16 @@ def generar_dossier_pdf(veredicto: VeredictoResponse, precio_total: float, metro
     if veredicto.estado == "CARO":
         c_veredicto_bg = colors.HexColor("#FEE2E2")
         c_veredicto_text = colors.HexColor("#991B1B")
-        veredicto_label = "SOBREPRECIO DETECTADO (CARO)"
+        veredicto_label = "POR ENCIMA DE LA REFERENCIA"
     elif veredicto.estado == "BARATO":
         c_veredicto_bg = colors.HexColor("#DCFCE7")
         c_veredicto_text = colors.HexColor("#166534")
-        veredicto_label = "OPORTUNIDAD DE PRECIO (BARATO)"
+        veredicto_label = "POR DEBAJO DE LA REFERENCIA"
     else:
         c_veredicto_bg = colors.HexColor("#DBEAFE")
         c_veredicto_text = colors.HexColor("#1E40AF")
-        veredicto_label = "EN PRECIO DE MERCADO (EN LÍNEA)"
+        veredicto_label = "EN EL RANGO DE REFERENCIA"
+    estado_comparativo = veredicto_label
 
     # Estilos tipograficos
     style_header = ParagraphStyle(
@@ -167,8 +168,8 @@ def generar_dossier_pdf(veredicto: VeredictoResponse, precio_total: float, metro
         ],
         [
             Paragraph(
-                f"El precio del inmueble ({veredicto.precio_m2_inmueble:,.0f} €/m²) presenta una desviación del <b>{desv_sign}{veredicto.desviacion_pct_barrio:.1f}%</b> respecto al precio medio de cierre del barrio de {veredicto.barrio_nombre} ({veredicto.precio_m2_barrio_medio:,.0f} €/m²).<br/>"
-                f"<b>Margen estimado de negociación sugerido:</b> {veredicto.margen_negociacion_estimado_eur:,.0f} €",
+                f"El precio indicado ({veredicto.precio_m2_inmueble:,.0f} €/m²) está <b>{abs(veredicto.desviacion_pct_barrio):.1f}% {'por encima de' if veredicto.desviacion_pct_barrio > 0 else 'por debajo de' if veredicto.desviacion_pct_barrio < 0 else 'en torno a'} la referencia estimada</b> de {veredicto.barrio_nombre} ({veredicto.precio_m2_barrio_medio:,.0f} €/m²).<br/>"
+                f"<b>Referencia para la superficie indicada:</b> {veredicto.precio_justo_estimado_eur:,.0f} €",
                 ParagraphStyle("VDesc", parent=styles["Normal"], fontName="Helvetica", fontSize=9, leading=13, textColor=c_primary, alignment=1)
             )
         ]
@@ -187,14 +188,14 @@ def generar_dossier_pdf(veredicto: VeredictoResponse, precio_total: float, metro
     elements.append(Spacer(1, 12))
 
     # 4. Tabla Comparativa frente a Medias Oficiales de Madrid
-    elements.append(Paragraph("1. Contraste frente a Series Históricas Oficiales", style_section_title))
-    comp_header = ["Ámbito territorial", "Precio medio oficial", "Desviación vs Inmueble", "Estado comparativo"]
+    elements.append(Paragraph("1. Comparación con referencias estadísticas", style_section_title))
+    comp_header = ["Ámbito territorial", "Referencia observada", "Diferencia", "Comparación"]
     comp_rows = [
         [
             f"Barrio ({veredicto.barrio_nombre})",
             f"{veredicto.precio_m2_barrio_medio:,.0f} €/m²",
             f"{desv_sign}{veredicto.desviacion_pct_barrio:.1f}%",
-            veredicto.estado
+            estado_comparativo
         ],
         [
             f"Distrito ({veredicto.distrito_nombre})",
@@ -209,10 +210,10 @@ def generar_dossier_pdf(veredicto: VeredictoResponse, precio_total: float, metro
             "Referencia metropolitana"
         ],
         [
-            "Precio Justo de Mercado Estimado",
+            "Referencia estimada para la superficie",
             f"{veredicto.precio_justo_estimado_eur:,.0f} €",
             f"-{veredicto.margen_negociacion_estimado_eur:,.0f} €",
-            "Objetivo de negociación"
+            "Cálculo basado en la media de la zona"
         ]
     ]
     t_comp = Table([comp_header] + comp_rows, colWidths=[55 * mm, 38 * mm, 43 * mm, 38 * mm])
@@ -231,8 +232,8 @@ def generar_dossier_pdf(veredicto: VeredictoResponse, precio_total: float, metro
     elements.append(t_comp)
     elements.append(Spacer(1, 12))
 
-    # 5. Argumentario Táctico para Negociación
-    elements.append(Paragraph("2. Argumentario Defendible para la Negociación", style_section_title))
+    # 5. Lectura de la comparación
+    elements.append(Paragraph("2. Cómo leer esta comparación", style_section_title))
     arg_rows = []
     for idx, arg in enumerate(veredicto.resumen_argumentos, start=1):
         arg_rows.append([
@@ -240,13 +241,11 @@ def generar_dossier_pdf(veredicto: VeredictoResponse, precio_total: float, metro
             Paragraph(arg, style_arg)
         ])
 
-    # Argumento complementario bancario / tasador
+    # Contexto informativo adicional
     arg_rows.append([
-        Paragraph("<b>Punto técnico:</b>", style_body),
+        Paragraph("<b>Contexto:</b>", style_body),
         Paragraph(
-            "Al presentar este informe ante el vendedor o agencia, señale que las tasaciones hipotecarias bancarias "
-            f"se ajustan a las operaciones efectivas registradas en la zona ({veredicto.precio_m2_barrio_medio:,.0f} €/m²). "
-            f"Un sobreprecio superior al 8% eleva el riesgo de desfase en la concesión del préstamo hipotecario.",
+            f"Esta referencia se calcula a partir de operaciones de cierre observadas en la zona ({veredicto.precio_m2_barrio_medio:,.0f} €/m²). Es estadística e informativa: no es una tasación ni asesoramiento financiero o inmobiliario.",
             style_arg
         )
     ])
@@ -267,8 +266,8 @@ def generar_dossier_pdf(veredicto: VeredictoResponse, precio_total: float, metro
     disclaimer_text = (
         "<b>Aviso legal y marco metodológico:</b> Este documento ha sido generado por el motor analítico de Madrid Urban Intelligence "
         "a partir de las series estadísticas de transacciones y datos de cierre publicados por el Ayuntamiento de Madrid (registro de operaciones y "
-        f"actualizaciones hasta {veredicto.fecha_cierre_referencia}). Las estimaciones de precios y márgenes de negociación tienen carácter puramente "
-        "informativo y orientativo. No constituyen una tasación pericial oficial conforme a la Orden ECO/805/2003 ni asesoramiento financiero, "
+        f"actualizaciones hasta {veredicto.fecha_cierre_referencia}). Las referencias de precios tienen carácter puramente "
+        "informativo y orientativo. No constituyen una tasación ni asesoramiento financiero, de inversión o inmobiliario, "
         "legal o tributario vinculante. Madrid Urban Intelligence declina toda responsabilidad derivada del uso de este documento en acuerdos comerciales entre particulares."
     )
     elements.append(Paragraph(disclaimer_text, style_disclaimer))

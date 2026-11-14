@@ -7,6 +7,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ArrowDown, ArrowUpRight } from 'lucide-react';
+import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
 import DeferredMadridDistrictMap from './DeferredMadridDistrictMap';
 import MadridHeroArtwork from './MadridHeroArtwork';
 import LandingTrend from './LandingTrend';
@@ -147,8 +148,8 @@ export default function MadridLanding() {
                   ))}
                   <Link href="/madrid/veredicto" className="mi-verdict">
                     <span>
-                      <strong>El Veredicto</strong>
-                      <small>Pega el enlace de un piso y audita si te cobran de más con datos de cierre de su zona.</small>
+                      <strong>{PRICE_ANALYSIS_LABEL}</strong>
+                      <small>Compara el precio anunciado con operaciones de cierre de su zona. Es una referencia informativa, no una tasación.</small>
                     </span>
                     <ArrowUpRight aria-hidden="true"/>
                   </Link>
@@ -286,7 +287,7 @@ export default function MadridLanding() {
           <div className="mi-wrap mi-closing__inner">
             <p className="mi-kicker">Toma el control con Decide Madrid</p>
             <h2 id="mi-closing-title">Tu mayor decisión financiera<br/><span>merece datos comprobados.</span></h2>
-            <p>No compres, alquiles ni vendas a ciegas. Consulta los precios reales de cierre de tu barrio, esquiva el sobreprecio y negocia con certeza oficial.</p>
+            <p>Consulta las operaciones de cierre observadas en tu zona y compara precios con una referencia estadística informativa. No es una tasación ni asesoramiento inmobiliario.</p>
             <Link href="/madrid" className="mi-button mi-button--aurora">Entrar al cuadro de mando <ArrowUpRight aria-hidden="true"/></Link>
           </div>
         </section>
