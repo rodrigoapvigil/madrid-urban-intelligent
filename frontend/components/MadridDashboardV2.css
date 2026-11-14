@@ -3877,10 +3877,13 @@ body.v2-fullscreen-open footer { display: none !important; }
 
 /* Desktop-only ranking readability; mobile keeps its existing compact rows. */
 @media (min-width: 769px) and (hover: hover) {
-  .v2-root .v2-overlay-chart-stack { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-  .v2-root .v2-overlay-chart-stack .v2-chart-wrap.large { display: flex; flex-direction: column; gap: 8px; height: 500px; margin-top: 0; }
-  .v2-root .v2-overlay-chart-stack .v2-chart-wrap.large > canvas { flex: 1 1 auto; height: 0 !important; min-height: 0; }
-  .v2-root .v2-overlay-chart-stack .v2-comparison-zoom-controls { margin-left: auto; }
+  .v2-root .v2-overlay-chart-stack { display: grid; grid-template-rows: auto minmax(320px, 460px); gap: 8px; min-width: 0; }
+  .v2-root .v2-overlay-chart-toolbar { display: flex; align-items: flex-start; gap: 14px; min-width: 0; }
+  .v2-root .v2-overlay-chart-toolbar .v2-comparison-line-legend { flex: 1 1 auto; min-width: 0; }
+  .v2-root .v2-overlay-chart-toolbar .v2-comparison-zoom-controls { flex: 0 0 auto; margin-left: auto; }
+  .v2-root .v2-overlay-chart-stack .v2-chart-wrap.large { display: block; height: 460px; min-height: 0; margin: 0; overflow: hidden; }
+  .v2-root .v2-overlay-chart-stack .v2-chart-wrap.large > canvas { height: 100% !important; min-height: 0; }
+  .v2-root .v2-is-fullscreen.v2-overlay-wrapper .v2-overlay-chart-stack { height: 100%; grid-template-rows: auto minmax(0, 1fr); }
 
   .v2-root .v2-comparison-chart-meta { display: flex; flex: 0 0 auto; flex-direction: column; align-items: stretch; gap: 6px; }
   .v2-root .v2-comparison-line-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; min-height: 24px; }

@@ -4695,12 +4695,15 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-wrap large"><ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile /><canvas id={`v2-overlay-${p.id}`}></canvas></div>
                       <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={comparisonAHasData ? formatZoneOption(selectedZoneA) : ''} zoneB={comparisonBHasData ? formatZoneOption(selectedZoneB) : ''} />
                     </> : <div className="v2-overlay-chart-stack">
-                      <ComparisonSeriesLegend chartId={`v2-overlay-${p.id}`} items={[
-                        ...(comparisonAHasData ? [{ index: 0, label: `${formatZoneOption(selectedZoneA)} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' as const }, { index: 1, label: `${formatZoneOption(selectedZoneA)} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' as const }] : []),
-                        ...(comparisonBHasData ? [{ index: 2, label: `${formatZoneOption(selectedZoneB)} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' as const }, { index: 3, label: `${formatZoneOption(selectedZoneB)} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' as const }] : []),
-                        { index: 4, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' },
-                      ]} />
-                      <div className="v2-chart-wrap large"><ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile={false} /><canvas id={`v2-overlay-${p.id}`}></canvas></div>
+                      <div className="v2-overlay-chart-toolbar">
+                        <ComparisonSeriesLegend chartId={`v2-overlay-${p.id}`} items={[
+                          ...(comparisonAHasData ? [{ index: 0, label: `${formatZoneOption(selectedZoneA)} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' as const }, { index: 1, label: `${formatZoneOption(selectedZoneA)} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' as const }] : []),
+                          ...(comparisonBHasData ? [{ index: 2, label: `${formatZoneOption(selectedZoneB)} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' as const }, { index: 3, label: `${formatZoneOption(selectedZoneB)} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' as const }] : []),
+                          { index: 4, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' },
+                        ]} />
+                        <ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile={false} />
+                      </div>
+                      <div className="v2-chart-wrap large"><canvas id={`v2-overlay-${p.id}`}></canvas></div>
                     </div>}
                     {!comparisonAHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />)}
                     {!comparisonBHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />)}
