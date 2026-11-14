@@ -18,12 +18,16 @@ export default function ContactPage() {
       <SiteHeader activePath="/contacto" ctaText="Volver al dashboard" ctaHref="/madrid" appearance="aurora" />
       <main className="contact-page">
         <div className="contact-page__inner">
-          <Link className="contact-page__back" href="/" aria-label="Volver al inicio">← <span>Volver</span></Link>
-          <section className="contact-card" aria-labelledby="contact-title">
+          <Link className="contact-page__back" href="/" aria-label="Volver al inicio">↖</Link>
+          <section className="contact-layout" aria-labelledby="contact-title">
+            <div className="contact-intro">
             <p className="contact-card__eyebrow">HABLEMOS</p>
             <h1 id="contact-title">Contacto</h1>
             <p className="contact-card__intro">Cuéntanos cómo podemos colaborar o ayudarte.</p>
+            </div>
+            <div className="contact-form-panel">
             <ContactForm />
+            </div>
           </section>
         </div>
       </main>
