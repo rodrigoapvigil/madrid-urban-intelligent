@@ -50,19 +50,20 @@ export default function MethodologyPage() {
               <article>
                 <span>01</span>
                 <h3>Operaciones observadas</h3>
-                <p>Las series históricas proceden de datos públicos de cierre del Ayuntamiento de Madrid y se agregan por mes y zona.</p>
+                <p>Las series históricas de operaciones proceden de los datos de cierre publicados por el Ayuntamiento de Madrid y se agregan por mes y zona. Los indicadores de renta del hogar usan fuentes estadísticas del INE.</p>
               </article>
               <article>
                 <span>02</span>
-                <h3>Dato real o proyección</h3>
-                <p>Los meses sin registro histórico se muestran como proyección y quedan identificados por separado en el dashboard.</p>
+                <h3>Modelo y licencia</h3>
+                <p>Las proyecciones de alquiler y venta se calculan con modelos XGBoost separados. Usan variables temporales, precio histórico y contexto espacial, como accesibilidad a transporte y servicios. El código se distribuye bajo Apache License 2.0; los datos de origen conservan la licencia y condiciones de reutilización de cada fuente.</p>
               </article>
               <article>
                 <span>03</span>
                 <h3>Validación y límites</h3>
-                <p>El MAE agregado informado es 104,25 €/m² para venta y aproximadamente 0,48 €/m² para alquiler; una estimación es una referencia estadística.</p>
+                <p>En la validación temporal de 2026, el error absoluto medio fue 472,68 €/m² en venta (MAPE 9,33 %) y 1,12 €/m² en alquiler (MAPE 5,24 %). La muestra y el periodo limitan la precisión: una estimación estadística no es una tasación ni garantiza precios futuros.</p>
               </article>
             </div>
+            <p className="editorial-page__note">Los valores proyectados parten de observaciones oficiales hasta junio de 2026. No sustituimos datos ausentes por medias de otras zonas y no presentamos las proyecciones como datos observados.</p>
           </section>
         </div>
       </main>

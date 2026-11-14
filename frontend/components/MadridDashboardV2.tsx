@@ -962,6 +962,11 @@ function AvisoComparacionMovil({ zone, projectionWithoutHistory }: { zone: strin
   return <div className="v2-no-data-notice"><span>{zone}</span><strong>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</strong><p>{NO_OFFICIAL_DATA_COPY}</p>{projectionWithoutHistory && <p>{NO_PROJECTION_COPY}</p>}</div>;
 }
 
+function ProjectionBadge({ style, month, year }: { style: React.CSSProperties; month: string; year: string }) {
+  const note = `Estimación estadística basada en datos oficiales hasta ${month} de ${year}. No es una tasación ni una garantía de precios futuros.`;
+  return <span style={style} title={note} aria-label={`Estimación. ${note}`}>Estimación</span>;
+}
+
 const MadridDashboardV2: React.FC = () => {
   const isMobile = useIsMobile();
   const predBadgeStyle: React.CSSProperties = {
@@ -2628,7 +2633,7 @@ const MadridDashboardV2: React.FC = () => {
           const idx = PROFILES.findIndex(p => p.id === id);
           if (idx !== -1) handleProfileChange(idx);
         }}
-        ctaText="El Veredicto"
+        ctaText="Resumen del análisis"
         ctaHref="/madrid/veredicto"
       />
 
@@ -2948,7 +2953,7 @@ const MadridDashboardV2: React.FC = () => {
                           ruleOfThumb="Comprueba siempre la superficie y el periodo antes de comparar dos zonas."
                         />
                       </div>
-                      {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                      {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                     </div>
                     <div className="v2-val">
                       {new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiData.p_vivienda || 0)} {activeProfile.id === 'alquiler' ? '€/mes' : '€'}
@@ -2967,7 +2972,7 @@ const MadridDashboardV2: React.FC = () => {
                             ruleOfThumb="Para inversión los bancos suelen financiar el 60%-70%; para vivienda habitual hasta el 80%."
                           />
                         </div>
-                        {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                        {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                       </div>
 
                       <div className="v2-val" style={{ fontSize: '24px', margin: '4px 0 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -3089,7 +3094,7 @@ const MadridDashboardV2: React.FC = () => {
                             ruleOfThumb="En 'Crecimiento', los precios tienden a subir si esperas; en 'Ajuste', hay más margen para negociar."
                           />
                         </div>
-                        {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                        {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                       </div>
                       <div className="v2-val" style={{ fontSize: '24px' }}>
                         {kpiData.estado_mercado} {kpiData.estado_mercado === 'Crecimiento' ? '(+)' : kpiData.estado_mercado === 'Ajuste' ? '(-)' : ''}
@@ -3110,7 +3115,7 @@ const MadridDashboardV2: React.FC = () => {
                               ruleOfThumb="Permite detectar aceleraciones o cambios rápidos de tendencia en el corto plazo."
                             />
                           </div>
-                          {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                          {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                         </div>
                         <div className={`v2-val accent ${kpiData.v_mes < 0 ? 'negative' : ''}`}>
                           {kpiData.v_mes > 0 ? '+' : ''}{kpiData.v_mes?.toFixed(1)}%
@@ -3128,7 +3133,7 @@ const MadridDashboardV2: React.FC = () => {
                               ruleOfThumb="Es el indicador más robusto para medir la tendencia real de fondo y la revalorización patrimonial."
                             />
                           </div>
-                          {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                          {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                         </div>
                         <div className={`v2-val accent ${kpiData.v_anual < 0 ? 'negative' : ''}`}>
                           {kpiData.v_anual > 0 ? '+' : ''}{kpiData.v_anual?.toFixed(1)}%
@@ -3149,7 +3154,7 @@ const MadridDashboardV2: React.FC = () => {
                               ruleOfThumb="Cuanto menor sea el número de años, más rápida es la amortización y más atractiva la inversión (lo ideal es por debajo de 20 años)."
                             />
                           </div>
-                          {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                          {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                         </div>
                         <div className="v2-val" style={{ color: activeProfile.color }}>
                           {amortizacionAnios > 0 ? amortizacionAnios.toFixed(1) + ' años' : '-'}
@@ -3231,7 +3236,7 @@ const MadridDashboardV2: React.FC = () => {
                               ruleOfThumb="Menos de 5 años se considera asequible; entre 5 y 8 años moderado; más de 8 años supone un esfuerzo elevado."
                             />
                           </div>
-                          {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                          {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
                           Precio medio vivienda: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(precioMedio)}€</strong>
@@ -3339,7 +3344,7 @@ const MadridDashboardV2: React.FC = () => {
                               ruleOfThumb="El Banco de España recomienda no superar el 30%-35% del sueldo neto. Superar el 40% se considera sobreesfuerzo crítico."
                             />
                           </div>
-                          {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                          {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
                           Alquiler medio {selectedBarrio !== 'Todos' ? 'en el barrio' : (selectedDistrict !== 'Todos' ? 'en el distrito' : 'en Madrid')}: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(alquiler)}€/mes</strong>
@@ -3431,7 +3436,7 @@ const MadridDashboardV2: React.FC = () => {
                               ruleOfThumb="A mayor liquidez (más de 300 transacciones/año), menor riesgo de quedarte atrapado con el inmueble en caso de querer venderlo."
                             />
                           </div>
-                          {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                          {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
                           GRM {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ fontSize: '15px', color: '#FFFFFF', display: 'block', marginTop: '2px' }}>{grm > 0 ? grm.toFixed(1) : '-'} años <span style={{ fontSize: '10px', fontWeight: 'normal', color: '#00F0FF' }}>(recuperación)</span></strong>
@@ -3549,7 +3554,7 @@ const MadridDashboardV2: React.FC = () => {
                                 ruleOfThumb="Menos de 2 meses indica un mercado rápido con compradores activos; más de 3 meses exige fijar un precio muy competitivo."
                               />
                             </div>
-                            {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                            {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                           </div>
                           <div className="v2-val" style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
                             <span>{velocity > 0 ? (velocity % 1 === 0 ? velocity.toFixed(0) : velocity.toFixed(1)) + ' ' + (velocity === 1 ? 'mes' : 'meses') : '-'}</span>
@@ -3573,7 +3578,7 @@ const MadridDashboardV2: React.FC = () => {
                                 ruleOfThumb="Usa esta cifra junto al precio y a la demanda de la zona; no la interpretes como una promesa de velocidad."
                               />
                             </div>
-                            {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                            {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                           </div>
                           <div className="v2-val" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span>{transacciones > 0 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(transacciones) + ' trans./año' : '-'}</span>
@@ -3598,7 +3603,7 @@ const MadridDashboardV2: React.FC = () => {
                                 ruleOfThumb="En fases alcistas, posponer la venta puede aumentar el margen; en fases de ajuste, vender pronto protege tu beneficio."
                               />
                             </div>
-                            {kpiData.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                            {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                           </div>
                           <div className="v2-val" style={{ color: 'var(--azul-linea)' }}>
                             {appRate > 0 ? `+${gain6m}%` : appRate < 0 ? `${gain6m}%` : '0.0%'}
@@ -3618,7 +3623,7 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-map-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
                     <div className={`v2-data-status ${isProjectionPeriod ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
                       <span className="v2-data-status-dot" aria-hidden="true" />
-          <span><strong>{periodStatusLabel}</strong> · Último dato observado: {latestAvailablePeriod.month} de {latestAvailablePeriod.year} · estimaciones desde {MONTHS_ES[latestObservedMonthIndex + 1] || 'Enero'}</span>
+          <span><strong>{periodStatusLabel}</strong> · Último dato observado: {latestAvailablePeriod.month} de {latestAvailablePeriod.year} · estimaciones desde {MONTHS_ES[latestObservedMonthIndex + 1] || 'Enero'}. Estimación estadística basada en datos oficiales hasta {latestAvailablePeriod.month}; no es una tasación ni una garantía de precios futuros.</span>
                     </div>
                     <button
                       onClick={() => setShowMapHelpModal(true)}
@@ -4186,7 +4191,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 RENTABILIDAD NETA {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataA.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -4201,7 +4206,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 GRM {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataA.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -4235,7 +4240,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataA.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -4250,7 +4255,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 RENTABILIDAD BRUTA {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataA.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -4284,7 +4289,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataA.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -4299,7 +4304,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PODER ADQUISITIVO {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataA.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -4314,7 +4319,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 VARIACIÓN ANUAL {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataA.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                           </div>
@@ -4344,7 +4349,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataA.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -4359,7 +4364,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 VELOCIDAD DE VENTA {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataA.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -4374,7 +4379,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 VARIACIÓN ANUAL {selectedZoneA.toUpperCase()}
-                                {kpiDataA.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataA.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                           </div>
@@ -4410,7 +4415,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 RENTABILIDAD NETA {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataB.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -4425,7 +4430,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 GRM {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataB.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -4459,7 +4464,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataB.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -4474,7 +4479,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 RENTABILIDAD BRUTA {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataB.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -4508,7 +4513,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataB.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -4523,7 +4528,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PODER ADQUISITIVO {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataB.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -4538,7 +4543,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 VARIACIÓN ANUAL {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataB.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                           </div>
@@ -4568,7 +4573,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 PRECIO M² {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataB.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -4583,7 +4588,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 VELOCIDAD DE VENTA {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataB.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -4598,7 +4603,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 VARIACIÓN ANUAL {selectedZoneB.toUpperCase()}
-                                {kpiDataB.is_prediction && <span style={predBadgeStyle}>Estimación</span>}
+                                {kpiDataB.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
                           </div>

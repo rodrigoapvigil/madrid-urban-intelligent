@@ -52,7 +52,7 @@ export function SiteHeader({
   }, []);
 
   const effectiveCtaHref = ctaHref || (activePath === '/madrid' ? '/madrid/veredicto' : '/madrid');
-  const effectiveCtaText = ctaText || (activePath === '/madrid' ? 'El Veredicto' : 'Ver precios');
+  const effectiveCtaText = ctaText || (activePath === '/madrid' ? 'Resumen del análisis' : 'Ver precios');
 
   return (
     <>
@@ -320,7 +320,7 @@ export function SiteFooter() {
         {/* Fila inferior: Copyright */}
         <div className="auros-footer__bottom">
           <span className="auros-footer__disclaimer">
-            PROYECTO PERSONAL E INDEPENDIENTE.<br />NO ES UNA PLATAFORMA DEL AYUNTAMIENTO DE MADRID NI CUENTA CON SU AVAL.
+            PROYECTO PERSONAL E INDEPENDIENTE.<br />NO ES UNA PLATAFORMA DEL AYUNTAMIENTO DE MADRID NI CUENTA CON SU AVAL.<br />NO CONSTITUYE ASESORAMIENTO FINANCIERO, DE INVERSIÓN NI INMOBILIARIO.
           </span>
           <span className="auros-footer__copyright">
             © 2026 DMIYC
