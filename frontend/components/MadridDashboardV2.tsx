@@ -7,11 +7,14 @@ import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { cssColorResolverPlugin, colorWithAlpha, resolveCssColor } from '../lib/colors';
-import { Activity, Building2, ChevronDown, Database, Home, MapPinned, Maximize2, RotateCcw, RotateCw, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Activity, Building2, ChevronDown, HelpCircle, Database, Home, MapPinned, Maximize2, RotateCcw, RotateCw, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
 import './MadridDashboardV2.css';
 import { apiFetch } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
 import LoadingScreen from './LoadingScreen';
+import ComparacionZonas from './ComparacionZonas';
+import { useIsMobile } from '../hooks/useIsMobile';
+import { useComparacion } from '../hooks/useComparacion';
 
 ChartJS.register(ChartDataLabels, cssColorResolverPlugin);
 
@@ -249,6 +252,14 @@ const ChartZoomControls = ({ chartId }: { chartId: string }) => (
     <FullscreenToggle chartId={chartId} />
   </div>
 );
+
+const ComparisonChartControls = ({ chartId, isMobile }: { chartId: string; isMobile: boolean }) => isMobile
+  ? <ChartZoomControls chartId={chartId} />
+  : <div className="v2-comparison-zoom-controls" role="group" aria-label="Controles de zoom de la gráfica">
+      <button type="button" title="Acercar" aria-label="Acercar gráfica" onClick={() => updateChartZoom(chartId, 'in')}><ZoomIn size={15} /></button>
+      <button type="button" title="Alejar" aria-label="Alejar gráfica" onClick={() => updateChartZoom(chartId, 'out')}><ZoomOut size={15} /></button>
+      <button type="button" title="Restablecer zoom" aria-label="Restablecer zoom de la gráfica" onClick={() => updateChartZoom(chartId, 'reset')}><RotateCcw size={14} /></button>
+    </div>;
 
 const ComparisonSeriesChips = ({ chartId, zoneA, zoneB }: { chartId: string; zoneA: string; zoneB: string }) => {
   const [, setRevision] = useState(0);
@@ -843,6 +854,7 @@ const getComparisonKpiInfo = (metric: string, zoneName: string) => {
 };
 
 const MadridDashboardV2: React.FC = () => {
+  const isMobile = useIsMobile();
   const predBadgeStyle: React.CSSProperties = {
     fontSize: '9px',
     fontWeight: '700',
@@ -871,13 +883,10 @@ const MadridDashboardV2: React.FC = () => {
   const [selectedMapFeature, setSelectedMapFeature] = useState<string | null>(null);
   const [draftFilters, setDraftFilters] = useState({ year: '', month: '', district: 'Todos', barrio: 'Todos' });
   const [draftBarrios, setDraftBarrios] = useState<string[]>(['Todos']);
-  const [selectedYear, setSelectedYear] = useState('');
-  const [selectedMonth, setSelectedMonth] = useState('');
+  const { selectedZoneA, setSelectedZoneA, selectedZoneB, setSelectedZoneB, compareLevel, setCompareLevel, selectedYear, setSelectedYear, selectedMonth, setSelectedMonth } = useComparacion();
   const [latestAvailablePeriod, setLatestAvailablePeriod] = useState({ year: '2026', month: 'Junio' });
   const [selectedDistrict, setSelectedDistrict] = useState('Todos');
   const [selectedBarrio, setSelectedBarrio] = useState('Todos');
-  const [selectedZoneA, setSelectedZoneA] = useState('Salamanca');
-  const [selectedZoneB, setSelectedZoneB] = useState('Centro');
   const [compareMapTarget, setCompareMapTarget] = useState<'A' | 'B'>('A');
   const [compareZoneSheet, setCompareZoneSheet] = useState<'A' | 'B' | null>(null);
   const [compareZoneSearch, setCompareZoneSearch] = useState('');
@@ -895,9 +904,6 @@ const MadridDashboardV2: React.FC = () => {
   const [seriesA, setSeriesA] = useState<any[]>(() => DEFAULT_BASELINE_SERIES.alquiler.salamanca);
   const [seriesB, setSeriesB] = useState<any[]>(() => DEFAULT_BASELINE_SERIES.alquiler.centro);
   const [seriesMadrid, setSeriesMadrid] = useState<any[]>(() => DEFAULT_BASELINE_SERIES.alquiler.madrid);
-
-  // State: Niveles Comparativa
-  const [compareLevel, setCompareLevel] = useState<'Distritos' | 'Barrios'>('Distritos');
 
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
   const [isDashboardLoading, setIsDashboardLoading] = useState(true);
@@ -2316,7 +2322,7 @@ const MadridDashboardV2: React.FC = () => {
       clearTimeout(timer);
       clearTimeout(resizeTimer);
     };
-  }, [profileIdx, isTransitioning, compareLevel, activeProfile.color, seriesA, seriesB, seriesMadrid, activeProfile.id, scatterData, interestImpactData, riskReturnData, liquidityLevel, selectedDistrict, selectedBarrio, selectedYear, selectedZoneA, selectedZoneB]);
+  }, [profileIdx, isTransitioning, isMobile, compareLevel, activeProfile.color, seriesA, seriesB, seriesMadrid, activeProfile.id, scatterData, interestImpactData, riskReturnData, liquidityLevel, selectedDistrict, selectedBarrio, selectedYear, selectedZoneA, selectedZoneB]);
 
   const handleProfileChange = (newIdx: number) => {
     if (newIdx === profileIdx || isTransitioning) return;
@@ -3829,6 +3835,7 @@ const MadridDashboardV2: React.FC = () => {
             )}
 
              {/* COMPARATIVAS SECTION */}
+            <ComparacionZonas isMobile={isMobile}>
             <section className="v2-compare-section" data-dashboard-section="compare">
               <div className="v2-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -3837,16 +3844,22 @@ const MadridDashboardV2: React.FC = () => {
                     <span>Elige dos zonas y mira cómo se diferencian</span>
                   </div>
                 </div>
+                {!isMobile && <div className="v2-compare-desktop-toolbar">
+                  <button type="button" className="v2-compare-help" onClick={() => setShowCompareHelpModal(true)}><HelpCircle size={15} /> ¿Cómo usar la comparación?</button>
+                  <div className="v2-compare-level-tabs" role="tablist" aria-label="Nivel de comparación">
+                    {(['Distritos', 'Barrios'] as const).map(level => <button key={level} type="button" role="tab" aria-selected={compareLevel === level} className={compareLevel === level ? 'active' : ''} onClick={() => handleLevelToggle(level)}>{level}</button>)}
+                  </div>
+                </div>}
               </div>
 
-              <div className="v2-compare-level-tabs" role="tablist" aria-label="Nivel de comparación">
+              {isMobile && <div className="v2-compare-level-tabs" role="tablist" aria-label="Nivel de comparación">
                 {(['Distritos', 'Barrios'] as const).map(level => <button key={level} type="button" role="tab" aria-selected={compareLevel === level} className={compareLevel === level ? 'active' : ''} onClick={() => handleLevelToggle(level)}>{level}</button>)}
-              </div>
+              </div>}
 
               <div className="v2-compare-zone-selectors v2-compare-selectors-sticky">
                 <div className={`v2-dropdown-container v2-compare-zone-select zone-a ${activeDropdown === 'zoneA' ? 'v2-z-up' : ''}`}>
                   <span className="v2-filter-label zone-a-label"><i /> ZONA A</span>
-                  <button type="button" className="v2-custom-select" aria-haspopup="dialog" aria-expanded={compareZoneSheet === 'A'} onClick={() => { setCompareZoneSearch(''); setCompareZoneSheet('A'); }}>
+                  <button type="button" className="v2-custom-select" aria-haspopup={isMobile ? 'dialog' : 'listbox'} aria-expanded={isMobile ? compareZoneSheet === 'A' : activeDropdown === 'zoneA'} onClick={() => { if (isMobile) { setCompareZoneSearch(''); setCompareZoneSheet('A'); } else setActiveDropdown(activeDropdown === 'zoneA' ? null : 'zoneA'); }}>
                     <span>{formatZoneOption(selectedZoneA)}</span>
                     <ChevronDown size={14} className="v2-select-chevron" />
                   </button>
@@ -3858,10 +3871,10 @@ const MadridDashboardV2: React.FC = () => {
                     </div>
                   )}
                 </div>
-                <button type="button" className="v2-compare-swap" aria-label="Intercambiar zonas A y B" title="Intercambiar zonas" onClick={() => { setSelectedZoneA(selectedZoneB); setSelectedZoneB(selectedZoneA); }}><span>⇄</span></button>
+                {isMobile && <button type="button" className="v2-compare-swap" aria-label="Intercambiar zonas A y B" title="Intercambiar zonas" onClick={() => { setSelectedZoneA(selectedZoneB); setSelectedZoneB(selectedZoneA); }}><span>⇄</span></button>}
                 <div className={`v2-dropdown-container v2-compare-zone-select zone-b ${activeDropdown === 'zoneB' ? 'v2-z-up' : ''}`}>
                   <span className="v2-filter-label zone-b-label"><i /> ZONA B</span>
-                  <button type="button" className="v2-custom-select" aria-haspopup="dialog" aria-expanded={compareZoneSheet === 'B'} onClick={() => { setCompareZoneSearch(''); setCompareZoneSheet('B'); }}>
+                  <button type="button" className="v2-custom-select" aria-haspopup={isMobile ? 'dialog' : 'listbox'} aria-expanded={isMobile ? compareZoneSheet === 'B' : activeDropdown === 'zoneB'} onClick={() => { if (isMobile) { setCompareZoneSearch(''); setCompareZoneSheet('B'); } else setActiveDropdown(activeDropdown === 'zoneB' ? null : 'zoneB'); }}>
                     <span>{formatZoneOption(selectedZoneB)}</span>
                     <ChevronDown size={14} className="v2-select-chevron" />
                   </button>
@@ -3875,8 +3888,8 @@ const MadridDashboardV2: React.FC = () => {
                 </div>
               </div>
 
-              <div className="v2-compare-viewport" data-compare-view="overlay">
-                <div className="v2-compare-map-panel">
+              <div className="v2-compare-viewport" data-compare-view={isMobile ? 'overlay' : 'desktop'}>
+                {isMobile && <div className="v2-compare-map-panel">
                   <div className="v2-compare-map-heading">Toca dos zonas para asignar A y B</div>
                   <div className="v2-compare-map-canvas">
                     <MadridMap
@@ -3897,7 +3910,7 @@ const MadridDashboardV2: React.FC = () => {
                       }}
                     />
                   </div>
-                </div>
+                </div>}
                 <div className="v2-compare-grid">
                   {/* ZONA A (IZQ) */}
                   <div className="v2-comp-col zone-a">
@@ -3905,7 +3918,7 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneA}
                       </div>
-                      <div className="v2-chart-wrap"><ChartZoomControls chartId={`v2-chartA-${p.id}`} /><canvas id={`v2-chartA-${p.id}`}></canvas></div>
+                      <div className="v2-chart-wrap"><ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={isMobile} /><canvas id={`v2-chartA-${p.id}`}></canvas></div>
                     </div>
                     {(() => {
                       if (p.id === 'inversion') {
@@ -4128,7 +4141,7 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneB}
                       </div>
-                      <div className="v2-chart-wrap"><ChartZoomControls chartId={`v2-chartB-${p.id}`} /><canvas id={`v2-chartB-${p.id}`}></canvas></div>
+                      <div className="v2-chart-wrap"><ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={isMobile} /><canvas id={`v2-chartB-${p.id}`}></canvas></div>
                     </div>
                     {(() => {
                       if (p.id === 'inversion') {
@@ -4352,7 +4365,7 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                   <div className="v2-overlay-body">
                     <div className="v2-chart-wrap large">
-                      <ChartZoomControls chartId={`v2-overlay-${p.id}`} />
+                      <ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile={isMobile} />
                       <canvas id={`v2-overlay-${p.id}`}></canvas>
                     </div>
                     <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={formatZoneOption(selectedZoneA)} zoneB={formatZoneOption(selectedZoneB)} />
@@ -4384,7 +4397,7 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                 </div>
               </div>
-              {compareZoneSheet && <div className="v2-zone-picker-backdrop" role="presentation" onClick={() => window.history.back()}>
+              {isMobile && compareZoneSheet && <div className="v2-zone-picker-backdrop" role="presentation" onClick={() => window.history.back()}>
                 <div className="v2-zone-picker-sheet" role="dialog" aria-modal="true" aria-label={`Seleccionar zona ${compareZoneSheet}`} onClick={event => event.stopPropagation()}>
                   <div className="v2-zone-picker-head"><div><strong>Seleccionar zona {compareZoneSheet}</strong><span>Busca por distrito o barrio</span></div><button type="button" aria-label="Cerrar" onClick={() => window.history.back()}>×</button></div>
                   <input autoFocus value={compareZoneSearch} onChange={event => setCompareZoneSearch(event.target.value)} placeholder="Buscar zona…" aria-label="Buscar zona" />
@@ -4398,7 +4411,9 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                 </div>
               </div>}
-            </section>            </div>
+            </section>
+            </ComparacionZonas>
+            </div>
         ))}
       </main>
 
