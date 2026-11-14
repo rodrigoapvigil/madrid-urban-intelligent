@@ -3790,6 +3790,11 @@ body.v2-fullscreen-open footer { display: none !important; }
 
 /* Desktop-only ranking readability; mobile keeps its existing compact rows. */
 @media (min-width: 769px) and (hover: hover) {
+  .v2-root .v2-map-card { padding: 18px !important; gap: 6px; }
+  .v2-root .v2-dual-maps { gap: 16px; margin-top: 4px; min-height: 600px; }
+  .v2-root .v2-map-sub > span { display: none !important; }
+  .v2-root .v2-map-location-label { font-size: 13px !important; }
+
   /* Keep the explorer as the single framed surface; its two panels are content. */
   .v2-root .v2-explorer-grid { padding: 24px !important; }
   .v2-root .v2-explorer-header { padding-inline: 24px; }

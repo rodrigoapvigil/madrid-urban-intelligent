@@ -986,6 +986,23 @@ const MadridDashboardV2: React.FC = () => {
   const [monthsByYear, setMonthsByYear] = useState<Record<string, string[]>>({});
   const [availableDistricts, setAvailableDistricts] = useState<string[]>(['Todos', 'Salamanca', 'Centro', 'Chamberí', 'Retiro']);
   const [availableBarrios, setAvailableBarrios] = useState<string[]>(['Todos']);
+  const [neighborhoodFeatureCount, setNeighborhoodFeatureCount] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetch('/barrios_polygons.geojson', { signal: controller.signal })
+      .then(response => response.ok ? response.json() : null)
+      .then(geojson => {
+        if (Array.isArray(geojson?.features)) {
+          setNeighborhoodFeatureCount(geojson.features.filter((feature: any) => {
+            const properties = feature?.properties || {};
+            return Boolean(properties.barrio || properties.nombre || properties.name);
+          }).length);
+        }
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, []);
 
   // State: Real Data
   const [kpiData, setKpiData] = useState<any>({});
@@ -3666,6 +3683,7 @@ const MadridDashboardV2: React.FC = () => {
                           key="neighborhoods-map"
                           type="neighborhoods"
                           data={mapData.neighborhoods}
+                          neighborhoodCount={isMobile ? undefined : neighborhoodFeatureCount}
                           selectedYear={Number(selectedYear)}
                           selectedMonth={selectedMonth}
                           selectedProfile={activeProfile.label}
@@ -3726,7 +3744,7 @@ const MadridDashboardV2: React.FC = () => {
                       <span className="no-data-label"><i /> Sin datos</span>
                     </div>
                     <small>Los tonos comparan las zonas del periodo seleccionado. Rayado: sin datos oficiales del Ayuntamiento. No los estimamos.</small>
-                    <small>{mapData.neighborhoods.filter((item: any) => Number(item.precio_m2) > 0).length} de {availableBarrios.filter(zone => zone !== 'Todos').length || 131} barrios con datos.</small>
+                    <small>{mapData.neighborhoods.filter((item: any) => Number(activeProfile.id === 'inversion' ? item.rentabilidad : item.precio_m2) > 0).length} de {neighborhoodFeatureCount || mapData.neighborhoods.length} barrios con datos.</small>
                   </div>
                 </div>
               </div>

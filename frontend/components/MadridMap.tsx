@@ -14,6 +14,7 @@ interface MapProps {
   selectedBarrio?: string | null;
   selectedZone?: string | null;
   selectedZoneType?: 'districts' | 'neighborhoods';
+  neighborhoodCount?: number;
   drillDownOnSelection?: boolean;
   compareZoneA?: string;
   compareZoneB?: string;
@@ -234,7 +235,7 @@ let cachedBarriosGeoJson: any = null;
 
 const MadridMap: React.FC<MapProps> = ({ 
   type, data, selectedYear, selectedMonth, selectedProfile, 
-  selectedDistrict, selectedBarrio, selectedZone = null, selectedZoneType, drillDownOnSelection = true, compareZoneA, compareZoneB, onDistrictClick, onBarrioClick, onZoneHover
+  selectedDistrict, selectedBarrio, selectedZone = null, selectedZoneType, neighborhoodCount, drillDownOnSelection = true, compareZoneA, compareZoneB, onDistrictClick, onBarrioClick, onZoneHover
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
@@ -546,7 +547,7 @@ const MadridMap: React.FC<MapProps> = ({
         textShadow: '0 2px 8px rgba(0,0,0,0.8)'
       }}>
         <span>Madrid · Red Urbana</span>
-        <span>{type === 'districts' ? '21 Distritos' : '131 Barrios'}</span>
+        <span>{type === 'districts' ? '21 Distritos' : `${neighborhoodCount || 131} Barrios`}</span>
       </div>
     </div>
   );
