@@ -88,40 +88,40 @@ export default function ContactForm() {
         <input id="contact-website" type="text" name="website" tabIndex={-1} autoComplete="off" />
       </div>
       <div className="contact-form__grid">
-        <label className="contact-field">
-          <span>Nombre <b>*</b></span>
-          <input autoComplete="name" name="name" value={values.name} onChange={event => update('name', event.target.value)} aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'contact-name-error' : undefined} />
+        <div className={`contact-field${errors.name ? ' has-error' : ''}`}>
+          <input id="contact-name" className="contact-field__control" autoComplete="name" name="name" placeholder=" " value={values.name} onChange={event => update('name', event.target.value)} aria-invalid={Boolean(errors.name)} aria-describedby={errors.name ? 'contact-name-error' : undefined} />
+          <label htmlFor="contact-name" className="contact-field__label">Nombre <b>*</b></label>
           {errors.name && <small id="contact-name-error" className="contact-field__error">{errors.name}</small>}
-        </label>
+        </div>
 
-        <label className="contact-field">
-          <span>Email <b>*</b></span>
-          <input autoComplete="email" type="email" name="email" value={values.email} onChange={event => update('email', event.target.value)} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'contact-email-error' : undefined} />
+        <div className={`contact-field${errors.email ? ' has-error' : ''}`}>
+          <input id="contact-email" className="contact-field__control" autoComplete="email" type="email" name="email" placeholder=" " value={values.email} onChange={event => update('email', event.target.value)} aria-invalid={Boolean(errors.email)} aria-describedby={errors.email ? 'contact-email-error' : undefined} />
+          <label htmlFor="contact-email" className="contact-field__label">Email <b>*</b></label>
           {errors.email && <small id="contact-email-error" className="contact-field__error">{errors.email}</small>}
-        </label>
+        </div>
 
-        <label className="contact-field">
-          <span>Organización <em>Opcional</em></span>
-          <input autoComplete="organization" name="organization" value={values.organization} onChange={event => update('organization', event.target.value)} />
-        </label>
+        <div className="contact-field">
+          <input id="contact-organization" className="contact-field__control" autoComplete="organization" name="organization" placeholder=" " value={values.organization} onChange={event => update('organization', event.target.value)} />
+          <label htmlFor="contact-organization" className="contact-field__label">Organización <em>Opcional</em></label>
+        </div>
 
-        <label className="contact-field">
-          <span>Motivo <b>*</b></span>
-          <select name="reason" value={values.reason} onChange={event => update('reason', event.target.value)} aria-invalid={Boolean(errors.reason)} aria-describedby={errors.reason ? 'contact-reason-error' : undefined}>
+        <div className={`contact-field${errors.reason ? ' has-error' : ''}`}>
+          <select id="contact-reason" className="contact-field__control" name="reason" value={values.reason} onChange={event => update('reason', event.target.value)} aria-invalid={Boolean(errors.reason)} aria-describedby={errors.reason ? 'contact-reason-error' : undefined} required>
             <option value="">Selecciona un motivo</option>
             <option value="Colaboración">Colaboración</option>
             <option value="Prensa y medios">Prensa y medios</option>
             <option value="Datos y metodología">Datos y metodología</option>
             <option value="Sugerencia o error">Sugerencia o error</option>
           </select>
+          <label htmlFor="contact-reason" className="contact-field__label">Motivo <b>*</b></label>
           {errors.reason && <small id="contact-reason-error" className="contact-field__error">{errors.reason}</small>}
-        </label>
+        </div>
 
-        <label className="contact-field contact-field--full">
-          <span>Mensaje <b>*</b></span>
-          <textarea name="message" rows={6} value={values.message} onChange={event => update('message', event.target.value)} aria-invalid={Boolean(errors.message)} aria-describedby={errors.message ? 'contact-message-error' : undefined} />
+        <div className={`contact-field contact-field--full${errors.message ? ' has-error' : ''}`}>
+          <textarea id="contact-message" className="contact-field__control" name="message" rows={6} placeholder=" " value={values.message} onChange={event => update('message', event.target.value)} aria-invalid={Boolean(errors.message)} aria-describedby={errors.message ? 'contact-message-error' : undefined} />
+          <label htmlFor="contact-message" className="contact-field__label">Mensaje <b>*</b></label>
           {errors.message && <small id="contact-message-error" className="contact-field__error">{errors.message}</small>}
-        </label>
+        </div>
       </div>
 
       <label className="contact-privacy">

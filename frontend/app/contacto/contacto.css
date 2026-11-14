@@ -105,33 +105,82 @@
   border: 0;
 }
 
-.contact-field { display: flex; min-width: 0; flex-direction: column; gap: 8px; }
+.contact-field { position: relative; display: flex; min-width: 0; flex-direction: column; }
 .contact-field--full { grid-column: 1 / -1; }
-.contact-field > span { color: #dbe8f1; font-size: 13px; font-weight: 650; }
+.contact-field__label {
+  position: absolute;
+  top: 21px;
+  left: 0;
+  color: #9FB4C8;
+  font-size: 16px;
+  line-height: 1.2;
+  pointer-events: none;
+  transform-origin: left top;
+  transition: transform .2s ease, color .2s ease, font-size .2s ease;
+}
 .contact-field b, .contact-privacy b { color: #00e5ff; }
-.contact-field em { margin-left: 6px; color: #8299ad; font-size: 11px; font-style: normal; font-weight: 500; }
+.contact-field em { margin-left: 6px; color: #9FB4C8; font-size: 11px; font-style: normal; font-weight: 500; }
 
-.contact-field input,
-.contact-field select,
-.contact-field textarea {
+.contact-field__control {
   width: 100%;
-  min-height: 48px;
-  padding: 0 14px;
-  border: 1px solid rgba(157, 190, 213, .25);
-  border-radius: 11px;
+  min-height: 62px;
+  padding: 22px 0 9px;
+  border: 0;
+  border-bottom: 1px solid rgba(230, 240, 250, .24);
+  border-radius: 0;
   outline: none;
-  background: rgba(2, 16, 33, .72);
-  color: #f1f7fc;
+  background: transparent;
+  color: #E6F0FA;
   font: inherit;
-  font-size: 14px;
-  transition: border-color .16s ease, box-shadow .16s ease;
+  font-size: 17px;
+  line-height: 1.4;
+  transition: border-color .2s ease, color .2s ease;
 }
 
-.contact-field select { color-scheme: dark; }
-.contact-field textarea { min-height: 148px; padding: 12px 14px; resize: vertical; line-height: 1.5; }
-.contact-field input:focus, .contact-field select:focus, .contact-field textarea:focus { border-color: #00dff2; box-shadow: 0 0 0 3px rgba(0, 229, 255, .11); }
-.contact-field [aria-invalid="true"], .contact-privacy input[aria-invalid="true"] { border-color: #ff8292; }
-.contact-field__error { color: #ffabb4; font-size: 12px; line-height: 1.4; }
+.contact-field select { color-scheme: dark; appearance: none; }
+.contact-field select:invalid { color: transparent; }
+.contact-field select option { color: #E6F0FA; background: #061A33; }
+.contact-field textarea { min-height: 142px; padding: 28px 0 10px; resize: vertical; line-height: 1.5; }
+.contact-field::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: #00E5FF;
+  content: '';
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform .24s ease;
+}
+.contact-field:focus-within::after { transform: scaleX(1); }
+.contact-field.has-error::after { background: #FF8A80; }
+.contact-field__control:focus + .contact-field__label,
+.contact-field__control:not(:placeholder-shown) + .contact-field__label {
+  color: #00E5FF;
+  font-size: 12px;
+  transform: translateY(-15px);
+}
+.contact-field select + .contact-field__label,
+.contact-field select:focus + .contact-field__label,
+.contact-field select:valid + .contact-field__label {
+  color: #00E5FF;
+  font-size: 12px;
+  transform: translateY(-15px);
+}
+.contact-field.has-error .contact-field__control { border-bottom-color: #FF8A80; }
+.contact-field__control[aria-invalid="true"] { border-bottom-color: #FF8A80; }
+.contact-field__error { margin-top: 7px; color: #FF9D96; font-size: 13px; line-height: 1.4; }
+
+.contact-field__control:-webkit-autofill,
+.contact-field__control:-webkit-autofill:hover,
+.contact-field__control:-webkit-autofill:focus,
+.contact-field__control:-webkit-autofill:active {
+  -webkit-text-fill-color: #E6F0FA;
+  caret-color: #E6F0FA;
+  -webkit-box-shadow: 0 0 0 1000px #061A33 inset;
+  transition: background-color 9999s ease-out 0s;
+}
 
 .contact-privacy {
   display: flex;
@@ -178,7 +227,7 @@
   .contact-page__back { margin-bottom: 24px; }
   .contact-form__grid { grid-template-columns: minmax(0, 1fr); gap: 17px; }
   .contact-field--full { grid-column: auto; }
-  .contact-field input, .contact-field select { min-height: 48px; }
+  .contact-field__control { min-height: 58px; }
   .contact-form__submit { width: 100%; min-height: 50px; }
 }
 
@@ -196,5 +245,5 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .contact-field input, .contact-field select, .contact-field textarea { transition: none; }
+  .contact-field__control, .contact-field__label, .contact-field::after { transition: none; }
 }
