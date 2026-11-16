@@ -92,7 +92,7 @@ test('Paso 1 · filtros, perfiles y chips funcionan en móvil', async ({ page })
   const panel = page.locator('#v2-filter-panel');
   await expect(panel).toBeVisible();
   await expect(panel).toHaveAttribute('role', 'dialog');
-  await expect(page.locator('body')).toHaveCSS('overflow', 'hidden');
+  await expect(page.locator('body')).toHaveCSS('overflow-y', 'hidden');
   await expect(profileNav).toBeHidden();
   await page.screenshot({ path: resolve(screenshots, 'paso-1-filtros-390x844.png') });
 
