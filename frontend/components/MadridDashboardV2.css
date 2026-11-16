@@ -3299,14 +3299,14 @@
   .v2-rent-hero .v2-info-tooltip-trigger > button:hover,
   .v2-rent-hero .v2-info-tooltip-trigger > button:focus-visible { background: rgba(0,229,238,.24) !important; transform: scale(1.06); box-shadow: 0 0 20px rgba(0,229,238,.22); }
   .v2-rent-main-value { display: flex; align-items: baseline; gap: 6px; margin-top: 18px; white-space: nowrap; }
-  .v2-rent-main-value strong { color: #fff; font-size: clamp(44px, 13vw, 56px); font-weight: 700; letter-spacing: -.045em; line-height: 1; }
+  .v2-rent-main-value strong { color: #fff; font-size: clamp(53px, 15.6vw, 67px); font-weight: 700; letter-spacing: -.045em; line-height: 1; }
   .v2-rent-main-value span { color: rgba(255,255,255,.58); font-size: 20px; font-weight: 500; }
   .v2-rent-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 7px; margin-top: 16px; }
   .v2-rent-chips > span { padding: 5px 9px; border-radius: 999px; background: rgba(255,255,255,.08); color: #d3e2e8; font-size: 12px; font-weight: 650; }
   .v2-rent-chips > .v2-rent-market { background: rgba(0,229,238,.12); color: #9cecf0; }
   .v2-rent-secondary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
   .v2-rent-secondary-card { min-width: 0; padding: 17px 15px; border: 0; border-radius: 18px; background: rgba(255,255,255,.045); }
-  .v2-rent-secondary-card > strong { display: block; margin-top: 9px; color: #fff; font-size: clamp(24px, 7vw, 28px); font-weight: 750; white-space: nowrap; }
+  .v2-rent-secondary-card:not(.v2-rent-effort) > strong { display: block; margin-top: 9px; color: #fff; font-size: clamp(34px, 9.8vw, 40px); font-weight: 750; white-space: nowrap; }
   .v2-rent-secondary-card > strong small { color: #baccd6; font-size: 12px; font-weight: 550; }
   .v2-rent-effort-head { display: flex; align-items: center; justify-content: space-between; gap: 3px; }
   .v2-rent-effort-head .v2-rent-eyebrow { font-size: 10px; }

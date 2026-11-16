@@ -233,3 +233,37 @@ test('Paso 3 · los selectores del dashboard usan SegmentedControl en los cuatro
   await expect(page.locator('.v2-mobile-compare-level-control')).toHaveCount(0);
   await expect(page.locator('.v2-mobile-segmented-control')).toHaveCount(0);
 });
+
+test('Paso 4 · los precios de alquiler destacan sin recortar sus unidades en móvil', async ({ page }) => {
+  for (const width of [360, 390]) {
+    await openReadyDashboard(page, width, 844);
+    const price = page.locator('.v2-panel.v2-active .v2-rent-main-value strong');
+    const rent = page.locator('.v2-panel.v2-active .v2-rent-secondary-card:not(.v2-rent-effort) > strong');
+    await expect(price).toBeVisible();
+    await expect(rent).toBeVisible();
+    const sizes = await page.evaluate(() => {
+      const priceValue = document.querySelector('.v2-panel.v2-active .v2-rent-main-value strong')!;
+      const priceUnit = document.querySelector('.v2-panel.v2-active .v2-rent-main-value span')!;
+      const rentValue = document.querySelector('.v2-panel.v2-active .v2-rent-secondary-card:not(.v2-rent-effort) > strong')!;
+      const rentUnit = rentValue.querySelector('small')!;
+      return {
+        price: parseFloat(getComputedStyle(priceValue).fontSize),
+        priceUnit: parseFloat(getComputedStyle(priceUnit).fontSize),
+        rent: parseFloat(getComputedStyle(rentValue).fontSize),
+        rentUnit: parseFloat(getComputedStyle(rentUnit).fontSize),
+        overflow: document.documentElement.scrollWidth > innerWidth,
+        priceBounds: priceValue.getBoundingClientRect().toJSON(),
+        priceUnitBounds: priceUnit.getBoundingClientRect().toJSON(),
+        rentBounds: rentValue.getBoundingClientRect().toJSON(),
+        rentUnitBounds: rentUnit.getBoundingClientRect().toJSON(),
+      };
+    });
+    console.log(`Paso 4 · ${width}px price/unit measurements:`, sizes);
+    expect(sizes.price).toBeGreaterThanOrEqual(1.2 * Math.min(44, width * .13));
+    expect(sizes.rent).toBeGreaterThanOrEqual(1.35 * Math.min(28, width * .07));
+    expect(sizes.priceUnit).toBeLessThan(sizes.price);
+    expect(sizes.rentUnit).toBeLessThan(sizes.rent);
+    expect(sizes.overflow).toBe(false);
+    if (width === 390) await page.screenshot({ path: resolve(screenshots, 'paso-4-mobile-prices-390x844.png') });
+  }
+});
