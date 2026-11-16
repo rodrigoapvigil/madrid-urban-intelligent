@@ -503,6 +503,8 @@
    ========================================================================== */
 
 /* Menu button: hidden on desktop */
+.mi-header__mobile-action { display: none; }
+
 .mi-header__menu-btn {
   display: none;
   align-items: center;
@@ -808,6 +810,14 @@
   .mi-header__menu-btn {
     display: flex !important;
     flex-shrink: 0 !important;
+  }
+
+  .mi-header__mobile-action {
+    display: flex !important;
+    flex: 0 0 auto;
+    align-items: center;
+    margin-left: auto;
+    margin-right: 6px;
   }
 
   .mi-brand__subtitle {

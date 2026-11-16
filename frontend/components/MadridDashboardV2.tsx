@@ -1307,11 +1307,19 @@ const MadridDashboardV2: React.FC = () => {
     if (!isMobileFiltersOpen) return;
     window.history.pushState({ mobileFiltersOpen: true }, '', `${window.location.pathname}${window.location.search}#filtros`);
     const handleBack = () => { setIsMobileFiltersOpen(false); setActiveDropdown(null); };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      setIsMobileFiltersOpen(false);
+      setActiveDropdown(null);
+      if (window.location.hash === '#filtros') window.history.back();
+    };
     window.addEventListener('popstate', handleBack);
+    window.addEventListener('keydown', handleKeyDown);
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
       window.removeEventListener('popstate', handleBack);
+      window.removeEventListener('keydown', handleKeyDown);
       document.body.style.overflow = previousOverflow;
     };
   }, [isMobileFiltersOpen]);
@@ -2636,7 +2644,7 @@ const MadridDashboardV2: React.FC = () => {
     : selectedBarrio !== 'Todos' ? selectedBarrio : null;
 
   return (
-    <div className="v2-root" data-profile={activeProfile.id}>
+    <div className="v2-root" data-profile={activeProfile.id} data-platform={isMobile ? 'mobile' : 'desktop'}>
       <div className="mi-atmosphere" aria-hidden="true"/>
       {showDashboardLoader && (
         <LoadingScreen
@@ -2659,6 +2667,12 @@ const MadridDashboardV2: React.FC = () => {
 
       <SiteHeader
         activePath="/madrid"
+        mobileAction={isMobile ? (
+          <button type="button" className="v2-mobile-filter-trigger" aria-expanded={isMobileFiltersOpen} aria-controls="v2-filter-panel" onClick={openMobileFilters}>
+            <SlidersHorizontal size={17} aria-hidden="true" />
+            <span>Filtros</span><b>{Number(selectedDistrict !== 'Todos') + Number(selectedBarrio !== 'Todos') + Number(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month)}</b>
+          </button>
+        ) : undefined}
         profileTabs={PROFILES.map(p => ({ id: p.id, label: p.label }))}
         activeProfileId={activeProfile.id}
         onSelectProfile={(id) => {
@@ -2685,16 +2699,12 @@ const MadridDashboardV2: React.FC = () => {
           {selectedBarrio !== 'Todos' && <button type="button" onClick={() => setSelectedBarrio('Todos')}>{formatZoneOption(selectedBarrio)} ×</button>}
           {(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month) && <button type="button" onClick={() => { setSelectedYear(latestAvailablePeriod.year); setSelectedMonth(latestAvailablePeriod.month); }}>{selectedMonth.slice(0, 3)} {selectedYear} ×</button>}
         </div>
-        <button type="button" className="v2-mobile-filter-trigger" aria-expanded={isMobileFiltersOpen} aria-controls="v2-filter-panel" onClick={openMobileFilters}>
-          <SlidersHorizontal size={17} aria-hidden="true" />
-          <span>Filtros</span><b>{Number(selectedDistrict !== 'Todos') + Number(selectedBarrio !== 'Todos') + Number(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month)}</b>
-        </button>
       </div>
 
       {isMobileFiltersOpen && <button type="button" className="v2-mobile-filter-backdrop" aria-label="Cerrar filtros" onClick={closeMobileFilters} />}
 
       {/* 2. FILTROS REFINADOS (CUSTOM APPLE DROPDOWNS) */}
-      <div id="v2-filter-panel" className={`v2-filters ${isMobileFiltersOpen ? 'v2-mobile-filters-open' : ''} ${['year', 'month', 'dist', 'barrio'].includes(activeDropdown || '') ? 'v2-filters-open' : ''}`}>
+      <div id="v2-filter-panel" role={isMobile ? 'dialog' : undefined} aria-modal={isMobile && isMobileFiltersOpen ? true : undefined} aria-hidden={isMobile && !isMobileFiltersOpen ? true : undefined} className={`v2-filters ${isMobileFiltersOpen ? 'v2-mobile-filters-open' : ''} ${['year', 'month', 'dist', 'barrio'].includes(activeDropdown || '') ? 'v2-filters-open' : ''}`}>
         <div className="v2-mobile-filter-heading">
           <div><strong>Filtrar</strong><span>{activeProfile.label} · {visibleFilters.district === 'Todos' ? 'Madrid' : formatZoneOption(visibleFilters.district)} · {visibleFilters.month} {visibleFilters.year}</span></div>
           <button type="button" aria-label="Cerrar filtros" onClick={closeMobileFilters}><X size={20} /></button>

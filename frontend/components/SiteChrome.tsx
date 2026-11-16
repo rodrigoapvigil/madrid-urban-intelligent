@@ -10,6 +10,7 @@ import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
 type SiteHeaderProps = {
   activePath?: string;
   children?: ReactNode;
+  mobileAction?: ReactNode;
   profileTabs?: { id: string; label: string }[];
   activeProfileId?: string;
   onSelectProfile?: (id: string) => void;
@@ -21,6 +22,7 @@ type SiteHeaderProps = {
 export function SiteHeader({
   activePath,
   children,
+  mobileAction,
   profileTabs,
   activeProfileId,
   onSelectProfile,
@@ -106,6 +108,8 @@ export function SiteHeader({
           {effectiveCtaText}{' '}
           <ArrowUpRight size={14} aria-hidden="true" />
         </Link>
+
+        {mobileAction && <div className="mi-header__mobile-action">{mobileAction}</div>}
 
         {/* Mobile Hamburger Button (Auros style: visible only on mobile / small screens) */}
         <button
