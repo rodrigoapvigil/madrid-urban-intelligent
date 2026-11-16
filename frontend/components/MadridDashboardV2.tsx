@@ -11,6 +11,7 @@ import { Activity, Building2, ChevronDown, HelpCircle, Database, Home, MapPinned
 import './MadridDashboardV2.css';
 import { apiFetch } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
+import BackgroundAurora from './BackgroundAurora';
 import LoadingScreen from './LoadingScreen';
 import ComparacionZonas from './ComparacionZonas';
 import { useIsMobile } from '../hooks/useIsMobile';
@@ -2645,6 +2646,7 @@ const MadridDashboardV2: React.FC = () => {
 
   return (
     <div className="v2-root" data-profile={activeProfile.id} data-platform={isMobile ? 'mobile' : 'desktop'}>
+      {isMobile && <BackgroundAurora animated={false} />}
       <div className="mi-atmosphere" aria-hidden="true"/>
       {showDashboardLoader && (
         <LoadingScreen
@@ -2667,6 +2669,7 @@ const MadridDashboardV2: React.FC = () => {
 
       <SiteHeader
         activePath="/madrid"
+        appearance={isMobile ? 'aurora' : 'default'}
         mobileAction={isMobile ? (
           <button type="button" className="v2-mobile-filter-trigger" aria-expanded={isMobileFiltersOpen} aria-controls="v2-filter-panel" onClick={openMobileFilters}>
             <SlidersHorizontal size={17} aria-hidden="true" />

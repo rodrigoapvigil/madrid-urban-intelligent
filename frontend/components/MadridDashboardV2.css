@@ -4115,3 +4115,35 @@ body.v2-fullscreen-open footer { display: none !important; }
   .v2-root[data-platform="mobile"] .mi-header__mobile-action { margin-right: 3px; }
   .v2-root[data-platform="mobile"] .mi-header__mobile-action .v2-mobile-filter-trigger { gap: 3px; font-size: 11px; }
 }
+
+/* Mobile dashboard chrome: the shared header and section navigation stay together. */
+.v2-root[data-platform="mobile"] {
+  background: transparent !important;
+}
+.v2-root[data-platform="mobile"] .v2-mobile-section-nav {
+  position: sticky !important;
+  inset-block-start: 68px !important;
+  z-index: 1190 !important;
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0,1fr));
+  min-height: 44px;
+  padding: 0 8px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: rgba(10,42,79,.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.v2-root[data-platform="mobile"] .v2-mobile-section-nav button {
+  min-height: 44px;
+  padding: 0 3px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #e6f0fa;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.v2-root[data-platform="mobile"] .v2-mobile-section-nav button:focus-visible { outline: 2px solid #00e5ff; outline-offset: -3px; border-radius: 7px; }
+.v2-root[data-platform="mobile"]:has(.v2-mobile-filters-open) .v2-mobile-section-nav { display: none !important; }

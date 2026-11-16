@@ -44,6 +44,16 @@
   animation: aurora-drift-violet 70s ease-in-out infinite alternate;
 }
 
+/* Static, restrained variant for data-heavy views; landing pages keep animation. */
+.bg-aurora--static .bg-aurora__blob {
+  animation: none;
+  will-change: auto;
+  filter: blur(60px);
+}
+.bg-aurora--static .bg-aurora__blob--cyan { opacity: .13; }
+.bg-aurora--static .bg-aurora__blob--blue { opacity: .10; }
+.bg-aurora--static .bg-aurora__blob--violet { opacity: .07; }
+
 @keyframes aurora-drift-cyan {
   to { transform: translate(-85vw, 25vh) scale(1.15); }
 }

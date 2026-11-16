@@ -49,7 +49,12 @@ async function openReadyDashboard(page: import('@playwright/test').Page, width: 
   // map API omits production geometry. Keep the visual test focused on page UI.
   await page.addStyleTag({ content: 'nextjs-portal { display: none !important; }' });
   const privacyNotice = page.getByRole('button', { name: 'Entendido' });
-  if (width <= 768 && await privacyNotice.isVisible().catch(() => false)) await privacyNotice.click();
+  if (width <= 900 && await privacyNotice.isVisible().catch(() => false)) {
+    await privacyNotice.click({ force: true });
+    await page.locator('.privacy-notice').waitFor({ state: 'hidden', timeout: 3_000 }).catch(async () => {
+      await page.addStyleTag({ content: '.privacy-notice { display: none !important; }' });
+    });
+  }
 }
 
 test('Paso 0 · guarda captura base de escritorio a 1440 × 900', async ({ page }) => {
@@ -130,4 +135,53 @@ test('Paso 1 · cerrar con Escape y Atrás; móvil estrecho y escritorio sin acc
   await page.screenshot({ path: resolve(screenshots, 'paso-1-desktop-1440x900.png') });
   await expect(page.locator('.mi-header__mobile-action')).toHaveCount(0);
   await expect(page.locator('.v2-mobile-filter-bar')).toBeHidden();
+});
+
+test('Paso 2 · aurora estática y navegación móvil permanecen bajo la cabecera', async ({ page }) => {
+  await openReadyDashboard(page, 390, 844);
+  await expect(page.locator('.v2-root')).toHaveAttribute('data-platform', 'mobile');
+  await expect(page.locator('.bg-aurora--static')).toHaveCount(1);
+  await expect(page.locator('.mi-header')).toHaveClass(/site-header--aurora/);
+  const background = await page.locator('.bg-aurora--static').evaluate(element => ({
+    position: getComputedStyle(element).position,
+    pointerEvents: getComputedStyle(element).pointerEvents,
+    animation: getComputedStyle(element.querySelector('.bg-aurora__blob')!).animationName,
+    opacity: getComputedStyle(element.querySelector('.bg-aurora__blob--cyan')!).opacity,
+  }));
+  expect(background).toEqual({ position: 'fixed', pointerEvents: 'none', animation: 'none', opacity: '0.13' });
+  const sectionNav = page.locator('.v2-mobile-section-nav');
+  await expect(sectionNav).toBeVisible();
+  await page.evaluate(() => window.scrollTo(0, 700));
+  await page.waitForTimeout(250);
+  const headerTop = await page.locator('.mi-header').evaluate(element => element.getBoundingClientRect().top);
+  const sectionTop = await sectionNav.evaluate(element => element.getBoundingClientRect().top);
+  console.log('Paso 2 · top header / tabs tras scroll:', headerTop, sectionTop);
+  expect(Math.abs(headerTop)).toBeLessThanOrEqual(1);
+  expect(Math.abs(sectionTop - 68)).toBeLessThanOrEqual(1);
+  await page.screenshot({ path: resolve(screenshots, 'paso-2-mobile-sticky-390x844.png') });
+
+  await openReadyDashboard(page, 1440, 900);
+  await expect(page.locator('.v2-root')).toHaveAttribute('data-platform', 'desktop');
+  await expect(page.locator('.bg-aurora--static')).toHaveCount(0);
+  await expect(page.locator('.mi-header')).not.toHaveClass(/site-header--aurora/);
+});
+
+test('Paso 2 · móvil horizontal también usa el layout móvil', async ({ browser }) => {
+  const context = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
+  const page = await context.newPage();
+  await openReadyDashboard(page, 844, 390);
+  await expect(page.locator('.v2-root')).toHaveAttribute('data-platform', 'mobile');
+  await expect(page.locator('.mi-header__mobile-action .v2-mobile-filter-trigger')).toBeVisible();
+  await expect(page.locator('.v2-mobile-profile-nav')).toBeVisible();
+  console.log('Paso 2 · landscape header geometry:', await page.locator('.mi-header').evaluate(element => ({
+    bounds: element.getBoundingClientRect().toJSON(), display: getComputedStyle(element).display,
+    visibility: getComputedStyle(element).visibility, opacity: getComputedStyle(element).opacity,
+    scrollY: window.scrollY, brand: element.querySelector('.mi-brand')?.getBoundingClientRect().toJSON(),
+    text: element.textContent, brandColor: getComputedStyle(element.querySelector('.mi-brand')!).color,
+    action: getComputedStyle(element.querySelector('.mi-header__mobile-action')!).display,
+    logo: element.querySelector('img')?.getBoundingClientRect().toJSON(),
+  })));
+  await expect(page.locator('.v2-mobile-section-nav button').first()).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await page.screenshot({ path: resolve(screenshots, 'paso-2-mobile-landscape-844x390.png') });
+  await context.close();
 });
