@@ -2686,13 +2686,13 @@ const MadridDashboardV2: React.FC = () => {
         ctaHref="/madrid/veredicto"
       />
 
-      <nav className="v2-mobile-section-nav is-visible" aria-label="Secciones del cuadro de mando">
+      {isMobile && <nav className="v2-mobile-section-nav is-visible" aria-label="Secciones del cuadro de mando">
         {[
           ['Resumen', 'summary'], ['Mapa', 'map'], ['Ranking', 'ranking'], ['Heatmap', 'heatmap'], ['Comparar', 'compare'],
         ].map(([label, section]) => <button key={section} type="button" onClick={() => scrollToDashboardSection(section)}>{label}</button>)}
-      </nav>
+      </nav>}
 
-      <div className="v2-mobile-filter-bar">
+      {isMobile && <div className="v2-mobile-filter-bar">
         <div className="v2-mobile-filter-summary">
           <strong>{activeProfile.label}</strong>
           <span>{selectedDistrict === 'Todos' ? 'Madrid' : formatZoneOption(selectedDistrict)} · {selectedMonth} {selectedYear}</span>
@@ -2702,16 +2702,16 @@ const MadridDashboardV2: React.FC = () => {
           {selectedBarrio !== 'Todos' && <button type="button" onClick={() => setSelectedBarrio('Todos')}>{formatZoneOption(selectedBarrio)} ×</button>}
           {(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month) && <button type="button" onClick={() => { setSelectedYear(latestAvailablePeriod.year); setSelectedMonth(latestAvailablePeriod.month); }}>{selectedMonth.slice(0, 3)} {selectedYear} ×</button>}
         </div>
-      </div>
+      </div>}
 
       {isMobileFiltersOpen && <button type="button" className="v2-mobile-filter-backdrop" aria-label="Cerrar filtros" onClick={closeMobileFilters} />}
 
       {/* 2. FILTROS REFINADOS (CUSTOM APPLE DROPDOWNS) */}
       <div id="v2-filter-panel" role={isMobile ? 'dialog' : undefined} aria-modal={isMobile && isMobileFiltersOpen ? true : undefined} aria-hidden={isMobile && !isMobileFiltersOpen ? true : undefined} className={`v2-filters ${isMobileFiltersOpen ? 'v2-mobile-filters-open' : ''} ${['year', 'month', 'dist', 'barrio'].includes(activeDropdown || '') ? 'v2-filters-open' : ''}`}>
-        <div className="v2-mobile-filter-heading">
+        {isMobile && <div className="v2-mobile-filter-heading">
           <div><strong>Filtrar</strong><span>{activeProfile.label} · {visibleFilters.district === 'Todos' ? 'Madrid' : formatZoneOption(visibleFilters.district)} · {visibleFilters.month} {visibleFilters.year}</span></div>
           <button type="button" aria-label="Cerrar filtros" onClick={closeMobileFilters}><X size={20} /></button>
-        </div>
+        </div>}
         <div className="v2-filter-group">
 
           {/* AÑO */}
@@ -2838,17 +2838,17 @@ const MadridDashboardV2: React.FC = () => {
               <span style={{ color: '#FFFFFF', fontWeight: '700' }}>¿Cómo entender estos precios?</span>
             </button>
 
-            <div className="v2-mobile-filter-commit">
+            {isMobile && <div className="v2-mobile-filter-commit">
               <button type="button" className="v2-mobile-filter-apply" onClick={applyMobileFilters}>Aplicar ({Number(draftFilters.district !== 'Todos') + Number(draftFilters.barrio !== 'Todos') + Number(draftFilters.year !== latestAvailablePeriod.year || draftFilters.month !== latestAvailablePeriod.month)})</button>
               <button type="button" className="v2-mobile-filter-reset" onClick={resetMobileFilters}>Restablecer al último dato real</button>
-            </div>
+            </div>}
 
           </div>
 
         </div>
       </div>
 
-      <nav className="v2-mobile-profile-nav" aria-label="Perfiles de mercado">
+      {isMobile && <nav className="v2-mobile-profile-nav" aria-label="Perfiles de mercado">
         {PROFILES.map((profile, index) => {
           const ProfileIcon = [Home, Building2, Tag, Activity][index];
           return (
@@ -2858,7 +2858,7 @@ const MadridDashboardV2: React.FC = () => {
             </button>
           );
         })}
-      </nav>
+      </nav>}
 
 
       {/* 4. CONTENIDO PRINCIPAL */}

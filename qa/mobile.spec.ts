@@ -267,3 +267,54 @@ test('Paso 4 · los precios de alquiler destacan sin recortar sus unidades en m�
     if (width === 390) await page.screenshot({ path: resolve(screenshots, 'paso-4-mobile-prices-390x844.png') });
   }
 });
+
+test('Paso 5 · regresión responsive de perfiles, móvil horizontal y escritorio', async ({ browser, page }) => {
+  const profiles = [
+    ['Alquiler', 'alquiler'],
+    ['Compra', 'compra'],
+    ['Venta', 'venta'],
+    ['Inversión', 'inversion'],
+  ] as const;
+
+  for (const [width, height] of [[390, 844], [360, 740]] as const) {
+    await openReadyDashboard(page, width, height);
+    await expect(page.locator('.v2-root')).toHaveAttribute('data-platform', 'mobile');
+    await expect(page.locator('.mi-header__mobile-action .v2-mobile-filter-trigger')).toBeVisible();
+    await expect(page.locator('.v2-mobile-section-nav')).toBeVisible();
+    await expect(page.locator('.v2-mobile-profile-nav').last()).toBeVisible();
+    for (const [label, id] of profiles) {
+      const tab = page.getByRole('navigation', { name: 'Perfiles de mercado' }).last().getByRole('button', { name: label, exact: true });
+      await tab.click();
+      await expect(page.locator(`.v2-root[data-profile="${id}"] .v2-panel.v2-active`)).toBeVisible();
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
+      expect(overflow, `${width}x${height} ${label} horizontal overflow`).toBe(false);
+    }
+  }
+
+  const landscape = await browser.newContext({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true });
+  const landscapePage = await landscape.newPage();
+  await openReadyDashboard(landscapePage, 844, 390);
+  await expect(landscapePage.locator('.v2-root')).toHaveAttribute('data-platform', 'mobile');
+  await expect(landscapePage.locator('.mi-header__mobile-action .v2-mobile-filter-trigger')).toBeVisible();
+  await expect(landscapePage.locator('.v2-mobile-section-nav')).toBeVisible();
+  const landscapeNav = landscapePage.getByRole('navigation', { name: 'Perfiles de mercado' }).last();
+  for (const [label, id] of profiles) {
+    await landscapeNav.getByRole('button', { name: label, exact: true }).click();
+    await expect(landscapePage.locator(`.v2-root[data-profile="${id}"] .v2-panel.v2-active`)).toBeVisible();
+  }
+  const landscapeOverflow = await landscapePage.evaluate(() => document.documentElement.scrollWidth > innerWidth);
+  expect(landscapeOverflow, '844x390 horizontal overflow').toBe(false);
+  await landscapePage.screenshot({ path: resolve(screenshots, 'paso-5-mobile-landscape-844x390.png') });
+  await landscape.close();
+
+  for (const width of [1440, 1920]) {
+    await openReadyDashboard(page, width, 900);
+    await expect(page.locator('.v2-root')).toHaveAttribute('data-platform', 'desktop');
+    await expect(page.locator('.v2-mobile-section-nav')).toHaveCount(0);
+    await expect(page.locator('.v2-mobile-profile-nav')).toHaveCount(0);
+    await expect(page.locator('.v2-mobile-filter-trigger')).toHaveCount(0);
+    await expect(page.locator('.v2-mobile-filter-bar, .v2-mobile-filter-heading, .v2-mobile-filter-commit')).toHaveCount(0);
+    await expect(page.locator('.v2-mobile-compare-level-control')).toHaveCount(0);
+    await page.screenshot({ path: resolve(screenshots, `paso-5-desktop-${width}x900.png`) });
+  }
+});
