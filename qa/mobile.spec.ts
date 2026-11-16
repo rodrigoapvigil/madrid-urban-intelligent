@@ -185,3 +185,51 @@ test('Paso 2 · móvil horizontal también usa el layout móvil', async ({ brows
   await page.screenshot({ path: resolve(screenshots, 'paso-2-mobile-landscape-844x390.png') });
   await context.close();
 });
+
+test('Paso 3 · los selectores del dashboard usan SegmentedControl en los cuatro perfiles', async ({ page }) => {
+  await openReadyDashboard(page, 390, 844);
+  const profileNav = page.getByRole('navigation', { name: 'Perfiles de mercado' }).last();
+  for (const [profile, id] of [['Alquiler', 'alquiler'], ['Compra', 'compra'], ['Venta', 'venta'], ['Inversión', 'inversion']]) {
+    await profileNav.getByRole('button', { name: profile, exact: true }).click();
+    const panel = page.locator(`.v2-root[data-profile="${id}"] .v2-panel.v2-active`);
+    await expect(panel).toBeVisible();
+
+    const zones = panel.locator('.v2-mobile-segmented-control .segmented-control');
+    await expect(zones).toBeVisible();
+    for (let index = 0; index < await zones.locator('button').count(); index++) {
+      const bounds = await zones.locator('button').nth(index).boundingBox();
+      expect(bounds?.height ?? 0).toBeGreaterThanOrEqual(44);
+    }
+    await zones.getByRole('button', { name: 'Barrios', exact: true }).click();
+    await expect(zones.getByRole('button', { name: 'Barrios', exact: true })).toHaveAttribute('aria-pressed', 'true');
+
+    const comparison = panel.locator('.v2-mobile-compare-level-control .segmented-control');
+    await comparison.scrollIntoViewIfNeeded();
+    await expect(comparison).toBeVisible();
+    for (let index = 0; index < await comparison.locator('button').count(); index++) {
+      const bounds = await comparison.locator('button').nth(index).boundingBox();
+      expect(bounds?.height ?? 0).toBeGreaterThanOrEqual(44);
+    }
+    await comparison.getByRole('button', { name: 'Barrios', exact: true }).click();
+    await expect(comparison.getByRole('button', { name: 'Barrios', exact: true })).toHaveAttribute('aria-pressed', 'true');
+
+    const unit = panel.locator('.v2-ranking-head-actions .segmented-control');
+    if (['alquiler', 'compra'].includes(id)) {
+      await expect(unit).toBeVisible();
+      const buttons = unit.locator('button');
+      for (let index = 0; index < await buttons.count(); index++) {
+        const bounds = await buttons.nth(index).boundingBox();
+        expect(bounds?.height ?? 0).toBeGreaterThanOrEqual(44);
+      }
+      await unit.getByRole('button', { name: '€/m²', exact: true }).click();
+      await expect(unit.getByRole('button', { name: '€/m²', exact: true })).toHaveAttribute('aria-pressed', 'true');
+    } else {
+      await expect(unit).toHaveCount(0);
+    }
+  }
+  await page.screenshot({ path: resolve(screenshots, 'paso-3-mobile-segmented-390x844.png') });
+
+  await openReadyDashboard(page, 1440, 900);
+  await expect(page.locator('.v2-mobile-compare-level-control')).toHaveCount(0);
+  await expect(page.locator('.v2-mobile-segmented-control')).toHaveCount(0);
+});

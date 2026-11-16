@@ -3889,24 +3889,16 @@ const MadridDashboardV2: React.FC = () => {
                         : 'Zonas más asequibles'}
                 </div>
                 <div className="v2-rank-settings">
-                  {isMobile ? (
-                    <div className="v2-tabs-bg small v2-level-switch v2-level-switch-full" role="group" aria-label="Nivel de zonas">
-                      <span className="v2-indicator" style={{ transform: `translateX(${rankingLevel === 'Distritos' ? '0' : '100%'})`, backgroundColor: activeProfile.color }} />
-                      <button type="button" aria-pressed={rankingLevel === 'Distritos'} className={`v2-tab-btn ${rankingLevel === 'Distritos' ? 'active' : ''}`} onClick={() => setRankingLevel('Distritos')}>Distritos</button>
-                      <button type="button" aria-pressed={rankingLevel === 'Barrios'} className={`v2-tab-btn ${rankingLevel === 'Barrios' ? 'active' : ''}`} onClick={() => setRankingLevel('Barrios')}>Barrios</button>
-                    </div>
-                  ) : (
-                    <div className="v2-segmented-with-label">
-                      <span>Ver por:</span>
-                      <SegmentedControl<'Distritos' | 'Barrios'>
-                        label="Nivel de zonas"
-                        size="md"
-                        value={rankingLevel}
-                        options={[{ value: 'Distritos', label: 'Distritos' }, { value: 'Barrios', label: 'Barrios' }] as const}
-                        onChange={setRankingLevel}
-                      />
-                    </div>
-                  )}
+                  <div className={isMobile ? 'v2-mobile-segmented-control' : 'v2-segmented-with-label'}>
+                    {!isMobile && <span>Ver por:</span>}
+                    <SegmentedControl<'Distritos' | 'Barrios'>
+                      label="Nivel de zonas"
+                      size="md"
+                      value={rankingLevel}
+                      options={[{ value: 'Distritos', label: 'Distritos' }, { value: 'Barrios', label: 'Barrios' }] as const}
+                      onChange={setRankingLevel}
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -3946,20 +3938,13 @@ const MadridDashboardV2: React.FC = () => {
                     <div className="v2-rank-head">
                       <span>Top 10 · {rankingLevel === 'Distritos' ? 'distritos' : 'barrios'} {activeProfile.id === 'compra' ? 'con menor precio' : 'más asequibles'}</span>
                       <div className="v2-ranking-head-actions">
-                        {activeProfile.id !== 'inversion' && (isMobile ? (
-                          <div className="v2-ranking-unit-switch" role="group" aria-label="Unidad mostrada">
-                            <button type="button" className={rankingMetric === 'total' ? 'active' : ''} aria-pressed={rankingMetric === 'total'} onClick={() => setRankingMetric('total')}>{activeProfile.id === 'alquiler' ? '€/mes' : '€'}</button>
-                            <button type="button" className={rankingMetric === 'unit' ? 'active' : ''} aria-pressed={rankingMetric === 'unit'} onClick={() => setRankingMetric('unit')}>€/m²</button>
-                          </div>
-                        ) : (
-                          <SegmentedControl<'total' | 'unit'>
-                            label="Unidad mostrada"
-                            size="sm"
-                            value={rankingMetric}
-                            options={[{ value: 'total', label: activeProfile.id === 'alquiler' ? '€/mes' : '€' }, { value: 'unit', label: '€/m²' }] as const}
-                            onChange={setRankingMetric}
-                          />
-                        ))}
+                        <SegmentedControl<'total' | 'unit'>
+                          label="Unidad mostrada"
+                          size="sm"
+                          value={rankingMetric}
+                          options={[{ value: 'total', label: activeProfile.id === 'alquiler' ? '€/mes' : '€' }, { value: 'unit', label: '€/m²' }] as const}
+                          onChange={setRankingMetric}
+                        />
                       </div>
                     </div>
                     {selectedRankingZone && <span className="v2-highlighted-zone">{formatZoneOption(selectedRankingZone)} resaltada</span>}
@@ -4256,8 +4241,14 @@ const MadridDashboardV2: React.FC = () => {
                 </div>}
               </div>
 
-              {isMobile && <div className="v2-compare-level-tabs" role="tablist" aria-label="Nivel de comparación">
-                {(['Distritos', 'Barrios'] as const).map(level => <button key={level} type="button" role="tab" aria-selected={compareLevel === level} className={compareLevel === level ? 'active' : ''} onClick={() => handleLevelToggle(level)}>{level}</button>)}
+              {isMobile && <div className="v2-mobile-compare-level-control">
+                <SegmentedControl<'Distritos' | 'Barrios'>
+                  label="Nivel de comparación"
+                  size="md"
+                  value={compareLevel}
+                  options={[{ value: 'Distritos', label: 'Distritos' }, { value: 'Barrios', label: 'Barrios' }] as const}
+                  onChange={handleLevelToggle}
+                />
               </div>}
 
               <div className="v2-compare-zone-selectors v2-compare-selectors-sticky">

@@ -4147,3 +4147,19 @@ body.v2-fullscreen-open footer { display: none !important; }
 }
 .v2-root[data-platform="mobile"] .v2-mobile-section-nav button:focus-visible { outline: 2px solid #00e5ff; outline-offset: -3px; border-radius: 7px; }
 .v2-root[data-platform="mobile"]:has(.v2-mobile-filters-open) .v2-mobile-section-nav { display: none !important; }
+.v2-root[data-platform="mobile"] .v2-mobile-segmented-control .segmented-control,
+.v2-root[data-platform="mobile"] .v2-ranking-head-actions .segmented-control,
+.v2-root[data-platform="mobile"] .v2-mobile-compare-level-control .segmented-control {
+  min-height: 44px;
+  gap: 3px;
+  padding: 3px;
+}
+.v2-root[data-platform="mobile"] .v2-mobile-segmented-control .segmented-control button,
+.v2-root[data-platform="mobile"] .v2-ranking-head-actions .segmented-control button,
+.v2-root[data-platform="mobile"] .v2-mobile-compare-level-control .segmented-control button {
+  min-height: 44px !important;
+  padding-inline: 14px;
+  font-size: 13px;
+}
+.v2-root[data-platform="mobile"] .v2-mobile-segmented-control .segmented-control { width: fit-content; }
+.v2-root[data-platform="mobile"] .v2-mobile-compare-level-control { display: flex; justify-content: flex-start; margin: 0 0 14px; }
