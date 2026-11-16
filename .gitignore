@@ -1,6 +1,9 @@
 # Next.js Frontend
 frontend/node_modules/
 frontend/.next/
+/node_modules/
+/test-results/
+/playwright-report/
 frontend/out/
 frontend/build/
 frontend/tsconfig.tsbuildinfo
