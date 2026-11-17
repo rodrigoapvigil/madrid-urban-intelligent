@@ -27,6 +27,7 @@
 .zona-panel-movil > :not(.zona-panel-close) { grid-column: 1 / -1; }
 .zona-panel-close { position: absolute; top: -9px; right: -7px; width: 36px; height: 36px; padding: 0; border: 0; background: transparent; color: #c7d8e5; font: inherit; font-size: 24px; cursor: pointer; }
 .zona-panel-desktop .zona-panel-close { pointer-events: auto; }
+.zona-panel-desktop-static { top: 104px; right: 24px; left: auto; z-index: 2147482000; transform: none !important; visibility: visible !important; pointer-events: auto; }
 .zona-panel-movil .v2-map-sheet-actions { display: flex; justify-content: space-between; gap: 8px; }
 .zona-panel-movil .v2-map-sheet-actions button { min-height: 36px; padding: 0 10px; border: 1px solid rgba(0,229,255,.28); border-radius: 9px; background: rgba(0,229,255,.08); color: #8ef5ff; font-size: 11px; font-weight: 700; }
 .v2-map-card { position: relative; }

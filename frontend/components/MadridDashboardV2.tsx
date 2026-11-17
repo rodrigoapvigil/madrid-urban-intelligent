@@ -1136,6 +1136,7 @@ const MadridDashboardV2: React.FC = () => {
   const [heatmapSearch, setHeatmapSearch] = useState('');
   const [heatmapVisibleCount, setHeatmapVisibleCount] = useState(15);
   const [rankingLevel, setRankingLevel] = useState<'Distritos' | 'Barrios'>('Distritos');
+  const [rankingOpenedZone, setRankingOpenedZone] = useState<string | null>(null);
   const [rankingYearOverrides, setRankingYearOverrides] = useState<Record<string, string | null>>(() => Object.fromEntries(PROFILES.map(profile => [profile.id, null])));
   const [rankingMonthOverrides, setRankingMonthOverrides] = useState<Record<string, string | null>>(() => Object.fromEntries(PROFILES.map(profile => [profile.id, null])));
   const [rankingMetric, setRankingMetric] = useState<'total' | 'unit'>('total');
@@ -1260,6 +1261,7 @@ const MadridDashboardV2: React.FC = () => {
       ? mapFeatureHasData && mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_vivienda), 0)} €/mes` : displayedMapFeature ? '' : `${formatNumber(madridMonthlyAverage, 0)} €/mes`
       : mapFeatureHasData && mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_vivienda), 0)} €` : displayedMapFeature ? '' : '';
   const handleMapDistrictClick = useCallback((district: string | null) => {
+    setRankingOpenedZone(null);
     const hoverContext = desktopZoneHoverRef.current;
     const matchesHover = !isMobile && district && hoverContext && normalizeZoneLabel(district) === normalizeZoneLabel(hoverContext.zoneId);
     const isAlreadySelected = Boolean(district && normalizeZoneLabel(selectedDistrict) === normalizeZoneLabel(district));
@@ -1276,6 +1278,7 @@ const MadridDashboardV2: React.FC = () => {
     }
   }, [isMobile, selectZone, selectedDistrict]);
   const handleMapBarrioClick = useCallback((barrio: string | null) => {
+    setRankingOpenedZone(null);
     const hoverContext = desktopZoneHoverRef.current;
     const matchesHover = !isMobile && barrio && hoverContext && normalizeZoneLabel(barrio) === normalizeZoneLabel(hoverContext.zoneId);
     const isAlreadySelected = Boolean(barrio && normalizeZoneLabel(selectedBarrio) === normalizeZoneLabel(barrio));
@@ -2917,6 +2920,7 @@ const MadridDashboardV2: React.FC = () => {
   };
 
   const handleZoneSearchSelection = (selection: { district: string; barrio: string }) => {
+    setRankingOpenedZone(null);
     setSelectedDistrict(selection.district);
     setSelectedBarrio(selection.barrio);
     const selected = selection.barrio !== 'Todos' ? selection.barrio : selection.district !== 'Todos' ? selection.district : null;
@@ -2972,6 +2976,15 @@ const MadridDashboardV2: React.FC = () => {
   const selectedRankingZone = rankingLevel === 'Distritos'
     ? selectedDistrict !== 'Todos' ? selectedDistrict : null
     : selectedBarrio !== 'Todos' ? selectedBarrio : null;
+  const handleRankingZoneSelection = (zone: string) => {
+    const option = zoneSearchOptions.find(item => item.kind === 'barrio' && normalizeZoneSearchKey(item.name) === normalizeZoneSearchKey(zone));
+    if (!option?.district) return;
+    handleZoneSearchSelection({ district: option.district, barrio: option.name });
+    setRankingOpenedZone(option.name);
+    setHeatmapSearch('');
+    const selectedRowIndex = heatmapData.findIndex(row => normalizeZoneSearchKey(String(row.zona || '')) === normalizeZoneSearchKey(option.name));
+    if (selectedRowIndex >= 0) setHeatmapVisibleCount(current => Math.max(current, selectedRowIndex + 1));
+  };
 
   const periodControls = <PeriodSelector
     years={PERIOD_SELECTOR_YEARS}
@@ -4054,6 +4067,22 @@ const MadridDashboardV2: React.FC = () => {
                     delta={mapFeatureDelta === null ? null : `${mapFeatureDelta > 0 ? '+' : ''}${mapFeatureDelta.toFixed(1)}% frente a la media`}
                     onClose={() => { clearSelection(); desktopZoneHoverRef.current = null; setDesktopZoneHover(null); setDesktopPinnedZone(null); }}
                   />}
+                  {!isMobile && rankingOpenedZone && selectedMapFeature && <FichaZonaDesktop
+                    zone={rankingOpenedZone}
+                    zoneType="BARRIO"
+                    noData={mapFeatureNoData}
+                    projectionWithoutHistory={mapFeatureNoData && isProjectionPeriod}
+                    position={null}
+                    pinned
+                    staticPosition
+                    rank={mapFeatureNoData ? undefined : mapFeatureRank ? `Puesto ${mapFeatureRank} de ${mapFeatureRows.length} barrios` : undefined}
+                    primaryLabel={mapFeaturePrimaryLabel}
+                    primaryValue={mapFeaturePrimary}
+                    secondaryLabel={mapFeatureSecondaryLabel}
+                    secondaryValue={mapFeatureSecondary}
+                    delta={mapFeatureDelta === null ? null : `${mapFeatureDelta > 0 ? '+' : ''}${mapFeatureDelta.toFixed(1)}% frente a la media`}
+                    onClose={() => { setRankingOpenedZone(null); clearSelection(); setSelectedBarrio('Todos'); setSelectedDistrict('Todos'); }}
+                  />}
                   {isMobile && selectedMapFeature && <FichaZonaMovil
                     zone={selectedMapFeature}
                     zoneType={mapFeatureIsDistrict ? 'DISTRITO' : 'BARRIO'}
@@ -4128,6 +4157,9 @@ const MadridDashboardV2: React.FC = () => {
                   formatEuro={formatEuro}
                   status={rankingStatus}
                   onRetry={() => setLoadAttempt(value => value + 1)}
+                  districtForZone={zone => zoneSearchOptions.find(option => option.kind === 'barrio' && normalizeZoneSearchKey(option.name) === normalizeZoneSearchKey(zone))?.district}
+                  selectedZone={selectedRankingZone}
+                  onSelectZone={rankingLevel === 'Barrios' ? handleRankingZoneSelection : undefined}
                 />
               </div>
 
@@ -4156,8 +4188,10 @@ const MadridDashboardV2: React.FC = () => {
                     level={rankingLevel}
                     year={rankingYear}
                     selectedMonth={rankingMonth}
+                    latestReal={{ year: latestRealYear, month: latestRealMonth }}
                     colorThresholds={mapColorThresholds}
                     visibleCount={heatmapVisibleCount}
+                    selectedZone={selectedRankingZone}
                     onShowMore={() => setHeatmapVisibleCount(count => count + 15)}
                     formatValue={value => formatNumber(activeProfile.id === 'inversion' ? value * 100 : value, activeProfile.id === 'alquiler' || activeProfile.id === 'inversion' ? 1 : 0)}
                     status={heatmapStatus}

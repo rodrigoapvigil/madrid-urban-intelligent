@@ -26,6 +26,7 @@ type DesktopZonaPanelProps = ZonaPanelProps & {
   zoneType: 'DISTRITO' | 'BARRIO';
   position: DesktopCardPosition | null;
   pinned?: boolean;
+  staticPosition?: boolean;
   style?: React.CSSProperties;
 };
 
@@ -37,14 +38,14 @@ function AvisoSinDatosMovil({ zoneType = 'BARRIO', zone, projectionWithoutHistor
   return <div className="zona-panel-no-data"><span className="zona-panel-kind">{zoneType}</span><strong>{zone}</strong><h3>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</h3><p>El Ayuntamiento de Madrid no publica datos de alquiler para esta zona. Preferimos no inventarlos.</p>{projectionWithoutHistory && <p>No hay base suficiente para proyectar esta zona, y no aproximamos valores sin datos.</p>}</div>;
 }
 
-export function FichaZonaDesktop({ zone, rank, primaryLabel, primaryValue, secondaryLabel, secondaryValue, delta, onClose, zoneType, position, pinned, style, noData, projectionWithoutHistory }: DesktopZonaPanelProps & Pick<ZonaPanelProps, 'noData' | 'projectionWithoutHistory'>) {
+export function FichaZonaDesktop({ zone, rank, primaryLabel, primaryValue, secondaryLabel, secondaryValue, delta, onClose, zoneType, position, pinned, staticPosition, style, noData, projectionWithoutHistory }: DesktopZonaPanelProps & Pick<ZonaPanelProps, 'noData' | 'projectionWithoutHistory'>) {
   const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLElement>(null);
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
     const panel = panelRef.current;
-    if (!panel || !position) return;
+    if (!panel || !position || staticPosition) return;
     const panelRect = panel.getBoundingClientRect();
     const { point, bounds } = position;
     const minX = bounds.left + 8;
@@ -57,10 +58,10 @@ export function FichaZonaDesktop({ zone, rank, primaryLabel, primaryValue, secon
     y = Math.max(minY, Math.min(y, bounds.bottom - panelRect.height - 8));
     panel.style.transform = `translate3d(${x}px, ${y}px, 0)`;
     panel.style.visibility = 'visible';
-  }, [position, zone, rank, primaryValue, secondaryValue, delta]);
+  }, [position, staticPosition, zone, rank, primaryValue, secondaryValue, delta]);
 
-  if (!mounted || typeof document === 'undefined' || !position) return null;
-  return createPortal(<aside ref={panelRef} className="zona-panel zona-panel-desktop" style={style} role="status" aria-live="polite">
+  if (!mounted || typeof document === 'undefined' || (!position && !staticPosition)) return null;
+  return createPortal(<aside ref={panelRef} className={`zona-panel zona-panel-desktop${staticPosition ? ' zona-panel-desktop-static' : ''}`} style={style} role="status" aria-live="polite">
     <div className="zona-panel-top"><div className="zona-panel-heading"><span className="zona-panel-kind">{zoneType}</span><strong>{zone}</strong>{rank && <span>{rank}</span>}</div>{pinned && <button type="button" className="zona-panel-close" aria-label="Quitar zona seleccionada" onClick={onClose}>×</button>}</div>
     {noData ? <AvisoSinDatosDesktop projectionWithoutHistory={projectionWithoutHistory} /> : <><dl>
       <div><dt>{primaryLabel}</dt><dd>{primaryValue}</dd></div>
