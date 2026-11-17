@@ -8,6 +8,7 @@ export type ZoneSearchOption = {
   name: string;
   kind: 'district' | 'barrio' | 'city';
   district?: string;
+  aliases?: string[];
 };
 
 type ZoneSearchProps = {
@@ -45,7 +46,7 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
     if (!needle) return [];
     return options
       .filter(option => {
-        const searchable = [option.name, formatName(option.name), option.district || ''].map(normalize);
+        const searchable = [option.name, formatName(option.name), option.district || '', ...(option.aliases || [])].map(normalize);
         return searchable.some(value => value.includes(needle));
       })
       .sort((a, b) => {

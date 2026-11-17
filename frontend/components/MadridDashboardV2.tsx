@@ -569,7 +569,10 @@ const parseNumericInput = (value: string) => Number(value.replace(/\D/g, '')) ||
 const displayNumericInput = (value: string) => value ? formatNumber(parseNumericInput(value), 0) : '';
 const formatZoneOption = (value: string) => value === 'Todos' ? 'Madrid (media)' : formatMadridName(value);
 const normalizeZoneLabel = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
-const normalizeZoneSearchKey = (value: string) => normalizeZoneLabel(value).replace(/^\d+\.\s*/, '').replace(/[^a-z0-9]+/g, ' ').trim();
+const normalizeZoneSearchKey = (value: string) => {
+  const key = normalizeZoneLabel(value).replace(/^\d+\.\s*/, '').replace(/[^a-z0-9]+/g, ' ').trim();
+  return key === 'valderribas' ? 'valderrivas' : key;
+};
 
 const getNiceChartScale = (datasets: Array<Array<number | null>>) => {
   const values = datasets.flat().filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
@@ -1022,7 +1025,7 @@ const MadridDashboardV2: React.FC = () => {
   const [monthsByYear, setMonthsByYear] = useState<Record<string, string[]>>({});
   const [availableDistricts, setAvailableDistricts] = useState<string[]>(['Todos', 'Salamanca', 'Centro', 'Chamberí', 'Retiro']);
   const [availableBarrios, setAvailableBarrios] = useState<string[]>(['Todos']);
-  const [neighborhoodZoneMetadata, setNeighborhoodZoneMetadata] = useState<Array<{ key: string; district: string }>>([]);
+  const [neighborhoodZoneMetadata, setNeighborhoodZoneMetadata] = useState<Array<{ keys: string[]; names: string[]; district: string }>>([]);
   const [zoneSearchOptions, setZoneSearchOptions] = useState<ZoneSearchOption[]>([
     { id: 'city-madrid', name: 'Madrid', kind: 'city' },
     { id: 'district-centro', name: 'Centro', kind: 'district' },
@@ -1045,11 +1048,14 @@ const MadridDashboardV2: React.FC = () => {
           setNeighborhoodFeatureCount(features.length);
           setNeighborhoodZoneMetadata(features.map((feature: any) => {
             const properties = feature.properties || {};
+            const names = [properties.barrio, properties.nombre, properties.name, properties.NOMBRE, properties.BARRIO_MAY, properties.BARRIO_MT]
+              .filter((name: unknown): name is string => typeof name === 'string' && Boolean(name.trim()));
             return {
-              key: normalizeZoneSearchKey(String(properties.BARRIO_MAY || properties.barrio || properties.nombre || properties.name || '')),
+              keys: Array.from(new Set(names.map(normalizeZoneSearchKey).filter(Boolean))),
+              names,
               district: String(properties.distrito || properties.NOMDIS || ''),
             };
-          }).filter((zone: { key: string; district: string }) => zone.key && zone.district));
+          }).filter((zone: { keys: string[]; names: string[]; district: string }) => zone.keys.length > 0 && zone.district));
         }
       })
       .catch(() => undefined);
@@ -1331,25 +1337,39 @@ const MadridDashboardV2: React.FC = () => {
   useEffect(() => {
     if (!filtersReady || neighborhoodZoneMetadata.length === 0) return;
     let current = true;
-    apiFetch('/neighborhoods?district=Todos')
-      .then(response => response.ok ? response.json() : [])
-      .then((names: unknown) => {
-        if (!current) return;
-        const namesByKey = new Map((Array.isArray(names) ? names : [])
+    const controller = new AbortController();
+    const districts = availableDistricts.filter(name => name !== 'Todos');
+    Promise.all(districts.map(async district => {
+      try {
+        const response = await apiFetch(`/neighborhoods?district=${encodeURIComponent(district)}`, { signal: controller.signal });
+        const names: unknown = response.ok ? await response.json() : [];
+        return (Array.isArray(names) ? names : [])
           .filter((name): name is string => typeof name === 'string' && name !== 'Todos')
-          .map((name: string) => [normalizeZoneSearchKey(name), name] as const));
-        const districts = availableDistricts.filter(name => name !== 'Todos');
-        setZoneSearchOptions([
-          { id: 'city-madrid', name: 'Madrid', kind: 'city' },
-          ...districts.map(name => ({ id: `district:${name}`, name, kind: 'district' as const })),
-          ...neighborhoodZoneMetadata.flatMap(zone => {
-            const name = namesByKey.get(zone.key);
-            return name ? [{ id: `barrio:${zone.district}:${name}`, name, district: zone.district, kind: 'barrio' as const }] : [];
-          }),
-        ]);
-      })
-      .catch(() => undefined);
-    return () => { current = false; };
+          .map((name: string) => {
+            const metadata = neighborhoodZoneMetadata.find(zone =>
+              normalizeZoneSearchKey(zone.district) === normalizeZoneSearchKey(district)
+              && zone.keys.includes(normalizeZoneSearchKey(name))
+            );
+            return {
+              id: `barrio:${district}:${name}`,
+              name,
+              district,
+              kind: 'barrio' as const,
+              aliases: metadata?.names.filter(alias => alias !== name),
+            };
+          });
+      } catch {
+        return [];
+      }
+    })).then(groups => {
+      if (!current) return;
+      setZoneSearchOptions([
+        { id: 'city-madrid', name: 'Madrid', kind: 'city' },
+        ...districts.map(name => ({ id: `district:${name}`, name, kind: 'district' as const })),
+        ...groups.flat(),
+      ]);
+    });
+    return () => { current = false; controller.abort(); };
   }, [filtersReady, availableDistricts, neighborhoodZoneMetadata]);
 
   useEffect(() => {
