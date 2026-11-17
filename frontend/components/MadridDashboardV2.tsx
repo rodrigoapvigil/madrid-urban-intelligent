@@ -1766,6 +1766,23 @@ const MadridDashboardV2: React.FC = () => {
             return found?.is_prediction || isBoundary ? value : null;
           });
           const scale = scaleOverride || getNiceChartScale([alignedPrices, alignedMadrid]);
+          const setChartMonthActive = (chart: any, index: number | null) => {
+            if (index === null) {
+              chart.setActiveElements([]);
+              chart.tooltip?.setActiveElements([], { x: 0, y: 0 });
+              chart.draw();
+              return;
+            }
+            const source = effectiveData.find(d => Number(d.mes) === index + 1);
+            const zoneDatasetIndex = source?.is_prediction ? 2 : 1;
+            const activeElements = [0, zoneDatasetIndex]
+              .filter(datasetIndex => Number.isFinite(Number(chart.data.datasets[datasetIndex]?.data?.[index])))
+              .map(datasetIndex => ({ datasetIndex, index }));
+            const position = { x: chart.scales.x.getPixelForValue(index), y: chart.chartArea.top };
+            chart.setActiveElements(activeElements);
+            chart.tooltip?.setActiveElements(activeElements, position);
+            chart.draw();
+          };
 
           return new ChartJS(ctx, {
             type: 'line',
@@ -1851,6 +1868,10 @@ const MadridDashboardV2: React.FC = () => {
                 intersect: false
               },
               onHover: (_event: any, active: any[], chart: any) => {
+                if (!isMobile) {
+                  if (chart.$v2PinnedIndex !== undefined) setChartMonthActive(chart, chart.$v2PinnedIndex);
+                  return;
+                }
                 const index = active?.[0]?.index;
                 const partnerId = ctx.id.includes('chartA-')
                   ? ctx.id.replace('chartA-', 'chartB-')
@@ -1863,6 +1884,20 @@ const MadridDashboardV2: React.FC = () => {
                   partner.setActiveElements(activeElements);
                   partner.tooltip?.setActiveElements(activeElements, index === undefined ? { x: 0, y: 0 } : { x: partner.scales.x.getPixelForValue(index), y: partner.chartArea.top });
                   partner.draw();
+                }
+              },
+              onClick: (event: any, _active: any[], chart: any) => {
+                if (isMobile) return;
+                const elements = chart.getElementsAtEventForMode(event, 'index', { intersect: false }, true);
+                const index = elements[0]?.index;
+                if (index === undefined) return;
+                const nextIndex = chart.$v2PinnedIndex === index ? undefined : index;
+                chart.$v2PinnedIndex = nextIndex;
+                if (nextIndex === undefined) {
+                  setChartMonthActive(chart, null);
+                  chart.update('none');
+                } else {
+                  setChartMonthActive(chart, nextIndex);
                 }
               },
               layout: { padding: { top: 15, right: 30, bottom: 20, left: 0 } },
