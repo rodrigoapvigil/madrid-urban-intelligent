@@ -2880,6 +2880,17 @@
 .v2-data-status strong { color: #00f0ff; }
 .v2-data-status.is-projection { border-color: rgba(0, 240, 255, 0.22); }
 .v2-data-status.is-projection strong { color: #8de8f1; }
+.v2-map-card { position: relative; }
+.v2-map-resource-state { position: absolute; inset: 64px 16px 16px; z-index: 5; display: grid; place-items: center; pointer-events: none; }
+.v2-map-card[data-resource-state="loading"] .v2-dual-maps,
+.v2-map-card[data-resource-state="loading"] .v2-map-legend { opacity: .5; }
+.v2-map-card[data-resource-state="error"] .v2-map-resource-state { pointer-events: auto; }
+.v2-heatmap-scroll[data-resource-state="loading"] .v2-heatmap-table,
+.v2-rank-mini-card[data-resource-state="loading"] .v2-ranking-table { opacity: .5; }
+.v2-heatmap-scroll { position: relative; }
+.v2-heatmap-loading-overlay { position: absolute; inset: 50% 0 auto; z-index: 2; transform: translateY(-50%); pointer-events: none; }
+.v2-resource-loading { position: relative; }
+.v2-resource-loading > .v2-resource-state { min-height: 260px; }
 
 /* Comparison language: the zone is identified by hue, the data type by style. */
 .v2-comp-col.zone-a .v2-chart-card { border-top: 2px solid #00e5ff; }

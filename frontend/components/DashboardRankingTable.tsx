@@ -2,12 +2,13 @@
 
 import React, { ReactNode } from 'react';
 import SegmentedControl from './SegmentedControl';
+import DashboardResourceState, { DashboardResourceStatus } from './DashboardResourceState';
 
 type RankingRow = { name: string; value: number };
 
 export default function DashboardRankingTable({
   profileId, level, rows, loading, loadingRows, highlightedZone, valueMax, isMobile,
-  metric, onMetricChange, formatName, formatZone, normalizeName, formatNumber, formatEuro,
+  metric, onMetricChange, formatName, formatZone, normalizeName, formatNumber, formatEuro, status, onRetry,
 }: {
   profileId: string;
   level: 'Distritos' | 'Barrios';
@@ -24,6 +25,8 @@ export default function DashboardRankingTable({
   normalizeName: (name: string) => string;
   formatNumber: (value: number, digits: number) => string;
   formatEuro: (value: number, digits: number) => string;
+  status: DashboardResourceStatus;
+  onRetry: () => void;
 }) {
   const zoneType = level === 'Distritos' ? 'distrito' : 'barrio';
   const title = profileId === 'venta'
@@ -38,16 +41,17 @@ export default function DashboardRankingTable({
     : (metric === 'total' ? 'PRECIO €' : 'PRECIO €/M²');
 
   return (
-    <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
+    <div className="v2-rank-mini-card" data-resource-state={status} style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
       <div className="v2-rank-head">
         <span>{title}</span>
         {!isDemand && !isInvestment && <div className="v2-ranking-head-actions"><SegmentedControl<'total' | 'unit'> label="Unidad mostrada" size="sm" value={metric} options={[{ value: 'total', label: profileId === 'alquiler' ? '€/mes' : '€' }, { value: 'unit', label: '€/m²' }] as const} onChange={onMetricChange} /></div>}
       </div>
       {highlightedZone && <span className="v2-highlighted-zone">{formatZone(highlightedZone)} resaltada</span>}
+      {status === 'loading' && rows.length > 0 && <DashboardResourceState status="loading" />}
       <table className={`v2-ranking-table${!isDemand && !isInvestment ? ' v2-affordability-ranking-table' : ''}`} style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
         <thead><tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}><th style={{ paddingBottom: '8px', fontWeight: '600' }}>{level === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th><th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>{valueHeading}</th></tr></thead>
         <tbody>
-          {rows.length === 0 && loading ? loadingRows : rows.map((item, index) => {
+          {status === 'loading' && rows.length === 0 ? loadingRows : status === 'error' || status === 'empty' ? <tr><td colSpan={2}><DashboardResourceState status={status} retry={onRetry} emptyText="No hay datos disponibles para esta selección." /></td></tr> : rows.map((item, index) => {
             const demand = isDemand;
             const years = item.value > 0 ? `${(1 / item.value).toFixed(1)} años` : '-';
             const price = metric === 'unit' ? `${formatNumber(item.value, Number.isInteger(Number(item.value)) ? 0 : 1)} €/m²` : profileId === 'alquiler' ? `${formatEuro(item.value, 0)}/mes` : formatEuro(item.value, 0);
