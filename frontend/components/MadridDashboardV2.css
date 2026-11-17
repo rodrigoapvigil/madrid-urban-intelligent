@@ -3481,6 +3481,17 @@ body.v2-fullscreen-open .v2-panel.v2-active { transform: none !important; }
 .v2-root .v2-ranking-position { display: inline-block; min-width: 2.4em; vertical-align: top; }
 .v2-root .v2-ranking-name { display: inline; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
 
+.v2-root .v2-calculator-submit {
+  width: 100%; min-height: 42px; margin-top: 4px; padding: 10px 14px;
+  border: 1px solid rgba(255,255,255,.18); border-radius: 10px;
+  background: linear-gradient(105deg, #00dff3, #7641d8); color: #031528;
+  font: inherit; font-size: 12px; font-weight: 750; cursor: pointer;
+  transition: filter .18s ease, opacity .18s ease, transform .18s ease;
+}
+.v2-root .v2-calculator-submit:not(:disabled):hover { filter: brightness(1.08); transform: translateY(-1px); }
+.v2-root .v2-calculator-submit:focus-visible { outline: 2px solid #00e5ff; outline-offset: 3px; }
+.v2-root .v2-calculator-submit:disabled { opacity: .38; cursor: not-allowed; filter: saturate(.55); }
+
 /* Comparison layout: keep zone identity stable and its selectors together. */
 .v2-root .v2-compare-title-block { display: grid; gap: 5px; }
 .v2-root .v2-compare-title-block > span { color: #8fa3b8; font-size: 13px; }

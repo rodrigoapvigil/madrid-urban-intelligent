@@ -571,6 +571,8 @@ const MADRID_NAME_EXCEPTIONS: Record<string, string> = {
 const formatMadridName = (value: string) => MADRID_NAME_EXCEPTIONS[value] || value;
 const formatNumber = (value: number, digits = 0) => formatSpanishNumber(value, digits);
 const formatEuro = (value: number, digits = 0) => formatEuroAmount(value, digits);
+const parseNumericInput = (value: string) => Number(value.replace(/\D/g, '')) || 0;
+const displayNumericInput = (value: string) => value ? formatNumber(parseNumericInput(value), 0) : '';
 const formatZoneOption = (value: string) => value === 'Todos' ? 'Madrid (media)' : formatMadridName(value);
 const normalizeZoneLabel = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
 
@@ -2918,7 +2920,7 @@ const MadridDashboardV2: React.FC = () => {
                     const incomeMonthly = (kpiData.renta_media || 0) / 12;
                     const effort = incomeMonthly > 0 ? (rent / incomeMonthly) * 100 : 0;
                     const effortColor = effort <= 30 ? '#00E5EE' : effort <= 40 ? '#F4B860' : '#F08080';
-                    const salary = Number.parseFloat(userRentSalary);
+                    const salary = parseNumericInput(userRentSalary);
                     const personalEffort = salary > 0 ? (rent / salary) * 100 : 0;
                     const money = (value: number) => new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(value);
                     return (
@@ -2960,7 +2962,7 @@ const MadridDashboardV2: React.FC = () => {
                               {showRentCalculator ? 'Cerrar cálculo' : 'Calcula con tu sueldo'} <span aria-hidden="true">{showRentCalculator ? '↑' : '→'}</span>
                             </button>
                             {showRentCalculator && <div className="v2-rent-calculator">
-                              <input type="number" value={userRentSalary} onChange={event => setUserRentSalary(event.target.value)} placeholder="Sueldo neto mensual (€)" aria-label="Sueldo neto mensual" />
+                              <input type="text" inputMode="numeric" value={displayNumericInput(userRentSalary)} onChange={event => setUserRentSalary(event.target.value.replace(/\D/g, ''))} placeholder="Sueldo neto mensual (€)" aria-label="Sueldo neto mensual" />
                               {salary > 0 && <span>Tu esfuerzo sería <strong style={{ color: personalEffort <= 30 ? '#00E5EE' : personalEffort <= 40 ? '#F4B860' : '#F08080' }}>{personalEffort.toFixed(0)}%</strong></span>}
                             </div>}
                           </div>
@@ -3275,9 +3277,10 @@ const MadridDashboardV2: React.FC = () => {
                       }
                     }
 
-                    const parsedIncome = parseFloat(userPurchaseIncome);
-                    const parsedSavings = parseFloat(userPurchaseSavings);
-                    const hasUserSim = showPurchaseSim && !isNaN(parsedIncome) && parsedIncome > 0;
+                    const parsedIncome = parseNumericInput(userPurchaseIncome);
+                    const parsedSavings = parseNumericInput(userPurchaseSavings);
+                    const canSimulatePurchase = parsedIncome > 0 && parsedSavings > 0;
+                    const hasUserSim = showPurchaseSim && canSimulatePurchase;
 
                     const userAnios = hasUserSim ? precioMedio / parsedIncome : 0;
                     let userAniosStatus = '';
@@ -3348,9 +3351,10 @@ const MadridDashboardV2: React.FC = () => {
                           <div>
                             <label style={{ fontSize: '10px', color: '#BACCD6' }}>Ingresos anuales (€)</label>
                             <input
-                              type="number"
-                              value={userPurchaseIncome}
-                              onChange={(e) => { setUserPurchaseIncome(e.target.value); setShowPurchaseSim(false); }}
+                              type="text"
+                              inputMode="numeric"
+                              value={displayNumericInput(userPurchaseIncome)}
+                              onChange={(e) => { setUserPurchaseIncome(e.target.value.replace(/\D/g, '')); setShowPurchaseSim(false); }}
                               placeholder="Ej: 80000"
                               style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
                             />
@@ -3359,19 +3363,22 @@ const MadridDashboardV2: React.FC = () => {
                           <div>
                             <label style={{ fontSize: '10px', color: '#BACCD6' }}>Ahorros disponibles (€)</label>
                             <input
-                              type="number"
-                              value={userPurchaseSavings}
-                              onChange={(e) => { setUserPurchaseSavings(e.target.value); setShowPurchaseSim(false); }}
+                              type="text"
+                              inputMode="numeric"
+                              value={displayNumericInput(userPurchaseSavings)}
+                              onChange={(e) => { setUserPurchaseSavings(e.target.value.replace(/\D/g, '')); setShowPurchaseSim(false); }}
                               placeholder="Ej: 150000"
                               style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
                             />
                           </div>
 
                           <button
+                            type="button"
+                            className="v2-calculator-submit"
+                            disabled={!canSimulatePurchase}
                             onClick={() => setShowPurchaseSim(true)}
-                            style={{ width: '100%', background: activeProfile.color, color: '#FFFFFF', border: 'none', padding: '7px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', transition: 'opacity 0.2s', marginTop: '4px' }}
                           >
-                            Calcular MI caso
+                            Calcular mi caso
                           </button>
                         </div>
 
@@ -3410,7 +3417,7 @@ const MadridDashboardV2: React.FC = () => {
                       else statusColor = 'var(--coral-texto)';
                     }
 
-                    const parsedSalary = parseFloat(userRentSalary);
+                    const parsedSalary = parseNumericInput(userRentSalary);
                     const hasUserSalary = !isNaN(parsedSalary) && parsedSalary > 0;
                     const userEffort = hasUserSalary ? (alquiler / parsedSalary) * 100 : 0;
 
@@ -3450,9 +3457,10 @@ const MadridDashboardV2: React.FC = () => {
                         <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: '1px solid rgba(186, 204, 214, 0.16)' }}>
                           <label style={{ fontSize: '11px', fontWeight: '700', color: '#FFFFFF' }}>¿Cuál es TU renta?</label>
                           <input
-                            type="number"
-                            value={userRentSalary}
-                            onChange={(e) => setUserRentSalary(e.target.value)}
+                            type="text"
+                            inputMode="numeric"
+                            value={displayNumericInput(userRentSalary)}
+                            onChange={(e) => setUserRentSalary(e.target.value.replace(/\D/g, ''))}
                             placeholder="Sueldo neto mensual (€)"
                             style={{ width: '100%', padding: '7px 10px', borderRadius: '8px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '12px', marginTop: '4px', outline: 'none' }}
                           />
@@ -3490,9 +3498,10 @@ const MadridDashboardV2: React.FC = () => {
                       liquidezColor = 'var(--coral)';
                     }
 
-                    const capital = parseFloat(userInvCapital);
-                    const duracion = parseInt(userInvDuration);
-                    const hasInvSim = showInvSim && !isNaN(capital) && capital > 0 && !isNaN(duracion) && duracion > 0;
+                    const capital = parseNumericInput(userInvCapital);
+                    const duracion = parseNumericInput(userInvDuration);
+                    const canSimulateInvestment = capital > 0 && duracion > 0;
+                    const hasInvSim = showInvSim && canSimulateInvestment;
 
                     const projectionRows = [];
                     let currentVal = capital;
@@ -3547,9 +3556,10 @@ const MadridDashboardV2: React.FC = () => {
                           <div>
                             <label style={{ fontSize: '10px', color: '#BACCD6' }}>Capital inicial (€)</label>
                             <input
-                              type="number"
-                              value={userInvCapital}
-                              onChange={(e) => { setUserInvCapital(e.target.value); setShowInvSim(false); }}
+                              type="text"
+                              inputMode="numeric"
+                              value={displayNumericInput(userInvCapital)}
+                              onChange={(e) => { setUserInvCapital(e.target.value.replace(/\D/g, '')); setShowInvSim(false); }}
                               placeholder="Ej: 300000"
                               style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
                             />
@@ -3558,17 +3568,20 @@ const MadridDashboardV2: React.FC = () => {
                           <div>
                             <label style={{ fontSize: '10px', color: '#BACCD6' }}>Duración (años)</label>
                             <input
-                              type="number"
+                              type="text"
+                              inputMode="numeric"
                               value={userInvDuration}
-                              onChange={(e) => { setUserInvDuration(e.target.value); setShowInvSim(false); }}
+                              onChange={(e) => { setUserInvDuration(e.target.value.replace(/\D/g, '')); setShowInvSim(false); }}
                               placeholder="Ej: 5"
                               style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
                             />
                           </div>
 
                           <button
+                            type="button"
+                            className="v2-calculator-submit"
+                            disabled={!canSimulateInvestment}
                             onClick={() => setShowInvSim(true)}
-                            style={{ width: '100%', background: activeProfile.color, color: '#FFFFFF', border: 'none', padding: '7px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', transition: 'opacity 0.2s', marginTop: '4px' }}
                           >
                             Ver proyección
                           </button>
