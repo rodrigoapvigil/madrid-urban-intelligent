@@ -11,12 +11,12 @@ export type LoadingScreenProps = {
   onRetry?: () => void;
 };
 
-type Phrase = { big: string; small: string };
+type Phrase = { big: string; small: string; lines?: string[] };
 
 const PHRASES: Phrase[] = [
   { big: "Madrid despierta.", small: "El servidor gratuito se está desperezando. Solo pasa en la primera carga." },
-  { big: "131 barrios. Ni uno menos.", small: "Leyendo el precio de cada uno, mes a mes." },
-  { big: "Precios de cierre. No ofertas infladas.", small: "Datos abiertos de Madrid, no anuncios de portales." },
+  { big: "131 barrios. Ni uno menos.", lines: ["131 barrios.", "Ni uno menos."], small: "Leyendo el precio de cada uno, mes a mes." },
+  { big: "Precios de cierre. No ofertas infladas.", lines: ["Precios de cierre.", "No ofertas infladas."], small: "Datos abiertos de Madrid, no anuncios de portales." },
   { big: "Lo pasado, medido. Lo futuro, estimado.", small: "Dato real y proyección van siempre por separado." },
   { big: "Sin registro. Sin cuentas. Solo datos.", small: "Entras, miras y decides." },
   { big: "¿Cuánto cuesta vivir aquí de verdad?", small: "Alquiler, compra, rentabilidad y esfuerzo, calculados para ti." },
@@ -62,8 +62,12 @@ const SPLIT_X = POINTS[SPLIT][0];
 const SPLIT_FRAC = SPLIT / (N - 1);
 const RANK = Array.from({ length: TOTAL_BARRIOS }, (_, i) => (i * 37) % TOTAL_BARRIOS);
 
-function Words({ text }: { text: string }) {
-  return <>{text.split(" ").map((word, i) => <span className="dmiyc-ls__w" key={`${word}-${i}`}><span style={{ animationDelay: `${i * 70}ms` }}>{word}</span></span>)}</>;
+function Words({ text, lines }: { text: string; lines?: string[] }) {
+  let wordIndex = 0;
+  return <>{(lines ?? [text]).map((line, lineIndex) => <span className="dmiyc-ls__line" key={`${line}-${lineIndex}`}>{line.split(" ").map((word) => {
+    const index = wordIndex++;
+    return <span className="dmiyc-ls__w" key={`${word}-${index}`}><span style={{ animationDelay: `${index * 70}ms` }}>{word}</span></span>;
+  })}</span>)}</>;
 }
 
 
@@ -126,7 +130,7 @@ export default function LoadingScreen({ ready = false, estimatedSeconds = 25, on
     </div>
     <div className="dmiyc-ls__main">
       <div className="dmiyc-ls__pill" data-late={late}><i />{ready ? "Todo cargado" : late ? "Tardando más de lo normal" : "Primera carga"}</div>
-      <h2 className="dmiyc-ls__headline" key={phraseKey}><Words text={phrase.big} /></h2>
+      <h2 className="dmiyc-ls__headline" key={phraseKey}><Words text={phrase.big} lines={phrase.lines} /></h2>
       <p className="dmiyc-ls__sub" key={`${phraseKey}-sub`}>{phrase.small}</p>
       {showRetry && <button className="dmiyc-ls__retry" type="button" onClick={onRetry ?? (() => window.location.reload())}>¿Sigue sin cargar? Recargar</button>}
       <div className="dmiyc-ls__chart" aria-hidden="true">

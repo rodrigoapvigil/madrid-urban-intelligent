@@ -31,6 +31,7 @@
 .dmiyc-ls__pill[data-late="true"] { border-color: rgba(139,92,246,.5); background: rgba(139,92,246,.1); }
 .dmiyc-ls__pill[data-late="true"] i { background: var(--ls-violet); }
 .dmiyc-ls__headline { margin: clamp(14px, 2.4vw, 26px) 0 0; min-height: 1.9em; font-family: var(--ls-font); font-size: clamp(38px, min(10vw, 13.5vh), 140px); font-weight: 700; line-height: .98; letter-spacing: -.045em; text-transform: none; text-wrap: balance; color: #fff; filter: drop-shadow(0 0 22px rgba(0,229,255,.12)); }
+.dmiyc-ls__line { display: block; }
 .dmiyc-ls__w { display: inline-block; overflow: hidden; vertical-align: bottom; margin: -.14em .2em -.06em 0; padding: .14em 0 .06em; }
 .dmiyc-ls__w > span { display: inline-block; transform: translateY(112%); animation: dmiyc-ls-rise .75s cubic-bezier(.2,.8,.2,1) forwards; }
 .dmiyc-ls__w:last-child > span { color: inherit; }
