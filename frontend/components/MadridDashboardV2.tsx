@@ -2787,11 +2787,12 @@ const MadridDashboardV2: React.FC = () => {
         </div>}
         <div className="v2-filter-group">
           <div className="v2-period-filter-group">
-            <span className="v2-period-filter-heading">{isMobile ? 'Periodo (afecta a todo)' : 'Periodo'}</span>
+            {isMobile && <span className="v2-period-filter-heading">Periodo (afecta a todo)</span>}
 
           {/* AÑO */}
-          <div className={`v2-dropdown-container ${activeDropdown === 'year' ? 'v2-z-up' : ''}`}>
+          <div className={`v2-dropdown-container v2-period-select ${activeDropdown === 'year' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Año</span>
+            {!isMobile && <span className="v2-period-prefix">Año</span>}
             <DashboardSelect value={visibleFilters.year} expanded={activeDropdown === 'year'} onToggle={() => setActiveDropdown(activeDropdown === 'year' ? null : 'year')} />
             {activeDropdown === 'year' && (
               <div className="v2-dropdown-menu" role="listbox" aria-label="Año">
@@ -2803,8 +2804,9 @@ const MadridDashboardV2: React.FC = () => {
           </div>
 
           {/* MES */}
-          <div className={`v2-dropdown-container ${activeDropdown === 'month' ? 'v2-z-up' : ''}`}>
+          <div className={`v2-dropdown-container v2-period-select ${activeDropdown === 'month' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Mes</span>
+            {!isMobile && <span className="v2-period-prefix">Mes</span>}
             <DashboardSelect value={visibleFilters.month} expanded={activeDropdown === 'month'} onToggle={() => setActiveDropdown(activeDropdown === 'month' ? null : 'month')} />
             {activeDropdown === 'month' && (
               <div className="v2-dropdown-menu" role="listbox" aria-label="Mes">
@@ -2815,6 +2817,11 @@ const MadridDashboardV2: React.FC = () => {
             )}
           </div>
           </div>
+          {!isMobile && <DashboardHelpButton
+            onClick={() => setShowHelpModal(true)}
+            label="¿Cómo entender estos precios?"
+            title="Aprende a interpretar los datos reales y las proyecciones"
+          />}
 
           {isMobile && <div className="v2-mobile-zone-filter-group">
           <span className="v2-mobile-zone-filter-heading">Zona (KPIs y mapas)</span>
@@ -2859,11 +2866,11 @@ const MadridDashboardV2: React.FC = () => {
           </div>}
           {/* BOTONES DE ACCIÓN EN ALTO CONTRASTE */}
           <div className="v2-filter-actions">
-            <DashboardHelpButton
+            {isMobile && <DashboardHelpButton
               onClick={() => setShowHelpModal(true)}
               label="¿Cómo entender estos precios?"
               title="Aprende a interpretar los datos reales y las proyecciones"
-            />
+            />}
 
             {isMobile && <div className="v2-mobile-filter-commit">
               <button type="button" className="v2-mobile-filter-apply" onClick={applyMobileFilters}>Aplicar ({Number(draftFilters.district !== 'Todos') + Number(draftFilters.barrio !== 'Todos') + Number(draftFilters.year !== latestAvailablePeriod.year || draftFilters.month !== latestAvailablePeriod.month)})</button>

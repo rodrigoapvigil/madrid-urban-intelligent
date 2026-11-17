@@ -4226,3 +4226,50 @@ body:has(.v2-root[data-platform="mobile"]) { overflow-x: clip; max-width: 100%; 
 }
 .v2-root[data-platform="mobile"] .v2-mobile-segmented-control .segmented-control { width: fit-content; }
 .v2-root[data-platform="mobile"] .v2-mobile-compare-level-control { display: flex; justify-content: flex-start; margin: 0 0 14px; }
+
+/* Desktop period bar: one compact, left-aligned row. */
+@media (min-width: 769px) {
+  .v2-root[data-platform="desktop"] .v2-filters {
+    min-height: 56px;
+    box-sizing: border-box;
+    padding-block: 4px;
+  }
+
+  .v2-root[data-platform="desktop"] .v2-filter-group {
+    gap: 14px;
+    justify-content: flex-start;
+  }
+
+  .v2-root[data-platform="desktop"] .v2-period-filter-group {
+    display: inline-flex;
+    gap: 12px;
+  }
+
+  .v2-root[data-platform="desktop"] .v2-period-filter-heading,
+  .v2-root[data-platform="desktop"] .v2-period-select > .v2-filter-label {
+    display: none;
+  }
+
+  .v2-root[data-platform="desktop"] .v2-period-select {
+    min-width: 0;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .v2-root[data-platform="desktop"] .v2-period-prefix {
+    color: #8EA8C3;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .v2-root[data-platform="desktop"] .v2-period-select .v2-custom-select {
+    min-height: 44px;
+    padding-block: 6px;
+  }
+
+  .v2-root[data-platform="desktop"] .v2-filter-actions {
+    display: none;
+  }
+}
