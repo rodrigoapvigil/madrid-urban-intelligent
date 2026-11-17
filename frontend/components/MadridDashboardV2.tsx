@@ -1765,7 +1765,25 @@ const MadridDashboardV2: React.FC = () => {
 
           return new ChartJS(ctx, {
             type: 'line',
-            plugins: [],
+            plugins: [{
+              id: `zone-chart-crosshair-${ctx.id}`,
+              afterDraw(chart: any) {
+                const active = chart.getActiveElements?.()?.[0];
+                if (!active) return;
+                const x = chart.scales?.x?.getPixelForValue(active.index);
+                if (!Number.isFinite(x)) return;
+                const { ctx: canvasCtx, chartArea } = chart;
+                canvasCtx.save();
+                canvasCtx.beginPath();
+                canvasCtx.moveTo(x, chartArea.top);
+                canvasCtx.lineTo(x, chartArea.bottom);
+                canvasCtx.strokeStyle = 'rgba(220,232,242,.55)';
+                canvasCtx.setLineDash([3, 4]);
+                canvasCtx.lineWidth = 1;
+                canvasCtx.stroke();
+                canvasCtx.restore();
+              }
+            }],
             data: {
               labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
               datasets: [
@@ -1828,6 +1846,21 @@ const MadridDashboardV2: React.FC = () => {
                 mode: 'index',
                 intersect: false
               },
+              onHover: (_event: any, active: any[], chart: any) => {
+                const index = active?.[0]?.index;
+                const partnerId = ctx.id.includes('chartA-')
+                  ? ctx.id.replace('chartA-', 'chartB-')
+                  : ctx.id.includes('chartB-') ? ctx.id.replace('chartB-', 'chartA-') : null;
+                const partnerCanvas = partnerId ? document.getElementById(partnerId) as HTMLCanvasElement | null : null;
+                const partner = partnerCanvas ? ChartJS.getChart(partnerCanvas) : undefined;
+                if (partner) {
+                  const partnerPoint = index === undefined ? null : otherRawData?.find(d => Number(d.mes) === index + 1);
+                  const activeElements = index === undefined ? [] : [{ datasetIndex: partnerPoint?.is_prediction ? 2 : 1, index }];
+                  partner.setActiveElements(activeElements);
+                  partner.tooltip?.setActiveElements(activeElements, index === undefined ? { x: 0, y: 0 } : { x: partner.scales.x.getPixelForValue(index), y: partner.chartArea.top });
+                  partner.draw();
+                }
+              },
               layout: { padding: { top: 15, right: 30, bottom: 20, left: 0 } },
               plugins: {
                 legend: {
@@ -1872,6 +1905,9 @@ const MadridDashboardV2: React.FC = () => {
                 },
                 tooltip: {
                   enabled: true,
+                  position: 'nearest',
+                  xAlign: 'center',
+                  yAlign: 'bottom',
                   backgroundColor: 'color-mix(in srgb, var(--azul-noche) 95%, transparent)',
                   titleColor: 'var(--blanco-humo)',
                   titleFont: { size: 14, weight: 'bold' },
@@ -1885,6 +1921,15 @@ const MadridDashboardV2: React.FC = () => {
                   displayColors: true,
                   boxWidth: 10,
                   boxHeight: 10,
+                  filter: (item: any) => {
+                    const value = item.parsed?.y;
+                    if (value === null || value === undefined) return false;
+                    if (item.datasetIndex === 0) return true;
+                    const source = effectiveData.find(d => Number(d.mes) === item.dataIndex + 1);
+                    if (!source) return false;
+                    const isPrediction = Boolean(source.is_prediction);
+                    return isPrediction ? item.datasetIndex === 2 : item.datasetIndex === 1;
+                  },
                   callbacks: {
                     labelColor: (context: any) => {
                       const color = context.dataset?.borderColor || '#E5F2F7';
@@ -1896,16 +1941,14 @@ const MadridDashboardV2: React.FC = () => {
                         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
                       ];
                       const idx = items[0]?.dataIndex ?? 0;
-                      return `${monthNames[idx]} ${selectedYear} · ${label}`;
+                      return `${monthNames[idx]} ${selectedYear}`;
                     },
                     label: (context: any) => {
                       const idx = context.dataIndex;
                       const val = context.parsed.y;
                       const unit = comparisonMetric.tooltipUnit;
 
-                      if (val === null || val === undefined) {
-                        return 'Sin datos registrados por el Ayuntamiento de Madrid para este periodo';
-                      }
+                      if (val === null || val === undefined) return '';
 
                       // La media es referencia estadística, no una cifra oficial proyectada.
                       if (context.datasetIndex === 0) {
@@ -1925,50 +1968,24 @@ const MadridDashboardV2: React.FC = () => {
                         maximumFractionDigits: 2
                       }).format(val);
 
-                      const lines: string[] = [];
-
-                      // 1. Precio actual y tipo de dato
-                      lines.push(`Precio actual: ${valFormatted} ${unit} (${tipoDato})`);
-
-                      // 2. Variación vs mes anterior
-                      if (idx > 0) {
-                        const prevVal = context.dataset.data[idx - 1];
-                        if (prevVal !== null && prevVal !== undefined && prevVal > 0) {
-                          const diffPrev = ((val - prevVal) / prevVal) * 100;
-                          const absDiff = Math.abs(diffPrev).toFixed(1);
-                          if (diffPrev > 0.08) {
-                            lines.push(`Variación mes anterior: Subida del ${absDiff}%`);
-                          } else if (diffPrev < -0.08) {
-                            lines.push(`Variación mes anterior: Bajada del ${absDiff}%`);
-                          } else {
-                            lines.push(`Variación mes anterior: Sin variación (0.0%)`);
-                          }
-                        }
-                      } else {
-                        lines.push(`Inicio del ejercicio ${selectedYear}`);
-                      }
-
-                      // 3. Comparativa vs Media de Madrid
                       const madridItem = effectiveMadridSeries.find(d => d.mes === idx + 1);
                       const madridVal = madridItem ? madridItem.precio_m2 * multiplier : null;
-                      if (madridVal !== null && madridVal !== undefined && madridVal > 0) {
-                        const diffMadrid = ((val - madridVal) / madridVal) * 100;
-                        const absDiffMadrid = Math.abs(diffMadrid).toFixed(1);
-                        const madridFmt = new Intl.NumberFormat('es-ES', {
-                          minimumFractionDigits: comparisonMetric.decimals,
-                          maximumFractionDigits: 1
-                        }).format(madridVal);
-
-                        if (Math.abs(diffMadrid) <= 2) {
-                          lines.push(`Comparativa Madrid: En la media de Madrid (${madridFmt} ${unit})`);
-                        } else if (diffMadrid > 0) {
-                          lines.push(`Comparativa Madrid: Un ${absDiffMadrid}% más caro que la media (${madridFmt} ${unit})`);
-                        } else {
-                          lines.push(`Comparativa Madrid: Un ${absDiffMadrid}% más barato que la media (${madridFmt} ${unit})`);
-                        }
-
-                      }
-
+                      return `${label} · ${tipoDato}: ${valFormatted} ${unit}`;
+                    },
+                    afterBody: (items: any[]) => {
+                      const idx = items[0]?.dataIndex;
+                      if (idx === undefined) return [];
+                      const found = effectiveData.find(d => Number(d.mes) === idx + 1);
+                      if (!found || found.precio_m2 == null) return [];
+                      const current = Number(found.precio_m2) * multiplier;
+                      const madridItem = effectiveMadridSeries.find(d => Number(d.mes) === idx + 1);
+                      const madrid = madridItem?.precio_m2 == null ? null : Number(madridItem.precio_m2) * multiplier;
+                      const unit = comparisonMetric.tooltipUnit;
+                      const number = (value: number) => new Intl.NumberFormat('es-ES', { minimumFractionDigits: comparisonMetric.decimals, maximumFractionDigits: comparisonMetric.decimals }).format(value);
+                      const lines = madrid == null ? [] : [`Media Madrid: ${number(madrid)} ${unit}`, `Dif. vs media: ${madrid > 0 ? (((current - madrid) / madrid) > 0 ? '+' : '') + (((current - madrid) / madrid) * 100).toFixed(1) : '—'}%`];
+                      const previous = effectiveData.find(d => Number(d.mes) === idx);
+                      const change = previous?.precio_m2 > 0 ? ((found.precio_m2 - previous.precio_m2) / previous.precio_m2) * 100 : null;
+                      if (change != null) lines.push(`Var. mes anterior: ${change > 0 ? '+' : ''}${change.toFixed(1)}%`);
                       return lines;
                     }
                   }
