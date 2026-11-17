@@ -25,6 +25,7 @@ import { DashboardMapLegend, DashboardMapStatus } from './DashboardMapChrome';
 import DashboardSelect from './DashboardSelect';
 import DashboardHeatmapTable from './DashboardHeatmapTable';
 import DashboardRankingTable from './DashboardRankingTable';
+import ZoneSearch, { ZoneSearchOption } from './ZoneSearch';
 import { formatEuroAmount, formatNumber as formatSpanishNumber, formatPercent } from '../lib/format-number';
 import { comparisonZoneColors, profileColorCuts, profileMapTierColors } from '../lib/map-color-scale';
 import { DASHBOARD_COPY } from '../lib/product-copy';
@@ -568,6 +569,7 @@ const parseNumericInput = (value: string) => Number(value.replace(/\D/g, '')) ||
 const displayNumericInput = (value: string) => value ? formatNumber(parseNumericInput(value), 0) : '';
 const formatZoneOption = (value: string) => value === 'Todos' ? 'Madrid (media)' : formatMadridName(value);
 const normalizeZoneLabel = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
+const normalizeZoneSearchKey = (value: string) => normalizeZoneLabel(value).replace(/^\d+\.\s*/, '').replace(/[^a-z0-9]+/g, ' ').trim();
 
 const getNiceChartScale = (datasets: Array<Array<number | null>>) => {
   const values = datasets.flat().filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
@@ -1005,7 +1007,6 @@ const MadridDashboardV2: React.FC = () => {
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [mapLevel, setMapLevel] = useState<'districts' | 'neighborhoods'>('districts');
   const [draftFilters, setDraftFilters] = useState({ year: '', month: '', district: 'Todos', barrio: 'Todos' });
-  const [draftBarrios, setDraftBarrios] = useState<string[]>(['Todos']);
   const { selectedZoneA, setSelectedZoneA, selectedZoneB, setSelectedZoneB, compareLevel, setCompareLevel, selectedYear, setSelectedYear, selectedMonth, setSelectedMonth } = useComparacion();
   const [comparisonYearOverride, setComparisonYearOverride] = useState<string | null>(null);
   const comparisonYear = comparisonYearOverride ?? selectedYear;
@@ -1021,6 +1022,14 @@ const MadridDashboardV2: React.FC = () => {
   const [monthsByYear, setMonthsByYear] = useState<Record<string, string[]>>({});
   const [availableDistricts, setAvailableDistricts] = useState<string[]>(['Todos', 'Salamanca', 'Centro', 'Chamberí', 'Retiro']);
   const [availableBarrios, setAvailableBarrios] = useState<string[]>(['Todos']);
+  const [neighborhoodZoneMetadata, setNeighborhoodZoneMetadata] = useState<Array<{ key: string; district: string }>>([]);
+  const [zoneSearchOptions, setZoneSearchOptions] = useState<ZoneSearchOption[]>([
+    { id: 'city-madrid', name: 'Madrid', kind: 'city' },
+    { id: 'district-centro', name: 'Centro', kind: 'district' },
+    { id: 'district-retiro', name: 'Retiro', kind: 'district' },
+    { id: 'district-salamanca', name: 'Salamanca', kind: 'district' },
+    { id: 'district-chamberi', name: 'Chamberí', kind: 'district' },
+  ]);
   const [neighborhoodFeatureCount, setNeighborhoodFeatureCount] = useState(0);
 
   useEffect(() => {
@@ -1029,10 +1038,18 @@ const MadridDashboardV2: React.FC = () => {
       .then(response => response.ok ? response.json() : null)
       .then(geojson => {
         if (Array.isArray(geojson?.features)) {
-          setNeighborhoodFeatureCount(geojson.features.filter((feature: any) => {
+          const features = geojson.features.filter((feature: any) => {
             const properties = feature?.properties || {};
             return Boolean(properties.barrio || properties.nombre || properties.name);
-          }).length);
+          });
+          setNeighborhoodFeatureCount(features.length);
+          setNeighborhoodZoneMetadata(features.map((feature: any) => {
+            const properties = feature.properties || {};
+            return {
+              key: normalizeZoneSearchKey(String(properties.BARRIO_MAY || properties.barrio || properties.nombre || properties.name || '')),
+              district: String(properties.distrito || properties.NOMDIS || ''),
+            };
+          }).filter((zone: { key: string; district: string }) => zone.key && zone.district));
         }
       })
       .catch(() => undefined);
@@ -1312,17 +1329,28 @@ const MadridDashboardV2: React.FC = () => {
   }, [selectedDistrict, filtersReady]);
 
   useEffect(() => {
-    if (!isMobileFiltersOpen) return;
-    apiFetch(`/neighborhoods?district=${encodeURIComponent(draftFilters.district)}`)
-      .then(res => res.json())
-      .then((data: string[]) => {
-        setDraftBarrios(data);
-        if (draftFilters.barrio !== 'Todos' && !data.includes(draftFilters.barrio)) {
-          setDraftFilters(current => ({ ...current, barrio: 'Todos' }));
-        }
+    if (!filtersReady || neighborhoodZoneMetadata.length === 0) return;
+    let current = true;
+    apiFetch('/neighborhoods?district=Todos')
+      .then(response => response.ok ? response.json() : [])
+      .then((names: unknown) => {
+        if (!current) return;
+        const namesByKey = new Map((Array.isArray(names) ? names : [])
+          .filter((name): name is string => typeof name === 'string' && name !== 'Todos')
+          .map((name: string) => [normalizeZoneSearchKey(name), name] as const));
+        const districts = availableDistricts.filter(name => name !== 'Todos');
+        setZoneSearchOptions([
+          { id: 'city-madrid', name: 'Madrid', kind: 'city' },
+          ...districts.map(name => ({ id: `district:${name}`, name, kind: 'district' as const })),
+          ...neighborhoodZoneMetadata.flatMap(zone => {
+            const name = namesByKey.get(zone.key);
+            return name ? [{ id: `barrio:${zone.district}:${name}`, name, district: zone.district, kind: 'barrio' as const }] : [];
+          }),
+        ]);
       })
-      .catch(() => setDraftBarrios(['Todos']));
-  }, [draftFilters.district, draftFilters.barrio, isMobileFiltersOpen]);
+      .catch(() => undefined);
+    return () => { current = false; };
+  }, [filtersReady, availableDistricts, neighborhoodZoneMetadata]);
 
   useEffect(() => {
     if (!isMobileFiltersOpen) return;
@@ -2812,7 +2840,6 @@ const MadridDashboardV2: React.FC = () => {
 
   const openMobileFilters = () => {
     setDraftFilters({ year: selectedYear, month: selectedMonth, district: selectedDistrict, barrio: selectedBarrio });
-    setDraftBarrios(availableBarrios);
     setIsMobileFiltersOpen(true);
   };
 
@@ -2828,6 +2855,15 @@ const MadridDashboardV2: React.FC = () => {
     setSelectedDistrict(draftFilters.district);
     setSelectedBarrio(draftFilters.barrio);
     closeMobileFilters();
+  };
+
+  const handleZoneSearchSelection = (selection: { district: string; barrio: string }) => {
+    if (isMobileFiltersOpen) {
+      setDraftFilters(current => ({ ...current, district: selection.district, barrio: selection.barrio }));
+      return;
+    }
+    setSelectedDistrict(selection.district);
+    setSelectedBarrio(selection.barrio);
   };
 
   const resetMobileFilters = () => {
@@ -2989,7 +3025,7 @@ const MadridDashboardV2: React.FC = () => {
         mobileAction={isMobile ? (
           <button type="button" className="v2-mobile-filter-trigger" aria-expanded={isMobileFiltersOpen} aria-controls="v2-filter-panel" onClick={openMobileFilters}>
             <SlidersHorizontal size={17} aria-hidden="true" />
-            <span>Filtros</span><b>{Number(selectedDistrict !== 'Todos') + Number(selectedBarrio !== 'Todos') + Number(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month)}</b>
+            <span>Filtros</span><b>{Number(selectedDistrict !== 'Todos') + Number(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month)}</b>
           </button>
         ) : undefined}
         profileTabs={PROFILES.map(p => ({ id: p.id, label: p.label }))}
@@ -3011,11 +3047,12 @@ const MadridDashboardV2: React.FC = () => {
       {isMobile && <div className="v2-mobile-filter-bar">
         <div className="v2-mobile-filter-summary">
           <strong>{activeProfile.label}</strong>
-          <span>{selectedDistrict === 'Todos' ? 'Madrid' : formatZoneOption(selectedDistrict)} · {selectedMonth} {selectedYear}</span>
+          <span>{selectedBarrio !== 'Todos' ? `${formatZoneOption(selectedDistrict)} · ${formatZoneOption(selectedBarrio)}` : selectedDistrict === 'Todos' ? 'Madrid' : formatZoneOption(selectedDistrict)} · {selectedMonth} {selectedYear}</span>
         </div>
         <div className="v2-mobile-filter-chips">
-          {selectedDistrict !== 'Todos' && <button type="button" onClick={() => { setSelectedDistrict('Todos'); setSelectedBarrio('Todos'); }}>‹ {formatZoneOption(selectedDistrict)} ×</button>}
-          {selectedBarrio !== 'Todos' && <button type="button" onClick={() => setSelectedBarrio('Todos')}>{formatZoneOption(selectedBarrio)} ×</button>}
+          {selectedBarrio !== 'Todos'
+            ? <button type="button" onClick={() => { setSelectedDistrict('Todos'); setSelectedBarrio('Todos'); }}>{formatZoneOption(selectedDistrict)} · {formatZoneOption(selectedBarrio)} ×</button>
+            : selectedDistrict !== 'Todos' && <button type="button" onClick={() => { setSelectedDistrict('Todos'); setSelectedBarrio('Todos'); }}>{formatZoneOption(selectedDistrict)} ×</button>}
           {(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month) && <button type="button" onClick={() => { setSelectedYear(latestAvailablePeriod.year); setSelectedMonth(latestAvailablePeriod.month); }}>{selectedMonth.slice(0, 3)} {selectedYear} ×</button>}
         </div>
       </div>}
@@ -3023,9 +3060,9 @@ const MadridDashboardV2: React.FC = () => {
       {isMobileFiltersOpen && <button type="button" className="v2-mobile-filter-backdrop" aria-label="Cerrar filtros" onClick={closeMobileFilters} />}
 
       {/* 2. FILTROS REFINADOS (CUSTOM APPLE DROPDOWNS) */}
-      {isMobile && <div id="v2-filter-panel" role="dialog" aria-modal={isMobileFiltersOpen} aria-hidden={!isMobileFiltersOpen} className={`v2-filters ${isMobileFiltersOpen ? 'v2-mobile-filters-open' : ''} ${['year', 'month', 'dist', 'barrio'].includes(activeDropdown || '') ? 'v2-filters-open' : ''}`}>
+      {isMobile && <div id="v2-filter-panel" role="dialog" aria-modal={isMobileFiltersOpen} aria-hidden={!isMobileFiltersOpen} className={`v2-filters ${isMobileFiltersOpen ? 'v2-mobile-filters-open' : ''} ${['year', 'month'].includes(activeDropdown || '') ? 'v2-filters-open' : ''}`}>
         <div className="v2-mobile-filter-heading">
-          <div><strong>Filtrar</strong><span>{activeProfile.label} · {visibleFilters.district === 'Todos' ? 'Madrid' : formatZoneOption(visibleFilters.district)} · {visibleFilters.month} {visibleFilters.year}</span></div>
+          <div><strong>Filtrar</strong><span>{activeProfile.label} · {visibleFilters.barrio !== 'Todos' ? `${formatZoneOption(visibleFilters.district)} · ${formatZoneOption(visibleFilters.barrio)}` : visibleFilters.district === 'Todos' ? 'Madrid' : formatZoneOption(visibleFilters.district)} · {visibleFilters.month} {visibleFilters.year}</span></div>
           <button type="button" aria-label="Cerrar filtros" onClick={closeMobileFilters}><X size={20} /></button>
         </div>
         <div className="v2-filter-group">
@@ -3033,44 +3070,13 @@ const MadridDashboardV2: React.FC = () => {
 
           {isMobile && <div className="v2-mobile-zone-filter-group">
           <span className="v2-mobile-zone-filter-heading">Zona (KPIs y mapas)</span>
-          {/* DISTRITO */}
-          <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
-            <span className="v2-filter-label">Distrito</span>
-            <DashboardSelect value={formatZoneOption(visibleFilters.district)} expanded={activeDropdown === 'dist'} onToggle={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')} />
-            {activeDropdown === 'dist' && (
-              <div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
-                {availableDistricts.map(d => (
-                  <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.district === d} onClick={(e) => { e.stopPropagation(); if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, district: d, barrio: 'Todos' })); else setSelectedDistrict(d); setActiveDropdown(null); }}>{formatZoneOption(d)}</button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* BARRIO */}
-          <div className={`v2-dropdown-container ${activeDropdown === 'barrio' ? 'v2-z-up' : ''}`}>
-            <span className="v2-filter-label">Barrio</span>
-            <DashboardSelect value={visibleFilters.district === 'Todos' ? 'Elige un distrito' : formatZoneOption(visibleFilters.barrio)} disabled={visibleFilters.district === 'Todos'} expanded={activeDropdown === 'barrio'} onToggle={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')} />
-            {activeDropdown === 'barrio' && (
-              <div className="v2-dropdown-menu" role="listbox" aria-label="Barrio">
-                <input
-                  className="v2-dropdown-search"
-                  aria-label="Buscar barrio"
-                  placeholder="Buscar barrio…"
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => {
-                    const query = e.target.value.toLocaleLowerCase('es-ES');
-                    const menu = e.currentTarget.parentElement;
-                    menu?.querySelectorAll<HTMLButtonElement>('.v2-dropdown-item').forEach(item => {
-                      item.hidden = query.length > 0 && !item.textContent?.toLocaleLowerCase('es-ES').includes(query);
-                    });
-                  }}
-                />
-                {(isMobileFiltersOpen ? draftBarrios : availableBarrios).map(b => (
-                  <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.barrio === b} onClick={(e) => { e.stopPropagation(); if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, barrio: b })); else setSelectedBarrio(b); setActiveDropdown(null); }}>{formatZoneOption(b)}</button>
-                ))}
-              </div>
-            )}
-          </div>
+          <ZoneSearch
+            options={zoneSearchOptions}
+            district={draftFilters.district}
+            barrio={draftFilters.barrio}
+            onSelect={handleZoneSearchSelection}
+            formatName={formatZoneOption}
+          />
           </div>}
           {/* BOTONES DE ACCIÓN EN ALTO CONTRASTE */}
           <div className="v2-filter-actions">
@@ -3081,7 +3087,7 @@ const MadridDashboardV2: React.FC = () => {
             />}
 
             {isMobile && <div className="v2-mobile-filter-commit">
-              <button type="button" className="v2-mobile-filter-apply" onClick={applyMobileFilters}>Aplicar ({Number(draftFilters.district !== 'Todos') + Number(draftFilters.barrio !== 'Todos') + Number(draftFilters.year !== latestAvailablePeriod.year || draftFilters.month !== latestAvailablePeriod.month)})</button>
+              <button type="button" className="v2-mobile-filter-apply" onClick={applyMobileFilters}>Aplicar ({Number(draftFilters.district !== 'Todos') + Number(draftFilters.year !== latestAvailablePeriod.year || draftFilters.month !== latestAvailablePeriod.month)})</button>
               <button type="button" className="v2-mobile-filter-reset" onClick={resetMobileFilters}>Restablecer al último dato real</button>
             </div>}
 
@@ -3915,27 +3921,13 @@ const MadridDashboardV2: React.FC = () => {
                     latestRealYear={latestRealYear}
                     firstProjectionMonth={firstProjectionMonth}
                     zoneControls={!isMobile && <div className="v2-map-controls-row">
-                      <div className="v2-zone-filter-row" aria-label="Filtros de zona">
-                        <span className="v2-zone-filter-title">Zona</span>
-                        <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
-                          <span className="v2-filter-label">Distrito</span>
-                          <DashboardSelect value={formatZoneOption(selectedDistrict)} expanded={activeDropdown === 'dist'} onToggle={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')} />
-                          {activeDropdown === 'dist' && <div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
-                            {availableDistricts.map(d => <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={selectedDistrict === d} onClick={event => { event.stopPropagation(); setSelectedDistrict(d); setSelectedBarrio('Todos'); setActiveDropdown(null); }}>{formatZoneOption(d)}</button>)}
-                          </div>}
-                        </div>
-                        <div className={`v2-dropdown-container ${activeDropdown === 'barrio' ? 'v2-z-up' : ''}`}>
-                          <span className="v2-filter-label">Barrio</span>
-                          <DashboardSelect value={selectedDistrict === 'Todos' ? 'Elige un distrito' : formatZoneOption(selectedBarrio)} disabled={selectedDistrict === 'Todos'} expanded={activeDropdown === 'barrio'} onToggle={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')} />
-                          {activeDropdown === 'barrio' && selectedDistrict !== 'Todos' && <div className="v2-dropdown-menu" role="listbox" aria-label="Barrio">
-                            <input className="v2-dropdown-search" aria-label="Buscar barrio" placeholder="Buscar barrio…" onClick={event => event.stopPropagation()} onChange={event => {
-                              const query = event.currentTarget.value.toLocaleLowerCase('es-ES');
-                              event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('.v2-dropdown-item').forEach(item => { item.hidden = query.length > 0 && !item.textContent?.toLocaleLowerCase('es-ES').includes(query); });
-                            }} />
-                            {availableBarrios.map(b => <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={selectedBarrio === b} onClick={event => { event.stopPropagation(); setSelectedBarrio(b); setActiveDropdown(null); }}>{formatZoneOption(b)}</button>)}
-                          </div>}
-                        </div>
-                      </div>
+                      <ZoneSearch
+                        options={zoneSearchOptions}
+                        district={selectedDistrict}
+                        barrio={selectedBarrio}
+                        onSelect={handleZoneSearchSelection}
+                        formatName={formatZoneOption}
+                      />
                       <div className="v2-desktop-map-period-controls">
                         {periodControls}
                         <DashboardHelpButton onClick={() => setShowHelpModal(true)} label="¿Cómo entender estos precios?" title="Aprende a interpretar los datos reales y las proyecciones" />
