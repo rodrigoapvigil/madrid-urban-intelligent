@@ -4574,18 +4574,14 @@ body:has(.v2-root[data-platform="mobile"]) { overflow-x: clip; max-width: 100%; 
 .v2-root .v2-map-period-tools .tool-period { flex: 1 1 auto; }
 
 @media (min-width: 769px) {
-  /* Keep the shared period control on the right and let its calendar expand in flow. */
+  /* Keep help at the left and period controls at the right; the calendar floats over content. */
   .v2-root[data-platform="desktop"] .v2-map-header-zone { flex: 0 1 auto; width: auto; margin-left: auto; }
+  .v2-root[data-platform="desktop"] .v2-map-header-actions { order: 1; margin-right: auto; }
+  .v2-root[data-platform="desktop"] .v2-map-header-zone { order: 2; }
   .v2-root[data-platform="desktop"] .v2-map-period-tools { flex: 0 1 auto; width: auto; }
-  .v2-root[data-platform="desktop"] .v2-map-period-tools .tool-controls-main { flex: 0 1 auto; width: auto; justify-content: flex-end; }
-  .v2-root[data-platform="desktop"] .v2-map-period-tools .tool-period { align-items: flex-end; margin-left: auto; }
-  .v2-root[data-platform="desktop"] .v2-map-card > .v2-map-header:has(.tool-period-popover) { align-items: flex-start !important; }
-  .v2-root[data-platform="desktop"] .v2-map-period-tools:has(.tool-period-popover) { align-items: flex-start; }
-  .v2-root[data-platform="desktop"] .v2-map-period-tools:has(.tool-period-popover) .tool-controls-trailing { align-self: flex-start; }
-  .v2-root[data-platform="desktop"] .v2-explorer-header:has(.tool-period-popover) { align-items: flex-start; }
-  .v2-root[data-platform="desktop"] .v2-explorer-header .v2-rank-settings:has(.tool-period-popover) { align-items: flex-start; }
-  .v2-root[data-platform="desktop"] .v2-compare-section .v2-section-header:has(.tool-period-popover) { align-items: flex-start !important; }
-  .v2-root[data-platform="desktop"] .v2-compare-desktop-toolbar:has(.tool-period-popover) { align-items: flex-start; }
+  .v2-root[data-platform="desktop"] .v2-map-period-tools .tool-controls-main { order: 2; flex: 0 0 auto; width: auto; justify-content: flex-end; }
+  .v2-root[data-platform="desktop"] .v2-map-period-tools .tool-controls-trailing { order: 1; }
+  .v2-root[data-platform="desktop"] .v2-map-period-tools .tool-period { align-items: flex-end; margin-left: 0; }
 }
 
 @media (max-width: 768px), (pointer: coarse) and (max-height: 500px) {
