@@ -44,6 +44,21 @@
   font-weight: 700;
 }
 
+.dashboard-help-button--icon-only {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+  border-radius: 50%;
+}
+.dashboard-help-button--icon-only .dashboard-help-button__icon {
+  width: 20px;
+  height: 20px;
+  flex-basis: 20px;
+  font-size: 13px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .dashboard-help-button { transition: none; }
 }

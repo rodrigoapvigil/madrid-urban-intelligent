@@ -12,6 +12,7 @@ export function DashboardMapStatus({
   latestRealMonth,
   latestRealYear,
   firstProjectionMonth,
+  zoneControls,
   onHelp,
   children,
 }: {
@@ -23,21 +24,28 @@ export function DashboardMapStatus({
   latestRealMonth: string;
   latestRealYear: string | number;
   firstProjectionMonth: string;
+  zoneControls?: ReactNode;
   onHelp: () => void;
   children: ReactNode;
 }) {
   return (
-    <div className="v2-map-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
-      <div className={`v2-data-status ${isProjection ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
-        {isMobile ? (
+    <div className={`v2-map-header${isMobile ? ' is-mobile' : ' is-desktop'}`}>
+      {isMobile ? <>
+        <div className={`v2-data-status ${isProjection ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
           <span><strong>{mobileStatus}</strong> · Último dato observado: {observedMonth} de {observedYear} · estimaciones desde {firstProjectionMonth}. Estimación estadística basada en datos oficiales hasta {observedMonth}; no es una tasación ni una garantía de precios futuros.</span>
-        ) : (
-          <strong className="v2-map-data-chip">Dato real · hasta {latestRealMonth} de {latestRealYear}</strong>
-        )}
-      </div>
-      {!isMobile && <span className="v2-map-data-note">Desde {firstProjectionMonth}: estimación estadística basada en datos oficiales. No es una tasación ni una garantía de precios futuros.</span>}
-      <DashboardHelpButton className="v2-map-help-button" onClick={onHelp} label="¿Cómo usar el mapa?" />
-      {children}
+        </div>
+        <DashboardHelpButton className="v2-map-help-button" onClick={onHelp} label="¿Cómo usar el mapa?" />
+        {children}
+      </> : <>
+        <div className="v2-map-header-zone">{zoneControls}</div>
+        <div className="v2-map-header-actions">
+          <div className={`v2-data-status ${isProjection ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
+            <strong className="v2-map-data-chip">Dato real · hasta {latestRealMonth} de {latestRealYear}</strong>
+          </div>
+          <DashboardHelpButton className="v2-map-help-button" onClick={onHelp} label="¿Cómo usar el mapa?" title="¿Cómo usar el mapa?" iconOnly />
+          {children}
+        </div>
+      </>}
     </div>
   );
 }
@@ -49,6 +57,7 @@ export function DashboardMapLegend({
   dataCount,
   totalCount,
   dataSource,
+  projectionNote,
 }: {
   isMobile: boolean;
   title: string;
@@ -56,6 +65,7 @@ export function DashboardMapLegend({
   dataCount: number;
   totalCount: number;
   dataSource: string;
+  projectionNote?: string;
 }) {
   const note = `Rayado: sin datos publicados en la fuente oficial (${dataSource}). No los estimamos.`;
   const countNote = `${dataCount} de ${totalCount} barrios tienen dato en este periodo.`;
@@ -71,7 +81,7 @@ export function DashboardMapLegend({
         </>
       ) : (
         <div className="v2-map-legend-desktop">
-          <div className="v2-map-legend-notes"><small>{note}</small><small>{countNote}</small></div>
+          <div className="v2-map-legend-notes"><small>{note}</small><small>{countNote}</small>{projectionNote && <small>{projectionNote}</small>}</div>
           <div className="v2-map-legend-visual">
             <div className="v2-map-legend-title">{title}</div>
             <div className="v2-map-legend-scale" aria-label="Escala de menor a mayor valor"><span>Más bajo</span><div className="v2-map-legend-swatches" aria-hidden="true"><i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" /></div><span>Más alto</span></div>

@@ -8,13 +8,14 @@ type DashboardHelpButtonProps = {
   onClick: () => void;
   title?: string;
   className?: string;
+  iconOnly?: boolean;
 };
 
-export default function DashboardHelpButton({ label, onClick, title, className = '' }: DashboardHelpButtonProps) {
+export default function DashboardHelpButton({ label, onClick, title, className = '', iconOnly = false }: DashboardHelpButtonProps) {
   return (
-    <button type="button" className={`dashboard-help-button ${className}`.trim()} onClick={onClick} title={title}>
-      <span className="dashboard-help-button__icon" aria-hidden="true">i</span>
-      <span>{label}</span>
+    <button type="button" className={`dashboard-help-button${iconOnly ? ' dashboard-help-button--icon-only' : ''} ${className}`.trim()} onClick={onClick} title={title} aria-label={label}>
+      <span className="dashboard-help-button__icon" aria-hidden="true">{iconOnly ? '?' : 'i'}</span>
+      {!iconOnly && <span>{label}</span>}
     </button>
   );
 }

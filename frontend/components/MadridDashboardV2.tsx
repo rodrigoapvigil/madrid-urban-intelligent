@@ -2895,27 +2895,6 @@ const MadridDashboardV2: React.FC = () => {
 
             {/* KPI & MAPA SECTION */}
             <div className="v2-grid-main" data-dashboard-section="summary">
-              {!isMobile && <div className="v2-zone-filter-row" aria-label="Filtros de zona">
-                <span className="v2-zone-filter-title">Zona</span>
-                <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
-                  <span className="v2-filter-label">Distrito</span>
-                  <DashboardSelect value={formatZoneOption(selectedDistrict)} expanded={activeDropdown === 'dist'} onToggle={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')} />
-                  {activeDropdown === 'dist' && <div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
-                    {availableDistricts.map(d => <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={selectedDistrict === d} onClick={event => { event.stopPropagation(); setSelectedDistrict(d); setSelectedBarrio('Todos'); setActiveDropdown(null); }}>{formatZoneOption(d)}</button>)}
-                  </div>}
-                </div>
-                <div className={`v2-dropdown-container ${activeDropdown === 'barrio' ? 'v2-z-up' : ''}`}>
-                  <span className="v2-filter-label">Barrio</span>
-                  <DashboardSelect value={selectedDistrict === 'Todos' ? 'Elige un distrito' : formatZoneOption(selectedBarrio)} disabled={selectedDistrict === 'Todos'} expanded={activeDropdown === 'barrio'} onToggle={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')} />
-                  {activeDropdown === 'barrio' && selectedDistrict !== 'Todos' && <div className="v2-dropdown-menu" role="listbox" aria-label="Barrio">
-                    <input className="v2-dropdown-search" aria-label="Buscar barrio" placeholder="Buscar barrio…" onClick={event => event.stopPropagation()} onChange={event => {
-                      const query = event.currentTarget.value.toLocaleLowerCase('es-ES');
-                      event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('.v2-dropdown-item').forEach(item => { item.hidden = query.length > 0 && !item.textContent?.toLocaleLowerCase('es-ES').includes(query); });
-                    }} />
-                    {availableBarrios.map(b => <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={selectedBarrio === b} onClick={event => { event.stopPropagation(); setSelectedBarrio(b); setActiveDropdown(null); }}>{formatZoneOption(b)}</button>)}
-                  </div>}
-                </div>
-              </div>}
               <div className="v2-kpi-col">
                 <div className="v2-kpi-stack">
 
@@ -3720,6 +3699,27 @@ const MadridDashboardV2: React.FC = () => {
                     latestRealMonth={latestRealMonth}
                     latestRealYear={latestRealYear}
                     firstProjectionMonth={firstProjectionMonth}
+                    zoneControls={!isMobile && <div className="v2-zone-filter-row" aria-label="Filtros de zona">
+                      <span className="v2-zone-filter-title">Zona</span>
+                      <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
+                        <span className="v2-filter-label">Distrito</span>
+                        <DashboardSelect value={formatZoneOption(selectedDistrict)} expanded={activeDropdown === 'dist'} onToggle={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')} />
+                        {activeDropdown === 'dist' && <div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
+                          {availableDistricts.map(d => <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={selectedDistrict === d} onClick={event => { event.stopPropagation(); setSelectedDistrict(d); setSelectedBarrio('Todos'); setActiveDropdown(null); }}>{formatZoneOption(d)}</button>)}
+                        </div>}
+                      </div>
+                      <div className={`v2-dropdown-container ${activeDropdown === 'barrio' ? 'v2-z-up' : ''}`}>
+                        <span className="v2-filter-label">Barrio</span>
+                        <DashboardSelect value={selectedDistrict === 'Todos' ? 'Elige un distrito' : formatZoneOption(selectedBarrio)} disabled={selectedDistrict === 'Todos'} expanded={activeDropdown === 'barrio'} onToggle={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')} />
+                        {activeDropdown === 'barrio' && selectedDistrict !== 'Todos' && <div className="v2-dropdown-menu" role="listbox" aria-label="Barrio">
+                          <input className="v2-dropdown-search" aria-label="Buscar barrio" placeholder="Buscar barrio…" onClick={event => event.stopPropagation()} onChange={event => {
+                            const query = event.currentTarget.value.toLocaleLowerCase('es-ES');
+                            event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('.v2-dropdown-item').forEach(item => { item.hidden = query.length > 0 && !item.textContent?.toLocaleLowerCase('es-ES').includes(query); });
+                          }} />
+                          {availableBarrios.map(b => <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={selectedBarrio === b} onClick={event => { event.stopPropagation(); setSelectedBarrio(b); setActiveDropdown(null); }}>{formatZoneOption(b)}</button>)}
+                        </div>}
+                      </div>
+                    </div>}
                     onHelp={() => setShowMapHelpModal(true)}
                   >
                     <FullscreenToggle targetSelector=".v2-map-card" mobileOnly mobilePlatform={isMobile} />
@@ -3829,6 +3829,7 @@ const MadridDashboardV2: React.FC = () => {
                     dataCount={mapData.neighborhoods.filter((item: any) => Number(activeProfile.id === 'inversion' ? item.rentabilidad : item.precio_m2) > 0).length}
                     totalCount={neighborhoodFeatureCount || mapData.neighborhoods.length}
                     dataSource={MAP_DATA_SOURCE}
+                    projectionNote={`Desde ${firstProjectionMonth}: estimación estadística basada en datos oficiales. No es una tasación ni una garantía de precios futuros.`}
                   />
                 </div>
               </div>
