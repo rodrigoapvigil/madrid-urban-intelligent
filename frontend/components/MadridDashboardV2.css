@@ -593,7 +593,7 @@
 .v2-chart-controls button:hover,
 .v2-chart-controls button:focus-visible { background: var(--blanco-humo); outline: 2px solid var(--coral-texto); outline-offset: 1px; }
 
-/* Keep zoom controls in the chart header zone, above the legend. */
+/* Chart controls share a row with the legend; individual chart controls remain in their chart header. */
 .v2-chart-wrap { margin-top: 34px; }
 .v2-overlay-wrapper,
 .v2-overlay-body { overflow: visible !important; }
@@ -3919,9 +3919,9 @@ body.v2-fullscreen-open footer { display: none !important; }
 /* Desktop-only ranking readability; mobile keeps its existing compact rows. */
 @media (min-width: 769px) and (hover: hover) {
   .v2-root .v2-overlay-chart-stack { display: grid; grid-template-rows: auto minmax(320px, 460px); gap: 8px; min-width: 0; }
-  .v2-root .v2-overlay-chart-toolbar { display: flex; align-items: flex-start; gap: 14px; min-width: 0; }
+  .v2-root .v2-overlay-chart-toolbar { display: flex; align-items: center; gap: 14px; min-width: 0; }
   .v2-root .v2-overlay-chart-toolbar .v2-comparison-line-legend { flex: 1 1 auto; min-width: 0; }
-  .v2-root .v2-overlay-chart-toolbar .v2-comparison-zoom-controls { flex: 0 0 auto; margin-left: auto; }
+  .v2-root .v2-overlay-chart-toolbar .v2-comparison-zoom-controls { position: static; flex: 0 0 auto; align-self: center; margin: 0 0 0 auto; }
   .v2-root .v2-overlay-chart-stack .v2-chart-wrap.large { display: block; height: 460px; min-height: 0; margin: 0; overflow: hidden; }
   .v2-root .v2-overlay-chart-stack .v2-chart-wrap.large > canvas { height: 100% !important; min-height: 0; }
   .v2-root .v2-is-fullscreen.v2-overlay-wrapper .v2-overlay-chart-stack { height: 100%; grid-template-rows: auto minmax(0, 1fr); }
@@ -4373,9 +4373,14 @@ body:has(.v2-root[data-platform="mobile"]) { overflow-x: clip; max-width: 100%; 
   height: 100% !important;
   border-radius: inherit;
 }
+.v2-root .v2-overlay-mobile-toolbar { display: none; }
 @media (max-width: 768px), (pointer: coarse) and (max-height: 500px) {
   .v2-root .v2-overlay-wrapper:not(.v2-is-fullscreen) { border-radius: 18px !important; }
   .v2-root .v2-overlay-wrapper:not(.v2-is-fullscreen) .v2-overlay-header { padding: 14px 16px !important; border-radius: 17px 17px 0 0; }
   .v2-root .v2-overlay-wrapper:not(.v2-is-fullscreen) .v2-overlay-body { padding: 14px 12px 16px !important; border-radius: 0 0 17px 17px; }
   .v2-root .v2-overlay-wrapper:not(.v2-is-fullscreen) .v2-chart-wrap.large { height: 540px; border-radius: 14px; }
+  .v2-root .v2-overlay-wrapper:not(.v2-is-fullscreen) .v2-overlay-mobile-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; }
+  .v2-root .v2-overlay-mobile-toolbar .v2-compare-legend { flex: 1 1 auto; min-width: 0; justify-content: flex-start; margin: 0; padding: 0; }
+  .v2-root .v2-overlay-mobile-toolbar .v2-chart-controls { position: static; flex: 0 0 auto; top: auto; right: auto; z-index: 1; }
+  .v2-root .v2-overlay-mobile-toolbar .v2-chart-controls .v2-expand-button { width: 40px; height: 40px; }
 }

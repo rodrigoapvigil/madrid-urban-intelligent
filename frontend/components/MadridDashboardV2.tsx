@@ -4623,8 +4623,11 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                   <div className="v2-overlay-body">
                     {isMobile ? <>
-                      <div className="v2-chart-wrap large"><ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile /><canvas id={`v2-overlay-${p.id}`}></canvas></div>
-                      <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={comparisonAHasData ? formatZoneOption(selectedZoneA) : ''} zoneB={comparisonBHasData ? formatZoneOption(selectedZoneB) : ''} zoneAColor={comparisonColors.zoneA} zoneBColor={comparisonColors.zoneB} />
+                      <div className="v2-chart-wrap large"><canvas id={`v2-overlay-${p.id}`}></canvas></div>
+                      <div className="v2-overlay-mobile-toolbar">
+                        <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={comparisonAHasData ? formatZoneOption(selectedZoneA) : ''} zoneB={comparisonBHasData ? formatZoneOption(selectedZoneB) : ''} zoneAColor={comparisonColors.zoneA} zoneBColor={comparisonColors.zoneB} />
+                        <ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile />
+                      </div>
                     </> : <div className="v2-overlay-chart-stack">
                       <div className="v2-overlay-chart-toolbar">
                         <ComparisonSeriesLegend chartId={`v2-overlay-${p.id}`} items={[
