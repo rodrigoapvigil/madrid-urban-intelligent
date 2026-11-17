@@ -31,6 +31,7 @@ export function DashboardMapStatus({
   return (
     <div className={`v2-map-header${isMobile ? ' is-mobile' : ' is-desktop'}`}>
       {isMobile ? <>
+        {zoneControls}
         <div className={`v2-data-status ${isProjection ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
           <span><strong>{mobileStatus}</strong> · Último dato observado: {observedMonth} de {observedYear} · estimaciones desde {firstProjectionMonth}. Estimación estadística basada en datos oficiales hasta {observedMonth}; no es una tasación ni una garantía de precios futuros.</span>
         </div>

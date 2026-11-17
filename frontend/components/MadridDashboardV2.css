@@ -4560,6 +4560,7 @@ body:has(.v2-root[data-platform="mobile"]) { overflow-x: clip; max-width: 100%; 
 .v2-root .v2-zone-search-result[aria-selected="true"] { background: rgba(0, 229, 255, .1); }
 .v2-root .v2-zone-search-result > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .v2-root .v2-zone-search-result > small { flex: 0 0 auto; color: #92a9bf; font-size: 11px; }
+.v2-root .v2-zone-search-group-label { display: block; padding: 8px 10px 4px; color: #00d9f2; font-size: 10px; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
 .v2-root .v2-zone-search-empty { margin: 0; padding: 12px 10px; color: #a9bdcf; font-size: 12px; }
 .v2-root .v2-zone-search-selection {
   display: flex;
@@ -4587,14 +4588,26 @@ body:has(.v2-root[data-platform="mobile"]) { overflow-x: clip; max-width: 100%; 
 .v2-root .v2-zone-search-reset:hover { color: #00e5ff; }
 .v2-root .v2-mobile-zone-filter-group > .v2-zone-search { grid-column: 1 / -1; width: 100%; }
 
+/* The shared zone finder now leads the KPI column on both platforms. */
+.v2-root .v2-kpi-stack > .v2-zone-search { flex: none; width: 100%; margin: 0 0 4px; }
+.v2-root .v2-kpi-stack > .v2-zone-search .v2-zone-search-selection { justify-content: flex-start; }
+.v2-root .v2-map-period-tools { align-items: center; }
+.v2-root .v2-map-period-tools .tool-controls-main { width: 100%; }
+.v2-root .v2-map-period-tools .tool-period { flex: 1 1 auto; }
+
 @media (max-width: 768px), (pointer: coarse) and (max-height: 500px) {
   .v2-root[data-platform="mobile"] .v2-mobile-zone-filter-group > .v2-zone-search { grid-column: 1 / -1; }
+  .v2-root[data-platform="mobile"] .v2-kpi-stack > .v2-zone-search { grid-column: 1 / -1; }
   .v2-root[data-platform="mobile"] .v2-zone-search-field { min-height: 48px; }
   .v2-root[data-platform="mobile"] .v2-zone-search-field input { min-height: 46px; font-size: 15px; }
   .v2-root[data-platform="mobile"] .v2-zone-search-results {
-    position: static;
+    position: absolute;
+    z-index: 1400;
+    top: calc(100% + 5px);
+    left: 0;
+    right: 0;
     max-height: min(34dvh, 280px);
-    margin-top: 2px;
+    margin-top: 0;
     box-shadow: none;
   }
   .v2-root[data-platform="mobile"] .v2-zone-search-result { min-height: 48px; }

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
@@ -26,6 +26,8 @@ import DashboardSelect from './DashboardSelect';
 import DashboardHeatmapTable from './DashboardHeatmapTable';
 import DashboardRankingTable from './DashboardRankingTable';
 import ZoneSearch, { ZoneSearchOption } from './ZoneSearch';
+import PeriodSelector from './PeriodSelector';
+import ToolControls from './ToolControls';
 import { formatEuroAmount, formatNumber as formatSpanishNumber, formatPercent } from '../lib/format-number';
 import { comparisonZoneColors, profileColorCuts, profileMapTierColors } from '../lib/map-color-scale';
 import { DASHBOARD_COPY } from '../lib/product-copy';
@@ -556,6 +558,12 @@ const getMapLegendLabels = (profileId: string, cuts: number[]) => {
 const MAP_DATA_SOURCE = 'Banco de Datos del Ayuntamiento de Madrid';
 
 const MONTHS_ES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+const PERIOD_SELECTOR_YEARS = ['2023', '2024', '2025', '2026', '2027', '2028'];
+const SECTION_CONTROL_SUBSCRIPTIONS = {
+  summary: { period: 'product', zone: 'product' },
+  affordability: { period: 'product', zone: 'independent' },
+  comparison: { period: 'product', zone: 'section' },
+} as const;
 
 const MADRID_NAME_EXCEPTIONS: Record<string, string> = {
   'Puente De Vallecas': 'Puente de Vallecas',
@@ -997,11 +1005,18 @@ const MadridDashboardV2: React.FC = () => {
     display: 'inline-block'
   };
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const profileParam = searchParams.get('profile');
 
   // State: Perfiles
   const [profileIdx, setProfileIdx] = useState(0);
+  const [productControls, setProductControls] = useState<Record<string, { year: string; month: string; district: string; barrio: string }>>(() => {
+    const period = getCurrentMadridPeriod();
+    const district = searchParams.get('district') || 'Todos';
+    const barrio = searchParams.get('barrio') || 'Todos';
+    return Object.fromEntries(PROFILES.map(profile => [profile.id, { ...period, district, barrio }]));
+  });
   const [prevIdx, setPrevIdx] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
 
@@ -1009,13 +1024,9 @@ const MadridDashboardV2: React.FC = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [mapLevel, setMapLevel] = useState<'districts' | 'neighborhoods'>('districts');
-  const [draftFilters, setDraftFilters] = useState({ year: '', month: '', district: 'Todos', barrio: 'Todos' });
-  const { selectedZoneA, setSelectedZoneA, selectedZoneB, setSelectedZoneB, compareLevel, setCompareLevel, selectedYear, setSelectedYear, selectedMonth, setSelectedMonth } = useComparacion();
-  const [comparisonYearOverride, setComparisonYearOverride] = useState<string | null>(null);
-  const comparisonYear = comparisonYearOverride ?? selectedYear;
+  const { selectedZoneA, setSelectedZoneA, selectedZoneB, setSelectedZoneB, compareLevel, setCompareLevel } = useComparacion();
+  const [comparisonYearOverrides, setComparisonYearOverrides] = useState<Record<string, string | null>>(() => Object.fromEntries(PROFILES.map(profile => [profile.id, null])));
   const [latestAvailablePeriod, setLatestAvailablePeriod] = useState({ year: '2026', month: 'Junio' });
-  const [selectedDistrict, setSelectedDistrict] = useState('Todos');
-  const [selectedBarrio, setSelectedBarrio] = useState('Todos');
   const [compareMapTarget, setCompareMapTarget] = useState<'A' | 'B'>('A');
   const [compareZoneSheet, setCompareZoneSheet] = useState<'A' | 'B' | null>(null);
   const [compareZoneSearch, setCompareZoneSearch] = useState('');
@@ -1122,8 +1133,8 @@ const MadridDashboardV2: React.FC = () => {
   const [heatmapSearch, setHeatmapSearch] = useState('');
   const [heatmapVisibleCount, setHeatmapVisibleCount] = useState(15);
   const [rankingLevel, setRankingLevel] = useState<'Distritos' | 'Barrios'>('Distritos');
-  const [rankingYearOverride, setRankingYearOverride] = useState<string | null>(null);
-  const [rankingMonthOverride, setRankingMonthOverride] = useState<string | null>(null);
+  const [rankingYearOverrides, setRankingYearOverrides] = useState<Record<string, string | null>>(() => Object.fromEntries(PROFILES.map(profile => [profile.id, null])));
+  const [rankingMonthOverrides, setRankingMonthOverrides] = useState<Record<string, string | null>>(() => Object.fromEntries(PROFILES.map(profile => [profile.id, null])));
   const [rankingMetric, setRankingMetric] = useState<'total' | 'unit'>('total');
   const [scatterData, setScatterData] = useState<any[]>([]);
   const [connectivityData, setConnectivityData] = useState<any>(null);
@@ -1155,6 +1166,29 @@ const MadridDashboardV2: React.FC = () => {
   const hasLoadedPrimaryKpis = useRef(false);
 
   const activeProfile = PROFILES[profileIdx];
+  const activeControls = productControls[activeProfile.id];
+  const comparisonYearOverride = comparisonYearOverrides[activeProfile.id];
+  const rankingYearOverride = rankingYearOverrides[activeProfile.id];
+  const rankingMonthOverride = rankingMonthOverrides[activeProfile.id];
+  const setComparisonYearOverride = (value: string | null) => setComparisonYearOverrides(current => ({ ...current, [activeProfile.id]: value }));
+  const setRankingYearOverride = (value: string | null) => setRankingYearOverrides(current => ({ ...current, [activeProfile.id]: value }));
+  const setRankingMonthOverride = (value: string | null) => setRankingMonthOverrides(current => ({ ...current, [activeProfile.id]: value }));
+  const selectedYear = activeControls.year;
+  const selectedMonth = activeControls.month;
+  const comparisonYear = comparisonYearOverride ?? selectedYear;
+  const selectedDistrict = activeControls.district;
+  const selectedBarrio = activeControls.barrio;
+  const updateProductControl = (key: 'year' | 'month' | 'district' | 'barrio', next: React.SetStateAction<string>) => {
+    setProductControls(current => {
+      const previous = current[activeProfile.id];
+      const value = typeof next === 'function' ? next(previous[key]) : next;
+      return { ...current, [activeProfile.id]: { ...previous, [key]: value } };
+    });
+  };
+  const setSelectedYear: React.Dispatch<React.SetStateAction<string>> = value => updateProductControl('year', value);
+  const setSelectedMonth: React.Dispatch<React.SetStateAction<string>> = value => updateProductControl('month', value);
+  const setSelectedDistrict: React.Dispatch<React.SetStateAction<string>> = value => updateProductControl('district', value);
+  const setSelectedBarrio: React.Dispatch<React.SetStateAction<string>> = value => updateProductControl('barrio', value);
   const comparisonColors = comparisonZoneColors(activeProfile.id);
   const selectedMonthIndex = MONTHS_ES.indexOf(selectedMonth);
   const rankingYear = rankingYearOverride ?? selectedYear;
@@ -1168,7 +1202,7 @@ const MadridDashboardV2: React.FC = () => {
   const latestRealPoint = realSeriesPoints[realSeriesPoints.length - 1];
   const latestRealMonth = latestRealPoint?.mes_nombre || latestAvailablePeriod.month;
   const latestRealYear = Number(latestRealPoint?.anio || latestAvailablePeriod.year);
-  const visibleFilters = isMobileFiltersOpen ? draftFilters : { year: selectedYear, month: selectedMonth, district: selectedDistrict, barrio: selectedBarrio };
+  const visibleFilters = { year: selectedYear, month: selectedMonth, district: selectedDistrict, barrio: selectedBarrio };
   const firstProjectionMonth = latestRealPoint
     ? MONTHS_ES[Number(latestRealPoint.mes)] || 'Enero'
     : MONTHS_ES[latestObservedMonthIndex + 1] || 'Enero';
@@ -1284,9 +1318,29 @@ const MadridDashboardV2: React.FC = () => {
       const idx = PROFILES.findIndex(p => p.id === profileParam);
       if (idx !== -1) {
         setProfileIdx(idx);
+        const next = productControls[PROFILES[idx].id];
+        selectZone(next.barrio !== 'Todos' ? next.barrio : next.district !== 'Todos' ? next.district : null);
       }
     }
   }, [profileParam]);
+
+  useEffect(() => {
+    const selected = selectedBarrio !== 'Todos' ? selectedBarrio : selectedDistrict !== 'Todos' ? selectedDistrict : null;
+    selectZone(selected);
+  }, [selectedDistrict, selectedBarrio, selectZone]);
+
+  useEffect(() => {
+    if (!filtersReady) return;
+    const params = new URLSearchParams(searchParams.toString());
+    if (selectedDistrict === 'Todos') params.delete('district');
+    else params.set('district', selectedDistrict);
+    if (selectedBarrio === 'Todos') params.delete('barrio');
+    else params.set('barrio', selectedBarrio);
+    const query = params.toString();
+    const current = `${pathname}${window.location.search}`;
+    const next = `${pathname}${query ? `?${query}` : ''}`;
+    if (current !== next) router.replace(next, { scroll: false });
+  }, [filtersReady, selectedDistrict, selectedBarrio, pathname, router, searchParams]);
 
   // Fetch initial filters
   useEffect(() => {
@@ -1311,8 +1365,6 @@ const MadridDashboardV2: React.FC = () => {
         setAvailableYears(allYears);
         setMonthsByYear(months);
         if (data.districts) setAvailableDistricts(['Todos', ...data.districts]);
-        setSelectedYear(currentPeriod.year);
-        setSelectedMonth(currentPeriod.month);
         setFiltersReady(true);
       })
       .catch(err => {
@@ -2854,12 +2906,13 @@ const MadridDashboardV2: React.FC = () => {
     if (newIdx === profileIdx || isTransitioning) return;
     setPrevIdx(profileIdx);
     setProfileIdx(newIdx);
+    const next = productControls[PROFILES[newIdx].id];
+    selectZone(next.barrio !== 'Todos' ? next.barrio : next.district !== 'Todos' ? next.district : null);
     setIsTransitioning(true);
     setTimeout(() => setIsTransitioning(false), 480);
   };
 
   const openMobileFilters = () => {
-    setDraftFilters({ year: selectedYear, month: selectedMonth, district: selectedDistrict, barrio: selectedBarrio });
     setIsMobileFiltersOpen(true);
   };
 
@@ -2870,29 +2923,24 @@ const MadridDashboardV2: React.FC = () => {
   };
 
   const applyMobileFilters = () => {
-    setSelectedYear(draftFilters.year);
-    setSelectedMonth(draftFilters.month);
-    setSelectedDistrict(draftFilters.district);
-    setSelectedBarrio(draftFilters.barrio);
     closeMobileFilters();
   };
 
   const handleZoneSearchSelection = (selection: { district: string; barrio: string }) => {
-    if (isMobileFiltersOpen) {
-      setDraftFilters(current => ({ ...current, district: selection.district, barrio: selection.barrio }));
-      return;
-    }
     setSelectedDistrict(selection.district);
     setSelectedBarrio(selection.barrio);
+    const selected = selection.barrio !== 'Todos' ? selection.barrio : selection.district !== 'Todos' ? selection.district : null;
+    selectZone(selected);
+    setDesktopPinnedZone(null);
+    setDesktopZoneHover(null);
+    desktopZoneHoverRef.current = null;
   };
 
   const resetMobileFilters = () => {
-    const reset = { year: latestAvailablePeriod.year, month: latestAvailablePeriod.month, district: 'Todos', barrio: 'Todos' };
-    setDraftFilters(reset);
-    setSelectedYear(reset.year);
-    setSelectedMonth(reset.month);
-    setSelectedDistrict(reset.district);
-    setSelectedBarrio(reset.barrio);
+    setSelectedYear(latestAvailablePeriod.year);
+    setSelectedMonth(latestAvailablePeriod.month);
+    setSelectedDistrict('Todos');
+    setSelectedBarrio('Todos');
     closeMobileFilters();
   };
 
@@ -2943,47 +2991,25 @@ const MadridDashboardV2: React.FC = () => {
     ? selectedDistrict !== 'Todos' ? selectedDistrict : null
     : selectedBarrio !== 'Todos' ? selectedBarrio : null;
 
-  const periodControls = isMobile ? <div className="v2-period-filter-group">
-    <span className="v2-period-filter-heading">Periodo (afecta a todo)</span>
-    <div className={`v2-dropdown-container v2-period-select ${activeDropdown === 'year' ? 'v2-z-up' : ''}`}>
-      <span className="v2-filter-label">Año</span>
-      <DashboardSelect value={visibleFilters.year} expanded={activeDropdown === 'year'} onToggle={() => setActiveDropdown(activeDropdown === 'year' ? null : 'year')} />
-      {activeDropdown === 'year' && <div className="v2-dropdown-menu" role="listbox" aria-label="Año">
-        {availableYears.map(y => <button type="button" key={y} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.year === y} onClick={event => { event.stopPropagation(); const months = monthsByYear[y] || []; const month = months[months.length - 1] || 'Diciembre'; if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, year: y, month })); else { setSelectedYear(y); setSelectedMonth(month); } setActiveDropdown(null); }}>{y}</button>)}
-      </div>}
-    </div>
-    <div className={`v2-dropdown-container v2-period-select ${activeDropdown === 'month' ? 'v2-z-up' : ''}`}>
-      <span className="v2-filter-label">Mes</span>
-      <DashboardSelect value={visibleFilters.month} expanded={activeDropdown === 'month'} onToggle={() => setActiveDropdown(activeDropdown === 'month' ? null : 'month')} />
-      {activeDropdown === 'month' && <div className="v2-dropdown-menu" role="listbox" aria-label="Mes">
-        {(monthsByYear[visibleFilters.year] || ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']).map(month => <button type="button" key={month} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.month === month} onClick={event => { event.stopPropagation(); if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, month })); else setSelectedMonth(month); setActiveDropdown(null); }}>{month}</button>)}
-      </div>}
-    </div>
-  </div> : <div className="v2-period-desktop-controls" aria-label="Periodo global">
-    <div className="v2-period-desktop-row">
-      <span className="v2-period-desktop-label">Año</span>
-      <div className="v2-period-years" role="group" aria-label="Seleccionar año">
-        {availableYears.map(year => <button type="button" key={year} aria-pressed={selectedYear === year} className={selectedYear === year ? 'is-active' : ''} onClick={() => {
-          if (selectedYear === year) return;
-          const months = monthsByYear[year] || [];
-          setSelectedYear(year);
-          setSelectedMonth(months[months.length - 1] || 'Diciembre');
-        }}>{year}</button>)}
-      </div>
-      <button type="button" className="v2-period-latest" onClick={() => { setSelectedYear(latestAvailablePeriod.year); setSelectedMonth(latestAvailablePeriod.month); }}>Último dato real</button>
-      <span className="v2-period-legend"><i className="is-real" /> Dato real <i className="is-estimate" /> Estimación</span>
-    </div>
-    <div className="v2-period-desktop-row v2-period-month-row">
-      <span className="v2-period-desktop-label">Mes</span>
-      <div className="v2-period-months" role="group" aria-label="Seleccionar mes">
-        {MONTHS_ES.map((month, index) => {
-          const isEstimate = Number(selectedYear) > Number(latestAvailablePeriod.year)
-            || (Number(selectedYear) === Number(latestAvailablePeriod.year) && index > latestObservedMonthIndex);
-          return <button type="button" key={month} aria-pressed={selectedMonth === month} aria-label={`${month}${isEstimate ? ' (estimación)' : ' (dato real)'}`} className={`${selectedMonth === month ? 'is-active' : ''} ${isEstimate ? 'is-estimate' : ''}`} onClick={() => setSelectedMonth(month)}>{month.slice(0, 3)}</button>;
-        })}
-      </div>
-    </div>
-  </div>;
+  const periodControls = <PeriodSelector
+    years={PERIOD_SELECTOR_YEARS}
+    year={selectedYear}
+    month={selectedMonth}
+    latestReal={latestAvailablePeriod}
+    monthsByYear={monthsByYear}
+    compact={isMobile}
+    onYearChange={year => {
+      const months = monthsByYear[year]?.length ? monthsByYear[year] : MONTHS_ES;
+      const targetIndex = MONTHS_ES.indexOf(selectedMonth);
+      const nextMonth = months.includes(selectedMonth)
+        ? selectedMonth
+        : [...months].sort((a, b) => Math.abs(MONTHS_ES.indexOf(a) - targetIndex) - Math.abs(MONTHS_ES.indexOf(b) - targetIndex))[0] || 'Diciembre';
+      setSelectedYear(year);
+      setSelectedMonth(nextMonth);
+    }}
+    onMonthChange={setSelectedMonth}
+    onLatest={() => { setSelectedYear(latestAvailablePeriod.year); setSelectedMonth(latestAvailablePeriod.month); }}
+  />;
 
   const rankingPeriodControls = <div className="v2-explorer-period-controls" aria-label="Periodo del ranking y mapa de calor">
     <div className={`v2-dropdown-container v2-explorer-period-select ${activeDropdown === 'rankingYear' ? 'v2-z-up' : ''}`}>
@@ -3088,16 +3114,6 @@ const MadridDashboardV2: React.FC = () => {
         <div className="v2-filter-group">
           {periodControls}
 
-          {isMobile && <div className="v2-mobile-zone-filter-group">
-          <span className="v2-mobile-zone-filter-heading">Zona (KPIs y mapas)</span>
-          <ZoneSearch
-            options={zoneSearchOptions}
-            district={draftFilters.district}
-            barrio={draftFilters.barrio}
-            onSelect={handleZoneSearchSelection}
-            formatName={formatZoneOption}
-          />
-          </div>}
           {/* BOTONES DE ACCIÓN EN ALTO CONTRASTE */}
           <div className="v2-filter-actions">
             {isMobile && <DashboardHelpButton
@@ -3107,7 +3123,7 @@ const MadridDashboardV2: React.FC = () => {
             />}
 
             {isMobile && <div className="v2-mobile-filter-commit">
-              <button type="button" className="v2-mobile-filter-apply" onClick={applyMobileFilters}>Aplicar ({Number(draftFilters.district !== 'Todos') + Number(draftFilters.year !== latestAvailablePeriod.year || draftFilters.month !== latestAvailablePeriod.month)})</button>
+              <button type="button" className="v2-mobile-filter-apply" onClick={applyMobileFilters}>Listo</button>
               <button type="button" className="v2-mobile-filter-reset" onClick={resetMobileFilters}>Restablecer al último dato real</button>
             </div>}
 
@@ -3135,9 +3151,17 @@ const MadridDashboardV2: React.FC = () => {
           <div key={p.id} ref={i === profileIdx ? activePanelRef : null} className={`v2-panel ${getSlideClass(i)}`}>
 
             {/* KPI & MAPA SECTION */}
-            <div className="v2-grid-main" data-dashboard-section="summary">
+              <div className="v2-grid-main" data-dashboard-section="summary" data-control-period={SECTION_CONTROL_SUBSCRIPTIONS.summary.period} data-control-zone={SECTION_CONTROL_SUBSCRIPTIONS.summary.zone}>
               <div className="v2-kpi-col">
                 <div className="v2-kpi-stack">
+
+                  {i === profileIdx && <ZoneSearch
+                    options={zoneSearchOptions}
+                    district={selectedDistrict}
+                    barrio={selectedBarrio}
+                    onSelect={handleZoneSearchSelection}
+                    formatName={formatZoneOption}
+                  />}
 
                   {activeProfile.id === 'alquiler' && (() => {
                     const rent = kpiData.p_vivienda || 0;
@@ -3940,19 +3964,11 @@ const MadridDashboardV2: React.FC = () => {
                     latestRealMonth={latestRealMonth}
                     latestRealYear={latestRealYear}
                     firstProjectionMonth={firstProjectionMonth}
-                    zoneControls={!isMobile && <div className="v2-map-controls-row">
-                      <ZoneSearch
-                        options={zoneSearchOptions}
-                        district={selectedDistrict}
-                        barrio={selectedBarrio}
-                        onSelect={handleZoneSearchSelection}
-                        formatName={formatZoneOption}
-                      />
-                      <div className="v2-desktop-map-period-controls">
-                        {periodControls}
-                        <DashboardHelpButton onClick={() => setShowHelpModal(true)} label="¿Cómo entender estos precios?" title="Aprende a interpretar los datos reales y las proyecciones" />
-                      </div>
-                    </div>}
+                    zoneControls={i === profileIdx && <ToolControls
+                      className="v2-map-period-tools"
+                      subscriptions={SECTION_CONTROL_SUBSCRIPTIONS.summary}
+                      trailing={!isMobile && <DashboardHelpButton onClick={() => setShowHelpModal(true)} label="¿Cómo entender estos precios?" title="Aprende a interpretar los datos reales y las proyecciones" />}
+                    >{periodControls}</ToolControls>}
                     onHelp={() => setShowMapHelpModal(true)}
                   >
                     <FullscreenToggle targetSelector=".v2-map-card" mobileOnly mobilePlatform={isMobile} />
@@ -4096,7 +4112,7 @@ const MadridDashboardV2: React.FC = () => {
               </div>
 
               {/* COL 2: AFFORDABILITY / RENTABILITY / DEMAND RANKINGS */}
-              <div className="v2-explorer-col v2-rankings-stack" data-dashboard-section="ranking">
+              <div className="v2-explorer-col v2-rankings-stack" data-dashboard-section="ranking" data-control-period={SECTION_CONTROL_SUBSCRIPTIONS.affordability.period} data-control-zone={SECTION_CONTROL_SUBSCRIPTIONS.affordability.zone}>
                 <DashboardRankingTable
                   profileId={activeProfile.id}
                   level={rankingLevel}
@@ -4116,7 +4132,7 @@ const MadridDashboardV2: React.FC = () => {
               </div>
 
               {/* COL 3: HEATMAP */}
-              <div className="v2-explorer-col v2-heatmap-area" data-dashboard-section="heatmap">
+              <div className="v2-explorer-col v2-heatmap-area" data-dashboard-section="heatmap" data-control-period={SECTION_CONTROL_SUBSCRIPTIONS.affordability.period} data-control-zone={SECTION_CONTROL_SUBSCRIPTIONS.affordability.zone}>
                 <div className="v2-heatmap-card">
                   <div className="v2-heatmap-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
                     <span>{activeProfile.id === 'inversion' ? 'Evolución mensual de rentabilidad (%)' : activeProfile.id === 'alquiler' ? 'Evolución mensual del alquiler (€/m²)' : 'Evolución mensual de venta (€/m²)'}</span>
@@ -4243,7 +4259,7 @@ const MadridDashboardV2: React.FC = () => {
 
              {/* COMPARATIVAS SECTION */}
             <ComparacionZonas isMobile={isMobile}>
-            <section className="v2-compare-section" data-dashboard-section="compare">
+            <section className="v2-compare-section" data-dashboard-section="compare" data-control-period={SECTION_CONTROL_SUBSCRIPTIONS.comparison.period} data-control-zone={SECTION_CONTROL_SUBSCRIPTIONS.comparison.zone}>
               <div className="v2-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                   <div className="v2-compare-title-block">

@@ -44,20 +44,35 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
   const results = useMemo(() => {
     const needle = normalize(query);
     if (!needle) return [];
-    return options
+    const matches = options
       .filter(option => {
-        const searchable = [option.name, formatName(option.name), option.district || '', ...(option.aliases || [])].map(normalize);
+        const searchable = [option.name, formatName(option.name), ...(option.aliases || [])].map(normalize);
         return searchable.some(value => value.includes(needle));
       })
       .sort((a, b) => {
         const aStarts = normalize(formatName(a.name)).startsWith(needle) ? 0 : 1;
         const bStarts = normalize(formatName(b.name)).startsWith(needle) ? 0 : 1;
-        const aKind = a.kind === 'district' ? 0 : a.kind === 'city' ? 1 : 2;
-        const bKind = b.kind === 'district' ? 0 : b.kind === 'city' ? 1 : 2;
+        const aKind = a.kind === 'district' ? 0 : a.kind === 'barrio' ? 1 : 2;
+        const bKind = b.kind === 'district' ? 0 : b.kind === 'barrio' ? 1 : 2;
         return aStarts - bStarts || aKind - bKind || formatName(a.name).localeCompare(formatName(b.name), 'es');
-      })
-      .slice(0, 12);
+      });
+    return [
+      ...matches.filter(option => option.kind === 'district'),
+      ...matches.filter(option => option.kind === 'barrio'),
+      ...matches.filter(option => option.kind === 'city'),
+    ];
   }, [options, query, formatName]);
+  const groupedResults = useMemo(() => {
+    let index = 0;
+    const groups = { districts: [] as Array<{ option: ZoneSearchOption; index: number }>, barrios: [] as Array<{ option: ZoneSearchOption; index: number }>, city: [] as Array<{ option: ZoneSearchOption; index: number }> };
+    results.forEach(option => {
+      const entry = { option, index: index++ };
+      if (option.kind === 'district') groups.districts.push(entry);
+      else if (option.kind === 'barrio') groups.barrios.push(entry);
+      else groups.city.push(entry);
+    });
+    return groups;
+  }, [results]);
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
@@ -76,7 +91,6 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
     setActiveIndex(0);
   };
 
-  const selectedLabel = selection ? formatName(selection.name) : 'Madrid (media)';
   const breadcrumb = selection?.kind === 'barrio'
     ? `Madrid · ${formatName(selection.district || '')} · ${formatName(selection.name)}`
     : selection?.kind === 'district'
@@ -110,33 +124,52 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
               else if (event.key === 'Enter' && results[activeIndex]) { event.preventDefault(); choose(results[activeIndex]); }
             }}
           />
-          {query && <button type="button" aria-label="Borrar búsqueda" onClick={() => { setQuery(''); setOpen(true); }}><X size={16} /></button>}
+          {query && <button type="button" aria-label="Limpiar búsqueda y volver a Madrid" onClick={() => choose({ id: 'city-madrid', name: 'Madrid', kind: 'city' })}><X size={16} /></button>}
         </div>
 
       {open && query && <div id={listId} className="v2-zone-search-results" role="listbox" aria-label="Resultados de zonas">
-        {results.length ? results.map((option, index) => (
-          <button
-            type="button"
-            id={`${listId}-${index}`}
-            role="option"
-            aria-selected={index === activeIndex}
-            key={option.id}
-            className="v2-zone-search-result"
-            onMouseEnter={() => setActiveIndex(index)}
-            onClick={() => choose(option)}
-          >
-            <span>{formatName(option.name)}</span>
-            <small>{option.kind === 'district' ? 'Distrito' : option.kind === 'city' ? 'Ciudad' : `Barrio de ${formatName(option.district || '')}`}</small>
-          </button>
-        )) : <p className="v2-zone-search-empty">No hay distritos ni barrios que coincidan.</p>}
+        {results.length ? <>
+          {groupedResults.districts.length > 0 && <div role="group" aria-label="Distritos">
+            <span className="v2-zone-search-group-label">Distritos</span>
+            {groupedResults.districts.map(({ option, index }) => <ZoneResult key={option.id} option={option} index={index} listId={listId} formatName={formatName} active={index === activeIndex} onActivate={setActiveIndex} onChoose={choose} />)}
+          </div>}
+          {groupedResults.barrios.length > 0 && <div role="group" aria-label="Barrios">
+            <span className="v2-zone-search-group-label">Barrios</span>
+            {groupedResults.barrios.map(({ option, index }) => <ZoneResult key={option.id} option={option} index={index} listId={listId} formatName={formatName} active={index === activeIndex} onActivate={setActiveIndex} onChoose={choose} />)}
+          </div>}
+          {groupedResults.city.map(({ option, index }) => <ZoneResult key={option.id} option={option} index={index} listId={listId} formatName={formatName} active={index === activeIndex} onActivate={setActiveIndex} onChoose={choose} />)}
+        </> : <p className="v2-zone-search-empty">Sin resultados</p>}
       </div>}
       </div>
 
       <div className="v2-zone-search-selection" aria-live="polite">
-        <span>{selectedLabel}</span>
         <small>{breadcrumb}</small>
-        {selection && <button type="button" className="v2-zone-search-reset" onClick={() => onSelect({ district: 'Todos', barrio: 'Todos' })}>Ver Madrid</button>}
+        {selection && <button type="button" className="v2-zone-search-reset" onClick={() => choose({ id: 'city-madrid', name: 'Madrid', kind: 'city' })}>Ver Madrid</button>}
       </div>
     </div>
   );
+}
+
+function ZoneResult({ option, index, listId, formatName, active, onActivate, onChoose }: {
+  option: ZoneSearchOption;
+  index: number;
+  listId: string;
+  formatName: (name: string) => string;
+  active: boolean;
+  onActivate: (index: number) => void;
+  onChoose: (option: ZoneSearchOption) => void;
+}) {
+  return <button
+    type="button"
+    id={`${listId}-${index}`}
+    role="option"
+    aria-selected={active}
+    key={option.id}
+    className="v2-zone-search-result"
+    onMouseEnter={() => onActivate(index)}
+    onClick={() => onChoose(option)}
+  >
+    <span>{formatName(option.name)}</span>
+    <small>{option.kind === 'district' ? 'Distrito' : option.kind === 'city' ? 'Ciudad' : `Barrio de ${formatName(option.district || '')}`}</small>
+  </button>;
 }

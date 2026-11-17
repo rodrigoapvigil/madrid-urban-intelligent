@@ -1,0 +1,49 @@
+.tool-controls {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px 18px;
+  width: 100%;
+  min-width: 0;
+}
+.tool-controls-main { display: flex; flex: 1 1 auto; align-items: center; min-width: 0; }
+.tool-controls-trailing { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
+.tool-period { position: relative; display: flex; flex: 1 1 auto; min-width: 0; }
+.tool-period-selector { display: grid; gap: 7px; min-width: 0; }
+.tool-period-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; min-width: 0; }
+.tool-period-label { flex: 0 0 36px; color: #8ea8c3; font-size: 11px; font-weight: 650; }
+.tool-period-years,
+.tool-period-months { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.tool-period-years { padding: 3px; border: 1px solid rgba(143,163,184,.2); border-radius: 11px; background: rgba(8,25,45,.72); }
+.tool-period-years button,
+.tool-period-months button,
+.tool-period-latest { min-height: 30px; padding: 5px 10px; border: 1px solid transparent; border-radius: 8px; background: transparent; color: #aebfd0; font: inherit; font-size: 11px; font-weight: 600; line-height: 1; cursor: pointer; transition: background-color .16s ease,color .16s ease,border-color .16s ease; }
+.tool-period-years button:hover,
+.tool-period-months button:hover,
+.tool-period-latest:hover { color: #f4f8fc; border-color: rgba(0,229,255,.45); }
+.tool-period-years button.is-active { color: #031528; background: #00e5ff; font-weight: 750; box-shadow: 0 0 14px rgba(0,229,255,.2); }
+.tool-period-months button { min-width: 39px; padding-inline: 8px; border-color: rgba(143,163,184,.16); background: rgba(13,37,63,.58); }
+.tool-period-months button.is-estimate { border-style: dashed; border-color: rgba(240,162,74,.76); background: transparent; color: #f0bd83; }
+.tool-period-months button.is-active { border-color: #00e5ff; background: #00cde7; color: #031528; font-weight: 750; }
+.tool-period-months button.is-active.is-estimate { border-style: dashed; border-color: #f0a24a; background: rgba(240,162,74,.14); color: #ffd29a; }
+.tool-period-latest { border-color: rgba(0,229,255,.34); color: #6beafa; white-space: nowrap; }
+.tool-period-key { display: inline-flex; align-items: center; gap: 5px; color: #8ea8c3; font-size: 10px; white-space: nowrap; }
+.tool-period-key i { width: 9px; height: 9px; border-radius: 3px; background: #00cde7; }
+.tool-period-key i.is-estimate { margin-left: 3px; border: 1.5px dashed #f0a24a; background: transparent; }
+.tool-period button:focus-visible { outline: 2px solid #00e5ff; outline-offset: 2px; }
+.tool-controls-badge { align-self: center; padding: 7px 11px; border: 1px solid rgba(0,229,255,.28); border-radius: 999px; background: rgba(0,229,255,.07); color: #76e9f6; font-size: 11px; font-weight: 650; white-space: nowrap; }
+.tool-period-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 13px; border: 1px solid rgba(0,229,255,.38); border-radius: 999px; background: rgba(0,229,255,.09); color: #dffaff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+.tool-period-popover { position: absolute; z-index: 1400; top: calc(100% + 8px); left: 0; width: min(760px,calc(100vw - 28px)); padding: 12px; border: 1px solid rgba(0,229,255,.24); border-radius: 14px; background: #061a30; box-shadow: 0 18px 48px rgba(0,0,0,.48); }
+.tool-period.is-compact .tool-period-selector { gap: 10px; }
+.tool-period.is-compact .tool-period-row { gap: 6px; }
+.tool-period.is-compact .tool-period-label { flex-basis: 32px; }
+.tool-period.is-compact .tool-period-years,
+.tool-period.is-compact .tool-period-months { flex: 1 1 calc(100% - 40px); }
+.tool-period.is-compact .tool-period-years button { min-width: 42px; min-height: 38px; }
+.tool-period.is-compact .tool-period-months button { min-height: 38px; }
+.tool-period.is-compact .tool-period-latest { min-height: 38px; }
+@media (max-width: 600px) {
+  .tool-controls { align-items: center; }
+  .tool-controls-trailing { gap: 6px; }
+  .tool-controls-badge { max-width: 150px; overflow: hidden; padding: 6px 8px; font-size: 9px; text-overflow: ellipsis; }
+}
