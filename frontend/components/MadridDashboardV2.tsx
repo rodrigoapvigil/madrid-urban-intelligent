@@ -2695,8 +2695,8 @@ const MadridDashboardV2: React.FC = () => {
 
   return (
     <div className="v2-root" data-profile={activeProfile.id} data-platform={isMobile ? 'mobile' : 'desktop'}>
-      {isMobile && <BackgroundAurora animated={false} />}
-      <div className="mi-atmosphere" aria-hidden="true"/>
+      <BackgroundAurora animated={false} />
+      {isMobile && <div className="mi-atmosphere" aria-hidden="true" />}
       {showDashboardLoader && (
         <LoadingScreen
           ready={!isDashboardLoading}
@@ -2718,7 +2718,7 @@ const MadridDashboardV2: React.FC = () => {
 
       <SiteHeader
         activePath="/madrid"
-        appearance={isMobile ? 'aurora' : 'default'}
+        appearance="aurora"
         mobileAction={isMobile ? (
           <button type="button" className="v2-mobile-filter-trigger" aria-expanded={isMobileFiltersOpen} aria-controls="v2-filter-panel" onClick={openMobileFilters}>
             <SlidersHorizontal size={17} aria-hidden="true" />

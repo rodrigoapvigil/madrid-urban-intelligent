@@ -2119,6 +2119,16 @@
     radial-gradient(ellipse at 18% -80%, color-mix(in srgb, var(--precio-subida) 28%, transparent), transparent 52%),
     linear-gradient(110deg, var(--mui-blue-950), var(--mui-blue-900));
 }
+
+/* Desktop dashboard uses the same restrained glass header as landing/contact. */
+@media (min-width: 769px) and (hover: hover) {
+  .v2-root[data-platform="desktop"] .site-header {
+    background: rgba(10, 42, 79, .85) !important;
+    border-bottom: 1px solid rgba(255, 255, 255, .06) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
 .v2-root .site-header .v2-tabs-bg { background: color-mix(in srgb, var(--blanco-humo) 12%, transparent); }
 .v2-root .site-header .v2-tab-btn { color: color-mix(in srgb, var(--blanco-humo) 82%, transparent); }
 .v2-root .site-header .v2-tab-btn:hover { color: var(--blanco-humo); }
