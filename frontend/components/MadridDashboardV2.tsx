@@ -27,6 +27,7 @@ import DashboardHeatmapTable from './DashboardHeatmapTable';
 import DashboardRankingTable from './DashboardRankingTable';
 import { formatEuroAmount, formatNumber as formatSpanishNumber, formatPercent } from '../lib/format-number';
 import { profileColorCuts } from '../lib/map-color-scale';
+import { DASHBOARD_COPY } from '../lib/product-copy';
 import DashboardResourceState, { DashboardResourceStatus } from './DashboardResourceState';
 import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
 import type { MapZoneHoverContext } from './MadridMap';
@@ -3269,7 +3270,7 @@ const MadridDashboardV2: React.FC = () => {
                         statusText = 'Moderado para habitantes típicos';
                         statusColor = 'var(--coral)';
                       } else {
-                        statusText = 'Difícil para habitantes típicos';
+                        statusText = DASHBOARD_COPY.purchase.affordability(aniosRenta);
                         statusColor = 'var(--coral-texto)';
                       }
                     }
@@ -3516,7 +3517,7 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--azul-linea)', letterSpacing: '0.5px' }}>OPORTUNIDAD DE INVERSIÓN</label>
+                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--azul-linea)', letterSpacing: '0.5px' }}>{DASHBOARD_COPY.investment.title.toUpperCase()}</label>
                             <InfoTooltip
                               title="Oportunidad y Rentabilidad de Inversión"
                               description="Combina el rendimiento neto del alquiler con el volumen anual de transacciones para evaluar qué tan rápido y rentable es invertir aquí."
@@ -3530,7 +3531,7 @@ const MadridDashboardV2: React.FC = () => {
                           GRM {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ fontSize: '15px', color: '#FFFFFF', display: 'block', marginTop: '2px' }}>{grm > 0 ? grm.toFixed(1) : '-'} años <span style={{ fontSize: '10px', fontWeight: 'normal', color: '#00F0FF' }}>(recuperación)</span></strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          Rentabilidad neta esperada: <strong style={{ fontSize: '16px', display: 'block', color: '#00F0FF', fontWeight: '800', marginTop: '2px' }}>{roiNeto > 0 ? roiNeto.toFixed(1) : '-'}%/año</strong>
+                          {DASHBOARD_COPY.investment.netYield}: <strong style={{ fontSize: '16px', display: 'block', color: '#00F0FF', fontWeight: '800', marginTop: '2px' }}>{roiNeto > 0 ? roiNeto.toFixed(1) : '-'}%/año</strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
                           Volumen de transacciones: <strong style={{ fontSize: '15px', color: '#FFFFFF' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(transacciones)}/año</strong>
@@ -3604,18 +3605,6 @@ const MadridDashboardV2: React.FC = () => {
                     const transacciones = kpiData.transacciones || 0;
                     const velocity = transacciones ? Math.max(1.0, 933.8 / transacciones) : 0;
 
-                    let velocityLabel = 'Lento';
-                    let velocityColor = 'var(--coral-texto)'; // red
-                    if (velocity > 0) {
-                      if (velocity < 2.0) {
-                        velocityLabel = 'Rápido';
-                        velocityColor = 'var(--azul-linea)';
-                      } else if (velocity < 3.0) {
-                        velocityLabel = 'Moderado';
-                        velocityColor = 'var(--coral)';
-                      }
-                    }
-
                     let demandText = 'Baja';
                     let demandColor = 'var(--coral-texto)';
                     if (transacciones > 300) {
@@ -3634,7 +3623,7 @@ const MadridDashboardV2: React.FC = () => {
                         <div className="v2-kpi-card">
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <label>¿Cuánto tardará en venderse?</label>
+                              <label>{DASHBOARD_COPY.sale.velocityTitle}</label>
                               <InfoTooltip
                                 title="Velocidad Media de Venta"
                                 description="Tiempo estimado promedio en meses que tarda una vivienda en cerrarse y firmarse ante notario en este distrito o barrio."
@@ -3646,12 +3635,9 @@ const MadridDashboardV2: React.FC = () => {
                           </div>
                           <div className="v2-val" style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
                             <span>{velocity > 0 ? (velocity % 1 === 0 ? velocity.toFixed(0) : velocity.toFixed(1)) + ' ' + (velocity === 1 ? 'mes' : 'meses') : '-'}</span>
-                            <span style={{ fontSize: '12px', fontWeight: '600', color: velocityColor }}>
-                              ({velocityLabel})
-                            </span>
                           </div>
                           <div style={{ fontSize: '10px', color: 'var(--azul-linea)', marginTop: '2px' }}>
-                            Velocidad de venta estimada promedio
+                            {DASHBOARD_COPY.sale.velocityNote}
                           </div>
                         </div>
 
@@ -3683,12 +3669,12 @@ const MadridDashboardV2: React.FC = () => {
                         <div className="v2-kpi-card">
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <label>Potencial de ganancia (6 meses)</label>
+                              <label>{DASHBOARD_COPY.sale.gainTitle}</label>
                               <InfoTooltip
-                                title="Potencial de Ganancia (6 Meses)"
-                                description="Estimación del incremento de valor que podría experimentar el inmueble si decides esperar un semestre antes de ponerlo a la venta."
-                                example="Si el potencial es de +2.5% y tu vivienda vale 300.000€, posponer la venta podría aportarte unos 7.500€ adicionales de margen."
-                                ruleOfThumb="En fases alcistas, posponer la venta puede aumentar el margen; en fases de ajuste, vender pronto protege tu beneficio."
+                                title={DASHBOARD_COPY.sale.gainTitle}
+                                description={DASHBOARD_COPY.sale.estimateNote}
+                                example="La variación se calcula a partir de la tendencia observada en los datos disponibles."
+                                ruleOfThumb="Es una estimación estadística y no garantiza la evolución futura del precio."
                               />
                             </div>
                             {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
@@ -3697,7 +3683,7 @@ const MadridDashboardV2: React.FC = () => {
                             {appRate > 0 ? `+${gain6m}%` : appRate < 0 ? `${gain6m}%` : '0.0%'}
                           </div>
                           <div style={{ fontSize: '10px', color: 'var(--azul-linea)', marginTop: '2px' }}>
-                            más de precio si esperas
+                            {DASHBOARD_COPY.sale.estimateNote}
                           </div>
                         </div>
                       </>
@@ -4236,15 +4222,9 @@ const MadridDashboardV2: React.FC = () => {
                         );
                       } else if (p.id === 'venta') {
                         const velocityA_num = kpiDataA.transacciones ? Math.max(1.0, 933.8 / kpiDataA.transacciones) : 0;
-                        let velocityA_label = '';
-                        if (velocityA_num > 0) {
-                          if (velocityA_num < 2.0) velocityA_label = ' (Rápido)';
-                          else if (velocityA_num < 3.0) velocityA_label = ' (Moderado)';
-                          else velocityA_label = ' (Lento)';
-                        }
                         const velocityA_formatted = velocityA_num > 0 ? (velocityA_num % 1 === 0 ? velocityA_num.toFixed(0) : velocityA_num.toFixed(1)) : '';
                         const velocityA_suffix = velocityA_num === 1 ? ' mes' : ' meses';
-                        const velocityA_text = velocityA_num > 0 ? `${velocityA_formatted}${velocityA_suffix}${velocityA_label}` : '-';
+                        const velocityA_text = velocityA_num > 0 ? `${velocityA_formatted}${velocityA_suffix}` : '-';
                         return (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -4273,7 +4253,7 @@ const MadridDashboardV2: React.FC = () => {
                                 {velocityA_text}
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                VELOCIDAD DE VENTA {selectedZoneA.toUpperCase()}
+                                {DASHBOARD_COPY.sale.velocityTitle.toUpperCase()} {selectedZoneA.toUpperCase()}
                                 {kpiDataA.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
@@ -4461,15 +4441,9 @@ const MadridDashboardV2: React.FC = () => {
                         );
                       } else if (p.id === 'venta') {
                         const velocityB_num = kpiDataB.transacciones ? Math.max(1.0, 933.8 / kpiDataB.transacciones) : 0;
-                        let velocityB_label = '';
-                        if (velocityB_num > 0) {
-                          if (velocityB_num < 2.0) velocityB_label = ' (Rápido)';
-                          else if (velocityB_num < 3.0) velocityB_label = ' (Moderado)';
-                          else velocityB_label = ' (Lento)';
-                        }
                         const velocityB_formatted = velocityB_num > 0 ? (velocityB_num % 1 === 0 ? velocityB_num.toFixed(0) : velocityB_num.toFixed(1)) : '';
                         const velocityB_suffix = velocityB_num === 1 ? ' mes' : ' meses';
-                        const velocityB_text = velocityB_num > 0 ? `${velocityB_formatted}${velocityB_suffix}${velocityB_label}` : '-';
+                        const velocityB_text = velocityB_num > 0 ? `${velocityB_formatted}${velocityB_suffix}` : '-';
                         return (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -4498,7 +4472,7 @@ const MadridDashboardV2: React.FC = () => {
                                 {velocityB_text}
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                VELOCIDAD DE VENTA {selectedZoneB.toUpperCase()}
+                                {DASHBOARD_COPY.sale.velocityTitle.toUpperCase()} {selectedZoneB.toUpperCase()}
                                 {kpiDataB.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                               </div>
                             </div>
