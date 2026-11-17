@@ -2689,7 +2689,6 @@ const MadridDashboardV2: React.FC = () => {
   ));
   const rankingValueMax = Math.max(1, ...rankingRows.map(item => Number(item.value) || 0));
   const normalizeZoneName = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
-  const highlightedRankingZone = rankingLevel === 'Distritos' ? selectedDistrict : selectedBarrio;
   const selectedRankingZone = rankingLevel === 'Distritos'
     ? selectedDistrict !== 'Todos' ? selectedDistrict : null
     : selectedBarrio !== 'Todos' ? selectedBarrio : null;
@@ -3846,14 +3845,11 @@ const MadridDashboardV2: React.FC = () => {
                   rows={rankingRows}
                   loading={isRankingsLoading}
                   loadingRows={rankingLoadingRows}
-                  highlightedZone={highlightedRankingZone}
                   valueMax={rankingValueMax}
                   isMobile={isMobile}
                   metric={rankingMetric}
                   onMetricChange={setRankingMetric}
                   formatName={formatMadridName}
-                  formatZone={formatZoneOption}
-                  normalizeName={normalizeZoneName}
                   formatNumber={formatNumber}
                   formatEuro={formatEuro}
                   status={rankingStatus}

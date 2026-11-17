@@ -7,22 +7,19 @@ import DashboardResourceState, { DashboardResourceStatus } from './DashboardReso
 type RankingRow = { name: string; value: number };
 
 export default function DashboardRankingTable({
-  profileId, level, rows, loading, loadingRows, highlightedZone, valueMax, isMobile,
-  metric, onMetricChange, formatName, formatZone, normalizeName, formatNumber, formatEuro, status, onRetry,
+  profileId, level, rows, loading, loadingRows, valueMax, isMobile,
+  metric, onMetricChange, formatName, formatNumber, formatEuro, status, onRetry,
 }: {
   profileId: string;
   level: 'Distritos' | 'Barrios';
   rows: RankingRow[];
   loading: boolean;
   loadingRows: ReactNode;
-  highlightedZone: string;
   valueMax: number;
   isMobile: boolean;
   metric: 'total' | 'unit';
   onMetricChange: (value: 'total' | 'unit') => void;
   formatName: (name: string) => string;
-  formatZone: (zone: string) => string;
-  normalizeName: (name: string) => string;
   formatNumber: (value: number, digits: number) => string;
   formatEuro: (value: number, digits: number) => string;
   status: DashboardResourceStatus;
@@ -46,7 +43,6 @@ export default function DashboardRankingTable({
         <span>{title}</span>
         {!isDemand && !isInvestment && <div className="v2-ranking-head-actions"><SegmentedControl<'total' | 'unit'> label="Unidad mostrada" size="sm" value={metric} options={[{ value: 'total', label: profileId === 'alquiler' ? '€/mes' : '€' }, { value: 'unit', label: '€/m²' }] as const} onChange={onMetricChange} /></div>}
       </div>
-      {highlightedZone && <span className="v2-highlighted-zone">{formatZone(highlightedZone)} resaltada</span>}
       {status === 'loading' && rows.length > 0 && <DashboardResourceState status="loading" />}
       <table className={`v2-ranking-table${!isDemand && !isInvestment ? ' v2-affordability-ranking-table' : ''}`} style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
         <thead><tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}><th style={{ paddingBottom: '8px', fontWeight: '600' }}>{level === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th><th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>{valueHeading}</th></tr></thead>
@@ -54,10 +50,9 @@ export default function DashboardRankingTable({
           {status === 'loading' && rows.length === 0 ? loadingRows : status === 'error' || status === 'empty' ? <tr><td colSpan={2}><DashboardResourceState status={status} retry={onRetry} emptyText="No hay datos disponibles para esta selección." /></td></tr> : rows.map((item, index) => {
             const demand = isDemand;
             const years = item.value > 0 ? `${(1 / item.value).toFixed(1)} años` : '-';
-            const price = metric === 'unit' ? `${formatNumber(item.value, Number.isInteger(Number(item.value)) ? 0 : 1)} €/m²` : profileId === 'alquiler' ? `${formatEuro(item.value, 0)}/mes` : formatEuro(item.value, 0);
-            const filtered = normalizeName(item.name) === normalizeName(highlightedZone);
-            return <tr key={index} className={filtered ? 'is-filtered' : ''} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
-              <td style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>{isMobile ? `${index + 1}. ${formatName(item.name)}` : <><span className="v2-ranking-position">{index + 1}.</span><span className="v2-ranking-name">{formatName(item.name)}</span></>}</td>
+            const price = metric === 'unit' ? `${formatNumber(item.value, 1)} €/m²` : profileId === 'alquiler' ? `${formatEuro(item.value, 2)}/mes` : formatEuro(item.value, 2);
+            return <tr key={index} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
+              <td className="v2-ranking-zone" style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}><span className="v2-ranking-position">{index + 1}.</span><span className="v2-ranking-name">{formatName(item.name)}</span></td>
               <td className="v2-ranking-value" style={{ padding: '8px 0', textAlign: 'right', color: demand ? '#00E5FF' : '#00F0FF', fontWeight: '700' }}>
                 {(demand || isInvestment) && <i style={{ width: `${Math.max(0, Math.min(100, (Number(item.value) || 0) / valueMax * 100))}%` }} />}
                 <span>{demand ? `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(item.value)} trans.` : isInvestment ? years : price}</span>

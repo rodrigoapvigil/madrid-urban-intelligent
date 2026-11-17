@@ -3463,12 +3463,13 @@ body.v2-fullscreen-open .v2-panel.v2-active { transform: none !important; }
 .v2-root .v2-rank-head .v2-fullscreen-control { flex: 0 0 auto; }
 .v2-root .v2-rank-head .v2-expand-button.has-label { width: auto; min-height: 32px; padding: 0 7px; gap: 4px; color: #8fa3b8; font-size: 10px; font-weight: 600; white-space: nowrap; }
 .v2-root .v2-rank-head .v2-expand-button.has-label span { font-size: inherit; }
-.v2-root .v2-highlighted-zone { display: inline-flex; margin: -3px 0 8px; padding: 3px 7px; border-radius: 999px; background: rgba(0,229,255,.1); color: #8eeeff; font-size: 10px; font-weight: 650; }
 .v2-root .v2-ranking-table tbody tr:nth-child(n+11) { display: none; }
-.v2-root .v2-ranking-table tbody tr.is-filtered { background: rgba(0,229,255,.12); box-shadow: inset 3px 0 #00e5ff; }
 .v2-root .v2-ranking-value { position: relative; overflow: hidden; isolation: isolate; white-space: nowrap; }
-.v2-root .v2-ranking-value > i { position: absolute; z-index: -1; top: 18%; right: 0; bottom: 18%; display: block; border-radius: 5px; background: rgba(0,229,255,.22); }
+.v2-root .v2-ranking-value > i { position: absolute; z-index: -1; top: 18%; left: 0; bottom: 18%; display: block; border-radius: 5px; background: rgba(0,229,255,.22); }
 .v2-root .v2-ranking-value > span { position: relative; z-index: 1; }
+.v2-root .v2-ranking-zone { vertical-align: middle; line-height: 1.3; white-space: normal; }
+.v2-root .v2-ranking-position { display: inline-block; min-width: 2.4em; vertical-align: top; }
+.v2-root .v2-ranking-name { display: inline; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
 
 /* Comparison layout: keep zone identity stable and its selectors together. */
 .v2-root .v2-compare-title-block { display: grid; gap: 5px; }
@@ -3944,7 +3945,7 @@ body.v2-fullscreen-open footer { display: none !important; }
   .v2-root .v2-affordability-ranking-table tbody td { padding-top: 5px !important; padding-bottom: 5px !important; font-size: 1.0125rem; line-height: 1.2; }
   .v2-root .v2-affordability-ranking-table tbody td:first-child { display: flex; align-items: center; gap: 6px; }
   .v2-root .v2-affordability-ranking-table .v2-ranking-position { flex: 0 0 1.5rem; font-variant-numeric: tabular-nums; }
-  .v2-root .v2-affordability-ranking-table .v2-ranking-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .v2-root .v2-affordability-ranking-table .v2-ranking-name { min-width: 0; overflow: visible; text-overflow: clip; white-space: normal; }
 }
 
 @media (max-width: 768px) and (orientation: landscape) {
