@@ -134,10 +134,11 @@ def get_series(
     year: int = 2026,
     op: str = "Venta",
     zona: Optional[str] = None,
-    tipo_zona: str = "distrito"
+    tipo_zona: str = "distrito",
+    distrito: Optional[str] = None,
 ):
     if zona and zona != "Todos":
-        df = data.get_monthly_series(year, op, zona, tipo_zona)
+        df = data.get_monthly_series(year, op, zona, tipo_zona, distrito)
     else:
         df = data.get_madrid_average_series(year, op)
         if not df.empty:
@@ -217,8 +218,8 @@ def get_risk_return_matrix(level: str = "distrito", district: str = "Todos"):
     return data.get_risk_return_matrix_data(level, district)
 
 @app.get("/api/zone-liquidity")
-def get_zone_liquidity(name: str, level: str = "distrito"):
-    return data.get_zone_liquidity_data(name, level)
+def get_zone_liquidity(name: str, level: str = "distrito", district: str = "Todos"):
+    return data.get_zone_liquidity_data(name, level, district)
 
 
 

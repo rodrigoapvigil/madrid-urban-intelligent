@@ -18,6 +18,8 @@ type ZoneSearchProps = {
   onSelect: (selection: { district: string; barrio: string }) => void;
   formatName: (name: string) => string;
   compact?: boolean;
+  title?: string;
+  showReset?: boolean;
 };
 
 const normalize = (value: string) => value
@@ -27,7 +29,7 @@ const normalize = (value: string) => value
   .replace(/^\d+\.\s*/, '')
   .trim();
 
-export default function ZoneSearch({ options, district, barrio, onSelect, formatName, compact = false }: ZoneSearchProps) {
+export default function ZoneSearch({ options, district, barrio, onSelect, formatName, compact = false, title = 'Zona', showReset = true }: ZoneSearchProps) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -99,7 +101,7 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
 
   return (
     <div ref={rootRef} className={`v2-zone-search ${compact ? 'is-compact' : ''}`}>
-      {!compact && <span className="v2-zone-filter-title">Zona</span>}
+      {!compact && <span className="v2-zone-filter-title">{title}</span>}
       <div className="v2-zone-search-control">
         <div className="v2-zone-search-field">
           <Search size={16} aria-hidden="true" />
@@ -108,7 +110,7 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
             type="search"
             value={query}
             placeholder="Busca un distrito o barrio"
-            aria-label="Busca un distrito o barrio"
+            aria-label={`${title}: busca un distrito o barrio`}
             autoComplete="off"
             role="combobox"
             aria-autocomplete="list"
@@ -144,7 +146,7 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
 
       <div className="v2-zone-search-selection" aria-live="polite">
         <small>{breadcrumb}</small>
-        {selection && <button type="button" className="v2-zone-search-reset" onClick={() => choose({ id: 'city-madrid', name: 'Madrid', kind: 'city' })}>Ver Madrid</button>}
+        {selection && showReset && <button type="button" className="v2-zone-search-reset" onClick={() => choose({ id: 'city-madrid', name: 'Madrid', kind: 'city' })}>Ver Madrid</button>}
       </div>
     </div>
   );

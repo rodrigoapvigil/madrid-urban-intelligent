@@ -1024,13 +1024,15 @@ const MadridDashboardV2: React.FC = () => {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [mapLevel, setMapLevel] = useState<'districts' | 'neighborhoods'>('districts');
-  const { selectedZoneA, setSelectedZoneA, selectedZoneB, setSelectedZoneB, compareLevel, setCompareLevel } = useComparacion();
+  const {
+    selectedZoneA, setSelectedZoneA, selectedZoneB, setSelectedZoneB,
+    selectedZoneAType, setSelectedZoneAType, selectedZoneBType, setSelectedZoneBType,
+    selectedZoneADistrict, setSelectedZoneADistrict, selectedZoneBDistrict, setSelectedZoneBDistrict,
+  } = useComparacion();
   const [comparisonYearOverrides, setComparisonYearOverrides] = useState<Record<string, string | null>>(() => Object.fromEntries(PROFILES.map(profile => [profile.id, null])));
   const [comparisonMonthOverrides, setComparisonMonthOverrides] = useState<Record<string, string | null>>(() => Object.fromEntries(PROFILES.map(profile => [profile.id, null])));
   const [latestAvailablePeriod, setLatestAvailablePeriod] = useState({ year: '2026', month: 'Junio' });
   const [compareMapTarget, setCompareMapTarget] = useState<'A' | 'B'>('A');
-  const [compareZoneSheet, setCompareZoneSheet] = useState<'A' | 'B' | null>(null);
-  const [compareZoneSearch, setCompareZoneSearch] = useState('');
 
   // State: Dynamic Options
   const [availableYears, setAvailableYears] = useState<string[]>(['2023', '2024', '2025']);
@@ -1450,22 +1452,6 @@ const MadridDashboardV2: React.FC = () => {
     };
   }, [isMobileFiltersOpen]);
 
-  useEffect(() => {
-    if (!compareZoneSheet) return;
-    window.history.pushState({ compareZoneSheet: true }, '', `${window.location.pathname}${window.location.search}#zona-${compareZoneSheet.toLowerCase()}`);
-    const onBack = () => setCompareZoneSheet(null);
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') window.history.back(); };
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    window.addEventListener('popstate', onBack);
-    window.addEventListener('keydown', onKey);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener('popstate', onBack);
-      window.removeEventListener('keydown', onKey);
-    };
-  }, [compareZoneSheet]);
-
   // Fetch KPIs and Series
   useEffect(() => {
     if (!filtersReady || !selectedYear || !selectedMonth) return;
@@ -1620,9 +1606,12 @@ const MadridDashboardV2: React.FC = () => {
     const fetchRequest = (path: string) => apiFetch(path, { signal: controller.signal });
     const isCurrent = () => !controller.signal.aborted;
     const op = activeProfile.op;
-    const zoneType = compareLevel.toLowerCase().slice(0, -1);
-    const zoneAParam = compareLevel === 'Distritos' ? `district=${encodeURIComponent(selectedZoneA)}` : `barrio=${encodeURIComponent(selectedZoneA)}`;
-    const zoneBParam = compareLevel === 'Distritos' ? `district=${encodeURIComponent(selectedZoneB)}` : `barrio=${encodeURIComponent(selectedZoneB)}`;
+    const zoneAParam = selectedZoneAType === 'barrio'
+      ? `district=${encodeURIComponent(selectedZoneADistrict)}&barrio=${encodeURIComponent(selectedZoneA)}`
+      : `district=${encodeURIComponent(selectedZoneA)}`;
+    const zoneBParam = selectedZoneBType === 'barrio'
+      ? `district=${encodeURIComponent(selectedZoneBDistrict)}&barrio=${encodeURIComponent(selectedZoneB)}`
+      : `district=${encodeURIComponent(selectedZoneB)}`;
 
     setSeriesA([]);
     setSeriesB([]);
@@ -1634,7 +1623,7 @@ const MadridDashboardV2: React.FC = () => {
     setComparisonKpiAStatus('loading');
     setComparisonKpiBStatus('loading');
 
-    fetchRequest(`/series?year=${comparisonYear}&op=${op}&zona=${encodeURIComponent(selectedZoneA)}&tipo_zona=${zoneType}`)
+    fetchRequest(`/series?year=${comparisonYear}&op=${op}&zona=${encodeURIComponent(selectedZoneA)}&tipo_zona=${selectedZoneAType}&distrito=${encodeURIComponent(selectedZoneADistrict)}`)
       .then(response => response.json())
       .then(data => {
         if (!isCurrent()) return;
@@ -1649,7 +1638,7 @@ const MadridDashboardV2: React.FC = () => {
         setSeriesAStatus(rows.some((point: any) => Number(point?.precio_m2) > 0) ? 'ready' : 'empty');
       }).catch(() => { if (isCurrent()) setSeriesAStatus('error'); });
 
-    fetchRequest(`/series?year=${comparisonYear}&op=${op}&zona=${encodeURIComponent(selectedZoneB)}&tipo_zona=${zoneType}`)
+    fetchRequest(`/series?year=${comparisonYear}&op=${op}&zona=${encodeURIComponent(selectedZoneB)}&tipo_zona=${selectedZoneBType}&distrito=${encodeURIComponent(selectedZoneBDistrict)}`)
       .then(response => response.json())
       .then(data => {
         if (!isCurrent()) return;
@@ -1688,7 +1677,7 @@ const MadridDashboardV2: React.FC = () => {
       }).catch(() => { if (isCurrent()) setComparisonKpiBStatus('error'); });
 
     return () => controller.abort();
-  }, [comparisonYear, comparisonMonth, profileIdx, selectedZoneA, selectedZoneB, compareLevel, filtersReady, loadAttempt, activeProfile.id, activeProfile.op]);
+  }, [comparisonYear, comparisonMonth, profileIdx, selectedZoneA, selectedZoneAType, selectedZoneADistrict, selectedZoneB, selectedZoneBType, selectedZoneBDistrict, filtersReady, loadAttempt, activeProfile.id, activeProfile.op]);
 
   // Warm both heatmap levels; apiFetch coalesces in-flight requests and caches each full key.
   useEffect(() => {
@@ -1783,29 +1772,26 @@ const MadridDashboardV2: React.FC = () => {
   // Fetch zone comparative liquidities (for Inversión profile only)
   useEffect(() => {
     if (activeProfile.id === 'inversion') {
-      const level = compareLevel.toLowerCase() === 'distritos' ? 'distrito' : 'barrio';
-      apiFetch(`/zone-liquidity?name=${encodeURIComponent(selectedZoneA)}&level=${level}`)
+      apiFetch(`/zone-liquidity?name=${encodeURIComponent(selectedZoneA)}&level=${selectedZoneAType}&district=${encodeURIComponent(selectedZoneADistrict)}`)
         .then(res => res.ok ? res.json() : { speed: 'N/A' })
         .then(data => setLiquidityZoneA(data.speed))
         .catch(() => setLiquidityZoneA('N/A'));
     }
-  }, [selectedZoneA, compareLevel, activeProfile.id]);
+  }, [selectedZoneA, selectedZoneAType, selectedZoneADistrict, activeProfile.id]);
 
   useEffect(() => {
     if (activeProfile.id === 'inversion') {
-      const level = compareLevel.toLowerCase() === 'distritos' ? 'distrito' : 'barrio';
-      apiFetch(`/zone-liquidity?name=${encodeURIComponent(selectedZoneB)}&level=${level}`)
+      apiFetch(`/zone-liquidity?name=${encodeURIComponent(selectedZoneB)}&level=${selectedZoneBType}&district=${encodeURIComponent(selectedZoneBDistrict)}`)
         .then(res => res.ok ? res.json() : { speed: 'N/A' })
         .then(data => setLiquidityZoneB(data.speed))
         .catch(() => setLiquidityZoneB('N/A'));
     }
-  }, [selectedZoneB, compareLevel, activeProfile.id]);
+  }, [selectedZoneB, selectedZoneBType, selectedZoneBDistrict, activeProfile.id]);
 
   // Fetch zone comparative volatilities (for Inversión profile only)
   useEffect(() => {
     if (activeProfile.id === 'inversion') {
-      const level = compareLevel.toLowerCase() === 'distritos' ? 'distrito' : 'barrio';
-      apiFetch(`/risk-return-matrix?level=${level}&district=Todos`)
+      apiFetch(`/risk-return-matrix?level=${selectedZoneAType}&district=${encodeURIComponent(selectedZoneAType === 'barrio' ? selectedZoneADistrict : 'Todos')}`)
         .then(res => res.ok ? res.json() : [])
         .then(data => {
           const found = data.find((d: any) => d.name.toLowerCase() === selectedZoneA.toLowerCase());
@@ -1817,12 +1803,11 @@ const MadridDashboardV2: React.FC = () => {
         })
         .catch(() => setVolatilityZoneA('N/A'));
     }
-  }, [selectedZoneA, compareLevel, activeProfile.id]);
+  }, [selectedZoneA, selectedZoneAType, selectedZoneADistrict, activeProfile.id]);
 
   useEffect(() => {
     if (activeProfile.id === 'inversion') {
-      const level = compareLevel.toLowerCase() === 'distritos' ? 'distrito' : 'barrio';
-      apiFetch(`/risk-return-matrix?level=${level}&district=Todos`)
+      apiFetch(`/risk-return-matrix?level=${selectedZoneBType}&district=${encodeURIComponent(selectedZoneBType === 'barrio' ? selectedZoneBDistrict : 'Todos')}`)
         .then(res => res.ok ? res.json() : [])
         .then(data => {
           const found = data.find((d: any) => d.name.toLowerCase() === selectedZoneB.toLowerCase());
@@ -1834,7 +1819,7 @@ const MadridDashboardV2: React.FC = () => {
         })
         .catch(() => setVolatilityZoneB('N/A'));
     }
-  }, [selectedZoneB, compareLevel, activeProfile.id]);
+  }, [selectedZoneB, selectedZoneBType, selectedZoneBDistrict, activeProfile.id]);
 
 
 
@@ -2905,7 +2890,7 @@ const MadridDashboardV2: React.FC = () => {
       clearTimeout(timer);
       clearTimeout(resizeTimer);
     };
-  }, [profileIdx, isTransitioning, isMobile, compareLevel, activeProfile.color, seriesA, seriesB, comparisonSeriesMadrid, activeProfile.id, scatterData, interestImpactData, riskReturnData, liquidityLevel, selectedDistrict, selectedBarrio, selectedYear, comparisonYear, selectedZoneA, selectedZoneB]);
+  }, [profileIdx, isTransitioning, isMobile, activeProfile.color, seriesA, seriesB, comparisonSeriesMadrid, activeProfile.id, scatterData, interestImpactData, riskReturnData, liquidityLevel, selectedDistrict, selectedBarrio, selectedYear, comparisonYear, selectedZoneA, selectedZoneB]);
 
   const handleProfileChange = (newIdx: number) => {
     if (newIdx === profileIdx || isTransitioning) return;
@@ -2951,14 +2936,6 @@ const MadridDashboardV2: React.FC = () => {
 
   const scrollToDashboardSection = (section: string) => {
     activePanelRef.current?.querySelector<HTMLElement>(`[data-dashboard-section="${section}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  const handleLevelToggle = (level: 'Distritos' | 'Barrios') => {
-    if (level === compareLevel) return;
-    const availableZones = (level === 'Distritos' ? availableDistricts : availableBarrios).filter(zone => zone !== 'Todos');
-    if (!availableZones.includes(selectedZoneA)) setSelectedZoneA(availableZones[0] || 'Todos');
-    if (!availableZones.includes(selectedZoneB)) setSelectedZoneB(availableZones[1] || availableZones[0] || 'Todos');
-    setCompareLevel(level);
   };
 
   const getSlideClass = (idx: number) => {
@@ -4090,7 +4067,7 @@ const MadridDashboardV2: React.FC = () => {
                     delta={mapFeatureDelta === null ? null : `${mapFeatureDelta > 0 ? '+' : ''}${mapFeatureDelta.toFixed(1)}% frente a la media`}
                     onClose={() => { clearSelection(); setSelectedBarrio('Todos'); }}
                   >
-                    <div className="v2-map-sheet-actions"><button type="button" onClick={() => { const level = mapFeatureIsDistrict ? 'Distritos' : 'Barrios'; const zones = level === 'Distritos' ? availableDistricts : availableBarrios; setCompareLevel(level); setSelectedZoneA(selectedMapFeature); if (selectedZoneB === selectedMapFeature) setSelectedZoneB(zones.find(zone => zone !== selectedMapFeature) || 'Todos'); clearSelection(); scrollToDashboardSection('compare'); }}>Ver evolución →</button><button type="button" onClick={() => { clearSelection(); setSelectedBarrio('Todos'); setSelectedDistrict('Todos'); setMapLevel('districts'); }}>Ver Madrid</button></div>
+                    <div className="v2-map-sheet-actions"><button type="button" onClick={() => { const type = mapFeatureIsDistrict ? 'distrito' : 'barrio'; setSelectedZoneA(selectedMapFeature); setSelectedZoneAType(type); setSelectedZoneADistrict(mapFeatureIsDistrict ? selectedMapFeature : selectedDistrict); if (selectedZoneB === selectedMapFeature) setSelectedZoneB(mapFeatureIsDistrict ? availableDistricts.find(zone => zone !== selectedMapFeature && zone !== 'Todos') || 'Todos' : availableBarrios.find(zone => zone !== selectedMapFeature && zone !== 'Todos') || 'Todos'); clearSelection(); scrollToDashboardSection('compare'); }}>Ver evolución →</button><button type="button" onClick={() => { clearSelection(); setSelectedBarrio('Todos'); setSelectedDistrict('Todos'); setMapLevel('districts'); }}>Ver Madrid</button></div>
                   </FichaZonaMovil>}
                   <DashboardMapLegend
                     isMobile={isMobile}
@@ -4292,42 +4269,26 @@ const MadridDashboardV2: React.FC = () => {
                 </div>
                 {!isMobile && <div className="v2-compare-desktop-toolbar">
                   <DashboardHelpButton className="v2-compare-help" onClick={() => setShowCompareHelpModal(true)} label="¿Cómo usar la comparación?" />
-                  <div className="v2-segmented-with-label">
-                    <span>Ver por:</span>
-                    <SegmentedControl<'Distritos' | 'Barrios'>
-                      label="Nivel de comparación"
-                      size="md"
-                      value={compareLevel}
-                      options={[{ value: 'Distritos', label: 'Distritos' }, { value: 'Barrios', label: 'Barrios' }] as const}
-                      onChange={handleLevelToggle}
-                    />
-                  </div>
                   {comparisonPeriodControl}
                 </div>}
               </div>
 
-              {isMobile && <div className="v2-mobile-compare-level-control">
-                <SegmentedControl<'Distritos' | 'Barrios'>
-                  label="Nivel de comparación"
-                  size="md"
-                  value={compareLevel}
-                  options={[{ value: 'Distritos', label: 'Distritos' }, { value: 'Barrios', label: 'Barrios' }] as const}
-                  onChange={handleLevelToggle}
-                />
-                {comparisonPeriodControl}
-              </div>}
+              {isMobile && <div className="v2-mobile-compare-level-control">{comparisonPeriodControl}</div>}
 
               <div className="v2-compare-zone-selectors v2-compare-selectors-sticky">
-                <div className={`v2-dropdown-container v2-compare-zone-select zone-a ${activeDropdown === 'zoneA' ? 'v2-z-up' : ''}`}>
+                <div className="v2-dropdown-container v2-compare-zone-select zone-a">
                   <span className="v2-filter-label zone-a-label"><i /> ZONA A</span>
-                  <DashboardSelect value={formatZoneOption(selectedZoneA)} expanded={isMobile ? compareZoneSheet === 'A' : activeDropdown === 'zoneA'} ariaHaspopup={isMobile ? 'dialog' : 'listbox'} ariaControls={!isMobile ? 'compare-zone-a-menu' : undefined} onToggle={() => { if (isMobile) { setCompareZoneSearch(''); setCompareZoneSheet('A'); } else { setCompareZoneSearch(''); setActiveDropdown(activeDropdown === 'zoneA' ? null : 'zoneA'); } }} />
-                  {!isMobile && activeDropdown === 'zoneA' && <ZoneDropdownList id="compare-zone-a" label="Seleccionar Zona A" zones={compareLevel === 'Distritos' ? availableDistricts : availableBarrios} selectedZone={selectedZoneA} formatZone={formatZoneOption} onSelect={zone => { setSelectedZoneA(zone); setActiveDropdown(null); }} />}
+                  <ZoneSearch options={zoneSearchOptions.filter(option => option.kind !== 'city')} district={selectedZoneAType === 'barrio' ? selectedZoneADistrict : selectedZoneA} barrio={selectedZoneAType === 'barrio' ? selectedZoneA : 'Todos'} compact title="Zona A" showReset={false} formatName={formatZoneOption} onSelect={selection => {
+                    if (selection.barrio !== 'Todos') { setSelectedZoneA(selection.barrio); setSelectedZoneAType('barrio'); setSelectedZoneADistrict(selection.district); }
+                    else { setSelectedZoneA(selection.district); setSelectedZoneAType('distrito'); setSelectedZoneADistrict(selection.district); }
+                  }} />
                 </div>
-                {isMobile && <button type="button" className="v2-compare-swap" aria-label="Intercambiar zonas A y B" title="Intercambiar zonas" onClick={() => { setSelectedZoneA(selectedZoneB); setSelectedZoneB(selectedZoneA); }}><span>⇄</span></button>}
-                <div className={`v2-dropdown-container v2-compare-zone-select zone-b ${activeDropdown === 'zoneB' ? 'v2-z-up' : ''}`}>
+                <div className="v2-dropdown-container v2-compare-zone-select zone-b">
                   <span className="v2-filter-label zone-b-label"><i /> ZONA B</span>
-                  <DashboardSelect value={formatZoneOption(selectedZoneB)} expanded={isMobile ? compareZoneSheet === 'B' : activeDropdown === 'zoneB'} ariaHaspopup={isMobile ? 'dialog' : 'listbox'} ariaControls={!isMobile ? 'compare-zone-b-menu' : undefined} onToggle={() => { if (isMobile) { setCompareZoneSearch(''); setCompareZoneSheet('B'); } else { setCompareZoneSearch(''); setActiveDropdown(activeDropdown === 'zoneB' ? null : 'zoneB'); } }} />
-                  {!isMobile && activeDropdown === 'zoneB' && <ZoneDropdownList id="compare-zone-b" label="Seleccionar Zona B" zones={compareLevel === 'Distritos' ? availableDistricts : availableBarrios} selectedZone={selectedZoneB} formatZone={formatZoneOption} onSelect={zone => { setSelectedZoneB(zone); setActiveDropdown(null); }} />}
+                  <ZoneSearch options={zoneSearchOptions.filter(option => option.kind !== 'city')} district={selectedZoneBType === 'barrio' ? selectedZoneBDistrict : selectedZoneB} barrio={selectedZoneBType === 'barrio' ? selectedZoneB : 'Todos'} compact title="Zona B" showReset={false} formatName={formatZoneOption} onSelect={selection => {
+                    if (selection.barrio !== 'Todos') { setSelectedZoneB(selection.barrio); setSelectedZoneBType('barrio'); setSelectedZoneBDistrict(selection.district); }
+                    else { setSelectedZoneB(selection.district); setSelectedZoneBType('distrito'); setSelectedZoneBDistrict(selection.district); }
+                  }} />
                 </div>
               </div>
 
@@ -4336,20 +4297,22 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-compare-map-heading">Toca dos zonas para asignar A y B</div>
                   <div className="v2-compare-map-canvas">
                     <MadridMap
-                      type={compareLevel === 'Distritos' ? 'districts' : 'neighborhoods'}
-                      data={compareLevel === 'Distritos' ? mapData.districts : mapData.neighborhoods}
+                      type={(compareMapTarget === 'A' ? selectedZoneAType : selectedZoneBType) === 'distrito' ? 'districts' : 'neighborhoods'}
+                      data={(compareMapTarget === 'A' ? selectedZoneAType : selectedZoneBType) === 'distrito' ? mapData.districts : mapData.neighborhoods}
                       selectedYear={Number(selectedYear)} selectedMonth={selectedMonth} selectedProfile={activeProfile.label} colorThresholds={mapColorThresholds}
                       selectedDistrict={null} selectedBarrio={null}
                       compareZoneA={selectedZoneA} compareZoneB={selectedZoneB}
                       onDistrictClick={(zone) => {
                         if (!zone) return;
-                        if (compareMapTarget === 'A') { setSelectedZoneA(zone); setCompareMapTarget('B'); }
-                        else { setSelectedZoneB(zone); setCompareMapTarget('A'); }
+                        if (compareMapTarget === 'A') { setSelectedZoneA(zone); setSelectedZoneAType('distrito'); setSelectedZoneADistrict(zone); setCompareMapTarget('B'); }
+                        else { setSelectedZoneB(zone); setSelectedZoneBType('distrito'); setSelectedZoneBDistrict(zone); setCompareMapTarget('A'); }
                       }}
                       onBarrioClick={(zone) => {
                         if (!zone) return;
-                        if (compareMapTarget === 'A') { setSelectedZoneA(zone); setCompareMapTarget('B'); }
-                        else { setSelectedZoneB(zone); setCompareMapTarget('A'); }
+                        const barrioOption = zoneSearchOptions.find(option => option.kind === 'barrio' && normalizeZoneSearchKey(option.name) === normalizeZoneSearchKey(zone));
+                        const district = barrioOption?.district || 'Todos';
+                        if (compareMapTarget === 'A') { setSelectedZoneA(zone); setSelectedZoneAType('barrio'); setSelectedZoneADistrict(district); setCompareMapTarget('B'); }
+                        else { setSelectedZoneB(zone); setSelectedZoneBType('barrio'); setSelectedZoneBDistrict(district); setCompareMapTarget('A'); }
                       }}
                     />
                   </div>
@@ -4846,20 +4809,6 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                 </div>
               </div>
-              {isMobile && compareZoneSheet && <div className="v2-zone-picker-backdrop" role="presentation" onClick={() => window.history.back()}>
-                <div className="v2-zone-picker-sheet" role="dialog" aria-modal="true" aria-label={`Seleccionar zona ${compareZoneSheet}`} onClick={event => event.stopPropagation()}>
-                  <div className="v2-zone-picker-head"><div><strong>Seleccionar zona {compareZoneSheet}</strong><span>Busca por distrito o barrio</span></div><button type="button" aria-label="Cerrar" onClick={() => window.history.back()}>×</button></div>
-                  <input autoFocus value={compareZoneSearch} onChange={event => setCompareZoneSearch(event.target.value)} placeholder="Buscar zona…" aria-label="Buscar zona" />
-                  <div className="v2-zone-picker-options" role="listbox">
-                    {(compareLevel === 'Distritos' ? availableDistricts : availableBarrios)
-                      .filter(zone => zone !== 'Todos' && formatZoneOption(zone).toLocaleLowerCase('es').includes(compareZoneSearch.toLocaleLowerCase('es')))
-                      .map(zone => <button type="button" role="option" aria-selected={zone === (compareZoneSheet === 'A' ? selectedZoneA : selectedZoneB)} key={zone} onClick={() => {
-                        if (compareZoneSheet === 'A') setSelectedZoneA(zone); else setSelectedZoneB(zone);
-                        window.history.back();
-                      }}>{formatZoneOption(zone)}</button>)}
-                  </div>
-                </div>
-              </div>}
             </section>
             </ComparacionZonas>
             </div>
@@ -5399,10 +5348,10 @@ const MadridDashboardV2: React.FC = () => {
                     </div>
                     <div>
                       <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--azul-noche)' }}>
-                        Selección por Distritos o Barrios
+                        Búsqueda de zonas
                       </div>
                       <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.4, marginTop: '2px' }}>
-                        Usa los botones superiores para elegir si deseas comparar a nivel de <strong>Distritos</strong> o de <strong>Barrios</strong>. En los desplegables de <strong>Zona A</strong> y <strong>Zona B</strong> puedes elegir libremente cualquier par de zonas de Madrid.
+                        Busca una zona por nombre en cada campo. Puedes comparar un distrito con otro distrito, un barrio con otro barrio o mezclar ambos niveles; los resultados indican el distrito de cada barrio.
                       </div>
                     </div>
                   </div>

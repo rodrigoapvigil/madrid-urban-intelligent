@@ -785,7 +785,7 @@ def get_kpi_data(anio: int, mes: str, op: str, distrito: str = "Todos", barrio: 
 
 
 def get_monthly_series(anio: int, op: str, zona_nombre: str,
-                        zona_tipo: str = "barrio") -> pd.DataFrame:
+                        zona_tipo: str = "barrio", distrito_nombre: Optional[str] = None) -> pd.DataFrame:
     """
     Devuelve la serie mensual unificada (Histórico + Predicción).
     zona_tipo: 'barrio' | 'distrito'
@@ -802,14 +802,19 @@ def get_monthly_series(anio: int, op: str, zona_nombre: str,
 
         # 1. Obtener Históricos
         if zona_tipo == "barrio":
+            district_filter = " AND d.nombre = ?" if distrito_nombre and distrito_nombre != "Todos" else ""
             q_hist = f"""
                 SELECT t.mes, AVG(f.{val_col}) as precio_m2
                 FROM Fact_Operacion f
                 JOIN Dim_Barrio b ON f.id_barrio = b.id_barrio
+                JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito
                 JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
-                WHERE t.anio = ? AND b.nombre = ? AND f.tipo_operacion = ?
+                WHERE t.anio = ? AND b.nombre = ? AND f.tipo_operacion = ?{district_filter}
                 GROUP BY t.mes ORDER BY t.mes
             """
+            hist_params = [int(anio), str(zona_nombre), real_op]
+            if district_filter:
+                hist_params.append(str(distrito_nombre))
         else:
             q_hist = f"""
                 SELECT t.mes, AVG(f.{val_col}) as precio_m2
@@ -819,7 +824,8 @@ def get_monthly_series(anio: int, op: str, zona_nombre: str,
                 WHERE t.anio = ? AND d.nombre = ? AND f.tipo_operacion = ?
                 GROUP BY t.mes ORDER BY t.mes
             """
-        df_hist = pd.read_sql(q_hist, conn, params=[int(anio), str(zona_nombre), real_op])
+            hist_params = [int(anio), str(zona_nombre), real_op]
+        df_hist = pd.read_sql(q_hist, conn, params=hist_params)
         df_hist['is_prediction'] = False
 
         # 2. Obtener Predicciones desde CSV
@@ -835,6 +841,10 @@ def get_monthly_series(anio: int, op: str, zona_nombre: str,
                     df_barr_names = pd.read_sql("SELECT id_barrio, nombre FROM Dim_Barrio WHERE id_barrio != -1", conn)
                     df_pred_b = pd.merge(df_merged, df_barr_names, on='id_barrio', how='inner')
                     filtered = df_pred_b[(df_pred_b['anio'] == anio) & (df_pred_b['nombre'] == zona_nombre)]
+                    if distrito_nombre and distrito_nombre != "Todos":
+                        df_dist_names = pd.read_sql("SELECT id_distrito, nombre as distrito FROM Dim_Distrito WHERE id_distrito != -1", conn)
+                        filtered = pd.merge(filtered, df_dist_names, on='id_distrito', how='inner')
+                        filtered = filtered[filtered['distrito'] == distrito_nombre]
                     df_pred = filtered[['mes', 'precio_m2_predicho']].rename(columns={'precio_m2_predicho': 'precio_m2'}).sort_values('mes')
                 else:
                     df_dist_names = pd.read_sql("SELECT id_distrito, nombre FROM Dim_Distrito WHERE id_distrito != -1", conn)
@@ -849,6 +859,10 @@ def get_monthly_series(anio: int, op: str, zona_nombre: str,
                 df_barr_names = pd.read_sql("SELECT id_barrio, nombre FROM Dim_Barrio WHERE id_barrio != -1", conn)
                 df_pred_b = pd.merge(pred_df, df_barr_names, on='id_barrio', how='inner')
                 filtered = df_pred_b[(df_pred_b['anio'] == anio) & (df_pred_b['nombre'] == zona_nombre) & (df_pred_b['tipo_operacion'] == op_l)]
+                if distrito_nombre and distrito_nombre != "Todos":
+                    df_dist_names = pd.read_sql("SELECT id_distrito, nombre as distrito FROM Dim_Distrito WHERE id_distrito != -1", conn)
+                    filtered = pd.merge(filtered, df_dist_names, on='id_distrito', how='inner')
+                    filtered = filtered[filtered['distrito'] == distrito_nombre]
                 df_pred = filtered[['mes', 'precio_m2_predicho']].rename(columns={'precio_m2_predicho': 'precio_m2'}).sort_values('mes')
             else:
                 df_pred = pd.DataFrame(columns=['mes', 'precio_m2'])
@@ -1833,7 +1847,7 @@ def get_risk_return_matrix_data(level: str = "distrito", district: str = "Todos"
         return []
 
 
-def get_zone_liquidity_data(zone_name: str, level: str = "distrito") -> dict:
+def get_zone_liquidity_data(zone_name: str, level: str = "distrito", district: str = "Todos") -> dict:
     """
     Gets transaction volume and speed category for a single zone.
     """
@@ -1851,8 +1865,12 @@ def get_zone_liquidity_data(zone_name: str, level: str = "distrito") -> dict:
         df_filtered = df_trans[df_trans['anio'] == year_to_query]
         
         if level == "barrio":
-            q = "SELECT id_barrio, nombre FROM Dim_Barrio WHERE nombre = ?"
-            df_zone = pd.read_sql(q, conn, params=[str(zone_name)])
+            q = "SELECT b.id_barrio, b.nombre FROM Dim_Barrio b JOIN Dim_Distrito d ON b.id_distrito = d.id_distrito WHERE b.nombre = ?"
+            params = [str(zone_name)]
+            if district and district != "Todos":
+                q += " AND d.nombre = ?"
+                params.append(str(district))
+            df_zone = pd.read_sql(q, conn, params=params)
             if df_zone.empty:
                 conn.close()
                 return {"transactions": 0, "speed": "Moderado", "color": "orange"}

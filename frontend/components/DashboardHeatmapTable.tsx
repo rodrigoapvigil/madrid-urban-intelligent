@@ -46,7 +46,7 @@ export default function DashboardHeatmapTable({
                 const tier = value > 0 ? colorTier(value, colorThresholds) : -1;
                 const cellColor = value > 0 ? tierColors[tier] : 'transparent';
                 const textColor = tier >= 4 ? '#03172b' : '#f2f7fb';
-                const classes = [value > 0 ? '' : 'v2-heatmap-no-data', monthIndex === selectedMonthIndex ? 'v2-heatmap-selected-month' : ''].filter(Boolean).join(' ');
+                const classes = value > 0 ? '' : 'v2-heatmap-no-data';
                 return <td key={monthIndex} className={classes || undefined} title={value > 0 ? undefined : 'Sin datos oficiales del Ayuntamiento'} style={{ backgroundColor: cellColor, color: value > 0 ? textColor : '#f2f7fb' }}>{value > 0 ? formatValue(value) : 'n/d'}</td>;
               })}
             </tr>
