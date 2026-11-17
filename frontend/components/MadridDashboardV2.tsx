@@ -2440,9 +2440,9 @@ const MadridDashboardV2: React.FC = () => {
                 type: 'bar',
                 label: 'Precio m²',
                 data: interestImpactData.map(d => d.price_m2),
-                backgroundColor: 'color-mix(in srgb, var(--azul-linea) 20%, transparent)',
-                borderColor: 'var(--azul-linea)',
-                borderWidth: 1.5,
+                backgroundColor: 'rgba(0,229,255,.28)',
+                borderColor: '#00E5FF',
+                borderWidth: 1.75,
                 borderRadius: 8,
                 barThickness: 32,
                 yAxisID: 'yPrecio'
@@ -2456,6 +2456,7 @@ const MadridDashboardV2: React.FC = () => {
               legend: {
                 position: 'top',
                 labels: {
+                  color: '#C8D6E4',
                   font: { size: 10, weight: 'bold' },
                   boxWidth: 8,
                   padding: 8
@@ -2483,23 +2484,23 @@ const MadridDashboardV2: React.FC = () => {
             scales: {
               x: {
                 grid: { display: false },
-                ticks: { color: 'var(--azul-linea)', font: { size: 10, weight: 'bold' } }
+                ticks: { color: '#C8D6E4', font: { size: 10, weight: 'bold' } }
               },
               yInteres: {
                 type: 'linear',
                 position: 'left',
                 ticks: {
-                  color: 'var(--azul-linea)',
+                  color: '#C8D6E4',
                   callback: (val) => val + '%',
                   font: { size: 9 }
                 },
-                grid: { color: 'color-mix(in srgb, var(--azul-noche) 5%, transparent)' }
+                grid: { color: 'rgba(255,255,255,.12)' }
               },
               yPrecio: {
                 type: 'linear',
                 position: 'right',
                 ticks: {
-                  color: 'var(--azul-linea)',
+                  color: '#C8D6E4',
                   callback: (val) => val + '€',
                   font: { size: 9 }
                 },
@@ -2568,6 +2569,7 @@ const MadridDashboardV2: React.FC = () => {
                 display: true,
                 position: 'top',
                 labels: {
+                  color: '#C8D6E4',
                   font: { size: 9, weight: 'bold' },
                   boxWidth: 8,
                   padding: 8
@@ -2594,22 +2596,23 @@ const MadridDashboardV2: React.FC = () => {
             },
             scales: {
               x: {
-                title: { display: true, text: 'Índice de riesgo histórico (10–90)', font: { size: 10, weight: 'bold' } },
+                title: { display: true, text: 'Índice de riesgo histórico (10–90)', color: '#C8D6E4', font: { size: 10, weight: 'bold' } },
                 min: 0,
                 max: 100,
                 ticks: {
-                  color: 'var(--azul-linea)',
+                  color: '#C8D6E4',
                   font: { size: 9, weight: 'bold' }
                 }
               },
               y: {
                 type: 'linear',
-                title: { display: true, text: 'Rentabilidad bruta observada (%)', font: { size: 10, weight: 'bold' } },
+                title: { display: true, text: 'Rentabilidad bruta observada (%)', color: '#C8D6E4', font: { size: 10, weight: 'bold' } },
                 ticks: {
+                  color: '#C8D6E4',
                   callback: (val) => val + '%',
                   font: { size: 9 }
                 },
-                grid: { color: 'color-mix(in srgb, var(--azul-noche) 5%, transparent)' }
+                grid: { color: 'rgba(255,255,255,.12)' }
               }
             }
           }
@@ -3543,7 +3546,7 @@ const MadridDashboardV2: React.FC = () => {
                           {DASHBOARD_COPY.investment.netYield}: <strong style={{ fontSize: '16px', display: 'block', color: '#00F0FF', fontWeight: '800', marginTop: '2px' }}>{roiNeto > 0 ? roiNeto.toFixed(1) : '-'}%/año</strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          Volumen de transacciones: <strong style={{ fontSize: '15px', color: '#FFFFFF' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(transacciones)}/año</strong>
+                          Volumen de transacciones: <strong className="v2-kpi-value-unit" style={{ fontSize: '15px', color: '#FFFFFF' }}><span>{formatNumber(transacciones, 0)}</span><span className="v2-kpi-value-unit__unit">trans./año</span></strong>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '600', color: liquidezColor }}>
                           <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: liquidezColor }} />
@@ -3668,7 +3671,7 @@ const MadridDashboardV2: React.FC = () => {
                             {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                           </div>
                           <div className="v2-val" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span>{transacciones > 0 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(transacciones) + ' trans./año' : '-'}</span>
+                            <span className="v2-kpi-value-unit"><span>{transacciones > 0 ? formatNumber(transacciones, 0) : '-'}</span>{transacciones > 0 && <span className="v2-kpi-value-unit__unit">trans./año</span>}</span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: '700', color: demandColor }}>
                               <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: demandColor }} />
                               {demandText}

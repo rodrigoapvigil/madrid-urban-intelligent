@@ -3491,6 +3491,9 @@ body.v2-fullscreen-open .v2-panel.v2-active { transform: none !important; }
 .v2-root .v2-calculator-submit:not(:disabled):hover { filter: brightness(1.08); transform: translateY(-1px); }
 .v2-root .v2-calculator-submit:focus-visible { outline: 2px solid #00e5ff; outline-offset: 3px; }
 .v2-root .v2-calculator-submit:disabled { opacity: .38; cursor: not-allowed; filter: saturate(.55); }
+.v2-root .v2-kpi-value-unit { display: flex; flex: 1 1 150px; flex-wrap: wrap; align-items: baseline; min-width: 0; column-gap: 5px; white-space: normal; }
+.v2-root .v2-kpi-value-unit > span:first-child { white-space: nowrap; }
+.v2-root .v2-kpi-value-unit__unit { flex: 0 0 auto; white-space: nowrap; }
 
 /* Comparison layout: keep zone identity stable and its selectors together. */
 .v2-root .v2-compare-title-block { display: grid; gap: 5px; }
