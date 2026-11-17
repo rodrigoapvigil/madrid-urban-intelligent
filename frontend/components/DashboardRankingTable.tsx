@@ -55,7 +55,7 @@ export default function DashboardRankingTable({
               <td className="v2-ranking-zone" style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}><span className="v2-ranking-position">{index + 1}.</span><span className="v2-ranking-name">{formatName(item.name)}</span></td>
               <td className="v2-ranking-value" style={{ padding: '8px 0', textAlign: 'right', color: demand ? '#00E5FF' : '#00F0FF', fontWeight: '700' }}>
                 {(demand || isInvestment) && <i style={{ width: `${Math.max(0, Math.min(100, (Number(item.value) || 0) / valueMax * 100))}%` }} />}
-                <span>{demand ? `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(item.value)} trans.` : isInvestment ? years : price}</span>
+                <span>{demand ? `${formatNumber(item.value, 0)} trans.` : isInvestment ? years : price}</span>
               </td>
             </tr>;
           })}

@@ -25,6 +25,7 @@ import { DashboardMapLegend, DashboardMapStatus } from './DashboardMapChrome';
 import DashboardSelect from './DashboardSelect';
 import DashboardHeatmapTable from './DashboardHeatmapTable';
 import DashboardRankingTable from './DashboardRankingTable';
+import { formatEuroAmount, formatNumber as formatSpanishNumber, formatPercent } from '../lib/format-number';
 import DashboardResourceState, { DashboardResourceStatus } from './DashboardResourceState';
 import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
 import type { MapZoneHoverContext } from './MadridMap';
@@ -565,9 +566,8 @@ const MADRID_NAME_EXCEPTIONS: Record<string, string> = {
   'Alameda De Osuna': 'Alameda de Osuna',
 };
 const formatMadridName = (value: string) => MADRID_NAME_EXCEPTIONS[value] || value;
-const formatNumber = (value: number, maximumFractionDigits = 0) =>
-  new Intl.NumberFormat('es-ES', { maximumFractionDigits }).format(value);
-const formatEuro = (value: number, maximumFractionDigits = 0) => `${formatNumber(value, maximumFractionDigits)} €`;
+const formatNumber = (value: number, digits = 0) => formatSpanishNumber(value, digits);
+const formatEuro = (value: number, digits = 0) => formatEuroAmount(value, digits);
 const formatZoneOption = (value: string) => value === 'Todos' ? 'Madrid (media)' : formatMadridName(value);
 const normalizeZoneLabel = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
 
@@ -2939,8 +2939,8 @@ const MadridDashboardV2: React.FC = () => {
                             <span>€/m²</span>
                           </div>
                           <div className="v2-rent-chips">
-                            <span>{Number(kpiData.v_mes || 0) < 0 ? '↘' : '↗'} {kpiData.v_mes > 0 ? '+' : ''}{Number(kpiData.v_mes || 0).toFixed(1)}% mes</span>
-                            <span>{Number(kpiData.v_anual || 0) < 0 ? '↘' : '↗'} {kpiData.v_anual > 0 ? '+' : ''}{Number(kpiData.v_anual || 0).toFixed(1)}% año</span>
+                            <span>{Number(kpiData.v_mes || 0) < 0 ? '↘' : '↗'} {formatPercent(Number(kpiData.v_mes || 0), 1, true)} mes</span>
+                            <span>{Number(kpiData.v_anual || 0) < 0 ? '↘' : '↗'} {formatPercent(Number(kpiData.v_anual || 0), 1, true)} año</span>
                             <span className="v2-rent-market">{kpiData.estado_mercado || 'Mercado estable'}</span>
                           </div>
                         </section>
@@ -2950,7 +2950,7 @@ const MadridDashboardV2: React.FC = () => {
                             <strong>{money(rent)} <small>€/mes</small></strong>
                           </div>
                           <div className="v2-rent-secondary-card v2-rent-effort">
-                            <div className="v2-rent-effort-head"><span className="v2-rent-eyebrow">Esfuerzo de alquiler</span><strong style={{ color: effortColor }}>{effort > 0 ? `${effort.toFixed(0)}%` : '—'}</strong></div>
+                            <div className="v2-rent-effort-head"><span className="v2-rent-eyebrow">Esfuerzo de alquiler</span><strong style={{ color: effortColor }}>{effort > 0 ? formatPercent(effort, 0) : '—'}</strong></div>
                             <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(effort, 100)}%`, background: effortColor }} /><b style={{ left: '30%' }} /></div>
                             <span className="v2-rent-effort-caption">{money(rent)} € de alquiler · {money(incomeMonthly)} € de renta (INE)</span>
                             <span className="v2-rent-effort-note">30% recomendado</span>
@@ -3205,7 +3205,7 @@ const MadridDashboardV2: React.FC = () => {
                           {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                         </div>
                         <div className={`v2-val accent ${kpiData.v_mes < 0 ? 'negative' : ''}`}>
-                          {kpiData.v_mes > 0 ? '+' : ''}{kpiData.v_mes?.toFixed(1)}%
+                          {formatPercent(Number(kpiData.v_mes || 0), 1, true)}
                         </div>
                       </div>
 
@@ -3223,7 +3223,7 @@ const MadridDashboardV2: React.FC = () => {
                           {kpiData.is_prediction && <ProjectionBadge style={predBadgeStyle} month={latestAvailablePeriod.month} year={latestAvailablePeriod.year} />}
                         </div>
                         <div className={`v2-val accent ${kpiData.v_anual < 0 ? 'negative' : ''}`}>
-                          {kpiData.v_anual > 0 ? '+' : ''}{kpiData.v_anual?.toFixed(1)}%
+                          {formatPercent(Number(kpiData.v_anual || 0), 1, true)}
                         </div>
                       </div>
                     </>
@@ -3902,7 +3902,7 @@ const MadridDashboardV2: React.FC = () => {
                     max={heatmapMax}
                     visibleCount={heatmapVisibleCount}
                     onShowMore={() => setHeatmapVisibleCount(count => count + 15)}
-                    formatValue={value => formatNumber(activeProfile.id === 'inversion' ? value * 100 : value, 1)}
+                    formatValue={value => formatNumber(activeProfile.id === 'inversion' ? value * 100 : value, activeProfile.id === 'alquiler' || activeProfile.id === 'inversion' ? 1 : 0)}
                     status={heatmapStatus}
                     onRetry={() => setLoadAttempt(value => value + 1)}
                   />
