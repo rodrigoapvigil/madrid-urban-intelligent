@@ -2787,7 +2787,7 @@ const MadridDashboardV2: React.FC = () => {
         </div>}
         <div className="v2-filter-group">
           <div className="v2-period-filter-group">
-            <span className="v2-period-filter-heading">Periodo</span>
+            <span className="v2-period-filter-heading">{isMobile ? 'Periodo (afecta a todo)' : 'Periodo'}</span>
 
           {/* AÑO */}
           <div className={`v2-dropdown-container ${activeDropdown === 'year' ? 'v2-z-up' : ''}`}>
@@ -2816,7 +2816,8 @@ const MadridDashboardV2: React.FC = () => {
           </div>
           </div>
 
-          {isMobile && <>
+          {isMobile && <div className="v2-mobile-zone-filter-group">
+          <span className="v2-mobile-zone-filter-heading">Zona (KPIs y mapas)</span>
           {/* DISTRITO */}
           <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
             <span className="v2-filter-label">Distrito</span>
@@ -2855,7 +2856,7 @@ const MadridDashboardV2: React.FC = () => {
               </div>
             )}
           </div>
-          </>}
+          </div>}
           {/* BOTONES DE ACCIÓN EN ALTO CONTRASTE */}
           <div className="v2-filter-actions">
             <DashboardHelpButton

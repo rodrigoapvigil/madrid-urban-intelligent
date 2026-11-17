@@ -4107,6 +4107,16 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root[data-platform="mobile"] .v2-filter-group > .v2-dropdown-container { min-height: 70px !important; }
 .v2-root[data-platform="mobile"] .v2-filter-actions,
 .v2-root[data-platform="mobile"] .v2-filters .v2-dropdown-container.v2-z-up { grid-column: 1 / -1 !important; }
+.v2-root[data-platform="mobile"] .v2-period-filter-group,
+.v2-root[data-platform="mobile"] .v2-mobile-zone-filter-group {
+  display: grid !important; grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; min-width: 0;
+}
+.v2-root[data-platform="mobile"] .v2-period-filter-heading,
+.v2-root[data-platform="mobile"] .v2-mobile-zone-filter-heading {
+  display: block !important; grid-column: 1 / -1; margin: 0; color: #a9c0ce; font-size: 11px; font-weight: 750; letter-spacing: .04em;
+}
+.v2-root[data-platform="mobile"] .v2-period-filter-group > .v2-dropdown-container,
+.v2-root[data-platform="mobile"] .v2-mobile-zone-filter-group > .v2-dropdown-container { min-width: 0; }
 .v2-root[data-platform="mobile"] .v2-filters .v2-dropdown-menu {
   position: static !important; inset: auto !important; width: 100% !important; min-width: 0 !important; max-width: none !important;
   max-height: min(24dvh,190px) !important; margin-top: 6px; overflow-y: auto !important; border-radius: 12px; padding: 6px;
@@ -4123,6 +4133,14 @@ body.v2-fullscreen-open footer { display: none !important; }
 }
 .v2-root[data-platform="mobile"] .v2-mobile-filter-apply { border: 0; color: #03172b; background: linear-gradient(115deg,#D9F8FF,#E9E8FF 58%,#F0E3FF); }
 .v2-root[data-platform="mobile"] .v2-mobile-filter-reset { border: 1px solid rgba(186,204,214,.3); color: #fff; background: transparent; }
+.v2-root[data-platform="mobile"] .v2-heatmap-scroll { overflow-x: clip !important; }
+.v2-root[data-platform="mobile"] .v2-heatmap-table { width: 100% !important; min-width: 0 !important; table-layout: fixed; }
+.v2-root[data-platform="mobile"] .v2-heatmap-table th,
+.v2-root[data-platform="mobile"] .v2-heatmap-table td { min-width: 0 !important; padding: 7px 1px !important; font-size: clamp(8px, 2.25vw, 10px) !important; text-align: center; }
+.v2-root[data-platform="mobile"] .v2-heatmap-table th:first-child,
+.v2-root[data-platform="mobile"] .v2-heatmap-table td:first-child { width: 76px !important; min-width: 76px !important; max-width: 76px !important; padding-inline: 4px !important; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+html:has(.v2-root[data-platform="mobile"]),
+body:has(.v2-root[data-platform="mobile"]) { overflow-x: clip; max-width: 100%; }
 .v2-root[data-platform="mobile"] .v2-mobile-profile-nav {
   position: fixed; inset: auto 0 0; z-index: 1400; display: grid !important; grid-template-columns: repeat(4,minmax(0,1fr));
   gap: 4px; padding: 8px 8px max(8px,env(safe-area-inset-bottom)); border-top: 1px solid rgba(255,255,255,.08);
