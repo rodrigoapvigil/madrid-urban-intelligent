@@ -1007,6 +1007,8 @@ const MadridDashboardV2: React.FC = () => {
   const [draftFilters, setDraftFilters] = useState({ year: '', month: '', district: 'Todos', barrio: 'Todos' });
   const [draftBarrios, setDraftBarrios] = useState<string[]>(['Todos']);
   const { selectedZoneA, setSelectedZoneA, selectedZoneB, setSelectedZoneB, compareLevel, setCompareLevel, selectedYear, setSelectedYear, selectedMonth, setSelectedMonth } = useComparacion();
+  const [comparisonYearOverride, setComparisonYearOverride] = useState<string | null>(null);
+  const comparisonYear = !isMobile && comparisonYearOverride ? comparisonYearOverride : selectedYear;
   const [latestAvailablePeriod, setLatestAvailablePeriod] = useState({ year: '2026', month: 'Junio' });
   const [selectedDistrict, setSelectedDistrict] = useState('Todos');
   const [selectedBarrio, setSelectedBarrio] = useState('Todos');
@@ -1045,6 +1047,7 @@ const MadridDashboardV2: React.FC = () => {
   const [seriesB, setSeriesB] = useState<any[]>([]);
   const [seriesAStatus, setSeriesAStatus] = useState<DashboardResourceStatus>('loading');
   const [seriesBStatus, setSeriesBStatus] = useState<DashboardResourceStatus>('loading');
+  const [comparisonSeriesMadrid, setComparisonSeriesMadrid] = useState<any[]>(() => DEFAULT_BASELINE_SERIES.alquiler.madrid);
   const [comparisonKpiAStatus, setComparisonKpiAStatus] = useState<DashboardResourceStatus>('loading');
   const [comparisonKpiBStatus, setComparisonKpiBStatus] = useState<DashboardResourceStatus>('loading');
   const [seriesMadrid, setSeriesMadrid] = useState<any[]>(() => DEFAULT_BASELINE_SERIES.alquiler.madrid);
@@ -1129,6 +1132,7 @@ const MadridDashboardV2: React.FC = () => {
   const selectedMonthIndex = MONTHS_ES.indexOf(selectedMonth);
   const latestObservedMonthIndex = MONTHS_ES.indexOf(latestAvailablePeriod.month);
   const isProjectionPeriod = Number(selectedYear) > Number(latestAvailablePeriod.year) || (Number(selectedYear) === Number(latestAvailablePeriod.year) && selectedMonthIndex > latestObservedMonthIndex);
+  const isComparisonProjectionPeriod = Number(comparisonYear) > Number(latestAvailablePeriod.year) || (Number(comparisonYear) === Number(latestAvailablePeriod.year) && selectedMonthIndex > latestObservedMonthIndex);
   const periodStatusLabel = isProjectionPeriod ? 'Estimación' : 'Dato real';
   const realSeriesPoints = seriesMadrid.filter(point => point && !point.is_prediction);
   const latestRealPoint = realSeriesPoints[realSeriesPoints.length - 1];
@@ -1370,12 +1374,6 @@ const MadridDashboardV2: React.FC = () => {
     setDashboardLoadError(null);
     // Never leave data from the previous operation visible while a new profile loads.
     setKpiData({});
-    setKpiDataA({});
-    setKpiDataB({});
-    setSeriesAStatus('loading');
-    setSeriesBStatus('loading');
-    setComparisonKpiAStatus('loading');
-    setComparisonKpiBStatus('loading');
     setMapStatus('loading');
     setHeatmapStatus('loading');
 
@@ -1412,48 +1410,6 @@ const MadridDashboardV2: React.FC = () => {
     fetchRequest(`/series?year=${selectedYear}&op=${op}`)
       .then(res => res.json())
       .then(data => { if (isLatestRequest() && !rejectInvalidRentalSeries(data)) setSeriesMadrid(data); });
-
-    // Series Zone A
-    fetchRequest(`/series?year=${selectedYear}&op=${op}&zona=${encodeURIComponent(selectedZoneA)}&tipo_zona=${compareLevel.toLowerCase().slice(0, -1)}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!isLatestRequest() || rejectInvalidRentalSeries(data)) return;
-        const rows = Array.isArray(data) ? data : [];
-        setSeriesA(rows);
-        setSeriesAStatus(rows.some((point: any) => Number(point?.precio_m2) > 0) ? 'ready' : 'empty');
-      }).catch(() => { if (isLatestRequest()) setSeriesAStatus('error'); });
-
-    // Series Zone B
-    fetchRequest(`/series?year=${selectedYear}&op=${op}&zona=${encodeURIComponent(selectedZoneB)}&tipo_zona=${compareLevel.toLowerCase().slice(0, -1)}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!isLatestRequest() || rejectInvalidRentalSeries(data)) return;
-        const rows = Array.isArray(data) ? data : [];
-        setSeriesB(rows);
-        setSeriesBStatus(rows.some((point: any) => Number(point?.precio_m2) > 0) ? 'ready' : 'empty');
-      }).catch(() => { if (isLatestRequest()) setSeriesBStatus('error'); });
-
-    // KPIs Zone A
-    const zoneAParam = compareLevel === 'Distritos' ? `district=${encodeURIComponent(selectedZoneA)}` : `barrio=${encodeURIComponent(selectedZoneA)}`;
-    fetchRequest(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneAParam}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!isLatestRequest()) return;
-        if (activeProfile.id === 'alquiler' && Number(data.precio_m2) > 100) return;
-        setKpiDataA({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra });
-        setComparisonKpiAStatus(Number(data.precio_m2 || data.precio_vivienda || data.rentabilidad || data.transacciones) > 0 ? 'ready' : 'empty');
-      }).catch(() => { if (isLatestRequest()) setComparisonKpiAStatus('error'); });
-
-    // KPIs Zone B
-    const zoneBParam = compareLevel === 'Distritos' ? `district=${encodeURIComponent(selectedZoneB)}` : `barrio=${encodeURIComponent(selectedZoneB)}`;
-    fetchRequest(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneBParam}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!isLatestRequest()) return;
-        if (activeProfile.id === 'alquiler' && Number(data.precio_m2) > 100) return;
-        setKpiDataB({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra });
-        setComparisonKpiBStatus(Number(data.precio_m2 || data.precio_vivienda || data.rentabilidad || data.transacciones) > 0 ? 'ready' : 'empty');
-      }).catch(() => { if (isLatestRequest()) setComparisonKpiBStatus('error'); });
 
     // Map Data
     fetchRequest(`/map?year=${selectedYear}&month=${selectedMonth}&interest=${activeProfile.id === 'alquiler' ? 'Alquiler' : activeProfile.id === 'compra' ? 'Compra-venta' : activeProfile.id === 'venta' ? 'Venta' : 'Inversión'}`)
@@ -1514,7 +1470,84 @@ const MadridDashboardV2: React.FC = () => {
       .catch(err => { console.error("Error loading connectivity:", err); if (isLatestRequest()) setConnectivityData(null); });
 
     return () => controller.abort();
-  }, [selectedYear, selectedMonth, profileIdx, selectedDistrict, selectedBarrio, selectedZoneA, selectedZoneB, compareLevel, rankingLevel, filtersReady, loadAttempt, activeProfile.id, activeProfile.op]);
+  }, [selectedYear, selectedMonth, profileIdx, selectedDistrict, selectedBarrio, rankingLevel, filtersReady, loadAttempt, activeProfile.id, activeProfile.op]);
+
+  // Comparison year is independent on desktop; mobile continues to follow the global period.
+  useEffect(() => {
+    if (!filtersReady || !comparisonYear || !selectedMonth) return;
+    const controller = new AbortController();
+    const fetchRequest = (path: string) => apiFetch(path, { signal: controller.signal });
+    const isCurrent = () => !controller.signal.aborted;
+    const op = activeProfile.op;
+    const zoneType = compareLevel.toLowerCase().slice(0, -1);
+    const zoneAParam = compareLevel === 'Distritos' ? `district=${encodeURIComponent(selectedZoneA)}` : `barrio=${encodeURIComponent(selectedZoneA)}`;
+    const zoneBParam = compareLevel === 'Distritos' ? `district=${encodeURIComponent(selectedZoneB)}` : `barrio=${encodeURIComponent(selectedZoneB)}`;
+
+    setSeriesA([]);
+    setSeriesB([]);
+    setComparisonSeriesMadrid([]);
+    setKpiDataA({});
+    setKpiDataB({});
+    setSeriesAStatus('loading');
+    setSeriesBStatus('loading');
+    setComparisonKpiAStatus('loading');
+    setComparisonKpiBStatus('loading');
+
+    fetchRequest(`/series?year=${comparisonYear}&op=${op}&zona=${encodeURIComponent(selectedZoneA)}&tipo_zona=${zoneType}`)
+      .then(response => response.json())
+      .then(data => {
+        if (!isCurrent()) return;
+        const rows = Array.isArray(data) ? data : [];
+        const invalidRental = activeProfile.id === 'alquiler' && rows.some((point: any) => Number(point.precio_m2) > 100);
+        if (invalidRental) {
+          setDashboardLoadError('La serie de alquiler contiene precios por m² fuera de escala. Se ha detenido su visualización para evitar mezclar datos de compra y alquiler.');
+          setSeriesAStatus('error');
+          return;
+        }
+        setSeriesA(rows);
+        setSeriesAStatus(rows.some((point: any) => Number(point?.precio_m2) > 0) ? 'ready' : 'empty');
+      }).catch(() => { if (isCurrent()) setSeriesAStatus('error'); });
+
+    fetchRequest(`/series?year=${comparisonYear}&op=${op}&zona=${encodeURIComponent(selectedZoneB)}&tipo_zona=${zoneType}`)
+      .then(response => response.json())
+      .then(data => {
+        if (!isCurrent()) return;
+        const rows = Array.isArray(data) ? data : [];
+        const invalidRental = activeProfile.id === 'alquiler' && rows.some((point: any) => Number(point.precio_m2) > 100);
+        if (invalidRental) {
+          setDashboardLoadError('La serie de alquiler contiene precios por m² fuera de escala. Se ha detenido su visualización para evitar mezclar datos de compra y alquiler.');
+          setSeriesBStatus('error');
+          return;
+        }
+        setSeriesB(rows);
+        setSeriesBStatus(rows.some((point: any) => Number(point?.precio_m2) > 0) ? 'ready' : 'empty');
+      }).catch(() => { if (isCurrent()) setSeriesBStatus('error'); });
+
+    fetchRequest(`/series?year=${comparisonYear}&op=${op}`)
+      .then(response => response.json())
+      .then(data => { if (isCurrent()) setComparisonSeriesMadrid(Array.isArray(data) ? data : []); })
+      .catch(() => { if (isCurrent()) setComparisonSeriesMadrid([]); });
+
+    fetchRequest(`/kpis?year=${comparisonYear}&month=${selectedMonth}&op=${op}&${zoneAParam}`)
+      .then(response => response.json())
+      .then(data => {
+        if (!isCurrent()) return;
+        if (activeProfile.id === 'alquiler' && Number(data.precio_m2) > 100) { setComparisonKpiAStatus('empty'); return; }
+        setKpiDataA({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra });
+        setComparisonKpiAStatus(Number(data.precio_m2 || data.precio_vivienda || data.rentabilidad || data.transacciones) > 0 ? 'ready' : 'empty');
+      }).catch(() => { if (isCurrent()) setComparisonKpiAStatus('error'); });
+
+    fetchRequest(`/kpis?year=${comparisonYear}&month=${selectedMonth}&op=${op}&${zoneBParam}`)
+      .then(response => response.json())
+      .then(data => {
+        if (!isCurrent()) return;
+        if (activeProfile.id === 'alquiler' && Number(data.precio_m2) > 100) { setComparisonKpiBStatus('empty'); return; }
+        setKpiDataB({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra });
+        setComparisonKpiBStatus(Number(data.precio_m2 || data.precio_vivienda || data.rentabilidad || data.transacciones) > 0 ? 'ready' : 'empty');
+      }).catch(() => { if (isCurrent()) setComparisonKpiBStatus('error'); });
+
+    return () => controller.abort();
+  }, [comparisonYear, selectedMonth, profileIdx, selectedZoneA, selectedZoneB, compareLevel, filtersReady, loadAttempt, activeProfile.id, activeProfile.op]);
 
   // Warm both heatmap levels; apiFetch coalesces in-flight requests and caches each full key.
   useEffect(() => {
@@ -1738,8 +1771,8 @@ const MadridDashboardV2: React.FC = () => {
           // Zone series stay empty when the source has no official observations.
           const effectiveData = Array.isArray(rawData) ? rawData : [];
 
-          const effectiveMadridSeries = (seriesMadrid && seriesMadrid.length > 0 && seriesMadrid.some(d => d && d.precio_m2 != null))
-            ? seriesMadrid
+          const effectiveMadridSeries = (comparisonSeriesMadrid && comparisonSeriesMadrid.length > 0 && comparisonSeriesMadrid.some(d => d && d.precio_m2 != null))
+            ? comparisonSeriesMadrid
             : resolveFallbackSeries(activeProfile.id, 'madrid');
 
           // Align data to exactly 12 months (1 to 12)
@@ -2046,7 +2079,7 @@ const MadridDashboardV2: React.FC = () => {
                         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
                       ];
                       const idx = items[0]?.dataIndex ?? 0;
-                      return `${monthNames[idx]} ${selectedYear}`;
+                      return `${monthNames[idx]} ${comparisonYear}`;
                     },
                     label: (context: any) => {
                       const idx = context.dataIndex;
@@ -2143,7 +2176,7 @@ const MadridDashboardV2: React.FC = () => {
         const sharedComparisonScale = getNiceChartScale([
           chartSeries(seriesA),
           chartSeries(seriesB),
-          chartSeries(seriesMadrid),
+          chartSeries(comparisonSeriesMadrid),
         ]);
 
         if (ctxA) {
@@ -2171,8 +2204,8 @@ const MadridDashboardV2: React.FC = () => {
           const overlayMultiplier = comparisonMetric.multiplier;
           const effA = comparisonAHasData ? seriesA : [];
           const effB = comparisonBHasData ? seriesB : [];
-          const effMad = (seriesMadrid && seriesMadrid.length > 0 && seriesMadrid.some(d => d && d.precio_m2 != null))
-            ? seriesMadrid
+          const effMad = (comparisonSeriesMadrid && comparisonSeriesMadrid.length > 0 && comparisonSeriesMadrid.some(d => d && d.precio_m2 != null))
+            ? comparisonSeriesMadrid
             : resolveFallbackSeries(activeProfile.id, 'madrid');
 
           const overlayA = Array.from({ length: 12 }, (_, i) => { const found = effA.find(d => Number(d.mes) === i + 1); return found ? found.precio_m2 * overlayMultiplier : null; });
@@ -2395,7 +2428,7 @@ const MadridDashboardV2: React.FC = () => {
                         'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
                       ];
                       const idx = items[0]?.dataIndex ?? 0;
-                      return `${monthNames[idx]} ${selectedYear}`;
+                      return `${monthNames[idx]} ${comparisonYear}`;
                     },
                     label: (context: any) => {
                       const val = context.parsed.y;
@@ -2731,7 +2764,7 @@ const MadridDashboardV2: React.FC = () => {
       clearTimeout(timer);
       clearTimeout(resizeTimer);
     };
-  }, [profileIdx, isTransitioning, isMobile, compareLevel, activeProfile.color, seriesA, seriesB, seriesMadrid, activeProfile.id, scatterData, interestImpactData, riskReturnData, liquidityLevel, selectedDistrict, selectedBarrio, selectedYear, selectedZoneA, selectedZoneB]);
+  }, [profileIdx, isTransitioning, isMobile, compareLevel, activeProfile.color, seriesA, seriesB, comparisonSeriesMadrid, activeProfile.id, scatterData, interestImpactData, riskReturnData, liquidityLevel, selectedDistrict, selectedBarrio, selectedYear, comparisonYear, selectedZoneA, selectedZoneB]);
 
   const handleProfileChange = (newIdx: number) => {
     if (newIdx === profileIdx || isTransitioning) return;
@@ -4149,6 +4182,13 @@ const MadridDashboardV2: React.FC = () => {
                       onChange={handleLevelToggle}
                     />
                   </div>
+                  <div className={`v2-dropdown-container v2-compare-year-control ${activeDropdown === 'comparisonYear' ? 'v2-z-up' : ''}`}>
+                    <span className="v2-filter-label">Año</span>
+                    <DashboardSelect value={comparisonYear || selectedYear} expanded={activeDropdown === 'comparisonYear'} ariaHaspopup="listbox" ariaLabel="Año de comparación" onToggle={() => setActiveDropdown(activeDropdown === 'comparisonYear' ? null : 'comparisonYear')} />
+                    {activeDropdown === 'comparisonYear' && <div className="v2-dropdown-menu" role="listbox" aria-label="Año de comparación">
+                      {availableYears.map(year => <button type="button" key={year} className="v2-dropdown-item" role="option" aria-selected={comparisonYear === year} onClick={event => { event.stopPropagation(); setComparisonYearOverride(year); setActiveDropdown(null); }}>{year}</button>)}
+                    </div>}
+                  </div>
                 </div>}
               </div>
 
@@ -4206,7 +4246,7 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneA}
                       </div>
-                      <div className={`v2-chart-wrap${seriesAStatus === 'loading' ? ' v2-resource-loading' : ''}`}>{seriesAStatus === 'loading' || seriesAStatus === 'error' ? <DashboardResourceState status={seriesAStatus} retry={() => setLoadAttempt(value => value + 1)} /> : comparisonAHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: comparisonColors.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: comparisonColors.zoneA, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartA-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />}</div>
+                      <div className={`v2-chart-wrap${seriesAStatus === 'loading' ? ' v2-resource-loading' : ''}`}>{seriesAStatus === 'loading' || seriesAStatus === 'error' ? <DashboardResourceState status={seriesAStatus} retry={() => setLoadAttempt(value => value + 1)} /> : comparisonAHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: comparisonColors.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: comparisonColors.zoneA, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartA-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isComparisonProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isComparisonProjectionPeriod} />}</div>
                     </div>
                     {(() => {
                       if (comparisonKpiAStatus === 'loading' || comparisonKpiAStatus === 'error') return <DashboardResourceState status={comparisonKpiAStatus} retry={() => setLoadAttempt(value => value + 1)} />;
@@ -4425,7 +4465,7 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneB}
                       </div>
-                      <div className={`v2-chart-wrap${seriesBStatus === 'loading' ? ' v2-resource-loading' : ''}`}>{seriesBStatus === 'loading' || seriesBStatus === 'error' ? <DashboardResourceState status={seriesBStatus} retry={() => setLoadAttempt(value => value + 1)} /> : comparisonBHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: comparisonColors.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: comparisonColors.zoneB, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartB-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />}</div>
+                      <div className={`v2-chart-wrap${seriesBStatus === 'loading' ? ' v2-resource-loading' : ''}`}>{seriesBStatus === 'loading' || seriesBStatus === 'error' ? <DashboardResourceState status={seriesBStatus} retry={() => setLoadAttempt(value => value + 1)} /> : comparisonBHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: comparisonColors.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: comparisonColors.zoneB, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartB-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isComparisonProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isComparisonProjectionPeriod} />}</div>
                     </div>
                     {(() => {
                       if (comparisonKpiBStatus === 'loading' || comparisonKpiBStatus === 'error') return <DashboardResourceState status={comparisonKpiBStatus} retry={() => setLoadAttempt(value => value + 1)} />;
@@ -4661,8 +4701,8 @@ const MadridDashboardV2: React.FC = () => {
                       </div>
                       <div className="v2-chart-wrap large"><canvas id={`v2-overlay-${p.id}`}></canvas></div>
                     </div>}
-                    {!comparisonAHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />)}
-                    {!comparisonBHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />)}
+                    {!comparisonAHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isComparisonProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isComparisonProjectionPeriod} />)}
+                    {!comparisonBHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isComparisonProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isComparisonProjectionPeriod} />)}
                     {comparisonAHasData && comparisonBHasData && p.id === 'alquiler' && (() => {
                       const priceA = Number(kpiDataA.precio_m2) || 0;
                       const priceB = Number(kpiDataB.precio_m2) || 0;
