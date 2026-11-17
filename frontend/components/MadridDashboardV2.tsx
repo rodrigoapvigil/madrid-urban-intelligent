@@ -3961,8 +3961,6 @@ const MadridDashboardV2: React.FC = () => {
                     mobileStatus={periodStatusLabel}
                     observedMonth={latestAvailablePeriod.month}
                     observedYear={latestAvailablePeriod.year}
-                    latestRealMonth={latestRealMonth}
-                    latestRealYear={latestRealYear}
                     firstProjectionMonth={firstProjectionMonth}
                     zoneControls={i === profileIdx && <ToolControls
                       className="v2-map-period-tools"

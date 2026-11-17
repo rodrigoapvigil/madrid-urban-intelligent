@@ -2956,28 +2956,6 @@
     border-radius: 0;
     background: transparent;
   }
-  .v2-root .v2-map-data-chip {
-    display: inline-flex;
-    align-items: center;
-    min-height: 28px;
-    padding: 0 10px;
-    border: 1px solid rgba(0, 229, 255, .28);
-    border-radius: 999px;
-    background: rgba(0, 229, 255, .08);
-    color: #00e5ff;
-    font-size: 12px;
-    font-weight: 750;
-    white-space: nowrap;
-  }
-  .v2-root .v2-map-data-note {
-    flex: 1 1 auto;
-    align-self: center;
-    min-width: 0;
-    margin: 0;
-    color: #c7d8e0;
-    font-size: 11px;
-    line-height: 1.4;
-  }
   .v2-root .v2-map-help-button { flex: 0 0 auto; align-self: center; white-space: nowrap; }
 }
 

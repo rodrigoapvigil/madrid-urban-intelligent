@@ -9,8 +9,6 @@ export function DashboardMapStatus({
   mobileStatus,
   observedMonth,
   observedYear,
-  latestRealMonth,
-  latestRealYear,
   firstProjectionMonth,
   zoneControls,
   onHelp,
@@ -21,8 +19,6 @@ export function DashboardMapStatus({
   mobileStatus: string;
   observedMonth: string;
   observedYear: string;
-  latestRealMonth: string;
-  latestRealYear: string | number;
   firstProjectionMonth: string;
   zoneControls?: ReactNode;
   onHelp: () => void;
@@ -40,9 +36,6 @@ export function DashboardMapStatus({
       </> : <>
         <div className="v2-map-header-zone">{zoneControls}</div>
         <div className="v2-map-header-actions">
-          <div className={`v2-data-status ${isProjection ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
-            <strong className="v2-map-data-chip">Dato real · hasta {latestRealMonth} de {latestRealYear}</strong>
-          </div>
           <DashboardHelpButton className="v2-map-help-button" onClick={onHelp} label="¿Cómo usar el mapa?" title="¿Cómo usar el mapa?" iconOnly />
           {children}
         </div>
