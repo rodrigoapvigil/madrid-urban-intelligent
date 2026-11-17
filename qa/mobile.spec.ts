@@ -285,6 +285,7 @@ test('Paso 5 · regresión responsive de perfiles, móvil horizontal y escritori
     for (const [label, id] of profiles) {
       const tab = page.getByRole('navigation', { name: 'Perfiles de mercado' }).last().getByRole('button', { name: label, exact: true });
       await tab.click();
+      await expect(tab).toHaveAttribute('aria-pressed', 'true');
       await expect(page.locator(`.v2-root[data-profile="${id}"] .v2-panel.v2-active`)).toBeVisible();
       const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
       expect(overflow, `${width}x${height} ${label} horizontal overflow`).toBe(false);
@@ -299,7 +300,9 @@ test('Paso 5 · regresión responsive de perfiles, móvil horizontal y escritori
   await expect(landscapePage.locator('.v2-mobile-section-nav')).toBeVisible();
   const landscapeNav = landscapePage.getByRole('navigation', { name: 'Perfiles de mercado' }).last();
   for (const [label, id] of profiles) {
-    await landscapeNav.getByRole('button', { name: label, exact: true }).click();
+    const tab = landscapeNav.getByRole('button', { name: label, exact: true });
+    await tab.click();
+    await expect(tab).toHaveAttribute('aria-pressed', 'true');
     await expect(landscapePage.locator(`.v2-root[data-profile="${id}"] .v2-panel.v2-active`)).toBeVisible();
   }
   const landscapeOverflow = await landscapePage.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);

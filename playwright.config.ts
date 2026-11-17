@@ -7,9 +7,7 @@ export default defineConfig({
   timeout: 90_000,
   use: {
     baseURL: 'http://127.0.0.1:3100',
-    launchOptions: {
-      executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH || undefined,
-    },
+    channel: 'chrome',
     trace: 'retain-on-failure',
   },
   webServer: {
