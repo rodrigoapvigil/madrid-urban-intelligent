@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { colorTier } from '../lib/map-color-scale';
 
 interface MapProps {
   type: 'districts' | 'neighborhoods';
@@ -10,6 +11,7 @@ interface MapProps {
   selectedYear: number;
   selectedMonth: string;
   selectedProfile: string;
+  colorThresholds?: number[];
   selectedDistrict: string | null;
   selectedBarrio?: string | null;
   selectedZone?: string | null;
@@ -62,8 +64,9 @@ const getProfileKey = (profile: string): 'alquiler' | 'compra' | 'venta' | 'inve
   return 'alquiler';
 };
 
-const getChoroplethTier = (val: number, profile: string): number => {
+const getChoroplethTier = (val: number, profile: string, cuts?: number[]): number => {
   if (!val || val <= 0) return 0;
+  if (cuts?.length === 4) return colorTier(val, cuts);
   const p = normalize(profile);
 
   if (p.includes('alquiler')) {
@@ -232,7 +235,7 @@ let cachedDistritosGeoJson: any = null;
 let cachedBarriosGeoJson: any = null;
 
 const MadridMap: React.FC<MapProps> = ({ 
-  type, data, selectedYear, selectedMonth, selectedProfile, 
+  type, data, selectedYear, selectedMonth, selectedProfile, colorThresholds,
   selectedDistrict, selectedBarrio, selectedZone = null, selectedZoneType, neighborhoodCount, drillDownOnSelection = true, compareZoneA, compareZoneB, onDistrictClick, onBarrioClick, onZoneHover
 }) => {
   const mapRef = useRef<L.Map | null>(null);
@@ -287,7 +290,7 @@ const MadridMap: React.FC<MapProps> = ({
     }
     const hasObservedValue = Number.isFinite(Number(val)) && Number(val) > 0;
 
-    const tier = getChoroplethTier(val, selectedProfile);
+    const tier = getChoroplethTier(val, selectedProfile, colorThresholds);
     return {
       // Use five solid choropleth steps so the map reads as data, not texture.
       fillColor: !hasObservedValue ? `url(#no-data-pat-${containerId})` : isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#00F0FF' : TIER_CONFIGS[tier].baseFill,
@@ -296,7 +299,7 @@ const MadridMap: React.FC<MapProps> = ({
       color: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
       fillOpacity: isExcluded ? 0.25 : 1.0,
     };
-  }, [data, selectedDistrict, selectedBarrio, selectedZone, selectedZoneType, type, selectedProfile, compareZoneA, compareZoneB]);
+  }, [data, selectedDistrict, selectedBarrio, selectedZone, selectedZoneType, type, selectedProfile, colorThresholds, compareZoneA, compareZoneB]);
 
   useEffect(() => {
     const initializeMap = () => {

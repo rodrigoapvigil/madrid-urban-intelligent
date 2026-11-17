@@ -26,6 +26,7 @@ import DashboardSelect from './DashboardSelect';
 import DashboardHeatmapTable from './DashboardHeatmapTable';
 import DashboardRankingTable from './DashboardRankingTable';
 import { formatEuroAmount, formatNumber as formatSpanishNumber, formatPercent } from '../lib/format-number';
+import { profileColorCuts } from '../lib/map-color-scale';
 import DashboardResourceState, { DashboardResourceStatus } from './DashboardResourceState';
 import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
 import type { MapZoneHoverContext } from './MadridMap';
@@ -550,10 +551,11 @@ const getComparisonMetric = (profileId: string) => profileId === 'inversion'
   ? { label: 'Rentabilidad', unit: '%', tooltipUnit: '%', multiplier: 100, decimals: 2 }
   : { label: 'Precio m²', unit: '€/m²', tooltipUnit: '€/m²', multiplier: 1, decimals: profileId === 'alquiler' ? 2 : 1 };
 
-const getMapLegendLabels = (profileId: string) => {
-  if (profileId === 'inversion') return ['< 4,3 %', '4,3–5,0 %', '5,0–5,7 %', '5,7–6,5 %', '≥ 6,5 %'];
-  if (profileId === 'venta' || profileId === 'compra') return ['< 2.100 €/m²', '2.100–3.100 €/m²', '3.100–4.200 €/m²', '4.200–5.400 €/m²', '≥ 5.400 €/m²'];
-  return ['< 16 €/m²', '16–19 €/m²', '19–22 €/m²', '22–25 €/m²', '≥ 25 €/m²'];
+const getMapLegendLabels = (profileId: string, cuts: number[]) => {
+  const values = profileId === 'inversion' ? cuts.map(value => value * 100) : cuts;
+  const number = (value: number) => new Intl.NumberFormat('es-ES', { maximumFractionDigits: profileId === 'alquiler' ? 0 : profileId === 'inversion' ? 1 : 0 }).format(value);
+  const suffix = profileId === 'inversion' ? ' %' : ' €/m²';
+  return [`< ${number(values[0])}${suffix}`, ...values.slice(0, -1).map((value, index) => `${number(value)}–${number(values[index + 1])}${suffix}`), `≥ ${number(values[values.length - 1])}${suffix}`];
 };
 
 const MAP_DATA_SOURCE = 'Banco de Datos del Ayuntamiento de Madrid';
@@ -1139,15 +1141,14 @@ const MadridDashboardV2: React.FC = () => {
   const firstProjectionMonth = latestRealPoint
     ? MONTHS_ES[Number(latestRealPoint.mes)] || 'Enero'
     : MONTHS_ES[latestObservedMonthIndex + 1] || 'Enero';
-  const heatmapValues = useMemo(
-    () => heatmapData.flatMap(row => Object.keys(row)
-      .filter(key => key.startsWith('m'))
-      .map(key => Number(row[key]))
-      .filter(value => Number.isFinite(value) && value > 0)),
-    [heatmapData]
+  const realMonthsInSelectedYear = Number(selectedYear) < Number(latestAvailablePeriod.year)
+    ? 12
+    : Number(selectedYear) === Number(latestAvailablePeriod.year) ? latestObservedMonthIndex + 1 : 0;
+  const colorScaleRows = heatmapDataSourceKey === `${selectedYear}|${activeProfile.id}|${rankingLevel}` ? heatmapData : [];
+  const mapColorThresholds = useMemo(
+    () => profileColorCuts(activeProfile.id as 'alquiler' | 'compra' | 'venta' | 'inversion', colorScaleRows, realMonthsInSelectedYear),
+    [activeProfile.id, colorScaleRows, realMonthsInSelectedYear]
   );
-  const heatmapMin = heatmapValues.length ? Math.min(...heatmapValues) : 0;
-  const heatmapMax = heatmapValues.length ? Math.max(...heatmapValues) : 0;
   const filteredHeatmapRows = useMemo(() => {
     const query = heatmapSearch.trim().toLocaleLowerCase('es');
     return query ? heatmapData.filter(row => String(row.zona || '').toLocaleLowerCase('es').includes(query)) : heatmapData;
@@ -3748,6 +3749,7 @@ const MadridDashboardV2: React.FC = () => {
                           selectedYear={Number(selectedYear)}
                           selectedMonth={selectedMonth}
                           selectedProfile={activeProfile.label}
+                          colorThresholds={mapColorThresholds}
                           selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
                           selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
                           selectedZone={selectedMapFeature}
@@ -3769,6 +3771,7 @@ const MadridDashboardV2: React.FC = () => {
                           selectedYear={Number(selectedYear)}
                           selectedMonth={selectedMonth}
                           selectedProfile={activeProfile.label}
+                          colorThresholds={mapColorThresholds}
                           selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
                           selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
                           selectedZone={selectedMapFeature}
@@ -3819,7 +3822,7 @@ const MadridDashboardV2: React.FC = () => {
                     title={isMobile
                       ? `Intensidad de ${activeProfile.id === 'inversion' ? 'rentabilidad bruta · %' : 'precio · €/m²'}`
                       : `Intensidad de ${activeProfile.id === 'inversion' ? 'rentabilidad bruta (%)' : 'precio por m² (€/m²)'}`}
-                    labels={getMapLegendLabels(activeProfile.id)}
+                    labels={getMapLegendLabels(activeProfile.id, mapColorThresholds)}
                     dataCount={mapData.neighborhoods.filter((item: any) => Number(activeProfile.id === 'inversion' ? item.rentabilidad : item.precio_m2) > 0).length}
                     totalCount={neighborhoodFeatureCount || mapData.neighborhoods.length}
                     dataSource={MAP_DATA_SOURCE}
@@ -3898,8 +3901,7 @@ const MadridDashboardV2: React.FC = () => {
                     profileId={activeProfile.id}
                     level={rankingLevel}
                     year={selectedYear}
-                    min={heatmapMin}
-                    max={heatmapMax}
+                    colorThresholds={mapColorThresholds}
                     visibleCount={heatmapVisibleCount}
                     onShowMore={() => setHeatmapVisibleCount(count => count + 15)}
                     formatValue={value => formatNumber(activeProfile.id === 'inversion' ? value * 100 : value, activeProfile.id === 'alquiler' || activeProfile.id === 'inversion' ? 1 : 0)}
@@ -4056,7 +4058,7 @@ const MadridDashboardV2: React.FC = () => {
                     <MadridMap
                       type={compareLevel === 'Distritos' ? 'districts' : 'neighborhoods'}
                       data={compareLevel === 'Distritos' ? mapData.districts : mapData.neighborhoods}
-                      selectedYear={Number(selectedYear)} selectedMonth={selectedMonth} selectedProfile={activeProfile.label}
+                      selectedYear={Number(selectedYear)} selectedMonth={selectedMonth} selectedProfile={activeProfile.label} colorThresholds={mapColorThresholds}
                       selectedDistrict={null} selectedBarrio={null}
                       compareZoneA={selectedZoneA} compareZoneB={selectedZoneB}
                       onDistrictClick={(zone) => {
