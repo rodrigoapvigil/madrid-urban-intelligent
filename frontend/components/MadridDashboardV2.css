@@ -4087,6 +4087,45 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root[data-platform="desktop"] .v2-map-card > .v2-map-legend { margin-top: 12px !important; }
 .v2-root[data-platform="desktop"] .v2-map-legend-notes { align-content: start; }
 
+.v2-root[data-platform="desktop"] .v2-comparison-tooltip {
+  position: absolute;
+  z-index: 8;
+  width: max-content;
+  max-width: min(290px, calc(100% - 12px));
+  padding: 9px 10px;
+  border: 1px solid rgba(186, 204, 214, .2);
+  border-radius: 10px;
+  background: rgba(3, 18, 36, .97);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .3);
+  color: #f2f7fb;
+  font-size: 12px;
+  line-height: 1.45;
+  pointer-events: none;
+  transition: opacity .12s ease;
+}
+.v2-root[data-platform="desktop"] .v2-comparison-tooltip-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 3px; }
+.v2-root[data-platform="desktop"] .v2-comparison-tooltip-heading strong { font-size: 13px; }
+.v2-root[data-platform="desktop"] .v2-comparison-tooltip-pin {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(0, 229, 255, .42);
+  border-radius: 7px;
+  background: rgba(0, 229, 255, .08);
+  color: #9db5c8;
+  cursor: pointer;
+  pointer-events: auto;
+}
+.v2-root[data-platform="desktop"] .v2-comparison-tooltip-pin svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.v2-root[data-platform="desktop"] .v2-comparison-tooltip-pin[aria-pressed="true"] { background: rgba(0, 229, 255, .18); color: #00e5ff; }
+.v2-root[data-platform="desktop"] .v2-comparison-tooltip-pin:hover,
+.v2-root[data-platform="desktop"] .v2-comparison-tooltip-pin:focus-visible { border-color: #00e5ff; color: #00e5ff; outline: 2px solid rgba(0, 229, 255, .35); outline-offset: 2px; }
+.v2-root[data-platform="desktop"] .v2-comparison-tooltip-line { display: flex; align-items: baseline; gap: 5px; white-space: nowrap; }
+.v2-root[data-platform="desktop"] .v2-comparison-tooltip-line > i { width: 9px; height: 9px; flex: 0 0 9px; border-radius: 2px; transform: translateY(1px); }
+
 /* Desktop KPI density: reduce card and stack spacing without changing type. */
 @media (min-width: 769px) {
   .v2-root[data-platform="desktop"] .v2-kpi-card { padding-block: 13px; }

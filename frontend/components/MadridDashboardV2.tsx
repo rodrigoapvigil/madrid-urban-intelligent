@@ -1783,11 +1783,94 @@ const MadridDashboardV2: React.FC = () => {
             chart.tooltip?.setActiveElements(activeElements, position);
             chart.draw();
           };
+          const renderDesktopTooltip = ({ chart, tooltip }: any) => {
+            const host = chart.canvas.parentElement as HTMLElement | null;
+            if (!host) return;
+            let element = chart.$v2ExternalTooltip as HTMLDivElement | undefined;
+            if (!element) {
+              element = document.createElement('div');
+              element.className = 'v2-comparison-tooltip';
+              element.setAttribute('role', 'status');
+              host.appendChild(element);
+              chart.$v2ExternalTooltip = element;
+            }
+            if (chart.$v2TooltipHideTimer) window.clearTimeout(chart.$v2TooltipHideTimer);
+            if (tooltip.opacity === 0) {
+              if (chart.$v2PinnedIndex !== undefined) return;
+              chart.$v2TooltipHideTimer = window.setTimeout(() => {
+                if (chart.$v2PinnedIndex === undefined && !element?.matches(':hover') && !element?.contains(document.activeElement)) element!.style.opacity = '0';
+              }, 120);
+              return;
+            }
+
+            const index = tooltip.dataPoints?.[0]?.dataIndex;
+            const pinned = index !== undefined && chart.$v2PinnedIndex === index;
+            element.replaceChildren();
+            const heading = document.createElement('div');
+            heading.className = 'v2-comparison-tooltip-heading';
+            const title = document.createElement('strong');
+            title.textContent = (tooltip.title || []).join(' ');
+            const pinButton = document.createElement('button');
+            pinButton.type = 'button';
+            pinButton.className = 'v2-comparison-tooltip-pin';
+            pinButton.setAttribute('aria-label', pinned ? 'Soltar este mes' : 'Fijar este mes');
+            pinButton.setAttribute('aria-pressed', String(pinned));
+            pinButton.title = pinned ? 'Soltar mes' : 'Fijar mes';
+            pinButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m16 3 5 5-3.5 1-4.5 4.5-1 3.5-2-2-2 2 1-3.5 4.5-4.5L16 3Z"/><path d="m9 15-6 6"/></svg>';
+            pinButton.addEventListener('pointerdown', event => event.stopPropagation());
+            pinButton.addEventListener('click', event => {
+              event.preventDefault();
+              event.stopPropagation();
+              const targetIndex = Number(element?.dataset.index);
+              if (!Number.isInteger(targetIndex)) return;
+              if (chart.$v2PinnedIndex === targetIndex) {
+                chart.$v2PinnedIndex = undefined;
+                pinButton.setAttribute('aria-pressed', 'false');
+                pinButton.setAttribute('aria-label', 'Fijar este mes');
+                pinButton.title = 'Fijar mes';
+                setChartMonthActive(chart, null);
+              } else {
+                chart.$v2PinnedIndex = targetIndex;
+                pinButton.setAttribute('aria-pressed', 'true');
+                pinButton.setAttribute('aria-label', 'Soltar este mes');
+                pinButton.title = 'Soltar mes';
+                setChartMonthActive(chart, targetIndex);
+              }
+            });
+            heading.append(title, pinButton);
+            element.appendChild(heading);
+            (tooltip.body || []).forEach((bodyItem: any, bodyIndex: number) => {
+              (bodyItem.lines || []).forEach((line: string) => {
+                const row = document.createElement('div');
+                row.className = 'v2-comparison-tooltip-line';
+                const marker = document.createElement('i');
+                marker.style.backgroundColor = tooltip.labelColors?.[bodyIndex]?.backgroundColor || '#dce8f2';
+                const text = document.createElement('span');
+                text.textContent = line;
+                row.append(marker, text);
+                element!.appendChild(row);
+              });
+            });
+            element.dataset.index = index === undefined ? '' : String(index);
+            element.style.opacity = '1';
+            const hostRect = host.getBoundingClientRect();
+            const canvasRect = chart.canvas.getBoundingClientRect();
+            const scaleX = chart.width ? canvasRect.width / chart.width : 1;
+            const scaleY = chart.height ? canvasRect.height / chart.height : 1;
+            const left = canvasRect.left - hostRect.left + tooltip.x * scaleX;
+            const top = canvasRect.top - hostRect.top + tooltip.y * scaleY;
+            element.style.left = `${Math.max(4, Math.min(left, host.clientWidth - element.offsetWidth - 4))}px`;
+            element.style.top = `${Math.max(4, Math.min(top, host.clientHeight - element.offsetHeight - 4))}px`;
+          };
 
           return new ChartJS(ctx, {
             type: 'line',
             plugins: [{
               id: `zone-chart-crosshair-${ctx.id}`,
+              afterDestroy(chart: any) {
+                if (chart.$v2TooltipHideTimer) window.clearTimeout(chart.$v2TooltipHideTimer);
+                chart.$v2ExternalTooltip?.remove();
+              },
               afterDraw(chart: any) {
                 const active = chart.getActiveElements?.()?.[0];
                 if (!active) return;
@@ -1886,20 +1969,6 @@ const MadridDashboardV2: React.FC = () => {
                   partner.draw();
                 }
               },
-              onClick: (event: any, _active: any[], chart: any) => {
-                if (isMobile) return;
-                const elements = chart.getElementsAtEventForMode(event, 'index', { intersect: false }, true);
-                const index = elements[0]?.index;
-                if (index === undefined) return;
-                const nextIndex = chart.$v2PinnedIndex === index ? undefined : index;
-                chart.$v2PinnedIndex = nextIndex;
-                if (nextIndex === undefined) {
-                  setChartMonthActive(chart, null);
-                  chart.update('none');
-                } else {
-                  setChartMonthActive(chart, nextIndex);
-                }
-              },
               layout: { padding: { top: 15, right: 30, bottom: 20, left: 0 } },
               plugins: {
                 legend: {
@@ -1943,7 +2012,8 @@ const MadridDashboardV2: React.FC = () => {
                   }
                 },
                 tooltip: {
-                  enabled: true,
+                  enabled: isMobile,
+                  external: isMobile ? undefined : renderDesktopTooltip,
                   position: 'nearest',
                   xAlign: 'center',
                   yAlign: 'bottom',
