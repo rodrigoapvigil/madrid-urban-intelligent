@@ -1008,7 +1008,7 @@ const MadridDashboardV2: React.FC = () => {
   const [draftBarrios, setDraftBarrios] = useState<string[]>(['Todos']);
   const { selectedZoneA, setSelectedZoneA, selectedZoneB, setSelectedZoneB, compareLevel, setCompareLevel, selectedYear, setSelectedYear, selectedMonth, setSelectedMonth } = useComparacion();
   const [comparisonYearOverride, setComparisonYearOverride] = useState<string | null>(null);
-  const comparisonYear = !isMobile && comparisonYearOverride ? comparisonYearOverride : selectedYear;
+  const comparisonYear = comparisonYearOverride ?? selectedYear;
   const [latestAvailablePeriod, setLatestAvailablePeriod] = useState({ year: '2026', month: 'Junio' });
   const [selectedDistrict, setSelectedDistrict] = useState('Todos');
   const [selectedBarrio, setSelectedBarrio] = useState('Todos');
@@ -1092,11 +1092,15 @@ const MadridDashboardV2: React.FC = () => {
   const [affordabilityData, setAffordabilityData] = useState<any[]>([]);
   const [seasonalTrend, setSeasonalTrend] = useState<any[]>([]);
   const [heatmapData, setHeatmapData] = useState<any[]>([]);
+  const [mapColorHeatmapData, setMapColorHeatmapData] = useState<any[]>([]);
+  const [mapColorHeatmapDataSourceKey, setMapColorHeatmapDataSourceKey] = useState('');
   const [heatmapStatus, setHeatmapStatus] = useState<DashboardResourceStatus>('loading');
   const [heatmapDataSourceKey, setHeatmapDataSourceKey] = useState('');
   const [heatmapSearch, setHeatmapSearch] = useState('');
   const [heatmapVisibleCount, setHeatmapVisibleCount] = useState(15);
   const [rankingLevel, setRankingLevel] = useState<'Distritos' | 'Barrios'>('Distritos');
+  const [rankingYearOverride, setRankingYearOverride] = useState<string | null>(null);
+  const [rankingMonthOverride, setRankingMonthOverride] = useState<string | null>(null);
   const [rankingMetric, setRankingMetric] = useState<'total' | 'unit'>('total');
   const [scatterData, setScatterData] = useState<any[]>([]);
   const [connectivityData, setConnectivityData] = useState<any>(null);
@@ -1130,6 +1134,9 @@ const MadridDashboardV2: React.FC = () => {
   const activeProfile = PROFILES[profileIdx];
   const comparisonColors = comparisonZoneColors(activeProfile.id);
   const selectedMonthIndex = MONTHS_ES.indexOf(selectedMonth);
+  const rankingYear = rankingYearOverride ?? selectedYear;
+  const rankingMonth = rankingMonthOverride ?? selectedMonth;
+  const rankingMonthIndex = MONTHS_ES.indexOf(rankingMonth);
   const latestObservedMonthIndex = MONTHS_ES.indexOf(latestAvailablePeriod.month);
   const isProjectionPeriod = Number(selectedYear) > Number(latestAvailablePeriod.year) || (Number(selectedYear) === Number(latestAvailablePeriod.year) && selectedMonthIndex > latestObservedMonthIndex);
   const isComparisonProjectionPeriod = Number(comparisonYear) > Number(latestAvailablePeriod.year) || (Number(comparisonYear) === Number(latestAvailablePeriod.year) && selectedMonthIndex > latestObservedMonthIndex);
@@ -1145,7 +1152,7 @@ const MadridDashboardV2: React.FC = () => {
   const realMonthsInSelectedYear = Number(selectedYear) < Number(latestAvailablePeriod.year)
     ? 12
     : Number(selectedYear) === Number(latestAvailablePeriod.year) ? latestObservedMonthIndex + 1 : 0;
-  const colorScaleRows = heatmapDataSourceKey === `${selectedYear}|${activeProfile.id}|${rankingLevel}` ? heatmapData : [];
+  const colorScaleRows = mapColorHeatmapDataSourceKey === `${selectedYear}|${activeProfile.id}|${rankingLevel}` ? mapColorHeatmapData : [];
   const mapColorThresholds = useMemo(
     () => profileColorCuts(activeProfile.id as 'alquiler' | 'compra' | 'venta' | 'inversion', colorScaleRows, realMonthsInSelectedYear),
     [activeProfile.id, colorScaleRows, realMonthsInSelectedYear]
@@ -1375,7 +1382,6 @@ const MadridDashboardV2: React.FC = () => {
     // Never leave data from the previous operation visible while a new profile loads.
     setKpiData({});
     setMapStatus('loading');
-    setHeatmapStatus('loading');
 
     fetchRequest(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
       .then(res => res.json())
@@ -1441,38 +1447,68 @@ const MadridDashboardV2: React.FC = () => {
         .catch(err => { console.error("Error loading seasonal trend:", err); if (isLatestRequest()) setSeasonalTrend([]); });
     }
 
-    if (activeProfile.id !== 'inversion') {
-      fetchRequest(`/scatter-opportunity?year=${selectedYear}&month=${selectedMonth}&op=${op}&level=${rankingLevel.toLowerCase().slice(0, -1)}`)
-        .then(res => res.ok ? res.json() : [])
-        .then(data => { if (isLatestRequest()) setScatterData(Array.isArray(data) ? data : []); })
-        .catch(() => { if (isLatestRequest()) setScatterData([]); });
-    }
-
-    fetchRequest(`/heatmap?year=${selectedYear}&op=${activeProfile.id}&level=${rankingLevel.toLowerCase().slice(0, -1)}`)
-      .then(res => res.ok ? res.json() : [])
-      .then(data => {
-        if (!isLatestRequest()) return;
-        const values = (Array.isArray(data) ? data : []).flatMap((row: any) => Object.keys(row).filter(key => /^m\d+$/.test(key)).map(key => Number(row[key]))).filter(Number.isFinite);
-        if (activeProfile.id === 'alquiler' && values.some((value: number) => value > 100)) {
-          setDashboardLoadError('La API devolvió valores de compraventa en la tabla de alquiler. Se han ocultado para evitar una escala engañosa.');
-          return;
-        }
-        setHeatmapData(Array.isArray(data) ? data : []);
-        setHeatmapDataSourceKey(`${selectedYear}|${activeProfile.id}|${rankingLevel}`);
-        const hasObserved = (Array.isArray(data) ? data : []).some((row: any) => Object.keys(row).some(key => /^m\d+$/.test(key) && Number(row[key]) > 0));
-        setHeatmapStatus(hasObserved ? 'ready' : 'empty');
-      })
-      .catch(() => { if (isLatestRequest()) setHeatmapStatus('error'); });
-
     fetchRequest(`/connectivity-analysis?district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
       .then(res => res.ok ? res.json() : null)
       .then(data => { if (isLatestRequest()) setConnectivityData(data); })
       .catch(err => { console.error("Error loading connectivity:", err); if (isLatestRequest()) setConnectivityData(null); });
 
     return () => controller.abort();
-  }, [selectedYear, selectedMonth, profileIdx, selectedDistrict, selectedBarrio, rankingLevel, filtersReady, loadAttempt, activeProfile.id, activeProfile.op]);
+  }, [selectedYear, selectedMonth, profileIdx, selectedDistrict, selectedBarrio, filtersReady, loadAttempt, activeProfile.id, activeProfile.op]);
 
-  // Comparison year is independent on desktop; mobile continues to follow the global period.
+  // The table follows its own period while the map keeps the global period's color scale.
+  useEffect(() => {
+    if (!filtersReady || !rankingYear) return;
+    const controller = new AbortController();
+    let current = true;
+    const sourceKey = `${rankingYear}|${activeProfile.id}|${rankingLevel}`;
+    setHeatmapData([]);
+    setHeatmapDataSourceKey('');
+    setHeatmapStatus('loading');
+    apiFetch(`/heatmap?year=${rankingYear}&op=${activeProfile.id}&level=${rankingLevel.toLowerCase().slice(0, -1)}`, { signal: controller.signal })
+      .then(response => response.json())
+      .then(data => {
+        if (!current) return;
+        const rows = Array.isArray(data) ? data : [];
+        const values = rows.flatMap((row: any) => Object.keys(row).filter(key => /^m\d+$/.test(key)).map(key => Number(row[key]))).filter(Number.isFinite);
+        if (activeProfile.id === 'alquiler' && values.some((value: number) => value > 100)) {
+          setDashboardLoadError('La API devolvió valores de compraventa en la tabla de alquiler. Se han ocultado para evitar una escala engañosa.');
+          setHeatmapStatus('empty');
+          return;
+        }
+        setHeatmapData(rows);
+        setHeatmapDataSourceKey(sourceKey);
+        setHeatmapStatus(rows.some((row: any) => Object.keys(row).some(key => /^m\d+$/.test(key) && Number(row[key]) > 0)) ? 'ready' : 'empty');
+      })
+      .catch(() => { if (current) setHeatmapStatus('error'); });
+    return () => { current = false; controller.abort(); };
+  }, [filtersReady, rankingYear, rankingLevel, activeProfile.id]);
+
+  useEffect(() => {
+    if (!filtersReady || !selectedYear) return;
+    let current = true;
+    const sourceKey = `${selectedYear}|${activeProfile.id}|${rankingLevel}`;
+    apiFetch(`/heatmap?year=${selectedYear}&op=${activeProfile.id}&level=${rankingLevel.toLowerCase().slice(0, -1)}`)
+      .then(response => response.json())
+      .then(data => {
+        if (!current) return;
+        setMapColorHeatmapData(Array.isArray(data) ? data : []);
+        setMapColorHeatmapDataSourceKey(sourceKey);
+      })
+      .catch(() => { if (current) { setMapColorHeatmapData([]); setMapColorHeatmapDataSourceKey(''); } });
+    return () => { current = false; };
+  }, [filtersReady, selectedYear, rankingLevel, activeProfile.id]);
+
+  useEffect(() => {
+    if (!filtersReady || !selectedYear || !selectedMonth || activeProfile.id === 'inversion') return;
+    let current = true;
+    apiFetch(`/scatter-opportunity?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&level=${rankingLevel.toLowerCase().slice(0, -1)}`)
+      .then(response => response.ok ? response.json() : [])
+      .then(data => { if (current) setScatterData(Array.isArray(data) ? data : []); })
+      .catch(() => { if (current) setScatterData([]); });
+    return () => { current = false; };
+  }, [filtersReady, selectedYear, selectedMonth, rankingLevel, activeProfile.id, activeProfile.op]);
+
+  // Comparison year is local to Comparar zonas on both platforms.
   useEffect(() => {
     if (!filtersReady || !comparisonYear || !selectedMonth) return;
     const controller = new AbortController();
@@ -1559,7 +1595,7 @@ const MadridDashboardV2: React.FC = () => {
   }, [filtersReady, selectedYear, activeProfile.id]);
 
   useEffect(() => {
-    if (!filtersReady || !selectedYear || !selectedMonth) return;
+    if (!filtersReady || !rankingYear || !rankingMonth) return;
     let isCurrent = true;
     const controller = new AbortController();
     const fetchRequest = (path: string) => apiFetch(path, { signal: controller.signal });
@@ -1567,8 +1603,8 @@ const MadridDashboardV2: React.FC = () => {
     setRankingStatus('loading');
     if (activeProfile.id === 'venta') {
       Promise.all([
-        fetchRequest(`/liquidity?year=${selectedYear}&level=distrito`).then(r => r.json()),
-        fetchRequest(`/liquidity?year=${selectedYear}&level=barrio`).then(r => r.json()),
+        fetchRequest(`/liquidity?year=${rankingYear}&level=distrito`).then(r => r.json()),
+        fetchRequest(`/liquidity?year=${rankingYear}&level=barrio`).then(r => r.json()),
       ]).then(([dist, barr]) => {
         if (!isCurrent) return;
         const mapLiquidity = (list: any[]) => list.map(item => ({ name: item.name, value: item.transactions }));
@@ -1580,8 +1616,8 @@ const MadridDashboardV2: React.FC = () => {
       const category = activeProfile.id === 'inversion' ? 'Rentabilidad' : rankingMetric === 'unit' ? 'Precio m²' : 'Precio';
       const district = `&district=${encodeURIComponent(selectedDistrict)}`;
       Promise.all([
-        fetchRequest(`/rankings?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&level=distrito&category=${encodeURIComponent(category)}`).then(r => r.json()),
-        fetchRequest(`/rankings?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&level=barrio&category=${encodeURIComponent(category)}${district}`).then(r => r.json()),
+        fetchRequest(`/rankings?year=${rankingYear}&month=${rankingMonth}&op=${activeProfile.op}&level=distrito&category=${encodeURIComponent(category)}`).then(r => r.json()),
+        fetchRequest(`/rankings?year=${rankingYear}&month=${rankingMonth}&op=${activeProfile.op}&level=barrio&category=${encodeURIComponent(category)}${district}`).then(r => r.json()),
       ]).then(([dist, barr]) => {
         if (!isCurrent) return;
         if (activeProfile.id === 'alquiler') {
@@ -1606,7 +1642,7 @@ const MadridDashboardV2: React.FC = () => {
       });
     }
     return () => { isCurrent = false; controller.abort(); };
-  }, [filtersReady, selectedYear, selectedMonth, activeProfile.id, activeProfile.op, rankingMetric, rankingLevel, selectedDistrict]);
+  }, [filtersReady, rankingYear, rankingMonth, activeProfile.id, activeProfile.op, rankingMetric, rankingLevel, selectedDistrict]);
 
   // Fetch liquidity data (for Inversión profile only)
   useEffect(() => {
@@ -2830,15 +2866,15 @@ const MadridDashboardV2: React.FC = () => {
 
     // For €/m², use the selected month's heatmap cell as the ranking value so
     // the two views always show and sort the same source observation.
-    const expectedHeatmapKey = `${selectedYear}|${activeProfile.id}|${rankingLevel}`;
-    if (rankingMetric !== 'unit' || activeProfile.id === 'inversion' || selectedMonthIndex < 0 || heatmapData.length === 0 || heatmapDataSourceKey !== expectedHeatmapKey) return rows;
-    const heatmapByZone = new Map(heatmapData.map(row => [normalizeZoneLabel(String(row.zona || '')), Number(row[`m${selectedMonthIndex + 1}`]) || 0]));
+    const expectedHeatmapKey = `${rankingYear}|${activeProfile.id}|${rankingLevel}`;
+    if (rankingMetric !== 'unit' || activeProfile.id === 'inversion' || rankingMonthIndex < 0 || heatmapData.length === 0 || heatmapDataSourceKey !== expectedHeatmapKey) return rows;
+    const heatmapByZone = new Map(heatmapData.map(row => [normalizeZoneLabel(String(row.zona || '')), Number(row[`m${rankingMonthIndex + 1}`]) || 0]));
     const exactRows = rows
       .map(item => ({ ...item, value: heatmapByZone.get(normalizeZoneLabel(String(item.name || ''))) || 0 }))
       .filter(item => Number.isFinite(item.value) && item.value > 0);
     exactRows.sort((a, b) => isTopRanking ? b.value - a.value : a.value - b.value);
     return exactRows;
-  }, [rankingLevel, rankingMetric, selectedYear, selectedMonth, selectedMonthIndex, rankings, heatmapData, heatmapDataSourceKey, activeProfile.id]);
+  }, [rankingLevel, rankingMetric, rankingYear, rankingMonth, rankingMonthIndex, rankings, heatmapData, heatmapDataSourceKey, activeProfile.id]);
   const rankingLoadingRows = Array.from({ length: 10 }, (_, index) => (
     <tr key={`ranking-skeleton-${index}`} aria-hidden="true" style={{ height: '34px', borderBottom: '1px solid rgba(186, 204, 214, 0.08)' }}>
       <td><span style={{ display: 'block', width: `${54 + (index % 4) * 8}%`, height: '10px', borderRadius: '6px', background: 'rgba(143, 163, 184, 0.14)' }} /></td>
@@ -2891,6 +2927,37 @@ const MadridDashboardV2: React.FC = () => {
         })}
       </div>
     </div>
+  </div>;
+
+  const rankingPeriodControls = <div className="v2-explorer-period-controls" aria-label="Periodo del ranking y mapa de calor">
+    <div className={`v2-dropdown-container v2-explorer-period-select ${activeDropdown === 'rankingYear' ? 'v2-z-up' : ''}`}>
+      <span className="v2-filter-label">Año</span>
+      <DashboardSelect value={rankingYear} expanded={activeDropdown === 'rankingYear'} ariaLabel="Año del ranking y mapa de calor" onToggle={() => setActiveDropdown(activeDropdown === 'rankingYear' ? null : 'rankingYear')} />
+      {activeDropdown === 'rankingYear' && <div className="v2-dropdown-menu" role="listbox" aria-label="Año del ranking y mapa de calor">
+        {availableYears.map(year => <button type="button" key={year} className="v2-dropdown-item" role="option" aria-selected={rankingYear === year} onClick={event => {
+          event.stopPropagation();
+          const months = monthsByYear[year] || [];
+          setRankingYearOverride(year);
+          setRankingMonthOverride(months[months.length - 1] || 'Diciembre');
+          setActiveDropdown(null);
+        }}>{year}</button>)}
+      </div>}
+    </div>
+    <div className={`v2-dropdown-container v2-explorer-period-select ${activeDropdown === 'rankingMonth' ? 'v2-z-up' : ''}`}>
+      <span className="v2-filter-label">Mes</span>
+      <DashboardSelect value={rankingMonth} expanded={activeDropdown === 'rankingMonth'} ariaLabel="Mes del ranking y mapa de calor" onToggle={() => setActiveDropdown(activeDropdown === 'rankingMonth' ? null : 'rankingMonth')} />
+      {activeDropdown === 'rankingMonth' && <div className="v2-dropdown-menu" role="listbox" aria-label="Mes del ranking y mapa de calor">
+        {MONTHS_ES.map(month => <button type="button" key={month} className="v2-dropdown-item" role="option" aria-selected={rankingMonth === month} onClick={event => { event.stopPropagation(); setRankingMonthOverride(month); setActiveDropdown(null); }}>{month}</button>)}
+      </div>}
+    </div>
+  </div>;
+
+  const comparisonYearControl = <div className={`v2-dropdown-container v2-compare-year-control ${activeDropdown === 'comparisonYear' ? 'v2-z-up' : ''}`}>
+    <span className="v2-filter-label">Año</span>
+    <DashboardSelect value={comparisonYear || selectedYear} expanded={activeDropdown === 'comparisonYear'} ariaHaspopup="listbox" ariaLabel="Año de comparación" onToggle={() => setActiveDropdown(activeDropdown === 'comparisonYear' ? null : 'comparisonYear')} />
+    {activeDropdown === 'comparisonYear' && <div className="v2-dropdown-menu" role="listbox" aria-label="Año de comparación">
+      {availableYears.map(year => <button type="button" key={year} className="v2-dropdown-item" role="option" aria-selected={comparisonYear === year} onClick={event => { event.stopPropagation(); setComparisonYearOverride(year); setActiveDropdown(null); }}>{year}</button>)}
+    </div>}
   </div>;
 
   return (
@@ -4002,8 +4069,8 @@ const MadridDashboardV2: React.FC = () => {
                         : 'Zonas más asequibles'}
                 </div>
                 <div className="v2-rank-settings">
-                  <div className={isMobile ? 'v2-mobile-segmented-control' : 'v2-segmented-with-label'}>
-                    {!isMobile && <span>Ver por:</span>}
+                  <div className={`${isMobile ? 'v2-mobile-segmented-control' : 'v2-segmented-with-label'} v2-explorer-view-control`}>
+                    <span>Ver por:</span>
                     <SegmentedControl<'Distritos' | 'Barrios'>
                       label="Nivel de zonas"
                       size="md"
@@ -4012,6 +4079,7 @@ const MadridDashboardV2: React.FC = () => {
                       onChange={setRankingLevel}
                     />
                   </div>
+                  {rankingPeriodControls}
                 </div>
               </div>
 
@@ -4043,14 +4111,14 @@ const MadridDashboardV2: React.FC = () => {
                     <FullscreenToggle targetSelector=".v2-heatmap-card" mobilePlatform={isMobile} />
                     <DashboardHelpButton onClick={() => setShowHeatmapHelpModal(true)} label="¿Cómo usar el mapa de calor?" />
                   </div>
-                  {Number(selectedYear) === 2026 && (
+                  {Number(rankingYear) === 2026 && (
                     <div style={{ fontSize: '12px', color: '#dbe9f2', marginBottom: '12px', paddingLeft: '4px' }}>
                       * Nota: los datos reales llegan hasta <strong>{latestRealMonth} de {latestRealYear}</strong>; desde <strong>{firstProjectionMonth}</strong> son <strong>estimaciones</strong>. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un valor €/m² más alto.'}
                     </div>
                   )}
-                  {Number(selectedYear) > 2026 && (
+                  {Number(rankingYear) > 2026 && (
                     <div style={{ fontSize: '12px', color: '#dbe9f2', marginBottom: '12px', paddingLeft: '4px' }}>
-                      * Nota: Los meses de {selectedYear} se muestran como <strong>estimaciones</strong> basadas en datos históricos. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un valor €/m² más alto.'}
+                      * Nota: Los meses de {rankingYear} se muestran como <strong>estimaciones</strong> basadas en datos históricos. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un valor €/m² más alto.'}
                     </div>
                   )}
                   <input className="v2-heatmap-search" type="search" value={heatmapSearch} onChange={event => { setHeatmapSearch(event.target.value); setHeatmapVisibleCount(15); }} placeholder={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'}…`} aria-label={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'} en el mapa de calor`} />
@@ -4058,7 +4126,8 @@ const MadridDashboardV2: React.FC = () => {
                     rows={filteredHeatmapRows}
                     profileId={activeProfile.id}
                     level={rankingLevel}
-                    year={selectedYear}
+                    year={rankingYear}
+                    selectedMonth={rankingMonth}
                     colorThresholds={mapColorThresholds}
                     visibleCount={heatmapVisibleCount}
                     onShowMore={() => setHeatmapVisibleCount(count => count + 15)}
@@ -4182,13 +4251,7 @@ const MadridDashboardV2: React.FC = () => {
                       onChange={handleLevelToggle}
                     />
                   </div>
-                  <div className={`v2-dropdown-container v2-compare-year-control ${activeDropdown === 'comparisonYear' ? 'v2-z-up' : ''}`}>
-                    <span className="v2-filter-label">Año</span>
-                    <DashboardSelect value={comparisonYear || selectedYear} expanded={activeDropdown === 'comparisonYear'} ariaHaspopup="listbox" ariaLabel="Año de comparación" onToggle={() => setActiveDropdown(activeDropdown === 'comparisonYear' ? null : 'comparisonYear')} />
-                    {activeDropdown === 'comparisonYear' && <div className="v2-dropdown-menu" role="listbox" aria-label="Año de comparación">
-                      {availableYears.map(year => <button type="button" key={year} className="v2-dropdown-item" role="option" aria-selected={comparisonYear === year} onClick={event => { event.stopPropagation(); setComparisonYearOverride(year); setActiveDropdown(null); }}>{year}</button>)}
-                    </div>}
-                  </div>
+                  {comparisonYearControl}
                 </div>}
               </div>
 
@@ -4200,6 +4263,7 @@ const MadridDashboardV2: React.FC = () => {
                   options={[{ value: 'Distritos', label: 'Distritos' }, { value: 'Barrios', label: 'Barrios' }] as const}
                   onChange={handleLevelToggle}
                 />
+                {comparisonYearControl}
               </div>}
 
               <div className="v2-compare-zone-selectors v2-compare-selectors-sticky">

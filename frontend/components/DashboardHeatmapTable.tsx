@@ -11,6 +11,7 @@ export default function DashboardHeatmapTable({
   profileId,
   level,
   year,
+  selectedMonth,
   colorThresholds,
   visibleCount,
   onShowMore,
@@ -22,6 +23,7 @@ export default function DashboardHeatmapTable({
   profileId: string;
   level: string;
   year: string;
+  selectedMonth: string;
   colorThresholds: number[];
   visibleCount: number;
   onShowMore: () => void;
@@ -30,10 +32,11 @@ export default function DashboardHeatmapTable({
   onRetry: () => void;
 }) {
   const tierColors = profileMapTierColors(profileId);
+  const selectedMonthIndex = MONTHS.indexOf(selectedMonth);
   return (
     <div className="v2-heatmap-scroll" data-resource-state={status}>
       <table className="v2-heatmap-table">
-        <thead><tr><th>{level === 'Distritos' ? 'Distrito' : 'Barrio'}</th>{MONTHS.map(month => <th key={month}>{month.slice(0, 3)}</th>)}</tr></thead>
+        <thead><tr><th>{level === 'Distritos' ? 'Distrito' : 'Barrio'}</th>{MONTHS.map((month, monthIndex) => <th key={month} className={monthIndex === selectedMonthIndex ? 'v2-heatmap-selected-month' : undefined} aria-current={monthIndex === selectedMonthIndex ? 'date' : undefined}>{month.slice(0, 3)}</th>)}</tr></thead>
         <tbody>
           {(status === 'ready' || (status === 'loading' && rows.length > 0)) ? rows.map((row, idx) => (
             <tr key={idx} className={idx >= visibleCount ? 'v2-heatmap-extra-row' : undefined}>
@@ -43,7 +46,8 @@ export default function DashboardHeatmapTable({
                 const tier = value > 0 ? colorTier(value, colorThresholds) : -1;
                 const cellColor = value > 0 ? tierColors[tier] : 'transparent';
                 const textColor = tier >= 4 ? '#03172b' : '#f2f7fb';
-                return <td key={monthIndex} className={value > 0 ? undefined : 'v2-heatmap-no-data'} title={value > 0 ? undefined : 'Sin datos oficiales del Ayuntamiento'} style={{ backgroundColor: cellColor, color: value > 0 ? textColor : '#f2f7fb' }}>{value > 0 ? formatValue(value) : 'n/d'}</td>;
+                const classes = [value > 0 ? '' : 'v2-heatmap-no-data', monthIndex === selectedMonthIndex ? 'v2-heatmap-selected-month' : ''].filter(Boolean).join(' ');
+                return <td key={monthIndex} className={classes || undefined} title={value > 0 ? undefined : 'Sin datos oficiales del Ayuntamiento'} style={{ backgroundColor: cellColor, color: value > 0 ? textColor : '#f2f7fb' }}>{value > 0 ? formatValue(value) : 'n/d'}</td>;
               })}
             </tr>
           )) : <tr><td colSpan={13}><DashboardResourceState status={status} retry={onRetry} emptyText={`No hay datos disponibles para el año ${year}.`} /></td></tr>}
