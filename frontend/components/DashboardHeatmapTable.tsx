@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { colorTier, MAP_TIER_COLORS } from '../lib/map-color-scale';
+import { colorTier, profileMapTierColors } from '../lib/map-color-scale';
 import DashboardResourceState, { DashboardResourceStatus } from './DashboardResourceState';
 
 const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -29,6 +29,7 @@ export default function DashboardHeatmapTable({
   status: DashboardResourceStatus;
   onRetry: () => void;
 }) {
+  const tierColors = profileMapTierColors(profileId);
   return (
     <div className="v2-heatmap-scroll" data-resource-state={status}>
       <table className="v2-heatmap-table">
@@ -40,7 +41,9 @@ export default function DashboardHeatmapTable({
               {MONTHS.map((_, monthIndex) => {
                 const value = Number(row[`m${monthIndex + 1}`]);
                 const tier = value > 0 ? colorTier(value, colorThresholds) : -1;
-                return <td key={monthIndex} className={value > 0 ? undefined : 'v2-heatmap-no-data'} title={value > 0 ? undefined : 'Sin datos oficiales del Ayuntamiento'} style={{ backgroundColor: value > 0 ? MAP_TIER_COLORS[tier] : 'transparent', color: '#f2f7fb' }}>{value > 0 ? formatValue(value) : 'n/d'}</td>;
+                const cellColor = value > 0 ? tierColors[tier] : 'transparent';
+                const textColor = tier >= 4 ? '#03172b' : '#f2f7fb';
+                return <td key={monthIndex} className={value > 0 ? undefined : 'v2-heatmap-no-data'} title={value > 0 ? undefined : 'Sin datos oficiales del Ayuntamiento'} style={{ backgroundColor: cellColor, color: value > 0 ? textColor : '#f2f7fb' }}>{value > 0 ? formatValue(value) : 'n/d'}</td>;
               })}
             </tr>
           )) : <tr><td colSpan={13}><DashboardResourceState status={status} retry={onRetry} emptyText={`No hay datos disponibles para el año ${year}.`} /></td></tr>}

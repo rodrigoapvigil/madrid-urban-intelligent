@@ -3,6 +3,7 @@
 import React, { ReactNode } from 'react';
 import SegmentedControl from './SegmentedControl';
 import DashboardResourceState, { DashboardResourceStatus } from './DashboardResourceState';
+import { profileAccentColor } from '../lib/map-color-scale';
 
 type RankingRow = { name: string; value: number };
 
@@ -33,6 +34,7 @@ export default function DashboardRankingTable({
       : `Top 10 · ${level.toLocaleLowerCase('es-ES')} ${profileId === 'compra' ? 'con menor precio' : 'más asequibles'}`;
   const isDemand = profileId === 'venta';
   const isInvestment = profileId === 'inversion';
+  const profileAccent = profileAccentColor(profileId);
   const valueHeading = isDemand ? 'DEMANDA' : isInvestment ? 'AÑOS' : profileId === 'alquiler'
     ? (metric === 'total' ? 'ALQUILER €/MES' : 'ALQUILER €/M²')
     : (metric === 'total' ? 'PRECIO €' : 'PRECIO €/M²');
@@ -45,7 +47,7 @@ export default function DashboardRankingTable({
       </div>
       {status === 'loading' && rows.length > 0 && <DashboardResourceState status="loading" />}
       <table className={`v2-ranking-table${!isDemand && !isInvestment ? ' v2-affordability-ranking-table' : ''}`} style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-        <thead><tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}><th style={{ paddingBottom: '8px', fontWeight: '600' }}>{level === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th><th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>{valueHeading}</th></tr></thead>
+        <thead><tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: profileAccent }}><th style={{ paddingBottom: '8px', fontWeight: '600' }}>{level === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th><th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>{valueHeading}</th></tr></thead>
         <tbody>
           {status === 'loading' && rows.length === 0 ? loadingRows : status === 'error' || status === 'empty' ? <tr><td colSpan={2}><DashboardResourceState status={status} retry={onRetry} emptyText="No hay datos disponibles para esta selección." /></td></tr> : rows.map((item, index) => {
             const demand = isDemand;
@@ -53,8 +55,8 @@ export default function DashboardRankingTable({
             const price = metric === 'unit' ? `${formatNumber(item.value, 1)} €/m²` : profileId === 'alquiler' ? `${formatEuro(item.value, 2)}/mes` : formatEuro(item.value, 2);
             return <tr key={index} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
               <td className="v2-ranking-zone" style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}><span className="v2-ranking-position">{index + 1}.</span><span className="v2-ranking-name">{formatName(item.name)}</span></td>
-              <td className="v2-ranking-value" style={{ padding: '8px 0', textAlign: 'right', color: demand ? '#00E5FF' : '#00F0FF', fontWeight: '700' }}>
-                {(demand || isInvestment) && <i style={{ width: `${Math.max(0, Math.min(100, (Number(item.value) || 0) / valueMax * 100))}%` }} />}
+              <td className="v2-ranking-value" style={{ padding: '8px 0', textAlign: 'right', color: profileAccent, fontWeight: '700' }}>
+                {(demand || isInvestment) && <i style={{ width: `${Math.max(0, Math.min(100, (Number(item.value) || 0) / valueMax * 100))}%`, background: `${profileAccent}38` }} />}
                 <span>{demand ? `${formatNumber(item.value, 0)} trans.` : isInvestment ? years : price}</span>
               </td>
             </tr>;

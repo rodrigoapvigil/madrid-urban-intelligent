@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { colorTier } from '../lib/map-color-scale';
+import { colorTier, comparisonZoneColors, profileAccentColor, profileMapTierColors } from '../lib/map-color-scale';
 
 interface MapProps {
   type: 'districts' | 'neighborhoods';
@@ -48,12 +48,7 @@ const MADRID_NAME_EXCEPTIONS: Record<string, string> = {
 const formatMadridName = (value: string) => MADRID_NAME_EXCEPTIONS[value] || value;
 
 const getProfileAccentColor = (profile: string): string => {
-  const p = normalize(profile);
-  if (p.includes('alquiler')) return '#00F0FF';
-  if (p.includes('compra')) return '#A855F7';
-  if (p.includes('venta')) return '#FF5C5C';
-  if (p.includes('inversion')) return '#00E5FF';
-  return '#00F0FF';
+  return profileAccentColor(profile);
 };
 
 const getProfileKey = (profile: string): 'alquiler' | 'compra' | 'venta' | 'inversion' => {
@@ -291,12 +286,15 @@ const MadridMap: React.FC<MapProps> = ({
     const hasObservedValue = Number.isFinite(Number(val)) && Number(val) > 0;
 
     const tier = getChoroplethTier(val, selectedProfile, colorThresholds);
+    const tierColors = profileMapTierColors(selectedProfile);
+    const compareColors = comparisonZoneColors(selectedProfile);
+    const profileAccent = getProfileAccentColor(selectedProfile);
     return {
       // Use five solid choropleth steps so the map reads as data, not texture.
-      fillColor: !hasObservedValue ? `url(#no-data-pat-${containerId})` : isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#00F0FF' : TIER_CONFIGS[tier].baseFill,
+      fillColor: !hasObservedValue ? `url(#no-data-pat-${containerId})` : isCompareA ? compareColors.zoneA : isCompareB ? compareColors.zoneB : isSelected ? profileAccent : tierColors[tier],
       weight: isCompareA || isCompareB ? 2.5 : isSelected ? 2.5 : type === 'districts' ? 1.2 : 0.85,
       opacity: isExcluded ? 0.20 : 0.95,
-      color: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
+      color: isCompareA ? compareColors.zoneA : isCompareB ? compareColors.zoneB : isSelected ? '#FFFFFF' : `${profileAccent}88`,
       fillOpacity: isExcluded ? 0.25 : 1.0,
     };
   }, [data, selectedDistrict, selectedBarrio, selectedZone, selectedZoneType, type, selectedProfile, colorThresholds, compareZoneA, compareZoneB]);
@@ -438,10 +436,11 @@ const MadridMap: React.FC<MapProps> = ({
               if (!hasHoverPointer) return;
               onZoneHoverRef.current?.(zoneId, getHoverContext(e));
               const l = e.target;
+              const accent = getProfileAccentColor(selectedProfile);
               l.setStyle({
                 weight: 2,
-                color: '#00F0FF',
-                fillColor: '#00F0FF',
+                color: '#FFFFFF',
+                fillColor: accent,
                 fillOpacity: 1
               });
             },

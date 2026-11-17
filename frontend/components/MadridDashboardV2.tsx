@@ -26,20 +26,13 @@ import DashboardSelect from './DashboardSelect';
 import DashboardHeatmapTable from './DashboardHeatmapTable';
 import DashboardRankingTable from './DashboardRankingTable';
 import { formatEuroAmount, formatNumber as formatSpanishNumber, formatPercent } from '../lib/format-number';
-import { profileColorCuts } from '../lib/map-color-scale';
+import { comparisonZoneColors, profileColorCuts, profileMapTierColors } from '../lib/map-color-scale';
 import { DASHBOARD_COPY } from '../lib/product-copy';
 import DashboardResourceState, { DashboardResourceStatus } from './DashboardResourceState';
 import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
 import type { MapZoneHoverContext } from './MadridMap';
 
 ChartJS.register(ChartDataLabels, cssColorResolverPlugin);
-
-const COMPARISON_COLORS = {
-  zoneA: '#00E5FF',
-  zoneB: '#FFB65C',
-  forecastA: '#A78BFA',
-  forecastB: '#FF7AA8',
-} as const;
 
 const COMPARISON_MEDIA_COLOR = '#E5F2F7';
 
@@ -372,11 +365,11 @@ const ComparisonSeriesLegend = ({ chartId, items }: { chartId: string; items: Co
   </div>;
 };
 
-const ComparisonSeriesChips = ({ chartId, zoneA, zoneB }: { chartId: string; zoneA: string; zoneB: string }) => {
+const ComparisonSeriesChips = ({ chartId, zoneA, zoneB, zoneAColor, zoneBColor }: { chartId: string; zoneA: string; zoneB: string; zoneAColor: string; zoneBColor: string }) => {
   const [, setRevision] = useState(0);
   const groups = [
-    { key: 'A', label: zoneA, indexes: [0, 1], color: '#00e5ff' },
-    { key: 'B', label: zoneB, indexes: [2, 3], color: '#ffb65c' },
+    { key: 'A', label: zoneA, indexes: [0, 1], color: zoneAColor },
+    { key: 'B', label: zoneB, indexes: [2, 3], color: zoneBColor },
     { key: 'Madrid', label: 'Media Madrid', indexes: [4], color: '#dce8f2' },
   ].filter(group => Boolean(group.label));
   return <div className="v2-compare-legend" aria-label="Series de la comparación">
@@ -541,10 +534,10 @@ const resolveFallbackSeries = (profileId: string, zoneName: string) => {
 };
 
 const PROFILES = [
-  { id: 'alquiler', label: 'Alquiler', color: 'var(--azul-linea)', op: 'alquiler' },
-  { id: 'compra', label: 'Compra', color: 'var(--azul-linea)', op: 'venta' },
-  { id: 'venta', label: 'Venta', color: 'var(--coral)', op: 'venta' },
-  { id: 'inversion', label: 'Inversión', color: 'var(--texto-secundario-azul)', op: 'inversion' },
+  { id: 'alquiler', label: 'Alquiler', color: '#38C8D7', op: 'alquiler' },
+  { id: 'compra', label: 'Compra', color: '#E6B653', op: 'venta' },
+  { id: 'venta', label: 'Venta', color: '#63C79C', op: 'venta' },
+  { id: 'inversion', label: 'Inversión', color: '#C58BDD', op: 'inversion' },
 ];
 
 // La comparación es común a todos los perfiles; solo cambia la métrica y su unidad.
@@ -1132,6 +1125,7 @@ const MadridDashboardV2: React.FC = () => {
   const hasLoadedPrimaryKpis = useRef(false);
 
   const activeProfile = PROFILES[profileIdx];
+  const comparisonColors = comparisonZoneColors(activeProfile.id);
   const selectedMonthIndex = MONTHS_ES.indexOf(selectedMonth);
   const latestObservedMonthIndex = MONTHS_ES.indexOf(latestAvailablePeriod.month);
   const isProjectionPeriod = Number(selectedYear) > Number(latestAvailablePeriod.year) || (Number(selectedYear) === Number(latestAvailablePeriod.year) && selectedMonthIndex > latestObservedMonthIndex);
@@ -1692,6 +1686,8 @@ const MadridDashboardV2: React.FC = () => {
   // Actualización de color de perfil
   useEffect(() => {
     document.documentElement.style.setProperty('--v2-profile-color', activeProfile.color);
+    document.documentElement.style.setProperty('--v2-profile-contrast', '#03172b');
+    profileMapTierColors(activeProfile.id).forEach((color, index) => document.documentElement.style.setProperty(`--v2-map-tier-${index + 1}`, color));
   }, [activeProfile]);
 
   // Cerrar dropdowns al hacer clic fuera
@@ -1735,7 +1731,7 @@ const MadridDashboardV2: React.FC = () => {
           color?: string,
           scaleOverride?: { min?: number; max?: number; stepSize?: number }
         ) => {
-          const mainColor = color || COMPARISON_COLORS.zoneA;
+          const mainColor = color || comparisonColors.zoneA;
           const forecastColor = mainColor;
           const multiplier = comparisonMetric.multiplier;
 
@@ -2154,7 +2150,7 @@ const MadridDashboardV2: React.FC = () => {
           try {
             const prevA = ChartJS.getChart(ctxA);
             if (prevA) prevA.destroy();
-            chartsRef.current.push(createLineChart(ctxA, selectedZoneA, seriesA, selectedZoneB, seriesB, COMPARISON_COLORS.zoneA, sharedComparisonScale));
+            chartsRef.current.push(createLineChart(ctxA, selectedZoneA, seriesA, selectedZoneB, seriesB, comparisonColors.zoneA, sharedComparisonScale));
           } catch (e) {
             console.error('Error creating Chart A:', e);
           }
@@ -2163,7 +2159,7 @@ const MadridDashboardV2: React.FC = () => {
           try {
             const prevB = ChartJS.getChart(ctxB);
             if (prevB) prevB.destroy();
-            chartsRef.current.push(createLineChart(ctxB, selectedZoneB, seriesB, selectedZoneA, seriesA, COMPARISON_COLORS.zoneB, sharedComparisonScale));
+            chartsRef.current.push(createLineChart(ctxB, selectedZoneB, seriesB, selectedZoneA, seriesA, comparisonColors.zoneB, sharedComparisonScale));
           } catch (e) {
             console.error('Error creating Chart B:', e);
           }
@@ -2205,66 +2201,66 @@ const MadridDashboardV2: React.FC = () => {
                 {
                   label: `${selectedZoneA} · Dato real`,
                   data: overlayASplit.real,
-                  borderColor: COMPARISON_COLORS.zoneA,
+                  borderColor: comparisonColors.zoneA,
                   borderWidth: 2.5,
                   pointRadius: 4,
-                  pointBackgroundColor: COMPARISON_COLORS.zoneA,
+                  pointBackgroundColor: comparisonColors.zoneA,
                   pointBorderColor: '#011024',
                   pointBorderWidth: 2,
                   pointHoverRadius: 6,
                   pointHitRadius: 14,
                   fill: 'start',
-                  backgroundColor: (context: any) => createAreaGradient(context, COMPARISON_COLORS.zoneA, 0.12),
+                  backgroundColor: (context: any) => createAreaGradient(context, comparisonColors.zoneA, 0.12),
                   tension: 0.35,
                   cubicInterpolationMode: 'monotone'
                 },
                 {
                   label: `${selectedZoneA} · Estimación`,
                   data: overlayASplit.forecast,
-                  borderColor: COMPARISON_COLORS.zoneA,
+                  borderColor: comparisonColors.zoneA,
                   borderDash: [6, 5],
                   borderWidth: 2.5,
                   pointRadius: 4,
-                  pointBackgroundColor: COMPARISON_COLORS.zoneA,
+                  pointBackgroundColor: comparisonColors.zoneA,
                   pointBorderColor: '#011024',
                   pointBorderWidth: 2,
                   pointHoverRadius: 6,
                   pointHitRadius: 14,
                   fill: 'start',
-                  backgroundColor: (context: any) => createAreaGradient(context, COMPARISON_COLORS.zoneA, 0.14),
+                  backgroundColor: (context: any) => createAreaGradient(context, comparisonColors.zoneA, 0.14),
                   tension: 0.35,
                   cubicInterpolationMode: 'monotone'
                 },
                 {
                   label: `${selectedZoneB} · Dato real`,
                   data: overlayBSplit.real,
-                  borderColor: COMPARISON_COLORS.zoneB,
+                  borderColor: comparisonColors.zoneB,
                   borderWidth: 2.5,
                   pointRadius: 4,
-                  pointBackgroundColor: COMPARISON_COLORS.zoneB,
+                  pointBackgroundColor: comparisonColors.zoneB,
                   pointBorderColor: '#011024',
                   pointBorderWidth: 2,
                   pointHoverRadius: 6,
                   pointHitRadius: 14,
                   fill: 'start',
-                  backgroundColor: (context: any) => createAreaGradient(context, COMPARISON_COLORS.zoneB, 0.12),
+                  backgroundColor: (context: any) => createAreaGradient(context, comparisonColors.zoneB, 0.12),
                   tension: 0.35,
                   cubicInterpolationMode: 'monotone'
                 },
                 {
                   label: `${selectedZoneB} · Estimación`,
                   data: overlayBSplit.forecast,
-                  borderColor: COMPARISON_COLORS.zoneB,
+                  borderColor: comparisonColors.zoneB,
                   borderDash: [6, 5],
                   borderWidth: 2.5,
                   pointRadius: 4,
-                  pointBackgroundColor: COMPARISON_COLORS.zoneB,
+                  pointBackgroundColor: comparisonColors.zoneB,
                   pointBorderColor: '#011024',
                   pointBorderWidth: 2,
                   pointHoverRadius: 6,
                   pointHitRadius: 14,
                   fill: 'start',
-                  backgroundColor: (context: any) => createAreaGradient(context, COMPARISON_COLORS.zoneB, 0.14),
+                  backgroundColor: (context: any) => createAreaGradient(context, comparisonColors.zoneB, 0.14),
                   tension: 0.35,
                   cubicInterpolationMode: 'monotone'
                 },
@@ -2627,15 +2623,15 @@ const MadridDashboardV2: React.FC = () => {
           const y = d.roi || 0;
           const isSelected = d.name.toLowerCase() === (liquidityLevel === 'barrio' ? selectedBarrio.toLowerCase() : selectedDistrict.toLowerCase());
 
-          let pointColor = 'var(--precio-subida)'; // Blue default
+          let pointColor = '#B989CB'; // Lavanda clara para el conjunto base
           let isIdeal = false;
           let isAvoid = false;
 
           if (x < avgRisk && y > avgRoi) {
-            pointColor = 'var(--azul-linea)'; // Blue (ideal: low risk, high return)
+            pointColor = '#E0B2F0'; // Más luminoso para menor riesgo y mayor retorno
             isIdeal = true;
           } else if (x > avgRisk && y < avgRoi) {
-            pointColor = 'var(--coral-texto)'; // Coral (avoid: high risk, low return)
+            pointColor = '#A77BBA'; // Variación de ciruela, sin semáforo financiero
             isAvoid = true;
           }
 
@@ -2657,9 +2653,9 @@ const MadridDashboardV2: React.FC = () => {
                 type: 'scatter',
                 label: 'Zonas · índice de riesgo vs rentabilidad',
                 data: points.map(p => ({ x: p.x, y: p.y, name: p.name })),
-                backgroundColor: points.map(p => p.isSelected ? 'var(--coral)' : p.color),
-                borderColor: 'var(--blanco-humo)',
-                borderWidth: points.map(p => p.isSelected ? 2 : 0),
+                backgroundColor: points.map(p => p.isSelected ? '#F1D8FA' : p.color),
+                borderColor: points.map(p => p.isSelected ? '#FFFFFF' : p.color),
+                borderWidth: points.map(p => p.isSelected ? 2 : 1),
                 pointRadius: points.map(p => p.isSelected ? 7 : 5),
                 pointHoverRadius: 8,
                 showLine: false
@@ -3181,8 +3177,8 @@ const MadridDashboardV2: React.FC = () => {
                                 fontWeight: '700',
                                 border: 'none',
                                 borderRadius: '4px',
-                                backgroundColor: ltvPercent === val ? activeProfile.color : 'rgba(255, 255, 255, 0.08)',
-                                color: ltvPercent === val ? '#FFFFFF' : '#BACCD6',
+                                backgroundColor: ltvPercent === val ? '#00E5FF' : 'rgba(255, 255, 255, 0.08)',
+                                color: ltvPercent === val ? '#03172b' : '#BACCD6',
                                 cursor: 'pointer',
                                 transition: 'all 0.2s'
                               }}
@@ -3231,7 +3227,7 @@ const MadridDashboardV2: React.FC = () => {
                             style={{
                               width: '100%',
                               cursor: 'pointer',
-                              accentColor: activeProfile.color,
+                              accentColor: '#00E5FF',
                               height: '4px',
                               borderRadius: '2px',
                               background: 'rgba(186, 204, 214, 0.2)',
@@ -4188,7 +4184,7 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneA}
                       </div>
-                      <div className={`v2-chart-wrap${seriesAStatus === 'loading' ? ' v2-resource-loading' : ''}`}>{seriesAStatus === 'loading' || seriesAStatus === 'error' ? <DashboardResourceState status={seriesAStatus} retry={() => setLoadAttempt(value => value + 1)} /> : comparisonAHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartA-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />}</div>
+                      <div className={`v2-chart-wrap${seriesAStatus === 'loading' ? ' v2-resource-loading' : ''}`}>{seriesAStatus === 'loading' || seriesAStatus === 'error' ? <DashboardResourceState status={seriesAStatus} retry={() => setLoadAttempt(value => value + 1)} /> : comparisonAHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: comparisonColors.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: comparisonColors.zoneA, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartA-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />}</div>
                     </div>
                     {(() => {
                       if (comparisonKpiAStatus === 'loading' || comparisonKpiAStatus === 'error') return <DashboardResourceState status={comparisonKpiAStatus} retry={() => setLoadAttempt(value => value + 1)} />;
@@ -4407,7 +4403,7 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneB}
                       </div>
-                      <div className={`v2-chart-wrap${seriesBStatus === 'loading' ? ' v2-resource-loading' : ''}`}>{seriesBStatus === 'loading' || seriesBStatus === 'error' ? <DashboardResourceState status={seriesBStatus} retry={() => setLoadAttempt(value => value + 1)} /> : comparisonBHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartB-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />}</div>
+                      <div className={`v2-chart-wrap${seriesBStatus === 'loading' ? ' v2-resource-loading' : ''}`}>{seriesBStatus === 'loading' || seriesBStatus === 'error' ? <DashboardResourceState status={seriesBStatus} retry={() => setLoadAttempt(value => value + 1)} /> : comparisonBHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: comparisonColors.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: comparisonColors.zoneB, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartB-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />}</div>
                     </div>
                     {(() => {
                       if (comparisonKpiBStatus === 'loading' || comparisonKpiBStatus === 'error') return <DashboardResourceState status={comparisonKpiBStatus} retry={() => setLoadAttempt(value => value + 1)} />;
@@ -4628,12 +4624,12 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-overlay-body">
                     {isMobile ? <>
                       <div className="v2-chart-wrap large"><ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile /><canvas id={`v2-overlay-${p.id}`}></canvas></div>
-                      <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={comparisonAHasData ? formatZoneOption(selectedZoneA) : ''} zoneB={comparisonBHasData ? formatZoneOption(selectedZoneB) : ''} />
+                      <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={comparisonAHasData ? formatZoneOption(selectedZoneA) : ''} zoneB={comparisonBHasData ? formatZoneOption(selectedZoneB) : ''} zoneAColor={comparisonColors.zoneA} zoneBColor={comparisonColors.zoneB} />
                     </> : <div className="v2-overlay-chart-stack">
                       <div className="v2-overlay-chart-toolbar">
                         <ComparisonSeriesLegend chartId={`v2-overlay-${p.id}`} items={[
-                          ...(comparisonAHasData ? [{ index: 0, label: `${formatZoneOption(selectedZoneA)} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' as const }, { index: 1, label: `${formatZoneOption(selectedZoneA)} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' as const }] : []),
-                          ...(comparisonBHasData ? [{ index: 2, label: `${formatZoneOption(selectedZoneB)} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' as const }, { index: 3, label: `${formatZoneOption(selectedZoneB)} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' as const }] : []),
+                          ...(comparisonAHasData ? [{ index: 0, label: `${formatZoneOption(selectedZoneA)} · Dato real`, color: comparisonColors.zoneA, kind: 'real' as const }, { index: 1, label: `${formatZoneOption(selectedZoneA)} · Estimación`, color: comparisonColors.zoneA, kind: 'estimated' as const }] : []),
+                          ...(comparisonBHasData ? [{ index: 2, label: `${formatZoneOption(selectedZoneB)} · Dato real`, color: comparisonColors.zoneB, kind: 'real' as const }, { index: 3, label: `${formatZoneOption(selectedZoneB)} · Estimación`, color: comparisonColors.zoneB, kind: 'estimated' as const }] : []),
                           { index: 4, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' },
                         ]} />
                         <ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile={false} />
