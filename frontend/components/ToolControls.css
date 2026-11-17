@@ -10,7 +10,7 @@
 .tool-controls-trailing { display: flex; flex: 0 0 auto; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
 .tool-controls-badge { align-self: center; padding: 7px 11px; border: 1px solid rgba(0,229,255,.28); border-radius: 999px; background: rgba(0,229,255,.07); color: #76e9f6; font-size: 11px; font-weight: 650; white-space: nowrap; }
 
-.tool-period { position: relative; z-index: 2; display: inline-flex; width: max-content; max-width: 100%; min-width: 0; color: #dce8f2; }
+.tool-period { position: relative; z-index: 2; display: flex; flex: 0 1 auto; flex-direction: column; align-items: flex-end; width: max-content; max-width: 100%; min-width: 0; color: #dce8f2; }
 .tool-period-date-controls { position: relative; display: inline-flex; align-items: center; gap: 5px; min-width: 0; }
 .tool-period-arrow { display: grid; flex: 0 0 30px; width: 30px; height: 34px; place-items: center; border: 0; border-radius: 8px; background: transparent; color: #91a8bd; cursor: pointer; transition: color .16s ease, background-color .16s ease; }
 .tool-period-arrow:hover:not(:disabled) { background: rgba(0,229,255,.08); color: #eafaff; }
@@ -30,7 +30,9 @@
 .tool-period-shortcuts button:focus-visible,
 .tool-period-month-grid button:focus-visible { outline: 2px solid #00e5ff; outline-offset: 2px; }
 
-.tool-period-popover { position: absolute; top: calc(100% + 9px); left: 50%; z-index: 1400; width: min(304px,calc(100vw - 28px)); padding: 13px; transform: translateX(-50%); border: 1px solid rgba(0,229,255,.24); border-radius: 13px; background: #061a30; box-shadow: 0 18px 48px rgba(0,0,0,.5); }
+.tool-period-popover { position: static; z-index: 1400; align-self: flex-end; width: min(304px,calc(100vw - 28px)); margin-top: 8px; padding: 13px; border: 1px solid rgba(0,229,255,.24); border-radius: 13px; background: #061a30; box-shadow: 0 18px 48px rgba(0,0,0,.5); }
+.tool-period.is-compact { display: inline-flex; flex-direction: row; align-items: center; width: max-content; }
+.tool-period.is-compact .tool-period-popover { position: absolute; top: calc(100% + 9px); left: 50%; align-self: auto; transform: translateX(-50%); margin-top: 0; }
 .tool-period-year-picker { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
 .tool-period-year-picker strong { color: #f1f7fc; font-size: 14px; font-weight: 750; font-variant-numeric: tabular-nums; }
 .tool-period-year-picker button { display: grid; width: 32px; height: 30px; place-items: center; border: 0; border-radius: 7px; background: transparent; color: #9db1c4; cursor: pointer; }
@@ -57,7 +59,7 @@
   .tool-period-trigger { min-height: 38px; gap: 6px; padding: 5px 8px; }
   .tool-period-date { font-size: 13px; }
   .tool-period-status { min-height: 19px; padding: 2px 5px; font-size: 8px; }
-  .tool-period-popover { left: 0; transform: none; width: min(304px,calc(100vw - 24px)); }
+  .tool-period.is-compact .tool-period-popover { left: 0; transform: none; width: min(304px,calc(100vw - 24px)); }
   .tool-period-month-grid button { min-height: 42px; }
 }
 @media (prefers-reduced-motion: reduce) {

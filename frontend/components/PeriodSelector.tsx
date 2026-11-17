@@ -81,6 +81,31 @@ export default function PeriodSelector({ years, year, month, latestReal, monthsB
     if (!open) setViewYear(Number(year));
     setOpen(value => !value);
   };
+  const periodPopover = open && <div className="tool-period-popover" role="dialog" aria-label="Elegir periodo">
+    <div className="tool-period-year-picker">
+      <button type="button" aria-label="Año anterior" disabled={viewYear <= minYear} onClick={() => setViewedYear(viewYear - 1)}><ChevronLeft size={17} aria-hidden="true" /></button>
+      <strong>{viewYear}</strong>
+      <button type="button" aria-label="Año siguiente" disabled={viewYear >= maxYear} onClick={() => setViewedYear(viewYear + 1)}><ChevronRight size={17} aria-hidden="true" /></button>
+    </div>
+    <div className="tool-period-month-grid" role="group" aria-label={`Meses de ${viewYear}`}>
+      {MONTHS.map(candidate => {
+        const candidateIsReal = isRealMonth(viewYear, candidate);
+        const selected = viewYear === Number(year) && candidate === month;
+        return <button
+          type="button"
+          key={candidate}
+          className={`${selected ? 'is-active' : ''} ${candidateIsReal ? 'is-real' : 'is-estimate'}`}
+          aria-pressed={selected}
+          aria-label={`${candidate} ${viewYear} · ${candidateIsReal ? 'dato real' : 'estimación'}`}
+          onClick={() => selectMonth(candidate)}
+        >{SHORT_MONTHS[candidate]}</button>;
+      })}
+    </div>
+    <div className="tool-period-shortcuts" aria-label="Accesos rápidos al periodo">
+      <button type="button" className="tool-period-latest" disabled={isLatest} onClick={() => { onLatest(); setOpen(false); }}>Último dato real</button>
+      <button type="button" disabled={selectedIndex < 12} onClick={() => { moveByYear(-1); setOpen(false); }}>Hace 1 año</button>
+    </div>
+  </div>;
 
   return <div ref={rootRef} className={`tool-period${compact ? ' is-compact' : ''}`}>
     <div className="tool-period-date-controls" onKeyDown={event => {
@@ -105,32 +130,8 @@ export default function PeriodSelector({ years, year, month, latestReal, monthsB
         <ChevronDown className="tool-period-chevron" size={15} aria-hidden="true" />
       </button>
       <button type="button" className="tool-period-arrow" aria-label="Mes siguiente" disabled={selectedIndex >= lastIndex} onClick={() => setPeriod(selectedIndex + 1)}><ChevronRight size={18} aria-hidden="true" /></button>
-
-      {open && <div className="tool-period-popover" role="dialog" aria-label="Elegir periodo">
-        <div className="tool-period-year-picker">
-          <button type="button" aria-label="Año anterior" disabled={viewYear <= minYear} onClick={() => setViewedYear(viewYear - 1)}><ChevronLeft size={17} aria-hidden="true" /></button>
-          <strong>{viewYear}</strong>
-          <button type="button" aria-label="Año siguiente" disabled={viewYear >= maxYear} onClick={() => setViewedYear(viewYear + 1)}><ChevronRight size={17} aria-hidden="true" /></button>
-        </div>
-        <div className="tool-period-month-grid" role="group" aria-label={`Meses de ${viewYear}`}>
-          {MONTHS.map(candidate => {
-            const candidateIsReal = isRealMonth(viewYear, candidate);
-            const selected = viewYear === Number(year) && candidate === month;
-            return <button
-              type="button"
-              key={candidate}
-              className={`${selected ? 'is-active' : ''} ${candidateIsReal ? 'is-real' : 'is-estimate'}`}
-              aria-pressed={selected}
-              aria-label={`${candidate} ${viewYear} · ${candidateIsReal ? 'dato real' : 'estimación'}`}
-              onClick={() => selectMonth(candidate)}
-            >{SHORT_MONTHS[candidate]}</button>;
-          })}
-        </div>
-        <div className="tool-period-shortcuts" aria-label="Accesos rápidos al periodo">
-          <button type="button" className="tool-period-latest" disabled={isLatest} onClick={() => { onLatest(); setOpen(false); }}>Último dato real</button>
-          <button type="button" disabled={selectedIndex < 12} onClick={() => { moveByYear(-1); setOpen(false); }}>Hace 1 año</button>
-        </div>
-      </div>}
+      {compact && periodPopover}
     </div>
+    {!compact && periodPopover}
   </div>;
 }
