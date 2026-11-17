@@ -2818,11 +2818,10 @@ const MadridDashboardV2: React.FC = () => {
     ? selectedDistrict !== 'Todos' ? selectedDistrict : null
     : selectedBarrio !== 'Todos' ? selectedBarrio : null;
 
-  const periodControls = <div className="v2-period-filter-group">
-    {isMobile && <span className="v2-period-filter-heading">Periodo (afecta a todo)</span>}
+  const periodControls = isMobile ? <div className="v2-period-filter-group">
+    <span className="v2-period-filter-heading">Periodo (afecta a todo)</span>
     <div className={`v2-dropdown-container v2-period-select ${activeDropdown === 'year' ? 'v2-z-up' : ''}`}>
       <span className="v2-filter-label">Año</span>
-      {!isMobile && <span className="v2-period-prefix">Año</span>}
       <DashboardSelect value={visibleFilters.year} expanded={activeDropdown === 'year'} onToggle={() => setActiveDropdown(activeDropdown === 'year' ? null : 'year')} />
       {activeDropdown === 'year' && <div className="v2-dropdown-menu" role="listbox" aria-label="Año">
         {availableYears.map(y => <button type="button" key={y} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.year === y} onClick={event => { event.stopPropagation(); const months = monthsByYear[y] || []; const month = months[months.length - 1] || 'Diciembre'; if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, year: y, month })); else { setSelectedYear(y); setSelectedMonth(month); } setActiveDropdown(null); }}>{y}</button>)}
@@ -2830,11 +2829,34 @@ const MadridDashboardV2: React.FC = () => {
     </div>
     <div className={`v2-dropdown-container v2-period-select ${activeDropdown === 'month' ? 'v2-z-up' : ''}`}>
       <span className="v2-filter-label">Mes</span>
-      {!isMobile && <span className="v2-period-prefix">Mes</span>}
       <DashboardSelect value={visibleFilters.month} expanded={activeDropdown === 'month'} onToggle={() => setActiveDropdown(activeDropdown === 'month' ? null : 'month')} />
       {activeDropdown === 'month' && <div className="v2-dropdown-menu" role="listbox" aria-label="Mes">
         {(monthsByYear[visibleFilters.year] || ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']).map(month => <button type="button" key={month} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.month === month} onClick={event => { event.stopPropagation(); if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, month })); else setSelectedMonth(month); setActiveDropdown(null); }}>{month}</button>)}
       </div>}
+    </div>
+  </div> : <div className="v2-period-desktop-controls" aria-label="Periodo global">
+    <div className="v2-period-desktop-row">
+      <span className="v2-period-desktop-label">Año</span>
+      <div className="v2-period-years" role="group" aria-label="Seleccionar año">
+        {availableYears.map(year => <button type="button" key={year} aria-pressed={selectedYear === year} className={selectedYear === year ? 'is-active' : ''} onClick={() => {
+          if (selectedYear === year) return;
+          const months = monthsByYear[year] || [];
+          setSelectedYear(year);
+          setSelectedMonth(months[months.length - 1] || 'Diciembre');
+        }}>{year}</button>)}
+      </div>
+      <button type="button" className="v2-period-latest" onClick={() => { setSelectedYear(latestAvailablePeriod.year); setSelectedMonth(latestAvailablePeriod.month); }}>Último dato real</button>
+      <span className="v2-period-legend"><i className="is-real" /> Dato real <i className="is-estimate" /> Estimación</span>
+    </div>
+    <div className="v2-period-desktop-row v2-period-month-row">
+      <span className="v2-period-desktop-label">Mes</span>
+      <div className="v2-period-months" role="group" aria-label="Seleccionar mes">
+        {MONTHS_ES.map((month, index) => {
+          const isEstimate = Number(selectedYear) > Number(latestAvailablePeriod.year)
+            || (Number(selectedYear) === Number(latestAvailablePeriod.year) && index > latestObservedMonthIndex);
+          return <button type="button" key={month} aria-pressed={selectedMonth === month} aria-label={`${month}${isEstimate ? ' (estimación)' : ' (dato real)'}`} className={`${selectedMonth === month ? 'is-active' : ''} ${isEstimate ? 'is-estimate' : ''}`} onClick={() => setSelectedMonth(month)}>{month.slice(0, 3)}</button>;
+        })}
+      </div>
     </div>
   </div>;
 
