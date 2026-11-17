@@ -251,7 +251,7 @@ test('Paso 4 · los precios de alquiler destacan sin recortar sus unidades en m�
         priceUnit: parseFloat(getComputedStyle(priceUnit).fontSize),
         rent: parseFloat(getComputedStyle(rentValue).fontSize),
         rentUnit: parseFloat(getComputedStyle(rentUnit).fontSize),
-        overflow: document.documentElement.scrollWidth > innerWidth,
+        overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
         priceBounds: priceValue.getBoundingClientRect().toJSON(),
         priceUnitBounds: priceUnit.getBoundingClientRect().toJSON(),
         rentBounds: rentValue.getBoundingClientRect().toJSON(),
@@ -286,7 +286,7 @@ test('Paso 5 · regresión responsive de perfiles, móvil horizontal y escritori
       const tab = page.getByRole('navigation', { name: 'Perfiles de mercado' }).last().getByRole('button', { name: label, exact: true });
       await tab.click();
       await expect(page.locator(`.v2-root[data-profile="${id}"] .v2-panel.v2-active`)).toBeVisible();
-      const overflow = await page.evaluate(() => document.documentElement.scrollWidth > innerWidth);
+      const overflow = await page.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
       expect(overflow, `${width}x${height} ${label} horizontal overflow`).toBe(false);
     }
   }
@@ -302,7 +302,7 @@ test('Paso 5 · regresión responsive de perfiles, móvil horizontal y escritori
     await landscapeNav.getByRole('button', { name: label, exact: true }).click();
     await expect(landscapePage.locator(`.v2-root[data-profile="${id}"] .v2-panel.v2-active`)).toBeVisible();
   }
-  const landscapeOverflow = await landscapePage.evaluate(() => document.documentElement.scrollWidth > innerWidth);
+  const landscapeOverflow = await landscapePage.evaluate(() => document.documentElement.scrollWidth > document.documentElement.clientWidth);
   expect(landscapeOverflow, '844x390 horizontal overflow').toBe(false);
   await landscapePage.screenshot({ path: resolve(screenshots, 'paso-5-mobile-landscape-844x390.png') });
   await landscape.close();
