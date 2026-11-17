@@ -258,25 +258,6 @@
 .v2-dropdown-search::placeholder { color: #8ea8c3; }
 .v2-dropdown-search:focus { border-color: #00e5ff; box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.14); }
 
-.v2-guide-modal {
-  background: linear-gradient(145deg, #062744, #011024) !important;
-  border: 1px solid rgba(0, 229, 255, 0.28) !important;
-  color: #f4fbff;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.48) !important;
-}
-.v2-guide-modal h3,
-.v2-guide-modal [style*="color: var(--azul-noche)"],
-.v2-guide-modal [style*="color:var(--azul-noche)"] { color: #f4fbff !important; }
-.v2-guide-modal p,
-.v2-guide-modal [style*="color: var(--azul-linea)"],
-.v2-guide-modal [style*="color:var(--azul-linea)"] { color: #baccd6 !important; }
-.v2-guide-modal > div > div > div:not(:first-child),
-.v2-guide-modal [style*="background-color: var(--blanco-humo)"],
-.v2-guide-modal [style*="backgroundColor: var(--blanco-humo)"] {
-  background: rgba(255, 255, 255, 0.055) !important;
-  border-color: rgba(186, 204, 214, 0.18) !important;
-}
-
 @keyframes v2FadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -3611,19 +3592,18 @@ body.v2-fullscreen-open .v2-root .v2-filters { display: none !important; }
 .v2-root .v2-map-bottom-sheet .v2-map-sheet-actions { display: flex; grid-column: 1 / -1; justify-content: space-between; gap: 8px; }
 .v2-root .v2-map-bottom-sheet .v2-map-sheet-close { position: absolute; top: 7px; right: 8px; width: 32px; height: 32px; padding: 0; font-size: 20px; }
 .v2-root .v2-heatmap-search { width: min(100%,280px); min-height: 38px; margin: 0 0 8px; padding: 0 11px; border: 1px solid rgba(186,204,214,.18); border-radius: 10px; background: rgba(1,16,36,.72); color: #eaf5ff; font: inherit; font-size: 12px; }
-.v2-root .v2-heatmap-scroll { position: relative; max-height: min(60vh,704px); overflow: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.v2-root .v2-heatmap-scroll { position: relative; max-height: none; overflow: visible; -webkit-overflow-scrolling: touch; }
 .v2-root .v2-heatmap-table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; }
 .v2-root .v2-heatmap-table th, .v2-root .v2-heatmap-table td { height: 44px; min-width: 56px; padding: 0 8px; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .v2-root .v2-heatmap-table th { position: sticky; top: 0; z-index: 3; background: #0b2a4a; }
 .v2-root .v2-heatmap-table .v2-heatmap-period-groups th { height: 28px; min-height: 28px; color: #9fb3c7; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-align: center; }
 .v2-root .v2-heatmap-table .v2-heatmap-period-groups th:first-child { text-align: left; }
 .v2-root .v2-heatmap-table .v2-heatmap-month-head th { top: 28px; height: 32px; min-height: 32px; }
-.v2-root .v2-heatmap-table .v2-heatmap-estimate-group { color: #ffc078 !important; border-bottom: 1px dashed rgba(255,177,82,.72); background: rgba(255,177,82,.045); }
+.v2-root .v2-heatmap-table .v2-heatmap-estimate-group { color: #ffc078 !important; border-bottom: 1px solid rgba(255,177,82,.42); background: rgba(255,177,82,.045); }
 .v2-root .v2-heatmap-table .v2-heatmap-real-group { border-bottom: 1px solid rgba(0,229,255,.3); }
-.v2-root .v2-heatmap-table th.v2-heatmap-estimated-column,
-.v2-root .v2-heatmap-table td.v2-heatmap-estimated-column { border-left: 1px dashed rgba(255,177,82,.5); }
-.v2-root .v2-heatmap-table th.v2-heatmap-estimated-end,
-.v2-root .v2-heatmap-table td.v2-heatmap-estimated-end { border-right: 1px dashed rgba(255,177,82,.5); }
+.v2-root .v2-heatmap-table th.v2-heatmap-estimated-start,
+.v2-root .v2-heatmap-table td.v2-heatmap-estimated-start { border-left: 1px solid rgba(255,255,255,.3) !important; }
+.v2-root .v2-heatmap-table td.v2-heatmap-estimated-cell { opacity: .82; font-style: italic; }
 .v2-root .v2-heatmap-table tr.v2-heatmap-zone-selected > td { box-shadow: inset 0 1px rgba(0,229,255,.95), inset 0 -1px rgba(0,229,255,.95); }
 .v2-root .v2-heatmap-table tr.v2-heatmap-zone-selected > td:first-child { box-shadow: inset 3px 0 #00e5ff, inset 0 1px rgba(0,229,255,.95), inset 0 -1px rgba(0,229,255,.95); color: #8ef5ff !important; }
 .v2-root .v2-heatmap-table th:first-child, .v2-root .v2-heatmap-table td:first-child { position: sticky; left: 0; z-index: 2; width: 120px; min-width: 120px; max-width: 120px; overflow: hidden; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
@@ -4640,4 +4620,52 @@ body:has(.v2-root[data-platform="mobile"]) { overflow-x: clip; max-width: 100%; 
   .v2-root .v2-compare-zone-selectors,
   .v2-root .v2-compare-zone-selectors-sticky { grid-template-columns: minmax(0, 1fr) !important; gap: 8px !important; }
   .v2-root .v2-compare-zone-select { padding: 10px !important; }
+}
+
+/* A single sticky period control serves every dashboard section. */
+.v2-root .v2-global-period-bar {
+  position: sticky;
+  top: 88px;
+  z-index: 1490;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-height: 58px;
+  padding: 8px var(--page-gutter, 24px);
+  border-bottom: 1px solid rgba(186,204,214,.12);
+  background: rgba(3,18,36,.94);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.v2-root .v2-global-period-bar .tool-period { z-index: 1491; }
+.v2-root .v2-global-period-bar .tool-period-popover { z-index: 1492; }
+.v2-root .v2-map-heading-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.v2-root .v2-map-heading-row h2 { margin: 0; }
+.v2-root .v2-map-heading-row .dashboard-help-button { margin: 0; }
+.v2-root .v2-explorer-heading { display: grid; gap: 5px; min-width: 0; }
+.v2-root .v2-explorer-subtitle { margin: 0; color: #aebfd0; font-size: 12px; line-height: 1.45; }
+.v2-root .v2-heatmap-search { width: 100%; max-width: none; }
+.v2-root .v2-heatmap-more { color: #03141c; background: #8debf3; border-color: #8debf3; cursor: pointer; }
+.v2-root .tool-period-status.is-real { color: #03141c; background: #8debf3; border-color: #8debf3; }
+.v2-root .tool-period-status.is-estimate { color: #03141c; background: #ffd28a; border-color: #ffd28a; border-style: dashed; }
+.v2-root .tool-period-month-grid button.is-active.is-estimate { color: #03141c; background: #ffd28a; border-color: #ffd28a; }
+.v2-root .v2-mobile-filter-apply { color: #03141c !important; }
+.v2-root .v2-affordability-ranking-table .v2-ranking-value > span { display: inline-block; vertical-align: middle; }
+.v2-root .v2-explorer-grid { grid-template-rows: auto minmax(460px, auto) !important; }
+.v2-root .v2-heatmap-card:not(.v2-is-fullscreen) .v2-heatmap-scroll { flex: initial; max-height: none !important; overflow: visible !important; }
+.v2-root .v2-heatmap-card:not(.v2-is-fullscreen) .v2-heatmap-table .v2-heatmap-month-head th { position: static; top: auto; }
+.v2-root .v2-heatmap-card:not(.v2-is-fullscreen) .v2-heatmap-table .v2-heatmap-period-groups th { position: static; top: auto; }
+@media (max-width: 768px), (pointer: coarse) and (max-height: 500px) {
+  .v2-root .v2-global-period-bar {
+    top: 68px;
+    justify-content: flex-end;
+    min-height: 54px;
+    padding: 7px 12px;
+  }
+  .v2-root .v2-global-period-bar .tool-period.is-compact .tool-period-popover { left: auto; right: 0; transform: none; }
+  .v2-root[data-platform="mobile"] .v2-mobile-section-nav { top: 122px !important; inset-block-start: 122px !important; }
+  .v2-root .v2-explorer-header { align-items: flex-start; }
+  .v2-root .v2-explorer-subtitle { max-width: 56ch; }
+  .v2-root[data-platform="mobile"] .v2-explorer-grid { grid-template-rows: auto auto auto !important; }
+  .v2-root[data-platform="mobile"] .v2-heatmap-card:not(.v2-is-fullscreen) .v2-heatmap-scroll { overflow: visible !important; }
 }

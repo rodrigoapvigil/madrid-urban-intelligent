@@ -30,12 +30,11 @@ export default function DashboardRankingTable({
   selectedZone?: string | null;
   onSelectZone?: (zone: string) => void;
 }) {
-  const zoneType = level === 'Distritos' ? 'distrito' : 'barrio';
   const title = profileId === 'venta'
-    ? `Top 10 · ${level.toLocaleLowerCase('es-ES')} con más demanda`
+    ? 'Top 10 con más demanda'
     : profileId === 'inversion'
-      ? `Top 10 · amortización por ${zoneType}`
-      : `Top 10 · ${level.toLocaleLowerCase('es-ES')} ${profileId === 'compra' ? 'con menor precio' : 'más asequibles'}`;
+      ? 'Top 10 por amortización'
+      : profileId === 'compra' ? 'Top 10 con menor precio' : 'Top 10 más asequibles';
   const isDemand = profileId === 'venta';
   const isInvestment = profileId === 'inversion';
   const profileAccent = profileAccentColor(profileId);

@@ -42,7 +42,14 @@ export default function DashboardHeatmapTable({
   const latestMonthIndex = MONTHS.findIndex(month => month.toLocaleLowerCase('es') === latestReal.month.toLocaleLowerCase('es'));
   const realMonthCount = selectedYear < latestYear ? 12 : selectedYear > latestYear ? 0 : Math.max(0, latestMonthIndex + 1);
   const estimateMonthCount = 12 - realMonthCount;
+  const firstEstimatedMonth = realMonthCount;
   const normalizeZone = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').trim();
+  const readableTextColor = (hex: string) => {
+    const channels = hex.replace('#', '').match(/.{2}/g)?.map(channel => parseInt(channel, 16) / 255) || [0, 0, 0];
+    const linear = channels.map(channel => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
+    const luminance = 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2];
+    return luminance > 0.28 ? '#03141c' : '#f2f7fb';
+  };
   return (
     <div className="v2-heatmap-scroll" data-resource-state={status}>
       <table className="v2-heatmap-table">
@@ -54,8 +61,8 @@ export default function DashboardHeatmapTable({
           </tr>
           <tr className="v2-heatmap-month-head">{MONTHS.map((month, monthIndex) => {
             const isEstimated = monthIndex >= realMonthCount;
-            const classes = [monthIndex === selectedMonthIndex ? 'v2-heatmap-selected-month' : '', isEstimated ? 'v2-heatmap-estimated-column' : ''].filter(Boolean).join(' ');
-            return <th key={month} className={`${classes}${monthIndex === 11 && isEstimated ? ' v2-heatmap-estimated-end' : ''}`.trim() || undefined} aria-current={monthIndex === selectedMonthIndex ? 'date' : undefined}>{month.slice(0, 3)}</th>;
+            const classes = [monthIndex === selectedMonthIndex ? 'v2-heatmap-selected-month' : '', isEstimated && monthIndex === firstEstimatedMonth && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : ''].filter(Boolean).join(' ');
+            return <th key={month} className={classes || undefined} aria-current={monthIndex === selectedMonthIndex ? 'date' : undefined}>{month.slice(0, 3)}</th>;
           })}</tr>
         </thead>
         <tbody>
@@ -66,9 +73,9 @@ export default function DashboardHeatmapTable({
                 const value = Number(row[`m${monthIndex + 1}`]);
                 const tier = value > 0 ? colorTier(value, colorThresholds) : -1;
                 const cellColor = value > 0 ? tierColors[tier] : 'transparent';
-                const textColor = tier >= 4 ? '#03172b' : '#f2f7fb';
+                const textColor = value > 0 ? readableTextColor(cellColor) : '#f2f7fb';
                 const isEstimated = monthIndex >= realMonthCount;
-                const classes = [value > 0 ? '' : 'v2-heatmap-no-data', isEstimated ? 'v2-heatmap-estimated-column' : '', isEstimated && monthIndex === 11 ? 'v2-heatmap-estimated-end' : ''].filter(Boolean).join(' ');
+                const classes = [value > 0 ? '' : 'v2-heatmap-no-data', isEstimated ? 'v2-heatmap-estimated-cell' : '', isEstimated && monthIndex === firstEstimatedMonth && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : ''].filter(Boolean).join(' ');
                 return <td key={monthIndex} className={classes || undefined} title={value > 0 ? monthIndex >= realMonthCount ? 'Estimación' : undefined : 'Sin datos oficiales del Ayuntamiento'} style={{ backgroundColor: cellColor, color: value > 0 ? textColor : '#f2f7fb' }}>{value > 0 ? formatValue(value) : 'n/d'}</td>;
               })}
             </tr>
@@ -76,7 +83,7 @@ export default function DashboardHeatmapTable({
         </tbody>
       </table>
       {status === 'loading' && rows.length > 0 && <div className="v2-heatmap-loading-overlay"><DashboardResourceState status="loading" /></div>}
-      {rows.length > visibleCount && <button className="v2-heatmap-more" type="button" onClick={onShowMore}>Mostrar 15 más</button>}
+      {rows.length > visibleCount && <button className="v2-heatmap-more" type="button" onClick={onShowMore}>Ver todos ({rows.length})</button>}
     </div>
   );
 }

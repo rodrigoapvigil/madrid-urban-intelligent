@@ -27,16 +27,15 @@ export function DashboardMapStatus({
   return (
     <div className={`v2-map-header${isMobile ? ' is-mobile' : ' is-desktop'}`}>
       {isMobile ? <>
+        <div className="v2-map-heading-row"><h2>Precios por zona</h2><DashboardHelpButton className="v2-map-help-button" onClick={onHelp} label="Cómo leer el mapa" /></div>
         {zoneControls}
         <div className={`v2-data-status ${isProjection ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
           <span><strong>{mobileStatus}</strong> · Último dato observado: {observedMonth} de {observedYear} · estimaciones desde {firstProjectionMonth}. Estimación estadística basada en datos oficiales hasta {observedMonth}; no es una tasación ni una garantía de precios futuros.</span>
         </div>
-        <DashboardHelpButton className="v2-map-help-button" onClick={onHelp} label="¿Cómo usar el mapa?" />
         {children}
       </> : <>
-        <div className="v2-map-header-zone">{zoneControls}</div>
+        <div className="v2-map-header-zone"><div className="v2-map-heading-row"><h2>Precios por zona</h2><DashboardHelpButton className="v2-map-help-button" onClick={onHelp} label="Cómo leer el mapa" /></div>{zoneControls}</div>
         <div className="v2-map-header-actions">
-          <DashboardHelpButton className="v2-map-help-button" onClick={onHelp} label="¿Cómo usar el mapa?" title="¿Cómo usar el mapa?" iconOnly />
           {children}
         </div>
       </>}
