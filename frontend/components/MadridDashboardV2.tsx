@@ -2752,6 +2752,26 @@ const MadridDashboardV2: React.FC = () => {
     ? selectedDistrict !== 'Todos' ? selectedDistrict : null
     : selectedBarrio !== 'Todos' ? selectedBarrio : null;
 
+  const periodControls = <div className="v2-period-filter-group">
+    {isMobile && <span className="v2-period-filter-heading">Periodo (afecta a todo)</span>}
+    <div className={`v2-dropdown-container v2-period-select ${activeDropdown === 'year' ? 'v2-z-up' : ''}`}>
+      <span className="v2-filter-label">Año</span>
+      {!isMobile && <span className="v2-period-prefix">Año</span>}
+      <DashboardSelect value={visibleFilters.year} expanded={activeDropdown === 'year'} onToggle={() => setActiveDropdown(activeDropdown === 'year' ? null : 'year')} />
+      {activeDropdown === 'year' && <div className="v2-dropdown-menu" role="listbox" aria-label="Año">
+        {availableYears.map(y => <button type="button" key={y} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.year === y} onClick={event => { event.stopPropagation(); const months = monthsByYear[y] || []; const month = months[months.length - 1] || 'Diciembre'; if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, year: y, month })); else { setSelectedYear(y); setSelectedMonth(month); } setActiveDropdown(null); }}>{y}</button>)}
+      </div>}
+    </div>
+    <div className={`v2-dropdown-container v2-period-select ${activeDropdown === 'month' ? 'v2-z-up' : ''}`}>
+      <span className="v2-filter-label">Mes</span>
+      {!isMobile && <span className="v2-period-prefix">Mes</span>}
+      <DashboardSelect value={visibleFilters.month} expanded={activeDropdown === 'month'} onToggle={() => setActiveDropdown(activeDropdown === 'month' ? null : 'month')} />
+      {activeDropdown === 'month' && <div className="v2-dropdown-menu" role="listbox" aria-label="Mes">
+        {(monthsByYear[visibleFilters.year] || ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']).map(month => <button type="button" key={month} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.month === month} onClick={event => { event.stopPropagation(); if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, month })); else setSelectedMonth(month); setActiveDropdown(null); }}>{month}</button>)}
+      </div>}
+    </div>
+  </div>;
+
   return (
     <div className="v2-root" data-profile={activeProfile.id} data-platform={isMobile ? 'mobile' : 'desktop'}>
       <BackgroundAurora animated={false} />
@@ -2815,48 +2835,13 @@ const MadridDashboardV2: React.FC = () => {
       {isMobileFiltersOpen && <button type="button" className="v2-mobile-filter-backdrop" aria-label="Cerrar filtros" onClick={closeMobileFilters} />}
 
       {/* 2. FILTROS REFINADOS (CUSTOM APPLE DROPDOWNS) */}
-      <div id="v2-filter-panel" role={isMobile ? 'dialog' : undefined} aria-modal={isMobile && isMobileFiltersOpen ? true : undefined} aria-hidden={isMobile && !isMobileFiltersOpen ? true : undefined} className={`v2-filters ${isMobileFiltersOpen ? 'v2-mobile-filters-open' : ''} ${['year', 'month', 'dist', 'barrio'].includes(activeDropdown || '') ? 'v2-filters-open' : ''}`}>
-        {isMobile && <div className="v2-mobile-filter-heading">
+      {isMobile && <div id="v2-filter-panel" role="dialog" aria-modal={isMobileFiltersOpen} aria-hidden={!isMobileFiltersOpen} className={`v2-filters ${isMobileFiltersOpen ? 'v2-mobile-filters-open' : ''} ${['year', 'month', 'dist', 'barrio'].includes(activeDropdown || '') ? 'v2-filters-open' : ''}`}>
+        <div className="v2-mobile-filter-heading">
           <div><strong>Filtrar</strong><span>{activeProfile.label} · {visibleFilters.district === 'Todos' ? 'Madrid' : formatZoneOption(visibleFilters.district)} · {visibleFilters.month} {visibleFilters.year}</span></div>
           <button type="button" aria-label="Cerrar filtros" onClick={closeMobileFilters}><X size={20} /></button>
-        </div>}
+        </div>
         <div className="v2-filter-group">
-          <div className="v2-period-filter-group">
-            {isMobile && <span className="v2-period-filter-heading">Periodo (afecta a todo)</span>}
-
-          {/* AÑO */}
-          <div className={`v2-dropdown-container v2-period-select ${activeDropdown === 'year' ? 'v2-z-up' : ''}`}>
-            <span className="v2-filter-label">Año</span>
-            {!isMobile && <span className="v2-period-prefix">Año</span>}
-            <DashboardSelect value={visibleFilters.year} expanded={activeDropdown === 'year'} onToggle={() => setActiveDropdown(activeDropdown === 'year' ? null : 'year')} />
-            {activeDropdown === 'year' && (
-              <div className="v2-dropdown-menu" role="listbox" aria-label="Año">
-                {availableYears.map(y => (
-                  <button type="button" key={y} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.year === y} onClick={(e) => { e.stopPropagation(); const months = monthsByYear[y] || []; const month = months[months.length - 1] || 'Diciembre'; if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, year: y, month })); else { setSelectedYear(y); setSelectedMonth(month); } setActiveDropdown(null); }}>{y}</button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* MES */}
-          <div className={`v2-dropdown-container v2-period-select ${activeDropdown === 'month' ? 'v2-z-up' : ''}`}>
-            <span className="v2-filter-label">Mes</span>
-            {!isMobile && <span className="v2-period-prefix">Mes</span>}
-            <DashboardSelect value={visibleFilters.month} expanded={activeDropdown === 'month'} onToggle={() => setActiveDropdown(activeDropdown === 'month' ? null : 'month')} />
-            {activeDropdown === 'month' && (
-              <div className="v2-dropdown-menu" role="listbox" aria-label="Mes">
-                {(monthsByYear[visibleFilters.year] || ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']).map(m => (
-                  <button type="button" key={m} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.month === m} onClick={(e) => { e.stopPropagation(); if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, month: m })); else setSelectedMonth(m); setActiveDropdown(null); }}>{m}</button>
-                ))}
-              </div>
-            )}
-          </div>
-          </div>
-          {!isMobile && <DashboardHelpButton
-            onClick={() => setShowHelpModal(true)}
-            label="¿Cómo entender estos precios?"
-            title="Aprende a interpretar los datos reales y las proyecciones"
-          />}
+          {periodControls}
 
           {isMobile && <div className="v2-mobile-zone-filter-group">
           <span className="v2-mobile-zone-filter-heading">Zona (KPIs y mapas)</span>
@@ -2915,7 +2900,7 @@ const MadridDashboardV2: React.FC = () => {
           </div>
 
         </div>
-      </div>
+      </div>}
 
       {isMobile && <nav className="v2-mobile-profile-nav" aria-label="Perfiles de mercado">
         {PROFILES.map((profile, index) => {
@@ -3741,25 +3726,31 @@ const MadridDashboardV2: React.FC = () => {
                     latestRealMonth={latestRealMonth}
                     latestRealYear={latestRealYear}
                     firstProjectionMonth={firstProjectionMonth}
-                    zoneControls={!isMobile && <div className="v2-zone-filter-row" aria-label="Filtros de zona">
-                      <span className="v2-zone-filter-title">Zona</span>
-                      <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
-                        <span className="v2-filter-label">Distrito</span>
-                        <DashboardSelect value={formatZoneOption(selectedDistrict)} expanded={activeDropdown === 'dist'} onToggle={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')} />
-                        {activeDropdown === 'dist' && <div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
-                          {availableDistricts.map(d => <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={selectedDistrict === d} onClick={event => { event.stopPropagation(); setSelectedDistrict(d); setSelectedBarrio('Todos'); setActiveDropdown(null); }}>{formatZoneOption(d)}</button>)}
-                        </div>}
+                    zoneControls={!isMobile && <div className="v2-map-controls-row">
+                      <div className="v2-zone-filter-row" aria-label="Filtros de zona">
+                        <span className="v2-zone-filter-title">Zona</span>
+                        <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
+                          <span className="v2-filter-label">Distrito</span>
+                          <DashboardSelect value={formatZoneOption(selectedDistrict)} expanded={activeDropdown === 'dist'} onToggle={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')} />
+                          {activeDropdown === 'dist' && <div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
+                            {availableDistricts.map(d => <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={selectedDistrict === d} onClick={event => { event.stopPropagation(); setSelectedDistrict(d); setSelectedBarrio('Todos'); setActiveDropdown(null); }}>{formatZoneOption(d)}</button>)}
+                          </div>}
+                        </div>
+                        <div className={`v2-dropdown-container ${activeDropdown === 'barrio' ? 'v2-z-up' : ''}`}>
+                          <span className="v2-filter-label">Barrio</span>
+                          <DashboardSelect value={selectedDistrict === 'Todos' ? 'Elige un distrito' : formatZoneOption(selectedBarrio)} disabled={selectedDistrict === 'Todos'} expanded={activeDropdown === 'barrio'} onToggle={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')} />
+                          {activeDropdown === 'barrio' && selectedDistrict !== 'Todos' && <div className="v2-dropdown-menu" role="listbox" aria-label="Barrio">
+                            <input className="v2-dropdown-search" aria-label="Buscar barrio" placeholder="Buscar barrio…" onClick={event => event.stopPropagation()} onChange={event => {
+                              const query = event.currentTarget.value.toLocaleLowerCase('es-ES');
+                              event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('.v2-dropdown-item').forEach(item => { item.hidden = query.length > 0 && !item.textContent?.toLocaleLowerCase('es-ES').includes(query); });
+                            }} />
+                            {availableBarrios.map(b => <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={selectedBarrio === b} onClick={event => { event.stopPropagation(); setSelectedBarrio(b); setActiveDropdown(null); }}>{formatZoneOption(b)}</button>)}
+                          </div>}
+                        </div>
                       </div>
-                      <div className={`v2-dropdown-container ${activeDropdown === 'barrio' ? 'v2-z-up' : ''}`}>
-                        <span className="v2-filter-label">Barrio</span>
-                        <DashboardSelect value={selectedDistrict === 'Todos' ? 'Elige un distrito' : formatZoneOption(selectedBarrio)} disabled={selectedDistrict === 'Todos'} expanded={activeDropdown === 'barrio'} onToggle={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')} />
-                        {activeDropdown === 'barrio' && selectedDistrict !== 'Todos' && <div className="v2-dropdown-menu" role="listbox" aria-label="Barrio">
-                          <input className="v2-dropdown-search" aria-label="Buscar barrio" placeholder="Buscar barrio…" onClick={event => event.stopPropagation()} onChange={event => {
-                            const query = event.currentTarget.value.toLocaleLowerCase('es-ES');
-                            event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('.v2-dropdown-item').forEach(item => { item.hidden = query.length > 0 && !item.textContent?.toLocaleLowerCase('es-ES').includes(query); });
-                          }} />
-                          {availableBarrios.map(b => <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={selectedBarrio === b} onClick={event => { event.stopPropagation(); setSelectedBarrio(b); setActiveDropdown(null); }}>{formatZoneOption(b)}</button>)}
-                        </div>}
+                      <div className="v2-desktop-map-period-controls">
+                        {periodControls}
+                        <DashboardHelpButton onClick={() => setShowHelpModal(true)} label="¿Cómo entender estos precios?" title="Aprende a interpretar los datos reales y las proyecciones" />
                       </div>
                     </div>}
                     onHelp={() => setShowMapHelpModal(true)}

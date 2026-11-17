@@ -4067,6 +4067,12 @@ body.v2-fullscreen-open footer { display: none !important; }
   gap: 16px !important; flex-wrap: wrap; margin: 0 0 16px !important;
 }
 .v2-root[data-platform="desktop"] .v2-map-header-zone { flex: 1 1 430px; min-width: 0; }
+.v2-root[data-platform="desktop"] .v2-map-controls-row { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; min-width: 0; }
+.v2-root[data-platform="desktop"] .v2-map-controls-row .v2-zone-filter-row { flex: 0 1 auto; }
+.v2-root[data-platform="desktop"] .v2-desktop-map-period-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; min-width: 0; }
+.v2-root[data-platform="desktop"] .v2-desktop-map-period-controls .v2-period-filter-group { gap: 8px; }
+.v2-root[data-platform="desktop"] .v2-desktop-map-period-controls .v2-period-select .v2-custom-select { min-height: 40px; }
+.v2-root[data-platform="desktop"] .v2-desktop-map-period-controls > .dashboard-help-button { flex: 0 0 auto; }
 .v2-root[data-platform="desktop"] .v2-map-header .v2-zone-filter-row {
   display: flex; align-items: center; gap: 12px; margin: 0; padding: 0; border: 0;
 }
