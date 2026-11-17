@@ -4081,6 +4081,15 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root[data-platform="desktop"] .v2-map-card > .v2-map-legend { margin-top: 12px !important; }
 .v2-root[data-platform="desktop"] .v2-map-legend-notes { align-content: start; }
 
+/* Desktop KPI density: reduce card and stack spacing without changing type. */
+@media (min-width: 769px) {
+  .v2-root[data-platform="desktop"] .v2-kpi-card { padding-block: 13px; }
+  .v2-root[data-platform="desktop"] .v2-kpi-stack { gap: 9px; }
+}
+@media (min-width: 1201px) {
+  .v2-root[data-platform="desktop"] .v2-kpi-stack { gap: 12px; }
+}
+
 /* Mobile filter-only presentation; the platform marker comes from useIsMobile(). */
 .v2-root[data-platform="mobile"] .mi-header__mobile-action { display: flex !important; align-items: center; margin-left: auto; margin-right: 6px; }
 .v2-root[data-platform="mobile"] .v2-mobile-filter-bar {
