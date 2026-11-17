@@ -870,9 +870,7 @@
   .v2-mobile-filter-reset { border: 1px solid rgba(186,204,214,.3); color: #fff; background: transparent; }
   .v2-mobile-profile-nav { grid-template-columns: repeat(4, minmax(0,1fr)) !important; }
   .v2-mobile-profile-nav button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 48px; font-size: 12px !important; text-decoration: none; }
-  .v2-root .v2-mobile-map-switch { display: flex !important; width: fit-content; gap: 4px; margin: 0 0 12px; padding: 4px; border: 1px solid rgba(186,204,214,.2); border-radius: 999px; background: rgba(1,16,36,.7); }
-  .v2-mobile-map-switch button { min-height: 38px; padding: 0 15px; border: 0; border-radius: 999px; background: transparent; color: #d7e8ef; font-size: 12px; font-weight: 700; }
-  .v2-mobile-map-switch button.active { background: #00e5ee; color: #03172b; }
+  .v2-root .v2-mobile-map-control { display: flex; width: fit-content; margin: 0 0 12px; }
   .v2-root .v2-dual-maps { display: block; height: auto; }
   .v2-root .v2-map-sub { display: none; height: min(58vh, 480px); }
   .v2-root .v2-map-sub[data-map-level="districts"] { display: flex; }
@@ -892,8 +890,8 @@
 
 @media (max-width: 768px) {
   .v2-root .v2-map-sub[data-map-level="neighborhoods"] { display: none; }
-  .v2-root:has(.v2-mobile-map-switch button:nth-child(2).active) .v2-map-sub[data-map-level="districts"] { display: none; }
-  .v2-root:has(.v2-mobile-map-switch button:nth-child(2).active) .v2-map-sub[data-map-level="neighborhoods"] { display: flex; }
+  .v2-root:has(.v2-mobile-map-control button:nth-child(2)[aria-pressed="true"]) .v2-map-sub[data-map-level="districts"] { display: none; }
+  .v2-root:has(.v2-mobile-map-control button:nth-child(2)[aria-pressed="true"]) .v2-map-sub[data-map-level="neighborhoods"] { display: flex; }
 }
 /* 8. MARKET EXPLORER (3 COLUMNS) */
 .v2-explorer-grid {
@@ -938,23 +936,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Small iOS-style toggle */
-.v2-tabs-bg.small {
-  padding: 2px;
-  height: 32px;
-  background: var(--blanco-humo);
-}
-
-.v2-tabs-bg.small .v2-indicator {
-  height: 28px;
-  background: var(--v2-profile-color);
-}
-
-.v2-tabs-bg.small .v2-tab-btn {
-  font-size: 12px;
-  height: 28px;
-}
-
+/* Ranking description */
 .v2-rank-desc {
   font-size: 12px;
   color: var(--v2-text-sec);
@@ -2753,7 +2735,6 @@
 /* 5. Segmented Control / Toggle Buttons (Distritos vs Barrios) */
 .v2-level-switch,
 .v2-tabs-bg.v2-level-switch,
-.v2-tabs-bg.small.v2-level-switch,
 .v2-root .v2-level-switch {
   display: inline-flex !important;
   align-items: center !important;
@@ -2899,19 +2880,6 @@
 .v2-data-status strong { color: #00f0ff; }
 .v2-data-status.is-projection { border-color: rgba(0, 240, 255, 0.22); }
 .v2-data-status.is-projection strong { color: #8de8f1; }
-.v2-data-status-dot {
-  width: 8px;
-  height: 8px;
-  flex: 0 0 auto;
-  border-radius: 50%;
-  background: #00f0ff;
-  box-shadow: 0 0 12px rgba(0, 240, 255, 0.75);
-}
-.v2-data-status.is-projection .v2-data-status-dot {
-  background: transparent;
-  border: 1px dashed #00f0ff;
-  box-shadow: none;
-}
 
 /* Comparison language: the zone is identified by hue, the data type by style. */
 .v2-comp-col.zone-a .v2-chart-card { border-top: 2px solid #00e5ff; }
@@ -2959,7 +2927,6 @@
     border-radius: 0;
     background: transparent;
   }
-  .v2-root .v2-map-header .v2-data-status-dot { display: none; }
   .v2-root .v2-map-data-chip {
     display: inline-flex;
     align-items: center;
@@ -3181,14 +3148,12 @@
   .v2-root .v2-mobile-profile-nav button { color: #d9eaf2; }
   .v2-root .v2-mobile-profile-nav button > span { color: #8cebf4; }
   .v2-root .v2-mobile-profile-nav button.active > span { color: #03172b; }
-  .v2-root .v2-mobile-map-switch { display: flex; width: fit-content; gap: 4px; margin: 0 0 12px; padding: 4px; border: 1px solid rgba(186,204,214,.2); border-radius: 999px; background: rgba(1,16,36,.7); }
-  .v2-root .v2-mobile-map-switch button { min-height: 38px; padding: 0 15px; border: 0; border-radius: 999px; background: transparent; color: #d7e8ef; font-size: 12px; font-weight: 700; }
-  .v2-root .v2-mobile-map-switch button.active { background: #00e5ee; color: #03172b; }
+  .v2-root .v2-mobile-map-control { display: flex; width: fit-content; margin: 0 0 12px; }
   .v2-root .v2-dual-maps { display: block !important; height: auto !important; }
   .v2-root .v2-map-sub { display: none !important; height: min(58vh, 480px) !important; }
   .v2-root .v2-map-sub[data-map-level="districts"] { display: flex !important; }
-  .v2-root:has(.v2-mobile-map-switch button:nth-child(2).active) .v2-map-sub[data-map-level="districts"] { display: none !important; }
-  .v2-root:has(.v2-mobile-map-switch button:nth-child(2).active) .v2-map-sub[data-map-level="neighborhoods"] { display: flex !important; }
+  .v2-root:has(.v2-mobile-map-control button:nth-child(2)[aria-pressed="true"]) .v2-map-sub[data-map-level="districts"] { display: none !important; }
+  .v2-root:has(.v2-mobile-map-control button:nth-child(2)[aria-pressed="true"]) .v2-map-sub[data-map-level="neighborhoods"] { display: flex !important; }
   .v2-root .v2-dual-maps:has(.v2-map-sub[data-map-level="districts"]) { grid-template-columns: 1fr; }
   .v2-root .v2-mobile-filters-open { overscroll-behavior: contain; touch-action: pan-y; }
   .v2-root .v2-filter-actions { align-items: stretch !important; }
@@ -3218,7 +3183,7 @@
 .v2-mobile-section-nav,
 .v2-mobile-filter-backdrop,
 .v2-mobile-filter-commit,
-.v2-mobile-map-switch { display: none !important; }
+.v2-mobile-map-control { display: none !important; }
 
 @media (max-width: 768px) {
   .v2-root .v2-mobile-filter-bar {
@@ -3440,7 +3405,7 @@ body.v2-fullscreen-open .v2-panel.v2-active { transform: none !important; }
   .v2-root .v2-is-fullscreen.v2-map-card { gap: 8px !important; }
   .v2-root .v2-is-fullscreen.v2-map-card .v2-map-header { flex: 0 0 auto; margin-bottom: 0 !important; }
   .v2-root .v2-is-fullscreen.v2-map-card .v2-data-status,
-  .v2-root .v2-is-fullscreen.v2-map-card .v2-mobile-map-switch { display: none !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-mobile-map-control { display: none !important; }
   .v2-root .v2-is-fullscreen.v2-map-card .v2-dual-maps {
     display: grid !important; grid-template-columns: repeat(2, minmax(0,1fr)) !important; gap: 8px !important;
     width: 100%; min-width: 0 !important; min-height: 0 !important; height: calc(100dvh - 170px) !important; flex: 1 1 auto !important; margin: 0 !important;
@@ -3555,7 +3520,7 @@ body.v2-fullscreen-open .v2-panel.v2-active { transform: none !important; }
   .v2-root .v2-is-fullscreen { padding: max(8px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(54px,calc(54px + env(safe-area-inset-bottom))) max(10px,env(safe-area-inset-left)) !important; }
   .v2-root .v2-is-fullscreen .v2-chart-wrap { height: calc(100dvh - 105px) !important; margin-top: 20px; }
   .v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-scroll { max-height: calc(100dvh - 74px) !important; }
-  .v2-root .v2-is-fullscreen.v2-map-card .v2-mobile-map-switch { display: none !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-mobile-map-control { display: none !important; }
   .v2-root .v2-is-fullscreen.v2-map-card .v2-dual-maps { display: grid !important; grid-template-columns: minmax(0,.8fr) minmax(0,1.2fr) !important; gap: 10px !important; height: calc(100dvh - 82px) !important; }
   .v2-root .v2-is-fullscreen.v2-map-card .v2-map-sub { display: flex !important; height: 100% !important; }
   .v2-root .v2-is-fullscreen.v2-map-card .v2-map-legend { position: fixed; right: max(10px,env(safe-area-inset-right)); bottom: max(8px,env(safe-area-inset-bottom)); z-index: 5002; width: min(300px,38vw); margin: 0; padding: 5px 8px; background: rgba(4,20,39,.92); }
@@ -3579,7 +3544,7 @@ body.v2-fullscreen-open .v2-root .v2-filters { display: none !important; }
 .v2-root .v2-is-fullscreen.v2-map-card .v2-map-header .v2-pill { padding: 0; background: transparent; color: #f2f7fb; font-size: 14px; }
 .v2-root .v2-is-fullscreen.v2-map-card .v2-data-status,
 .v2-root .v2-is-fullscreen.v2-map-card .v2-map-header > button:not(.v2-expand-button),
-.v2-root .v2-is-fullscreen.v2-map-card .v2-mobile-map-switch { display: none !important; }
+.v2-root .v2-is-fullscreen.v2-map-card .v2-mobile-map-control { display: none !important; }
 .v2-root .v2-is-fullscreen.v2-map-card .v2-dual-maps {
   display: grid !important; grid-template-columns: minmax(0,.85fr) minmax(0,1.15fr) !important; gap: 10px !important;
   flex: 1 1 0 !important; width: 100%; height: auto !important; min-height: 0 !important; margin: 0 !important;
@@ -3733,7 +3698,7 @@ body.v2-fullscreen-open footer { display: none !important; }
 /* Re-apply mobile-only controls after all desktop and shared component rules. */
 @media (max-width: 768px) {
   .v2-root .v2-mobile-section-nav { display: grid !important; }
-  .v2-root .v2-mobile-map-switch { display: flex !important; }
+  .v2-root .v2-mobile-map-control { display: flex !important; }
   .v2-root .v2-mobile-only-expand { display: inline-flex !important; }
   .v2-root .v2-mobile-filter-backdrop { display: block !important; }
   .v2-root .v2-mobile-filters-open .v2-mobile-filter-commit { display: grid !important; }
@@ -3855,6 +3820,7 @@ body.v2-fullscreen-open footer { display: none !important; }
 }
 
 @media (max-width: 768px), (pointer: coarse) and (max-height: 500px) {
+  .v2-root .v2-mobile-map-control { display: flex !important; width: fit-content; margin: 0 0 12px; }
   .v2-root .v2-explorer-grid {
     grid-template-columns: minmax(0, 1fr) !important;
     grid-template-rows: auto auto auto;
@@ -3894,7 +3860,7 @@ body.v2-fullscreen-open footer { display: none !important; }
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-header { min-height: 36px; }
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-data-status,
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-header > button:not(.v2-expand-button),
-  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-mobile-map-switch,
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-mobile-map-control,
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .v2-map-bottom-sheet,
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-map-card .zona-panel-movil { display: none !important; }
   .v2-root .v2-map-fullscreen-info { display: none; }

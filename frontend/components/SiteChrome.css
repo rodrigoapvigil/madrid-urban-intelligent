@@ -142,11 +142,11 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid rgba(0, 240, 255, 0.45);
+  border: 1px solid rgba(224, 242, 255, 0.72);
   border-radius: 8px;
-  color: #011024 !important;
-  background: linear-gradient(135deg, #00F0FF 0%, #7928CA 100%);
-  box-shadow: 0 4px 16px rgba(0, 45, 84, 0.35), 0 0 16px rgba(0, 240, 255, 0.30);
+  color: #06162d !important;
+  background: linear-gradient(110deg, #d9fbff 0%, #e9f1ff 72%, #f1e5ff 100%);
+  box-shadow: 0 5px 18px rgba(140, 198, 232, 0.18);
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0.06em;
@@ -157,16 +157,16 @@
 }
 
 .mi-header__cta:hover {
-  background: linear-gradient(135deg, #33F3FF 0%, #8E3CE6 100%);
-  filter: brightness(1.08);
+  background: linear-gradient(110deg, #e8fdff 0%, #f0f5ff 72%, #f7edff 100%);
+  filter: none;
   transform: translateY(-1px);
-  box-shadow: 0 6px 22px rgba(0, 45, 84, 0.45), 0 0 24px rgba(0, 240, 255, 0.50);
+  box-shadow: 0 7px 22px rgba(140, 198, 232, 0.24);
 }
 
 .mi-header__cta svg {
   width: 14px;
   height: 14px;
-  stroke: #011024;
+  stroke: #06162d;
   stroke-width: 2.5;
 }
 
@@ -826,33 +826,7 @@
   }
 }
 
-/* Brand-aligned refinements: pale glass CTA and understated mobile menu. */
-.mi-header__cta {
-  border-color: rgba(224, 242, 255, 0.72);
-  color: #06162d !important;
-  background: linear-gradient(110deg, #d9fbff 0%, #e9f1ff 72%, #f1e5ff 100%);
-  box-shadow: 0 5px 18px rgba(140, 198, 232, 0.18);
-}
-.mi-header__cta:hover {
-  background: linear-gradient(110deg, #e8fdff 0%, #f0f5ff 72%, #f7edff 100%);
-  filter: none;
-  box-shadow: 0 7px 22px rgba(140, 198, 232, 0.24);
-}
-.mi-header__cta svg { stroke: #06162d; }
-.mi-header__cta--secondary {
-  min-height: 40px;
-  border-color: rgba(186, 204, 214, 0.28);
-  color: #d7e5ef !important;
-  background: rgba(255, 255, 255, 0.035);
-  box-shadow: none;
-  font-weight: 550;
-}
-.mi-header__cta--secondary:hover {
-  color: #ffffff !important;
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: none;
-}
-.mi-header__cta--secondary svg { stroke: currentColor; }
+/* Brand-aligned refinement: understated mobile menu. */
 .mi-header__menu-btn {
   border: 0;
   background: rgba(24, 57, 87, 0.72);

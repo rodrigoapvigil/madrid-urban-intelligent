@@ -1,0 +1,49 @@
+.dashboard-help-button {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 5px 12px;
+  border: 1px solid rgba(0, 229, 255, .52);
+  border-radius: 999px;
+  background: rgba(1, 16, 36, .82);
+  color: #dceaf2;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color .16s ease, border-color .16s ease, color .16s ease;
+}
+
+.dashboard-help-button:hover {
+  border-color: #00e5ff;
+  background: rgba(0, 229, 255, .12);
+  color: #fff;
+}
+
+.dashboard-help-button:focus-visible {
+  outline: 2px solid #00e5ff;
+  outline-offset: 2px;
+}
+
+.dashboard-help-button__icon {
+  display: inline-grid;
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  place-items: center;
+  border: 1px solid rgba(0, 229, 255, .72);
+  border-radius: 50%;
+  color: #00e5ff;
+  font-family: Georgia, serif;
+  font-size: 11px;
+  font-style: italic;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-help-button { transition: none; }
+}

@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { cssColorResolverPlugin, colorWithAlpha, resolveCssColor } from '../lib/colors';
-import { Activity, Building2, ChevronDown, HelpCircle, Database, Home, MapPinned, Maximize2, RotateCcw, RotateCw, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Activity, Building2, ChevronDown, Database, Home, MapPinned, Maximize2, RotateCcw, RotateCw, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
 import './MadridDashboardV2.css';
 import { apiFetch } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
@@ -19,6 +19,7 @@ import { useComparacion } from '../hooks/useComparacion';
 import { useZonaSeleccionada } from '../hooks/useZonaSeleccionada';
 import { FichaZonaDesktop, FichaZonaMovil } from './ZonaSelectionPanels';
 import SegmentedControl from './SegmentedControl';
+import DashboardHelpButton from './DashboardHelpButton';
 import ZoneDropdownList from './ZoneDropdownList';
 import { DashboardMapLegend, DashboardMapStatus } from './DashboardMapChrome';
 import DashboardSelect from './DashboardSelect';
@@ -2787,49 +2788,11 @@ const MadridDashboardV2: React.FC = () => {
           </>}
           {/* BOTONES DE ACCIÓN EN ALTO CONTRASTE */}
           <div className="v2-filter-actions">
-            <button
+            <DashboardHelpButton
               onClick={() => setShowHelpModal(true)}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '7px',
-                background: 'rgba(1, 16, 36, 0.92)',
-                border: '1.5px solid #00F0FF',
-                borderRadius: '20px',
-                padding: '6px 14px',
-                fontSize: '11px',
-                fontWeight: '700',
-                color: '#FFFFFF',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
-                whiteSpace: 'nowrap'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(0, 240, 255, 0.18)';
-                e.currentTarget.style.boxShadow = '0 0 14px rgba(0, 240, 255, 0.45)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(1, 16, 36, 0.92)';
-                e.currentTarget.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.5)';
-              }}
+              label="¿Cómo entender estos precios?"
               title="Aprende a interpretar los datos reales y las proyecciones"
-            >
-              <span style={{
-                width: '16px',
-                height: '16px',
-                borderRadius: '50%',
-                backgroundColor: '#FFFFFF',
-                color: '#011024',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '10px',
-                fontWeight: '900',
-                fontFamily: 'sans-serif'
-              }}>i</span>
-              <span style={{ color: '#FFFFFF', fontWeight: '700' }}>¿Cómo entender estos precios?</span>
-            </button>
+            />
 
             {isMobile && <div className="v2-mobile-filter-commit">
               <button type="button" className="v2-mobile-filter-apply" onClick={applyMobileFilters}>Aplicar ({Number(draftFilters.district !== 'Todos') + Number(draftFilters.barrio !== 'Todos') + Number(draftFilters.year !== latestAvailablePeriod.year || draftFilters.month !== latestAvailablePeriod.month)})</button>
@@ -3701,9 +3664,14 @@ const MadridDashboardV2: React.FC = () => {
                       : 'Toca un distrito o barrio para ver sus datos'}
                   </div>
 
-                  <div className="v2-mobile-map-switch" role="group" aria-label="Nivel del mapa">
-                    <button type="button" className={mapLevel === 'districts' ? 'active' : ''} aria-pressed={mapLevel === 'districts'} onClick={() => { setMapLevel('districts'); clearSelection(); }}>Distritos</button>
-                    <button type="button" className={mapLevel === 'neighborhoods' ? 'active' : ''} aria-pressed={mapLevel === 'neighborhoods'} onClick={() => setMapLevel('neighborhoods')}>Barrios</button>
+                  <div className="v2-mobile-map-control">
+                    <SegmentedControl<'districts' | 'neighborhoods'>
+                      label="Nivel del mapa"
+                      size="md"
+                      value={mapLevel}
+                      options={[{ value: 'districts', label: 'Distritos' }, { value: 'neighborhoods', label: 'Barrios' }] as const}
+                      onChange={value => { setMapLevel(value); if (value === 'districts') clearSelection(); }}
+                    />
                   </div>
                   <div className="v2-dual-maps">
                     <div className="v2-map-sub" data-map-level="districts">
@@ -3849,48 +3817,7 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-heatmap-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
                     <span>{activeProfile.id === 'inversion' ? 'Evolución mensual de rentabilidad (%)' : activeProfile.id === 'alquiler' ? 'Evolución mensual del alquiler (€/m²)' : 'Evolución mensual de venta (€/m²)'}</span>
                     <FullscreenToggle targetSelector=".v2-heatmap-card" mobilePlatform={isMobile} />
-                    <button
-                      onClick={() => setShowHeatmapHelpModal(true)}
-                      style={{
-                        background: 'rgba(1, 16, 36, 0.92)',
-                        border: '1.5px solid #00F0FF',
-                        borderRadius: '20px',
-                        padding: '5px 14px',
-                        fontSize: '11px',
-                        fontWeight: '700',
-                        color: '#FFFFFF',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '7px',
-                        transition: 'all 0.2s ease',
-                        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
-                        whiteSpace: 'nowrap'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgba(0, 240, 255, 0.18)';
-                        e.currentTarget.style.boxShadow = '0 0 14px rgba(0, 240, 255, 0.45)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgba(1, 16, 36, 0.92)';
-                        e.currentTarget.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.5)';
-                      }}
-                    >
-                      <span style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '15px',
-                        height: '15px',
-                        borderRadius: '50%',
-                        backgroundColor: '#FFFFFF',
-                        color: '#011024',
-                        fontSize: '10px',
-                        fontWeight: '900',
-                        fontFamily: 'sans-serif'
-                      }}>i</span>
-                      <span style={{ color: '#FFFFFF', fontWeight: '700' }}>¿Cómo usar el mapa de calor?</span>
-                    </button>
+                    <DashboardHelpButton onClick={() => setShowHeatmapHelpModal(true)} label="¿Cómo usar el mapa de calor?" />
                   </div>
                   {Number(selectedYear) === 2026 && (
                     <div style={{ fontSize: '12px', color: '#dbe9f2', marginBottom: '12px', paddingLeft: '4px' }}>
@@ -3927,21 +3854,13 @@ const MadridDashboardV2: React.FC = () => {
                       <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>
                         Actividad de mercado por {liquidityLevel === 'distrito' ? 'Distrito' : 'Barrio'}
                       </h3>
-                      {isMobile ? (
-                        <div className="v2-tabs-bg small">
-                          <span className="v2-indicator" style={{ transform: `translateX(${liquidityLevel === 'distrito' ? '0' : '100%'})`, width: '80px' }} />
-                          <button type="button" className={`v2-tab-btn ${liquidityLevel === 'distrito' ? 'active' : ''}`} style={{ minWidth: '80px' }} onClick={() => setLiquidityLevel('distrito')}>Distritos</button>
-                          <button type="button" className={`v2-tab-btn ${liquidityLevel === 'barrio' ? 'active' : ''}`} style={{ minWidth: '80px' }} onClick={() => setLiquidityLevel('barrio')}>Barrios</button>
-                        </div>
-                      ) : (
-                        <SegmentedControl<'distrito' | 'barrio'>
-                          label="Nivel de actividad de mercado"
-                          size="md"
-                          value={liquidityLevel}
-                          options={[{ value: 'distrito', label: 'Distritos' }, { value: 'barrio', label: 'Barrios' }] as const}
-                          onChange={setLiquidityLevel}
-                        />
-                      )}
+                      <SegmentedControl<'distrito' | 'barrio'>
+                        label="Nivel de actividad de mercado"
+                        size="md"
+                        value={liquidityLevel}
+                        options={[{ value: 'distrito', label: 'Distritos' }, { value: 'barrio', label: 'Barrios' }] as const}
+                        onChange={setLiquidityLevel}
+                      />
                     </div>
                     <div style={{ fontSize: '13px', fontWeight: '600', color: '#BACCD6', marginBottom: '20px' }}>
                       Responde: ¿Dónde se cierran más operaciones?
@@ -4027,7 +3946,7 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                 </div>
                 {!isMobile && <div className="v2-compare-desktop-toolbar">
-                  <button type="button" className="v2-compare-help" onClick={() => setShowCompareHelpModal(true)}><HelpCircle size={15} /> ¿Cómo usar la comparación?</button>
+                  <DashboardHelpButton className="v2-compare-help" onClick={() => setShowCompareHelpModal(true)} label="¿Cómo usar la comparación?" />
                   <div className="v2-segmented-with-label">
                     <span>Ver por:</span>
                     <SegmentedControl<'Distritos' | 'Barrios'>

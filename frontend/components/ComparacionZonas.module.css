@@ -32,11 +32,6 @@
 :global(.v2-root) .desktop :global(.v2-comparison-zoom-controls button:hover) { border-color: rgba(0,229,255,.45); color: #00e5ff; }
 
 :global(.v2-root) .desktop :global(.v2-compare-desktop-toolbar) { display: flex; align-items: center; gap: 16px; margin-left: auto; }
-:global(.v2-root) .desktop :global(.v2-compare-help) {
-  min-height: 38px; padding: 0 12px; border: 1px solid rgba(0,229,255,.48); border-radius: 999px;
-  background: transparent; color: #d9e8f0; font: inherit; font-size: 12px; font-weight: 650; cursor: pointer;
-}
-:global(.v2-root) .desktop :global(.v2-compare-help:hover) { background: rgba(0,229,255,.1); color: #00e5ff; }
 :global(.v2-root) .desktop :global(.v2-compare-selectors-sticky) { position: static !important; }
 :global(.v2-root) .desktop :global(.v2-compare-zone-selectors) { grid-template-columns: minmax(0,1fr) minmax(0,1fr) !important; gap: 14px !important; margin-bottom: 18px !important; }
 :global(.v2-root) .desktop :global(.v2-compare-swap) { display: none !important; }

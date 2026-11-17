@@ -1,6 +1,7 @@
 'use client';
 
 import React, { ReactNode } from 'react';
+import DashboardHelpButton from './DashboardHelpButton';
 
 export function DashboardMapStatus({
   isMobile,
@@ -28,7 +29,6 @@ export function DashboardMapStatus({
   return (
     <div className="v2-map-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', marginBottom: '16px' }}>
       <div className={`v2-data-status ${isProjection ? 'is-projection' : 'is-real'}`} role="status" aria-live="polite">
-        <span className="v2-data-status-dot" aria-hidden="true" />
         {isMobile ? (
           <span><strong>{mobileStatus}</strong> · Último dato observado: {observedMonth} de {observedYear} · estimaciones desde {firstProjectionMonth}. Estimación estadística basada en datos oficiales hasta {observedMonth}; no es una tasación ni una garantía de precios futuros.</span>
         ) : (
@@ -36,16 +36,7 @@ export function DashboardMapStatus({
         )}
       </div>
       {!isMobile && <span className="v2-map-data-note">Desde {firstProjectionMonth}: estimación estadística basada en datos oficiales. No es una tasación ni una garantía de precios futuros.</span>}
-      <button
-        className="v2-map-help-button"
-        onClick={onHelp}
-        style={{ background: 'rgba(1, 16, 36, 0.92)', border: '1.5px solid #00F0FF', borderRadius: '16px', padding: '5px 14px', fontSize: '11px', fontWeight: '600', color: '#FFFFFF', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', transition: 'all 0.2s', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.4)' }}
-        onMouseEnter={event => { event.currentTarget.style.backgroundColor = 'rgba(0, 240, 255, 0.16)'; event.currentTarget.style.boxShadow = '0 0 12px rgba(0, 240, 255, 0.35)'; }}
-        onMouseLeave={event => { event.currentTarget.style.backgroundColor = 'rgba(1, 16, 36, 0.92)'; event.currentTarget.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.4)'; }}
-      >
-        <span style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#FFFFFF', color: '#011024', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: '10px', fontWeight: '800' }}>i</span>
-        <span>¿Cómo usar el mapa?</span>
-      </button>
+      <DashboardHelpButton className="v2-map-help-button" onClick={onHelp} label="¿Cómo usar el mapa?" />
       {children}
     </div>
   );

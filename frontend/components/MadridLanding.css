@@ -143,44 +143,6 @@
 .mi-nav { display: flex; align-items: center; justify-content: center; gap: clamp(20px,3vw,48px); }
 .mi-nav a, .mi-footer nav a { min-height: 44px; display: inline-flex; align-items: center; color: var(--mi-silver); font-size: 11px; font-weight: 500; letter-spacing: .105em; text-transform: uppercase; transition: color .2s ease; }
 .mi-nav a:hover, .mi-footer nav a:hover { color: var(--mi-mist); }
-.mi-header__cta {
-  justify-self: end;
-  min-height: 42px;
-  padding: 0 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  border: 1px solid rgba(0, 240, 255, 0.45);
-  border-radius: 8px;
-  color: #011024 !important;
-  background: linear-gradient(135deg, #00F0FF 0%, #7928CA 100%);
-  box-shadow: 0 4px 16px rgba(0, 45, 84, 0.35), 0 0 16px rgba(0, 240, 255, 0.30);
-  font-family: var(--mi-font);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: .06em;
-  text-transform: uppercase;
-  transition: all .2s ease;
-}
-.mi-header__cta:hover {
-  background: linear-gradient(135deg, #33F3FF 0%, #8E3CE6 100%);
-  filter: brightness(1.08);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 22px rgba(0, 45, 84, 0.45), 0 0 24px rgba(0, 240, 255, 0.50);
-}
-.mi-header__cta svg {
-  width: 14px;
-  height: 14px;
-  stroke: #011024;
-  stroke-width: 2.5;
-}
-.mi-header__cta svg {
-  width: 14px;
-  height: 14px;
-  stroke: var(--color-navy-800);
-  stroke-width: 2.5;
-}
 
 
 .mi-hero__cta-main, .mi-button {

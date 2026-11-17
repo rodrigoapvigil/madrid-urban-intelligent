@@ -103,7 +103,7 @@ export function SiteHeader({
         {/* Desktop CTA Button (hidden on mobile) */}
         <Link
           href={effectiveCtaHref}
-          className={`mi-header__cta${effectiveCtaHref === '/contacto' ? ' mi-header__cta--secondary' : ''}`}
+          className="mi-header__cta"
         >
           {effectiveCtaText}{' '}
           <ArrowUpRight size={14} aria-hidden="true" />
