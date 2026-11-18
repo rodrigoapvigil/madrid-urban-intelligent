@@ -3809,7 +3809,10 @@ const MadridDashboardV2: React.FC = () => {
             <div className="v2-explorer-grid">
               <div className="v2-explorer-header">
                 <div className="v2-rank-heading">
-                  <div className="v2-rank-title">Ranking y evolución por {rankingLevel.toLocaleLowerCase('es')}</div>
+                  <div className="v2-rank-title-row">
+                    <div className="v2-rank-title">Ranking y evolución por {rankingLevel.toLocaleLowerCase('es')}</div>
+                    <button type="button" className="v2-compare-help-inline" aria-label="Cómo leer el ranking y la evolución" title="Cómo leer el ranking y la evolución" onClick={() => setShowHeatmapHelpModal(true)}><HelpCircle size={15} /></button>
+                  </div>
                   <div className="v2-rank-desc">Dónde es más barato alquilar y cómo cambia el precio mes a mes</div>
                 </div>
                 <div className="v2-rank-settings">
@@ -3858,56 +3861,9 @@ const MadridDashboardV2: React.FC = () => {
               <div className="v2-explorer-col v2-heatmap-area" data-dashboard-section="heatmap">
                 <div className="v2-heatmap-card">
                   <div className="v2-heatmap-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                    <span>{activeProfile.id === 'inversion' ? 'Evolución mensual de rentabilidad (%)' : activeProfile.id === 'alquiler' ? 'Evolución mensual del alquiler (€/m²)' : 'Evolución mensual de venta (€/m²)'}</span>
+                    <span>{activeProfile.id === 'inversion' ? 'Evolución de rentabilidad (%)' : activeProfile.id === 'alquiler' ? 'Evolución del alquiler (€/m²)' : activeProfile.id === 'compra' ? 'Evolución del precio de compra (€/m²)' : 'Evolución del precio de venta (€/m²)'}</span>
                     {isMobile && <FullscreenToggle targetSelector=".v2-heatmap-card" mobilePlatform />}
-                    <button
-                      onClick={() => setShowHeatmapHelpModal(true)}
-                      style={{
-                        background: 'rgba(1, 16, 36, 0.92)',
-                        border: '1.5px solid #00F0FF',
-                        borderRadius: '20px',
-                        padding: '5px 14px',
-                        fontSize: '11px',
-                        fontWeight: '700',
-                        color: '#FFFFFF',
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '7px',
-                        transition: 'all 0.2s ease',
-                        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
-                        whiteSpace: 'nowrap'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgba(0, 240, 255, 0.18)';
-                        e.currentTarget.style.boxShadow = '0 0 14px rgba(0, 240, 255, 0.45)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgba(1, 16, 36, 0.92)';
-                        e.currentTarget.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.5)';
-                      }}
-                    >
-                      <span style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '15px',
-                        height: '15px',
-                        borderRadius: '50%',
-                        backgroundColor: '#FFFFFF',
-                        color: '#011024',
-                        fontSize: '10px',
-                        fontWeight: '900',
-                        fontFamily: 'sans-serif'
-                      }}>i</span>
-                      <span style={{ color: '#FFFFFF', fontWeight: '700' }}>¿Cómo usar el mapa de calor?</span>
-                    </button>
                   </div>
-                  {Number(selectedYear) === 2026 && (
-                    <div style={{ fontSize: '12px', color: '#dbe9f2', marginBottom: '12px', paddingLeft: '4px' }}>
-                      * Nota: los datos reales llegan hasta <strong>{latestRealMonth} de {latestRealYear}</strong>; desde <strong>{firstProjectionMonth}</strong> son <strong>estimaciones</strong>. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un valor €/m² más alto.'}
-                    </div>
-                  )}
                   <input className="v2-heatmap-search" type="search" value={heatmapSearch} onChange={event => setHeatmapSearch(event.target.value)} placeholder={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'}…`} aria-label={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'} en el mapa de calor`} />
                   <DashboardHeatmapTable
                     rows={filteredHeatmapRows}
@@ -3920,6 +3876,11 @@ const MadridDashboardV2: React.FC = () => {
                     selectedMonth={selectedMonth}
                     formatValue={value => formatNumber(activeProfile.id === 'inversion' ? value * 100 : value, 1)}
                   />
+                  {Number(selectedYear) === 2026 && (
+                    <div className="v2-heatmap-data-note">
+                      Datos reales hasta <strong>{latestRealMonth} de {latestRealYear}</strong>; desde <strong>{firstProjectionMonth}</strong>, estimaciones. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un precio €/m² más alto.'}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
