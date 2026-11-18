@@ -4380,8 +4380,10 @@ body.v2-fullscreen-open footer { display: none !important; }
 
 /* Keep the ranking heading as a compact, top-aligned title/subtitle pair. */
 .v2-root .v2-explorer-header .v2-rank-heading {
-  align-self: center;
-  align-content: center;
+  flex: 1 1 auto;
+  align-self: flex-start;
+  align-content: start;
+  min-width: 0;
   grid-template-rows: auto auto;
   gap: 7px;
 }
@@ -4397,7 +4399,7 @@ body.v2-fullscreen-open footer { display: none !important; }
 }
 .v2-root .v2-explorer-header .v2-rank-desc {
   align-self: start;
-  max-width: 58ch;
+  max-width: min(100%, 900px);
   margin: 0 !important;
   padding: 0 !important;
   color: #aebfcd;
