@@ -4376,6 +4376,33 @@ body.v2-fullscreen-open footer { display: none !important; }
   .v2-root .v2-explorer-header .v2-rank-settings { flex-direction: row !important; flex-wrap: nowrap; align-items: center; justify-content: flex-end; gap: 12px; width: auto; }
   .v2-root .v2-explorer-header .v2-rank-settings > * { flex: 0 0 auto; }
 }
+
+/* Keep the ranking heading as a compact, top-aligned title/subtitle pair. */
+.v2-root .v2-explorer-header .v2-rank-heading {
+  align-self: center;
+  align-content: center;
+  grid-template-rows: auto auto;
+  gap: 7px;
+}
+.v2-root .v2-explorer-header .v2-rank-title-row {
+  min-height: 0;
+  align-items: center;
+  gap: 9px;
+}
+.v2-root .v2-explorer-header .v2-rank-title {
+  font-size: 23px !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.035em;
+}
+.v2-root .v2-explorer-header .v2-rank-desc {
+  align-self: start;
+  max-width: 58ch;
+  margin: 0 !important;
+  padding: 0 !important;
+  color: #aebfcd;
+  font-size: 14px;
+  line-height: 1.4;
+}
 @media (min-width: 769px) {
   .v2-root .v2-heatmap-card:not(.v2-is-fullscreen) .v2-heatmap-scroll { flex-basis: 560px !important; height: 560px !important; min-height: 560px !important; max-height: 560px !important; }
   .v2-root .v2-heatmap-table { border-collapse: separate !important; border-spacing: 0 !important; }
