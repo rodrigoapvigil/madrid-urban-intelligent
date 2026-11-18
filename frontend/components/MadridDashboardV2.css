@@ -4274,13 +4274,21 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-map-help-button { margin-right: auto; padding: 7px 12px !important; border-radius: 999px !important; box-shadow: none !important; font-size: 11px !important; }
 .v2-root .v2-map-period-slot { position: relative; z-index: 50; margin-left: auto; }
 .v2-root .v2-period-selector { position: relative; z-index: 50; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-.v2-root .v2-period-arrow { display: grid; place-items: center; width: 30px; height: 36px; padding: 0; border: 0; background: transparent; color: #a8bdce; font-size: 23px; cursor: pointer; }
+.v2-root .v2-period-arrow { display: grid; place-items: center; width: 30px; height: 44px; padding: 0; border: 0; background: transparent; color: #a8bdce; font-size: 23px; cursor: pointer; transition: color .16s ease, background .16s ease, transform .12s ease; }
 .v2-root .v2-period-arrow:hover:not(:disabled) { color: #fff; }
 .v2-root .v2-period-arrow:disabled { opacity: .35; cursor: default; }
-.v2-root .v2-period-trigger { display: inline-flex; align-items: center; gap: 8px; min-height: 38px; padding: 5px 9px 5px 12px; border: 1px solid rgba(0,229,255,.5); border-radius: 12px; background: #0b2037; color: #e3edf4; cursor: pointer; }
+.v2-root .v2-period-trigger { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 5px 9px 5px 12px; border: 1px solid rgba(0,229,255,.5); border-radius: 12px; background: #0b2037; color: #e3edf4; cursor: pointer; transition: background .16s ease, border-color .16s ease, box-shadow .16s ease, transform .12s ease; }
 .v2-root .v2-period-trigger strong { font-size: 13px; font-weight: 700; }
 .v2-root .v2-period-trigger .v2-estado-badge { font-size: 8px; }
-.v2-root .v2-period-chevron { color: #91aabe; font-size: 15px; line-height: 1; }
+.v2-root .v2-period-chevron { flex: 0 0 auto; color: #a8bdce; }
+.v2-root .v2-period-trigger:hover { border-color: rgba(0,229,255,.55); background: rgba(0,229,255,.06); }
+.v2-root .v2-period-arrow:active:not(:disabled),
+.v2-root .v2-period-trigger:active { transform: scale(.97); }
+.v2-root .v2-period-arrow:focus-visible,
+.v2-root .v2-period-trigger:focus-visible,
+.v2-root .v2-period-year-row button:focus-visible,
+.v2-root .v2-period-month-grid button:focus-visible,
+.v2-root .v2-period-shortcuts button:focus-visible { outline: 2px solid #00e5ff; outline-offset: 2px; }
 .v2-root .v2-period-popover { position: absolute; top: calc(100% + 8px); right: 0; z-index: 20000; width: 286px; padding: 12px; border: 1px solid rgba(0,229,255,.28); border-radius: 14px; background: #06182b; box-shadow: 0 18px 44px rgba(0,0,0,.55); }
 .v2-root .v2-period-year-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; color: #edf5fa; }
 .v2-root .v2-period-year-row button { width: 32px; height: 30px; border: 0; border-radius: 8px; background: transparent; color: #b8cbd9; font-size: 20px; cursor: pointer; }

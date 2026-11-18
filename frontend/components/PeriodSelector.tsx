@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
+import EstadoBadge from './EstadoBadge';
 
 const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
@@ -27,11 +29,13 @@ export default function PeriodSelector({ year, month, years, latestReal, onChang
   const availableYears = years.length ? years : ['2023', '2024', '2025', '2026', '2027', '2028'];
 
   return <div className="v2-period-selector" data-period-selector>
-    <button type="button" className="v2-period-arrow" aria-label="Periodo anterior" onClick={() => move(-1)}>‹</button>
+    <button type="button" className="v2-period-arrow" aria-label="Mes anterior" onClick={() => move(-1)}>‹</button>
     <button type="button" className={`v2-period-trigger ${open ? 'is-open' : ''}`} aria-label={`${month} ${year}, ${estimated ? 'estimación' : 'dato real'}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { setCalendarYear(year); setOpen(value => !value); }}>
-      <strong>{month} {year}</strong><span className="v2-period-chevron" aria-hidden="true">⌄</span>
+      <strong>{month} {year}</strong>
+      <EstadoBadge status={estimated ? 'estimate' : 'real'} />
+      <ChevronDown className="v2-period-chevron" size={16} strokeWidth={2.25} aria-hidden="true" />
     </button>
-    <button type="button" className="v2-period-arrow" aria-label="Periodo siguiente" onClick={() => move(1)}>›</button>
+    <button type="button" className="v2-period-arrow" aria-label="Mes siguiente" onClick={() => move(1)}>›</button>
     {open && <div className="v2-period-popover" role="dialog" aria-label="Elegir periodo">
       <div className="v2-period-year-row">
         <button type="button" aria-label="Año anterior" disabled={Number(calendarYear) <= Number(availableYears[0])} onClick={() => setCalendarYear(String(Number(calendarYear) - 1))}>‹</button>
@@ -41,7 +45,7 @@ export default function PeriodSelector({ year, month, years, latestReal, onChang
       <div className="v2-period-month-grid">{MONTHS.map((name, monthIndex) => {
         const isEstimate = Number(calendarYear) > Number(latestReal.year) || (calendarYear === latestReal.year && monthIndex > latestMonth);
         const selected = calendarYear === year && name === month;
-        return <button key={name} type="button" className={`${isEstimate ? 'is-estimate' : ''} ${selected ? 'is-selected' : ''}`} aria-pressed={selected} onClick={() => { onChange(calendarYear, name); setOpen(false); }}>{name.slice(0, 3)}</button>;
+        return <button key={name} type="button" className={`${isEstimate ? 'is-estimate' : ''} ${selected ? 'is-selected' : ''}`} aria-label={`${name} ${calendarYear}${isEstimate ? ', estimación' : ', dato real'}`} aria-pressed={selected} onClick={() => { onChange(calendarYear, name); setOpen(false); }}>{name.slice(0, 3)}</button>;
       })}</div>
       <div className="v2-period-shortcuts">
         <button type="button" onClick={() => { onChange(latestReal.year, latestReal.month); setOpen(false); }}>Último dato real</button>
