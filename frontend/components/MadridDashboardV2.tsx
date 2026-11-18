@@ -3674,7 +3674,8 @@ const MadridDashboardV2: React.FC = () => {
                   />
                   {Number(selectedYear) === 2026 && (
                     <div className="v2-heatmap-data-note">
-                      Datos reales hasta <strong>{latestRealMonth} de {latestRealYear}</strong>; desde <strong>{firstProjectionMonth}</strong>, estimaciones. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un precio €/m² más alto.'}
+                      <span>Datos reales hasta <strong>{latestRealMonth} de {latestRealYear}</strong>; desde <strong>{firstProjectionMonth}</strong>, son estimaciones.</span>
+                      <span>{activeProfile.id === 'inversion' ? 'Los tonos más brillantes indican mayor rentabilidad.' : 'Los tonos más brillantes indican precios €/m² más altos.'}</span>
                     </div>
                   )}
                 </div>
