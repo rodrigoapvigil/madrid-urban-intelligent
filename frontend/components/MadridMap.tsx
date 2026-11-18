@@ -45,23 +45,6 @@ const MADRID_NAME_EXCEPTIONS: Record<string, string> = {
 };
 const formatMadridName = (value: string) => MADRID_NAME_EXCEPTIONS[value] || value;
 
-const getProfileAccentColor = (profile: string): string => {
-  const p = normalize(profile);
-  if (p.includes('alquiler')) return '#00F0FF';
-  if (p.includes('compra')) return '#A855F7';
-  if (p.includes('venta')) return '#FF5C5C';
-  if (p.includes('inversion')) return '#00E5FF';
-  return '#00F0FF';
-};
-
-const getProfileKey = (profile: string): 'alquiler' | 'compra' | 'venta' | 'inversion' => {
-  const p = normalize(profile);
-  if (p.includes('compra')) return 'compra';
-  if (p.includes('venta')) return 'venta';
-  if (p.includes('invers')) return 'inversion';
-  return 'alquiler';
-};
-
 const getChoroplethTier = (val: number, profile: string): number => {
   if (!val || val <= 0) return 0;
   const p = normalize(profile);
@@ -196,7 +179,7 @@ function getPatternDefsMarkup(instanceId: string): string {
   }
 
   // Explicit pattern for areas without an observation in the selected period.
-  markup += `<pattern id="no-data-pat-${instanceId}" width="8" height="8" patternUnits="userSpaceOnUse"><rect width="8" height="8" fill="#17263b" /><path d="M-2 2L2-2M0 8L8 0M6 10L10 6" stroke="#71859a" stroke-width="1" opacity="0.65" /></pattern>`;
+  markup += `<pattern id="no-data-pat-${instanceId}" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="#17263b" /><path d="M-2 2L2-2M0 10L10 0M8 12L12 8" stroke="#71859a" stroke-width="0.8" opacity="0.48" /></pattern>`;
 
   // Hover pattern
   markup += `<pattern id="dot-pat-${instanceId}-hover" width="5.0" height="5.0" patternUnits="userSpaceOnUse"><rect width="5.0" height="5.0" fill="#003566" fill-opacity="0.96" /><circle cx="1.25" cy="1.25" r="2.0" fill="#00f0ff" /><circle cx="1.25" cy="1.25" r="1.0" fill="#ffffff" /><circle cx="3.75" cy="3.75" r="2.0" fill="#00f0ff" /><circle cx="3.75" cy="3.75" r="1.0" fill="#ffffff" /></pattern>`;
@@ -240,8 +223,6 @@ const MadridMap: React.FC<MapProps> = ({
   const onZoneHoverRef = useRef(onZoneHover);
   const hasInitialViewRef = useRef(false);
   const containerId = useRef(`map-${type}-${Math.random().toString(36).slice(2, 11)}`).current;
-  const accentColor = getProfileAccentColor(selectedProfile);
-  const profileKey = getProfileKey(selectedProfile);
   onZoneHoverRef.current = onZoneHover;
 
   useEffect(() => () => {
@@ -291,9 +272,9 @@ const MadridMap: React.FC<MapProps> = ({
     return {
       // Use five solid choropleth steps so the map reads as data, not texture.
       fillColor: !hasObservedValue ? `url(#no-data-pat-${containerId})` : TIER_CONFIGS[tier].baseFill,
-      weight: isCompareA || isCompareB ? 2.5 : isSelected ? 3 : type === 'districts' ? 1.2 : 0.85,
+      weight: isCompareA || isCompareB ? 2.5 : isSelected ? 3 : type === 'districts' ? 1.2 : 0.55,
       opacity: isExcluded ? 0.20 : 0.95,
-      color: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
+      color: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#FFFFFF' : type === 'districts' ? 'rgba(0, 240, 255, 0.45)' : 'rgba(111, 183, 203, 0.48)',
       fillOpacity: isExcluded ? 0.25 : 1.0,
     };
   }, [data, selectedDistrict, selectedBarrio, selectedZone, selectedZoneType, type, selectedProfile, compareZoneA, compareZoneB, containerId]);
@@ -308,16 +289,14 @@ const MadridMap: React.FC<MapProps> = ({
         zoomDelta: 0.5,
         zoomControl: false,
         attributionControl: false,
-        dragging: false,
-        touchZoom: false,
+        dragging: true,
+        touchZoom: true,
         scrollWheelZoom: false,
         doubleClickZoom: false,
         boxZoom: false,
         keyboard: false
       });
 
-      mapRef.current.dragging?.disable();
-      mapRef.current.touchZoom?.disable();
       mapRef.current.doubleClickZoom?.disable();
       mapRef.current.scrollWheelZoom?.disable();
       mapRef.current.boxZoom?.disable();
@@ -325,35 +304,50 @@ const MadridMap: React.FC<MapProps> = ({
     };
     initializeMap();
 
+    const getContextBounds = () => {
+      const layer = geoJsonLayerRef.current;
+      if (!layer) return null;
+      const bounds = L.latLngBounds([]);
+      if (drillDownOnSelection && selectedBarrio && type === 'neighborhoods') {
+        layer.eachLayer((featureLayer: any) => {
+          const props = featureLayer.feature?.properties || {};
+          const name = props.barrio || props.name || props.nombre;
+          if (name && normalize(name) === normalize(selectedBarrio)) bounds.extend(featureLayer.getBounds());
+        });
+      } else if (drillDownOnSelection && selectedDistrict) {
+        layer.eachLayer((featureLayer: any) => {
+          const props = featureLayer.feature?.properties || {};
+          const name = type === 'districts'
+            ? props.distrito || props.name || props.nombre || props.distrito_nombre
+            : props.distrito || props.nombre || props.name || props.distrito_nombre;
+          if (name && normalize(name) === normalize(selectedDistrict)) bounds.extend(featureLayer.getBounds());
+        });
+      }
+      return bounds.isValid() ? bounds : layer.getBounds();
+    };
+    const fitMapToContext = () => {
+      const map = mapRef.current;
+      const bounds = getContextBounds();
+      if (!map || !bounds?.isValid()) return false;
+      const size = map.getSize();
+      if (size.x <= 0 || size.y <= 0) return false;
+      const padding: [number, number] = [Math.max(14, Math.round(size.x * 0.035)), Math.max(14, Math.round(size.y * 0.035))];
+      const hasSelectedContext = drillDownOnSelection && Boolean(selectedBarrio || selectedDistrict);
+      map.fitBounds(bounds, {
+        padding,
+        ...(hasSelectedContext ? { maxZoom: type === 'neighborhoods' && selectedBarrio ? 12.2 : 11.5 } : {}),
+        animate: false,
+      });
+      return true;
+    };
+
     const handleResize = () => {
       const map = mapRef.current;
       const container = document.getElementById(containerId);
       if (!map || !container?.clientWidth || !container.clientHeight) return;
       map.invalidateSize({ pan: false });
-      window.requestAnimationFrame(() => {
-        const layer = geoJsonLayerRef.current;
-        if (!layer || !mapRef.current) return;
-        let bounds = L.latLngBounds([]);
-        if (selectedBarrio && type === 'neighborhoods') {
-          layer.eachLayer((featureLayer: any) => {
-            const name = featureLayer.feature?.properties?.barrio || featureLayer.feature?.properties?.name;
-            if (name && normalize(name) === normalize(selectedBarrio)) bounds.extend(featureLayer.getBounds());
-          });
-        } else if (selectedDistrict) {
-          layer.eachLayer((featureLayer: any) => {
-            const props = featureLayer.feature?.properties || {};
-            const featureName = type === 'districts'
-              ? props.distrito || props.name || props.nombre || props.distrito_nombre
-              : props.distrito || props.nombre || props.name || props.distrito_nombre;
-            if (featureName && normalize(featureName) === normalize(selectedDistrict)) bounds.extend(featureLayer.getBounds());
-          });
-        }
-        if (!bounds.isValid()) {
-          bounds = type === 'districts'
-            ? L.latLngBounds([40.285, -3.890], [40.640, -3.470])
-            : layer.getBounds();
-        }
-        if (bounds.isValid()) mapRef.current.fitBounds(bounds, { padding: [12, 12], animate: false });
+      if (!hasInitialViewRef.current) window.requestAnimationFrame(() => {
+        if (fitMapToContext()) hasInitialViewRef.current = true;
       });
     };
 
@@ -382,7 +376,6 @@ const MadridMap: React.FC<MapProps> = ({
     }
 
     const loadGeoJson = async () => {
-      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       let geoData: any = type === 'districts' ? cachedDistritosGeoJson : cachedBarriosGeoJson;
       if (!geoData) {
         const url = type === 'districts' ? '/madrid_distritos.geojson' : '/barrios_polygons.geojson';
@@ -516,45 +509,11 @@ const MadridMap: React.FC<MapProps> = ({
       // Inject pattern defs into the Leaflet overlay SVG
       injectPatternsIntoLeaflet(mapRef.current, containerId);
 
-      // Zoom logic
-      if (drillDownOnSelection && selectedBarrio && type === 'neighborhoods') {
-        const bounds = L.latLngBounds([]);
-        geoJsonLayerRef.current.eachLayer((layer: any) => {
-          const props = layer.feature.properties;
-          const featureBarrio = props.barrio || props.name;
-          if (featureBarrio && normalize(featureBarrio) === normalize(selectedBarrio)) {
-            bounds.extend(layer.getBounds());
-          }
-        });
-        if (bounds.isValid()) {
-          if (prefersReducedMotion) mapRef.current?.fitBounds(bounds, { padding: [64, 64], maxZoom: 12.2, animate: false });
-          else mapRef.current?.flyToBounds(bounds, { padding: [64, 64], maxZoom: 12.2, duration: 1.5 });
-        }
-      } else if (drillDownOnSelection && selectedDistrict) {
-        const bounds = L.latLngBounds([]);
-        geoJsonLayerRef.current.eachLayer((layer: any) => {
-          const props = layer.feature.properties;
-          const featureDistrict = props.distrito || props.nombre || props.name || props.distrito_nombre;
-          if (normalize(featureDistrict) === normalize(selectedDistrict)) {
-            bounds.extend(layer.getBounds());
-          }
-        });
-        if (bounds.isValid()) {
-          if (prefersReducedMotion) mapRef.current?.fitBounds(bounds, { padding: [64, 64], maxZoom: 11.5, animate: false });
-          else mapRef.current?.flyToBounds(bounds, { padding: [64, 64], maxZoom: 11.5, duration: 1.5 });
-        }
-      } else if (!hasInitialViewRef.current) {
-        if (type === 'districts') {
-          const urbanBounds = L.latLngBounds([40.285, -3.890], [40.640, -3.470]);
-          if (prefersReducedMotion) mapRef.current?.fitBounds(urbanBounds, { padding: [20, 15], animate: false });
-          else mapRef.current?.flyToBounds(urbanBounds, { padding: [20, 15], duration: 1 });
-        } else {
-          const bounds = geoJsonLayerRef.current.getBounds();
-          if (bounds.isValid()) {
-            if (prefersReducedMotion) mapRef.current?.fitBounds(bounds, { padding: [10, 10], animate: false });
-            else mapRef.current?.flyToBounds(bounds, { padding: [10, 10], duration: 1 });
-          }
-        }
+      // Both maps use their GeoJSON extent so the city framing stays aligned.
+      // A map hidden on first render is fitted by ResizeObserver when it becomes visible.
+      if (drillDownOnSelection && (selectedBarrio || selectedDistrict)) {
+        if (fitMapToContext()) hasInitialViewRef.current = true;
+      } else if (!hasInitialViewRef.current && fitMapToContext()) {
         hasInitialViewRef.current = true;
       }
     };
@@ -565,12 +524,24 @@ const MadridMap: React.FC<MapProps> = ({
       resizeObserver.disconnect();
       window.removeEventListener('v2:fullscreen-open', redrawAfterFullscreenOpen);
     };
-  }, [type, data, selectedProfile, selectedDistrict, selectedBarrio, selectedZone, drillDownOnSelection, containerId, selectedMonth, selectedYear, onDistrictClick, onBarrioClick, style, accentColor]);
+  }, [type, data, selectedProfile, selectedDistrict, selectedBarrio, selectedZone, drillDownOnSelection, containerId, selectedMonth, selectedYear, onDistrictClick, onBarrioClick, style]);
+
+  const resetMapView = () => {
+    const map = mapRef.current;
+    const bounds = geoJsonLayerRef.current?.getBounds();
+    if (!map || !bounds?.isValid()) return;
+    const size = map.getSize();
+    map.fitBounds(bounds, {
+      padding: [Math.max(14, Math.round(size.x * 0.035)), Math.max(14, Math.round(size.y * 0.035))],
+      animate: false,
+    });
+  };
 
   return (
-    <div style={{ position: 'relative', width: '100%', height: '100%', minWidth: 0, minHeight: 0, borderRadius: '12px', overflow: 'hidden', background: 'transparent', border: 0 }}>
+    <div className="v2-map-canvas" style={{ position: 'relative', width: '100%', height: '100%', minWidth: 0, minHeight: 0, borderRadius: '12px', overflow: 'hidden', background: 'transparent', border: 0 }}>
       <div 
         id={containerId} 
+        className="v2-leaflet-map"
         style={{ 
           width: '100%', 
           height: '100%', 
@@ -579,6 +550,11 @@ const MadridMap: React.FC<MapProps> = ({
           background: 'transparent'
         }} 
       />
+      <div className="v2-map-zoom-controls" role="group" aria-label={`Controles del mapa de ${type === 'districts' ? 'distritos' : 'barrios'}`}>
+        <button type="button" aria-label="Acercar mapa" title="Acercar" onClick={() => mapRef.current?.zoomIn(0.75)}>+</button>
+        <button type="button" aria-label="Alejar mapa" title="Alejar" onClick={() => mapRef.current?.zoomOut(0.75)}>−</button>
+        <button type="button" aria-label="Restablecer vista de Madrid" title="Ver Madrid completa" onClick={resetMapView}>⌖</button>
+      </div>
     </div>
   );
 };

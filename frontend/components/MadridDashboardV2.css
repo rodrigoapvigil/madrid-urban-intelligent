@@ -4438,3 +4438,47 @@ body.v2-fullscreen-open footer { display: none !important; }
   .v2-root .v2-guide-modal,
   .v2-root .v2-guide-modal * { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+/* Keep the paired city maps large without distorting their geographic proportions. */
+.v2-root .v2-map-sub { min-width: 0; min-height: 0; }
+.v2-root .v2-map-placeholder { min-width: 0; min-height: 0; }
+.v2-root .v2-map-canvas,
+.v2-root .v2-leaflet-map { min-width: 0; min-height: 0; }
+.v2-root .v2-map-zoom-controls {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 700;
+  display: grid;
+  gap: 6px;
+}
+.v2-root .v2-map-zoom-controls button {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(186, 204, 214, .28);
+  border-radius: 11px;
+  background: rgba(1, 16, 36, .94);
+  color: #e8f4fa;
+  font: inherit;
+  font-size: 23px;
+  font-weight: 650;
+  line-height: 1;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .28);
+  cursor: pointer;
+}
+.v2-root .v2-map-zoom-controls button:last-child { font-size: 20px; }
+.v2-root .v2-map-zoom-controls button:hover { border-color: #00e5ff; background: #09233a; color: #00e5ff; }
+.v2-root .v2-map-zoom-controls button:focus-visible { outline: 2px solid #00e5ff; outline-offset: 2px; }
+@media (min-width: 1025px) {
+  .v2-root .v2-dual-maps { min-height: clamp(600px, 68vh, 760px); }
+}
+@media (min-width: 769px) and (max-width: 1024px) {
+  .v2-root .v2-map-sub { height: clamp(560px, 64vh, 680px); }
+}
+@media (max-width: 768px) {
+  .v2-root .v2-map-zoom-controls { top: 10px; left: 10px; gap: 5px; }
+  .v2-root .v2-map-zoom-controls button { width: 44px; height: 44px; }
+}
