@@ -4272,3 +4272,20 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-rank-settings { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
 .v2-root .v2-compare-desktop-toolbar { position: relative; z-index: 30; display: flex; align-items: center; gap: 14px; }
 .v2-root .v2-compare-section { overflow: visible; }
+
+/* Cleaner heatmap table skin for the affordability and ranking section. */
+.v2-root .v2-rank-heading { min-width: 0; }
+.v2-root .v2-explorer-header .v2-rank-title { margin: 0 0 4px !important; }
+.v2-root .v2-explorer-header .v2-rank-desc { margin: 0; color: #aebfcd; font-size: 13px; }
+@media (min-width: 769px) {
+  .v2-root .v2-heatmap-card:not(.v2-is-fullscreen) .v2-heatmap-scroll { flex-basis: 560px !important; height: 560px !important; min-height: 560px !important; max-height: 560px !important; }
+  .v2-root .v2-heatmap-table { border-collapse: separate !important; border-spacing: 0 !important; }
+  .v2-root .v2-heatmap-table th,
+  .v2-root .v2-heatmap-table td { height: 46px !important; min-height: 46px; padding: 0 10px !important; border-radius: 0 !important; font-size: 13px !important; }
+  .v2-root .v2-heatmap-table .v2-heatmap-period-groups th { height: 26px !important; min-height: 26px; font-size: 11px !important; }
+  .v2-root .v2-heatmap-table .v2-heatmap-month-head th { top: 26px !important; height: 38px !important; min-height: 38px; font-size: 13px !important; }
+  .v2-root .v2-heatmap-table th:first-child,
+  .v2-root .v2-heatmap-table td:first-child { width: 140px; min-width: 140px; max-width: 140px; }
+  .v2-root .v2-heatmap-table td.is-selected-month { box-shadow: inset 1px 0 rgba(0,229,255,.28), inset -1px 0 rgba(0,229,255,.28); }
+  .v2-root .v2-heatmap-table th.is-selected-month { box-shadow: inset 0 -3px #00e5ff; }
+}

@@ -6,7 +6,7 @@ import { colorWithAlpha } from '../lib/colors';
 const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 export default function DashboardHeatmapTable({
-  rows, profileId, level, year, min, max, latestReal, formatValue,
+  rows, profileId, level, year, min, max, latestReal, selectedMonth, formatValue,
 }: {
   rows: Array<Record<string, any> & { zona: string }>;
   profileId: string;
@@ -15,6 +15,7 @@ export default function DashboardHeatmapTable({
   min: number;
   max: number;
   latestReal: { year: string; month: string };
+  selectedMonth: string;
   formatValue: (value: number) => string;
 }) {
   const cellColor = profileId === 'venta' || profileId === 'compra' ? '#FF8B6A' : '#00DDF0';
@@ -25,6 +26,7 @@ export default function DashboardHeatmapTable({
   const latestMonthIndex = MONTHS.findIndex(month => month.toLocaleLowerCase('es') === latestReal.month.toLocaleLowerCase('es'));
   const realMonthCount = selectedYear < latestYear ? 12 : selectedYear > latestYear ? 0 : latestMonthIndex + 1;
   const estimateMonthCount = 12 - realMonthCount;
+  const selectedMonthIndex = MONTHS.findIndex(month => month.toLocaleLowerCase('es') === selectedMonth.toLocaleLowerCase('es'));
   const textColorFor = (opacity: number) => {
     const base = [1 / 255, 16 / 255, 36 / 255];
     const channels = cellColor.slice(1).match(/.{2}/g)?.map(channel => parseInt(channel, 16) / 255) || [0, 0, 0];
@@ -45,7 +47,7 @@ export default function DashboardHeatmapTable({
             {realMonthCount > 0 && <th colSpan={realMonthCount} aria-hidden="true" />}
             {estimateMonthCount > 0 && <th className="v2-heatmap-estimate-group" colSpan={estimateMonthCount}>Estimación</th>}
           </tr>
-          <tr className="v2-heatmap-month-head">{MONTHS.map((month, monthIndex) => <th key={month} className={`${hoveredMonth === monthIndex ? 'is-hovered-column ' : ''}${monthIndex === realMonthCount && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : ''}`} onMouseEnter={() => setHoveredMonth(monthIndex)}>{month.slice(0, 3)}</th>)}</tr>
+          <tr className="v2-heatmap-month-head">{MONTHS.map((month, monthIndex) => <th key={month} className={`${hoveredMonth === monthIndex ? 'is-hovered-column ' : ''}${selectedMonthIndex === monthIndex ? 'is-selected-month ' : ''}${monthIndex === realMonthCount && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : ''}`} onMouseEnter={() => setHoveredMonth(monthIndex)}>{month.slice(0, 3)}</th>)}</tr>
         </thead>
         <tbody>
           {rows.length > 0 ? rows.map((row, rowIndex) => (
@@ -54,7 +56,7 @@ export default function DashboardHeatmapTable({
               {MONTHS.map((_, monthIndex) => {
                 const value = Number(row[`m${monthIndex + 1}`]);
                 const opacity = value > 0 ? Math.max(.22, Math.min(1, .22 + ((value - min) / (max - min || 1)) * .78)) : 0;
-                const classes = [value > 0 ? '' : 'v2-heatmap-no-data', monthIndex === realMonthCount && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : '', hoveredMonth === monthIndex ? 'is-hovered-column' : ''].filter(Boolean).join(' ');
+                const classes = [value > 0 ? '' : 'v2-heatmap-no-data', monthIndex === realMonthCount && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : '', selectedMonthIndex === monthIndex ? 'is-selected-month' : '', hoveredMonth === monthIndex ? 'is-hovered-column' : ''].filter(Boolean).join(' ');
                 return <td key={monthIndex} className={classes || undefined} onMouseEnter={() => setHoveredMonth(monthIndex)} title={value > 0 ? monthIndex >= realMonthCount ? 'Estimación' : undefined : 'Sin datos oficiales del Ayuntamiento'} style={{ backgroundColor: value > 0 ? colorWithAlpha(cellColor, opacity) : 'transparent', color: value > 0 ? textColorFor(opacity) : '#ffffff' }}>{value > 0 ? formatValue(value) : 'n/d'}</td>;
               })}
             </tr>

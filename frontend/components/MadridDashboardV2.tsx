@@ -3793,17 +3793,11 @@ const MadridDashboardV2: React.FC = () => {
             {/* 3. EXPLORACIÓN DE MERCADO (HEATMAP & RANKINGS) */}
             <div className="v2-explorer-grid">
               <div className="v2-explorer-header">
-                <div className="v2-rank-title">
-                  {activeProfile.id === 'venta'
-                    ? 'Zonas con más demanda'
-                    : activeProfile.id === 'inversion'
-                      ? 'Vivienda más rentable'
-                      : activeProfile.id === 'compra'
-                        ? 'Zonas con menor precio'
-                        : 'Zonas más asequibles'}
+                <div className="v2-rank-heading">
+                  <div className="v2-rank-title">Ranking y evolución por {rankingLevel.toLocaleLowerCase('es')}</div>
+                  <div className="v2-rank-desc">Dónde es más barato alquilar y cómo cambia el precio mes a mes</div>
                 </div>
                 <div className="v2-rank-settings">
-                  {!isMobile && <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />}
                   <div className={isMobile ? 'v2-mobile-segmented-control' : 'v2-segmented-with-label'}>
                     {!isMobile && <span>Ver por:</span>}
                     <SegmentedControl<'Distritos' | 'Barrios'>
@@ -3814,6 +3808,7 @@ const MadridDashboardV2: React.FC = () => {
                       onChange={setRankingLevel}
                     />
                   </div>
+                  {!isMobile && <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />}
                 </div>
               </div>
 
@@ -3907,6 +3902,7 @@ const MadridDashboardV2: React.FC = () => {
                     min={heatmapMin}
                     max={heatmapMax}
                     latestReal={latestAvailablePeriod}
+                    selectedMonth={selectedMonth}
                     formatValue={value => formatNumber(activeProfile.id === 'inversion' ? value * 100 : value, 1)}
                   />
                 </div>
