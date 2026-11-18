@@ -3896,11 +3896,6 @@ const MadridDashboardV2: React.FC = () => {
                       * Nota: los datos reales llegan hasta <strong>{latestRealMonth} de {latestRealYear}</strong>; desde <strong>{firstProjectionMonth}</strong> son <strong>estimaciones</strong>. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un valor €/m² más alto.'}
                     </div>
                   )}
-                  {Number(selectedYear) > 2026 && (
-                    <div style={{ fontSize: '12px', color: '#dbe9f2', marginBottom: '12px', paddingLeft: '4px' }}>
-                      * Nota: Los meses de {selectedYear} se muestran como <strong>estimaciones</strong> basadas en datos históricos. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un valor €/m² más alto.'}
-                    </div>
-                  )}
                   <input className="v2-heatmap-search" type="search" value={heatmapSearch} onChange={event => setHeatmapSearch(event.target.value)} placeholder={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'}…`} aria-label={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'} en el mapa de calor`} />
                   <DashboardHeatmapTable
                     rows={filteredHeatmapRows}
@@ -3909,6 +3904,7 @@ const MadridDashboardV2: React.FC = () => {
                     year={selectedYear}
                     min={heatmapMin}
                     max={heatmapMax}
+                    latestReal={latestAvailablePeriod}
                     formatValue={value => formatNumber(activeProfile.id === 'inversion' ? value * 100 : value, 1)}
                   />
                 </div>
