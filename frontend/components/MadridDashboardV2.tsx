@@ -2690,14 +2690,13 @@ const MadridDashboardV2: React.FC = () => {
             <span>Filtros</span><b>{Number(selectedDistrict !== 'Todos') + Number(selectedBarrio !== 'Todos') + Number(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month)}</b>
           </button>
         ) : undefined}
+        desktopAction={!isMobile ? <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} /> : undefined}
         profileTabs={PROFILES.map(p => ({ id: p.id, label: p.label }))}
         activeProfileId={activeProfile.id}
         onSelectProfile={(id) => {
           const idx = PROFILES.findIndex(p => p.id === id);
           if (idx !== -1) handleProfileChange(idx);
         }}
-        ctaText={PRICE_ANALYSIS_LABEL}
-        ctaHref="/madrid/veredicto"
       />
 
       {isMobile && <nav className="v2-mobile-section-nav is-visible" aria-label="Secciones del cuadro de mando">
@@ -3685,12 +3684,6 @@ const MadridDashboardV2: React.FC = () => {
                     latestRealYear={latestRealYear}
                     firstProjectionMonth={firstProjectionMonth}
                     onHelp={() => setShowMapHelpModal(true)}
-                    desktopTools={!isMobile ? <>
-                      <div className="v2-map-inline-legend" aria-label="Escala de precio de menor a mayor">
-                        <span>Menor</span><div className="v2-map-legend-swatches" aria-hidden="true"><i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" /></div><span>Mayor</span>
-                      </div>
-                      {(selectedDistrict !== 'Todos' || selectedBarrio !== 'Todos') && <button type="button" className="v2-map-reset-button" onClick={() => { setSelectedDistrict('Todos'); setSelectedBarrio('Todos'); clearSelection(); setMapLevel('districts'); }}>Ver Madrid</button>}
-                    </> : undefined}
                   >
                     {isMobile && <FullscreenToggle targetSelector=".v2-map-card" mobileOnly mobilePlatform />}
                     {!isMobile && <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />}
@@ -3708,7 +3701,6 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                   <div className="v2-dual-maps">
                     <div className="v2-map-sub" data-map-level="districts">
-                      <div className="v2-map-panel-heading"><span>Madrid · Red Urbana</span><strong>21 Distritos</strong></div>
                       <div className="v2-map-placeholder" style={{ border: 'none' }}>
                         <MadridMap
                           key="districts-map"
@@ -3725,10 +3717,10 @@ const MadridDashboardV2: React.FC = () => {
                           onZoneHover={isMobile ? undefined : handleDesktopZoneHover}
                           onDistrictClick={handleMapDistrictClick}
                         />
+                        {!isMobile && <><div className="v2-map-panel-heading"><strong>21 Distritos</strong><button type="button" aria-label="Cómo leer el mapa" title="Cómo leer el mapa" onClick={() => setShowMapHelpModal(true)}><HelpCircle size={14} /></button></div><div className="v2-map-inline-legend" aria-label={`Escala de menor a mayor ${activeProfile.id === 'inversion' ? 'rentabilidad' : 'precio'}`}><span>Menor</span><div className="v2-map-legend-swatches" aria-hidden="true"><i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" /></div><span>Mayor</span></div></>}
                       </div>
                     </div>
                     <div className="v2-map-sub" data-map-level="neighborhoods">
-                      <div className="v2-map-panel-heading"><span>Madrid · Red Urbana</span><strong>{neighborhoodFeatureCount || 131} Barrios</strong></div>
                       <div className="v2-map-placeholder" style={{ border: 'none' }}>
                         <MadridMap
                           key="neighborhoods-map"
@@ -3746,6 +3738,7 @@ const MadridDashboardV2: React.FC = () => {
                           onDistrictClick={handleMapDistrictClick}
                           onBarrioClick={handleMapBarrioClick}
                         />
+                        {!isMobile && <><div className="v2-map-panel-heading"><strong>{neighborhoodFeatureCount || 131} Barrios</strong></div><div className="v2-map-inline-legend" aria-label={`Escala de menor a mayor ${activeProfile.id === 'inversion' ? 'rentabilidad' : 'precio'}`}><span>Menor</span><div className="v2-map-legend-swatches" aria-hidden="true"><i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" /></div><span>Mayor</span></div></>}
                       </div>
                     </div>
                   </div>

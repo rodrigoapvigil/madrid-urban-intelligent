@@ -12,7 +12,6 @@ export function DashboardMapStatus({
   latestRealYear,
   firstProjectionMonth,
   onHelp,
-  desktopTools,
   children,
 }: {
   isMobile: boolean;
@@ -24,7 +23,6 @@ export function DashboardMapStatus({
   latestRealYear: string | number;
   firstProjectionMonth: string;
   onHelp: () => void;
-  desktopTools?: ReactNode;
   children: ReactNode;
 }) {
   return (
@@ -46,7 +44,6 @@ export function DashboardMapStatus({
       </button>
         {children}
       </> : <>
-        <div className="v2-map-desktop-tools">{desktopTools}<button type="button" className="v2-map-help-button" aria-label="Cómo leer el mapa" title="Cómo leer el mapa" onClick={onHelp}>?</button></div>
         <div className="v2-map-period-slot">{children}</div>
       </>}
     </div>

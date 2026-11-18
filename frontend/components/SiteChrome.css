@@ -170,6 +170,8 @@
   stroke-width: 2.5;
 }
 
+.mi-header__desktop-action { display: flex; min-width: 0; align-items: center; justify-self: end; }
+
 /* ==========================================================================
    AUROS FOOTER UNIFICADO (Idéntico en todas las páginas - CERO líneas divisorias)
    ========================================================================== */
@@ -803,7 +805,8 @@
 
   .site-navigation,
   .mi-nav,
-  .mi-header__cta {
+  .mi-header__cta,
+  .mi-header__desktop-action {
     display: none !important;
   }
 

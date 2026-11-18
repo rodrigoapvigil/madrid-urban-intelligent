@@ -11,6 +11,7 @@ type SiteHeaderProps = {
   activePath?: string;
   children?: ReactNode;
   mobileAction?: ReactNode;
+  desktopAction?: ReactNode;
   profileTabs?: { id: string; label: string }[];
   activeProfileId?: string;
   onSelectProfile?: (id: string) => void;
@@ -23,6 +24,7 @@ export function SiteHeader({
   activePath,
   children,
   mobileAction,
+  desktopAction,
   profileTabs,
   activeProfileId,
   onSelectProfile,
@@ -100,14 +102,14 @@ export function SiteHeader({
           </nav>
         )}
 
-        {/* Desktop CTA Button (hidden on mobile) */}
-        <Link
+        {/* Header action slot; the dashboard can place its shared period control here. */}
+        {desktopAction ? <div className="mi-header__desktop-action">{desktopAction}</div> : <Link
           href={effectiveCtaHref}
           className={`mi-header__cta${effectiveCtaHref === '/contacto' ? ' mi-header__cta--secondary' : ''}`}
         >
           {effectiveCtaText}{' '}
           <ArrowUpRight size={14} aria-hidden="true" />
-        </Link>
+        </Link>}
 
         {mobileAction && <div className="mi-header__mobile-action">{mobileAction}</div>}
 
