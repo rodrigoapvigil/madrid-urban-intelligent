@@ -4028,12 +4028,14 @@ const MadridDashboardV2: React.FC = () => {
               <div className="v2-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                   <div className="v2-compare-title-block">
-                    <h2 style={{ margin: 0 }}>Comparar zonas</h2>
+                    <div className="v2-compare-heading-row">
+                      <h2 style={{ margin: 0 }}>Comparar zonas</h2>
+                      <button type="button" className="v2-compare-help-inline" aria-label="Cómo comparar zonas" title="Cómo comparar zonas" onClick={() => setShowCompareHelpModal(true)}><HelpCircle size={15} /></button>
+                    </div>
                     <span>Elige dos zonas y mira cómo se diferencian</span>
                   </div>
                 </div>
                 {!isMobile && <div className="v2-compare-desktop-toolbar">
-                  <button type="button" className="v2-compare-help" onClick={() => setShowCompareHelpModal(true)}><HelpCircle size={15} /> ¿Cómo usar la comparación?</button>
                   <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />
                   <div className="v2-segmented-with-label">
                     <span>Ver por:</span>

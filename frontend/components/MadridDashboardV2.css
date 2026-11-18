@@ -3496,6 +3496,9 @@ body.v2-fullscreen-open .v2-panel.v2-active { transform: none !important; }
 
 /* Comparison layout: keep zone identity stable and its selectors together. */
 .v2-root .v2-compare-title-block { display: grid; gap: 5px; }
+.v2-root .v2-compare-heading-row { display: flex; align-items: center; gap: 8px; }
+.v2-root .v2-compare-help-inline { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 1px solid rgba(143,163,184,.28); border-radius: 50%; background: transparent; color: #91a9bd; cursor: pointer; }
+.v2-root .v2-compare-help-inline:hover { border-color: rgba(0,229,255,.65); color: #00e5ff; }
 .v2-root .v2-compare-title-block > span { color: #8fa3b8; font-size: 13px; }
 .v2-root .v2-compare-zone-selectors { grid-template-columns: minmax(0,1fr) 42px minmax(0,1fr) !important; gap: 10px !important; align-items: center; }
 .v2-root .v2-compare-zone-select { min-width: 0; padding: 10px 12px; border: 1px solid rgba(186,204,214,.13); border-radius: 14px; background: rgba(255,255,255,.035); }
