@@ -4242,6 +4242,15 @@ body.v2-fullscreen-open footer { display: none !important; }
   .v2-root .v2-ranking-sparkline { flex-basis: 60px; width: 60px; }
 }
 
+/* Let the explorer row include the full heatmap header, search and scroll viewport. */
+@media (min-width: 769px) {
+  .v2-root .v2-explorer-grid { grid-template-rows: auto auto !important; }
+  .v2-root .v2-heatmap-area { align-self: start !important; min-height: max-content !important; }
+  .v2-root .v2-heatmap-card:not(.v2-is-fullscreen) { flex: 0 0 auto !important; height: auto !important; min-height: 0 !important; }
+  .v2-root .v2-heatmap-card:not(.v2-is-fullscreen) .v2-heatmap-scroll { flex: 0 0 560px !important; }
+  .v2-root .v2-compare-section { clear: both; }
+}
+
 /* Shared period control: each section hosts the same global state without adding layout height. */
 @media (min-width: 769px) {
   .v2-root[data-platform="desktop"] .v2-filters { display: none !important; }
