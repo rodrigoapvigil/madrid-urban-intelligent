@@ -3802,12 +3802,19 @@ const MadridDashboardV2: React.FC = () => {
               <div className="v2-explorer-header">
                 <div className="v2-rank-heading">
                   <div className="v2-rank-title-row">
-                    <div className="v2-rank-title">Ranking y evolución por {rankingLevel.toLocaleLowerCase('es')}</div>
+                    <div className="v2-rank-title">Ranking de {rankingLevel.toLocaleLowerCase('es')}</div>
                     <button type="button" className="v2-compare-help-inline" aria-label="Cómo leer el ranking y la evolución" title="Cómo leer el ranking y la evolución" onClick={() => setShowHeatmapHelpModal(true)}><HelpCircle size={15} /></button>
                   </div>
-                  <div className="v2-rank-desc">Dónde es más barato alquilar y cómo cambia el precio mes a mes</div>
+                  <div className="v2-rank-desc">{activeProfile.id === 'alquiler'
+                    ? 'Encuentra dónde es más barato alquilar y mira cómo cambia el precio mes a mes'
+                    : activeProfile.id === 'compra'
+                      ? 'Encuentra dónde comprar por menos y mira cómo cambia el precio mes a mes'
+                      : activeProfile.id === 'venta'
+                        ? 'Encuentra dónde se vende más caro y mira cómo cambia el precio mes a mes'
+                        : 'Encuentra las zonas con mayor rentabilidad y mira cómo cambia mes a mes'}</div>
                 </div>
                 <div className="v2-rank-settings">
+                  {!isMobile && <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />}
                   <div className={isMobile ? 'v2-mobile-segmented-control' : 'v2-segmented-with-label'}>
                     {!isMobile && <span>Ver por:</span>}
                     <SegmentedControl<'Distritos' | 'Barrios'>
@@ -3818,7 +3825,6 @@ const MadridDashboardV2: React.FC = () => {
                       onChange={setRankingLevel}
                     />
                   </div>
-                  {!isMobile && <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />}
                 </div>
               </div>
 
@@ -3852,8 +3858,11 @@ const MadridDashboardV2: React.FC = () => {
               {/* COL 3: HEATMAP */}
               <div className="v2-explorer-col v2-heatmap-area" data-dashboard-section="heatmap">
                 <div className="v2-heatmap-card">
-                  <div className="v2-heatmap-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
-                    <span>{activeProfile.id === 'inversion' ? 'Evolución de rentabilidad (%)' : activeProfile.id === 'alquiler' ? 'Evolución del alquiler (€/m²)' : activeProfile.id === 'compra' ? 'Evolución del precio de compra (€/m²)' : 'Evolución del precio de venta (€/m²)'}</span>
+                  <div className="v2-heatmap-head">
+                    <div className="v2-heatmap-heading-copy">
+                      <span>{activeProfile.id === 'inversion' ? 'Evolución de rentabilidad (%)' : activeProfile.id === 'alquiler' ? 'Evolución del alquiler (€/m²)' : activeProfile.id === 'compra' ? 'Evolución del precio de compra (€/m²)' : 'Evolución del precio de venta (€/m²)'}</span>
+                      <small>Pulsa un mes para actualizar el ranking</small>
+                    </div>
                     {isMobile && <FullscreenToggle targetSelector=".v2-heatmap-card" mobilePlatform />}
                   </div>
                   <input className="v2-heatmap-search" type="search" value={heatmapSearch} onChange={event => setHeatmapSearch(event.target.value)} placeholder={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'}…`} aria-label={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'} en el mapa de calor`} />

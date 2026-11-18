@@ -45,6 +45,7 @@ export default function DashboardRankingTable({
   const isInvestment = profileId === 'inversion';
   const isPriceProfile = !isDemand && !isInvestment;
   const accent = isDemand ? '#00E5FF' : isInvestment ? '#00E5FF' : '#00E5FF';
+  const zoneLabel = level === 'Distritos' ? 'distritos' : 'barrios';
   const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').trim();
   const monthlyByZone = useMemo(() => new Map(monthlyRows.map(row => [normalize(String(row.zona || '')), row])), [monthlyRows]);
   const sortedRows = useMemo(() => [...rows].sort((a, b) => {
@@ -60,10 +61,10 @@ export default function DashboardRankingTable({
   }), [rows, order, previousValues]);
 
   const title = isDemand
-    ? `Top 10 con ${order === 'demand-low' ? 'menos' : 'más'} demanda`
+    ? `Top 10 ${zoneLabel} con ${order === 'demand-low' ? 'menos' : 'más'} demanda`
     : isInvestment
-      ? `Top 10 con ${order === 'yield-low' ? 'menor' : 'mayor'} rentabilidad`
-      : order === 'expensive' ? 'Top 10 más caros' : order === 'increase' ? 'Top 10 con mayor subida anual' : 'Top 10 más asequibles';
+      ? `Top 10 ${zoneLabel} con ${order === 'yield-low' ? 'menor' : 'mayor'} rentabilidad`
+      : order === 'expensive' ? `Top 10 ${zoneLabel} más caros` : order === 'increase' ? `Top 10 ${zoneLabel} con mayor subida anual` : `Top 10 ${zoneLabel} más asequibles`;
   const valueHeading = isDemand ? 'DEMANDA' : isInvestment ? 'RENTABILIDAD' : profileId === 'alquiler'
     ? (metric === 'total' ? 'ALQUILER €/MES' : 'ALQUILER €/M²')
     : (metric === 'total' ? 'PRECIO €' : 'PRECIO €/M²');
