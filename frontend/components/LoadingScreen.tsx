@@ -79,6 +79,19 @@ export default function LoadingScreen({ ready = false, estimatedSeconds = 25, on
   const est = Math.max(5, estimatedSeconds);
 
   useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    const previousHtmlOverflow = html.style.overflow;
+    const previousBodyOverflow = body.style.overflow;
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+    return () => {
+      html.style.overflow = previousHtmlOverflow;
+      body.style.overflow = previousBodyOverflow;
+    };
+  }, []);
+
+  useEffect(() => {
     if (ready) return;
     if (!startedAt.current) startedAt.current = performance.now();
     const id = window.setInterval(() => setElapsed((performance.now() - startedAt.current) / 1000), 100);
