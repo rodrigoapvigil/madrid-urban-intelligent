@@ -44,12 +44,6 @@ export function DashboardMapStatus({
       </button>
         {children}
       </> : <>
-        <button
-          className="v2-map-help-button"
-          type="button"
-          onClick={onHelp}
-          aria-label="Cómo entender estos precios"
-        ><span aria-hidden="true">ⓘ</span> ¿Cómo entender estos precios?</button>
         <div className="v2-map-period-slot">{children}</div>
       </>}
     </div>
