@@ -412,7 +412,6 @@ const getMapLegendLabels = (profileId: string) => {
   return ['< 16 €/m²', '16–19 €/m²', '19–22 €/m²', '22–25 €/m²', '≥ 25 €/m²'];
 };
 
-const MAP_DATA_SOURCE = 'Banco de Datos del Ayuntamiento de Madrid';
 
 const MONTHS_ES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
@@ -3609,12 +3608,10 @@ const MadridDashboardV2: React.FC = () => {
                     <div className="v2-map-sheet-actions"><button type="button" onClick={() => { const level = mapFeatureIsDistrict ? 'Distritos' : 'Barrios'; const zones = level === 'Distritos' ? availableDistricts : availableBarrios; setCompareLevel(level); setSelectedZoneA(selectedMapFeature); if (selectedZoneB === selectedMapFeature) setSelectedZoneB(zones.find(zone => zone !== selectedMapFeature) || 'Todos'); clearSelection(); scrollToDashboardSection('compare'); }}>Ver evolución →</button><button type="button" onClick={() => { clearSelection(); setSelectedBarrio('Todos'); setSelectedDistrict('Todos'); setMapLevel('districts'); }}>Ver Madrid</button></div>
                   </FichaZonaMovil>}
                   <DashboardMapLegend
-                    isMobile={isMobile}
                     title={`Intensidad · ${mapMetricLabel}`}
                     labels={getMapLegendLabels(activeProfile.id)}
                     dataCount={mapData.neighborhoods.filter((item: any) => Number(activeProfile.id === 'inversion' ? item.rentabilidad : item.precio_m2) > 0).length}
                     totalCount={neighborhoodFeatureCount || mapData.neighborhoods.length}
-                    dataSource={MAP_DATA_SOURCE}
                     observedThrough={`${latestRealMonth} de ${latestRealYear}`}
                     estimatesFrom={firstProjectionMonth}
                   />
@@ -3686,17 +3683,20 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-heatmap-head">
                     <div className="v2-heatmap-heading-copy">
                       <h3>{activeProfile.id === 'inversion' ? 'Rentabilidad bruta' : activeProfile.id === 'alquiler' ? 'Precio medio de alquiler' : activeProfile.id === 'compra' ? 'Precio medio de compra' : 'Precio medio de venta'} · {activeProfile.id === 'inversion' ? '%' : '€/m²'}</h3>
-                      <small>{rankingLevel} · Enero–diciembre {selectedYear}</small>
+                      <small>{rankingLevel} · enero–diciembre de {selectedYear}</small>
                     </div>
                     {isMobile && <FullscreenToggle targetSelector=".v2-heatmap-card" mobilePlatform />}
                   </div>
                   <div className="v2-heatmap-legend" data-profile={activeProfile.id}>
-                    <span>Menor valor</span>
+                    <span>{activeProfile.id === 'inversion' ? 'Menor rentabilidad' : 'Menor precio'}</span>
                     <span className="v2-heatmap-legend-scale" aria-hidden="true" />
-                    <span>Mayor valor</span>
-                    <small>El tono más intenso indica un valor mayor; la escala se ajusta a los datos cargados.</small>
+                    <span>{activeProfile.id === 'inversion' ? 'Mayor rentabilidad' : 'Mayor precio'}</span>
+                    <InfoTooltip
+                      title="Escala de color"
+                      description="El tono más intenso indica un valor mayor; la escala se ajusta a los datos cargados."
+                      align="right"
+                    />
                   </div>
-                  <p id="v2-heatmap-scroll-help" className="v2-heatmap-scroll-hint">Desplázate horizontalmente para ver todos los meses y verticalmente para consultar todas las zonas.</p>
                   <input className="v2-heatmap-search" type="search" value={heatmapSearch} onChange={event => setHeatmapSearch(event.target.value)} placeholder={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'}…`} aria-label={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'} en el mapa de calor`} />
                   <DashboardHeatmapTable
                     rows={filteredHeatmapRows}
@@ -3709,9 +3709,6 @@ const MadridDashboardV2: React.FC = () => {
                     selectedMonth={selectedMonth}
                     formatValue={value => formatNumber(activeProfile.id === 'inversion' ? value * 100 : value, 1)}
                   />
-                  <div className="v2-heatmap-data-note">
-                    <span>Datos observados hasta <strong>{latestRealMonth} de {latestRealYear}</strong>; desde <strong>{firstProjectionMonth}</strong>, las celdas disponibles son estimaciones.</span>
-                  </div>
                 </div>
               </div>
             </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { ReactNode } from 'react';
+import { Info } from 'lucide-react';
 
 export function DashboardMapStatus({
   isMobile,
@@ -60,48 +61,36 @@ export function DashboardMapStatus({
 }
 
 export function DashboardMapLegend({
-  isMobile,
   title,
   labels,
   dataCount,
   totalCount,
-  dataSource,
   observedThrough,
   estimatesFrom,
 }: {
-  isMobile: boolean;
   title: string;
   labels: string[];
   dataCount: number;
   totalCount: number;
-  dataSource: string;
   observedThrough: string;
   estimatesFrom: string;
 }) {
-  const note = `Rayado: sin datos publicados en la fuente oficial (${dataSource}). No los estimamos.`;
-  const countNote = `${dataCount} de ${totalCount} barrios tienen dato en este periodo.`;
-  const periodNote = `Corte general observado: ${observedThrough}. Las estimaciones comienzan en ${estimatesFrom}.`;
+  const countNote = `${dataCount} de ${totalCount} barrios tienen datos disponibles.`;
+  const periodNote = `Datos observados hasta ${observedThrough.toLocaleLowerCase('es')} · Estimaciones desde ${estimatesFrom.toLocaleLowerCase('es')}`;
+  const noDataNote = 'Rayado: la fuente oficial no publica datos para este periodo; no se estiman.';
   return (
-    <div className="v2-map-legend" aria-label="Leyenda del mapa">
-      {isMobile ? (
-        <>
-          <div className="v2-map-legend-title">{title}</div>
-          <div className="v2-map-legend-scale" aria-label="Tramos de la escala de color"><div className="v2-map-legend-swatches" aria-hidden="true"><i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" /></div></div>
-          <div className="v2-map-legend-labels">{labels.map(label => <span key={label}>{label}</span>)}<span className="no-data-label"><i /> Sin datos</span></div>
-          <small>Los tonos comparan las zonas del periodo seleccionado. {note}</small>
-          <small>{countNote}</small>
+    <div className="v2-map-legend" role="group" aria-label="Estado de datos y leyenda del mapa">
+      <div className="v2-map-legend-desktop">
+        <div className="v2-map-legend-status">
+          <strong>{countNote}</strong>
           <small>{periodNote}</small>
-        </>
-      ) : (
-        <div className="v2-map-legend-desktop">
-          <div className="v2-map-legend-notes"><small>{note}</small><small>{countNote}</small><small>{periodNote}</small></div>
-          <div className="v2-map-legend-visual">
-            <div className="v2-map-legend-title">{title}</div>
-            <div className="v2-map-legend-scale" aria-label="Escala de menor a mayor valor"><span>Más bajo</span><div className="v2-map-legend-swatches" aria-hidden="true"><i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" /></div><span>Más alto</span></div>
-            <div className="v2-map-legend-labels">{labels.map(label => <span key={label}>{label}</span>)}<span className="no-data-label"><i /> Sin datos</span></div>
-          </div>
         </div>
-      )}
+        <div className="v2-map-legend-visual">
+          <div className="v2-map-legend-title">{title}</div>
+          <div className="v2-map-legend-scale" aria-label={`Escala de menor a mayor valor · ${title}`}><span>Más bajo</span><div className="v2-map-legend-swatches" aria-hidden="true"><i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" /></div><span>Más alto</span></div>
+          <div className="v2-map-legend-labels">{labels.map(label => <span key={label}>{label}</span>)}<span className="no-data-label"><i aria-hidden="true" /> <span>Sin datos</span><details className="v2-map-legend-help"><summary aria-label="Qué significa el rayado" title="Qué significa el rayado"><Info size={14} aria-hidden="true" /></summary><span className="v2-map-legend-help-copy">{noDataNote}</span></details></span></div>
+        </div>
+      </div>
     </div>
   );
 }

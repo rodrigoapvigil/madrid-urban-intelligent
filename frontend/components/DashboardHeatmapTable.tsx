@@ -45,7 +45,6 @@ export default function DashboardHeatmapTable({
       className="v2-heatmap-scroll"
       role="region"
       aria-label={`Tabla mensual de ${level.toLocaleLowerCase('es')} por mes`}
-      aria-describedby="v2-heatmap-scroll-help"
       tabIndex={0}
       onMouseLeave={() => { setHoveredRow(null); setHoveredMonth(null); }}
     >

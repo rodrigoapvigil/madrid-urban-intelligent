@@ -1900,3 +1900,8 @@ footer.auros-footer,
   .mi-home .mi-hero h1 { font-size: clamp(41.4px, 10.58vw, 57.5px); }
   .mi-home .mi-hero__lead { max-width: 460px; font-size: 17px; }
 }
+
+/* Keep the desktop tagline clear of the central skyline details. */
+@media (min-width: 1051px) {
+  .mi-home .mi-hero-artwork__canvas { bottom: clamp(36px, 6vh, 72px); }
+}
