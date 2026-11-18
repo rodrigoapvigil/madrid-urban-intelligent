@@ -1,4 +1,5 @@
 .mi-home {
+  --grain-opacity: 0.055;
   /* ========================================================
      AUROS TWIN — 60-30-10 PALETTE TOKENS
      Base: Navy #14213D (60%) | Cream #F4EDE0 (30%) | Coral #FF6B5B (10%)
@@ -83,6 +84,17 @@
   text-rendering: optimizeLegibility;
 }
 .mi-home *, .mi-home *::before, .mi-home *::after { box-sizing: border-box; }
+.mi-home::before {
+  content: "";
+  position: fixed;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: soft-light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23grain)'/%3E%3C/svg%3E");
+  background-size: 240px 240px;
+}
 .mi-home a { color: inherit; text-decoration: none; }
 .mi-home a:focus-visible,
 .mi-home button:focus-visible,
@@ -94,7 +106,7 @@
   border-radius: inherit;
 }
 .mi-wrap { width: var(--mi-wrap); margin-inline: auto; }
-.mi-home main, .mi-home footer { position: relative; z-index: 1; }
+.mi-home main, .mi-home footer { position: relative; z-index: 2; }
 
 /* Shared, continuous unified chiaroscuro atmosphere.
    Un solo fondo idéntico para toda la página:
