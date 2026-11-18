@@ -100,3 +100,13 @@
   .dmiyc-ls__chart { width: min(58vw, 560px); margin-top: 10px; padding-bottom: 22px; }
 }
 @media (prefers-reduced-motion: reduce) { .dmiyc-ls__w > span, .dmiyc-ls__sub { transform: none; animation: none; opacity: 1; } .dmiyc-ls__proj, .dmiyc-ls__pill i, .dmiyc-ls__head .ring { animation: none; } }
+
+@media (min-width: 761px) {
+  .dmiyc-ls__main {
+    box-sizing: border-box;
+    padding-left: clamp(72px, 12vw, 210px);
+  }
+  .dmiyc-ls__headline {
+    font-size: clamp(46px, min(12.5vw, 16vh), 176px);
+  }
+}
