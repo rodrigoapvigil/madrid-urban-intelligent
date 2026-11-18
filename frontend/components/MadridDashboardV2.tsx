@@ -3601,12 +3601,12 @@ const MadridDashboardV2: React.FC = () => {
                     <button type="button" className="v2-compare-help-inline" aria-label="Cómo leer el ranking y la evolución" title="Cómo leer el ranking y la evolución" onClick={() => setShowHeatmapHelpModal(true)}><HelpCircle size={15} /></button>
                   </div>
                   <div className="v2-rank-desc">{activeProfile.id === 'alquiler'
-                    ? 'Encuentra dónde es más barato alquilar y mira cómo cambia el precio mes a mes'
+                    ? 'Encuentra los alquileres más asequibles y sigue su evolución mes a mes.'
                     : activeProfile.id === 'compra'
-                      ? 'Encuentra dónde comprar por menos y mira cómo cambia el precio mes a mes'
+                      ? 'Encuentra dónde comprar mejor y sigue la evolución de precios.'
                       : activeProfile.id === 'venta'
-                        ? 'Encuentra dónde se vende más caro y mira cómo cambia el precio mes a mes'
-                        : 'Encuentra las zonas con mayor rentabilidad y mira cómo cambia mes a mes'}</div>
+                        ? 'Descubre dónde vender mejor y sigue la evolución de precios.'
+                        : 'Encuentra las zonas más rentables y sigue su evolución.'}</div>
                 </div>
                 <div className="v2-rank-settings">
                   {!isMobile && <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />}

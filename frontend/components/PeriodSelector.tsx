@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import EstadoBadge from './EstadoBadge';
 
 const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
@@ -29,8 +28,8 @@ export default function PeriodSelector({ year, month, years, latestReal, onChang
 
   return <div className="v2-period-selector" data-period-selector>
     <button type="button" className="v2-period-arrow" aria-label="Periodo anterior" onClick={() => move(-1)}>‹</button>
-    <button type="button" className={`v2-period-trigger ${open ? 'is-open' : ''}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { setCalendarYear(year); setOpen(value => !value); }}>
-      <strong>{month} {year}</strong><EstadoBadge status={estimated ? 'estimate' : 'real'} /><span className="v2-period-chevron" aria-hidden="true">⌄</span>
+    <button type="button" className={`v2-period-trigger ${open ? 'is-open' : ''}`} aria-label={`${month} ${year}, ${estimated ? 'estimación' : 'dato real'}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { setCalendarYear(year); setOpen(value => !value); }}>
+      <strong>{month} {year}</strong><span className="v2-period-chevron" aria-hidden="true">⌄</span>
     </button>
     <button type="button" className="v2-period-arrow" aria-label="Periodo siguiente" onClick={() => move(1)}>›</button>
     {open && <div className="v2-period-popover" role="dialog" aria-label="Elegir periodo">
