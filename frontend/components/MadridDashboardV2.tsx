@@ -2892,6 +2892,10 @@ const MadridDashboardV2: React.FC = () => {
                       }}
                     />
                   </div>}
+                  <div className="v2-kpi-context" aria-live="polite">
+                    <strong>{selectedBarrio !== 'Todos' ? formatZoneOption(selectedBarrio) : selectedDistrict !== 'Todos' ? formatZoneOption(selectedDistrict) : 'Madrid'}</strong>
+                    <span>{selectedMonth} {selectedYear}</span>
+                  </div>
 
                   {activeProfile.id === 'alquiler' && (() => {
                     const rent = kpiData.p_vivienda || 0;
@@ -2966,7 +2970,7 @@ const MadridDashboardV2: React.FC = () => {
                             : 'Dato clave para comparar el valor real de distintas viviendas independientemente de su tamaño.'}
                         />
                       </div>
-                      {kpiData.is_prediction ? (
+                      {kpiData.is_prediction && (
                         <span
                           style={{
                             fontSize: '9px',
@@ -2983,24 +2987,6 @@ const MadridDashboardV2: React.FC = () => {
                           title={getZoneReliability(selectedDistrict, true).description}
                         >
                           {getZoneReliability(selectedDistrict, true).tag}
-                        </span>
-                      ) : (
-                        <span
-                          style={{
-                            fontSize: '9px',
-                            fontWeight: '700',
-                            color: 'var(--precio-subida)',
-                            backgroundColor: 'color-mix(in srgb, var(--precio-subida) 8%, transparent)',
-                            border: '0.5px solid color-mix(in srgb, var(--precio-subida) 20%, transparent)',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.4px',
-                            display: 'inline-block'
-                          }}
-                          title="Dato observado en la serie histórica del Ayuntamiento de Madrid"
-                        >
-                          ✓ DATO REAL
                         </span>
                       )}
                     </div>
@@ -3699,6 +3685,12 @@ const MadridDashboardV2: React.FC = () => {
                     latestRealYear={latestRealYear}
                     firstProjectionMonth={firstProjectionMonth}
                     onHelp={() => setShowMapHelpModal(true)}
+                    desktopTools={!isMobile ? <>
+                      <div className="v2-map-inline-legend" aria-label="Escala de precio de menor a mayor">
+                        <span>Menor</span><div className="v2-map-legend-swatches" aria-hidden="true"><i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" /></div><span>Mayor</span>
+                      </div>
+                      {(selectedDistrict !== 'Todos' || selectedBarrio !== 'Todos') && <button type="button" className="v2-map-reset-button" onClick={() => { setSelectedDistrict('Todos'); setSelectedBarrio('Todos'); clearSelection(); setMapLevel('districts'); }}>Ver Madrid</button>}
+                    </> : undefined}
                   >
                     {isMobile && <FullscreenToggle targetSelector=".v2-map-card" mobileOnly mobilePlatform />}
                     {!isMobile && <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />}
@@ -3791,7 +3783,7 @@ const MadridDashboardV2: React.FC = () => {
                   >
                     <div className="v2-map-sheet-actions"><button type="button" onClick={() => { const level = mapFeatureIsDistrict ? 'Distritos' : 'Barrios'; const zones = level === 'Distritos' ? availableDistricts : availableBarrios; setCompareLevel(level); setSelectedZoneA(selectedMapFeature); if (selectedZoneB === selectedMapFeature) setSelectedZoneB(zones.find(zone => zone !== selectedMapFeature) || 'Todos'); clearSelection(); scrollToDashboardSection('compare'); }}>Ver evolución →</button><button type="button" onClick={() => { clearSelection(); setSelectedBarrio('Todos'); setSelectedDistrict('Todos'); setMapLevel('districts'); }}>Ver Madrid</button></div>
                   </FichaZonaMovil>}
-                  <DashboardMapLegend
+                  {isMobile && <DashboardMapLegend
                     isMobile={isMobile}
                     title={isMobile
                       ? `Intensidad de ${activeProfile.id === 'inversion' ? 'rentabilidad bruta · %' : 'precio · €/m²'}`
@@ -3800,7 +3792,7 @@ const MadridDashboardV2: React.FC = () => {
                     dataCount={mapData.neighborhoods.filter((item: any) => Number(activeProfile.id === 'inversion' ? item.rentabilidad : item.precio_m2) > 0).length}
                     totalCount={neighborhoodFeatureCount || mapData.neighborhoods.length}
                     dataSource={MAP_DATA_SOURCE}
-                  />
+                  />}
                 </div>
               </div>
             </div>

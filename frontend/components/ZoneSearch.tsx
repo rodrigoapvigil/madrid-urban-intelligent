@@ -29,7 +29,7 @@ const normalize = (value: string) => value
   .replace(/^\d+\.\s*/, '')
   .trim();
 
-export default function ZoneSearch({ options, district, barrio, onSelect, formatName, compact = false, title = 'Zona', showReset = true }: ZoneSearchProps) {
+export default function ZoneSearch({ options, district, barrio, onSelect, formatName, compact = false, title = 'Zona' }: ZoneSearchProps) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -93,12 +93,6 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
     setActiveIndex(0);
   };
 
-  const breadcrumb = selection?.kind === 'barrio'
-    ? `Madrid · ${formatName(selection.district || '')} · ${formatName(selection.name)}`
-    : selection?.kind === 'district'
-      ? `Madrid · ${formatName(selection.name)}`
-      : 'Madrid';
-
   return (
     <div ref={rootRef} className={`v2-zone-search ${compact ? 'is-compact' : ''}`}>
       {!compact && <span className="v2-zone-filter-title">{title}</span>}
@@ -114,7 +108,7 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
             autoComplete="off"
             role="combobox"
             aria-autocomplete="list"
-            aria-expanded={open && results.length > 0}
+            aria-expanded={open && Boolean(query)}
             aria-controls={listId}
             aria-activedescendant={open && results[activeIndex] ? `${listId}-${activeIndex}` : undefined}
             onFocus={() => setOpen(true)}
@@ -145,8 +139,11 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
       </div>
 
       <div className="v2-zone-search-selection" aria-live="polite">
-        <small>{breadcrumb}</small>
-        {selection && showReset && <button type="button" className="v2-zone-search-reset" onClick={() => choose({ id: 'city-madrid', name: 'Madrid', kind: 'city' })}>Ver Madrid</button>}
+        <nav aria-label="Ubicación seleccionada">
+          <button type="button" onClick={() => choose({ id: 'city-madrid', name: 'Madrid', kind: 'city' })}>Madrid</button>
+          {selection?.kind === 'district' && <><span>›</span><button type="button" onClick={() => choose(selection)}>{formatName(selection.name)}</button></>}
+          {selection?.kind === 'barrio' && <><span>›</span><button type="button" onClick={() => choose({ id: `district:${selection.district}`, name: selection.district || '', kind: 'district' })}>{formatName(selection.district || '')}</button><span>›</span><strong>{formatName(selection.name)}</strong></>}
+        </nav>
       </div>
     </div>
   );

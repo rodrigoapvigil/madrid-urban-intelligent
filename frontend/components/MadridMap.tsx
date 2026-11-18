@@ -290,8 +290,8 @@ const MadridMap: React.FC<MapProps> = ({
     const tier = getChoroplethTier(val, selectedProfile);
     return {
       // Use five solid choropleth steps so the map reads as data, not texture.
-      fillColor: !hasObservedValue ? `url(#no-data-pat-${containerId})` : isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#00F0FF' : TIER_CONFIGS[tier].baseFill,
-      weight: isCompareA || isCompareB ? 2.5 : isSelected ? 2.5 : type === 'districts' ? 1.2 : 0.85,
+      fillColor: !hasObservedValue ? `url(#no-data-pat-${containerId})` : TIER_CONFIGS[tier].baseFill,
+      weight: isCompareA || isCompareB ? 2.5 : isSelected ? 3 : type === 'districts' ? 1.2 : 0.85,
       opacity: isExcluded ? 0.20 : 0.95,
       color: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
       fillOpacity: isExcluded ? 0.25 : 1.0,
@@ -479,7 +479,7 @@ const MadridMap: React.FC<MapProps> = ({
           }
         });
         if (bounds.isValid()) {
-          mapRef.current?.flyToBounds(bounds, { padding: [40, 40], duration: 1.5 });
+          mapRef.current?.flyToBounds(bounds, { padding: [64, 64], maxZoom: 12.2, duration: 1.5 });
         }
       } else if (drillDownOnSelection && selectedDistrict) {
         const bounds = L.latLngBounds([]);
@@ -491,7 +491,7 @@ const MadridMap: React.FC<MapProps> = ({
           }
         });
         if (bounds.isValid()) {
-          mapRef.current?.flyToBounds(bounds, { padding: [20, 20], duration: 1.5 });
+          mapRef.current?.flyToBounds(bounds, { padding: [64, 64], maxZoom: 11.5, duration: 1.5 });
         }
       } else if (!hasInitialViewRef.current) {
         if (type === 'districts') {

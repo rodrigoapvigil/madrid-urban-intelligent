@@ -4291,6 +4291,26 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-period-month-grid button.is-selected { border-style: solid; border-color: #00e5ff; background: #00d9eb; color: #03141c; }
 .v2-root .v2-period-shortcuts { display: flex; gap: 16px; margin-top: 10px; padding-top: 9px; border-top: 1px solid rgba(186,204,214,.12); }
 .v2-root .v2-period-shortcuts button { padding: 0; border: 0; background: transparent; color: #66eafa; font-size: 11px; font-weight: 650; cursor: pointer; }
+.v2-root .v2-map-desktop-tools { display: flex; align-items: center; gap: 14px; min-width: 0; }
+.v2-root .v2-map-inline-legend { display: flex; align-items: center; gap: 8px; width: min(290px, 30vw); color: #aebfcd; font-size: 11px; white-space: nowrap; }
+.v2-root .v2-map-inline-legend .v2-map-legend-swatches { min-width: 70px; height: 8px; }
+.v2-root .v2-map-reset-button { padding: 6px 10px; border: 1px solid rgba(0,229,255,.3); border-radius: 9px; background: rgba(0,229,255,.07); color: #bcecf2; font-size: 11px; font-weight: 650; cursor: pointer; }
+.v2-root .v2-map-reset-button:hover { border-color: #00e5ff; color: #fff; }
+.v2-root .v2-map-desktop-tools > .v2-map-help-button { display: grid; place-items: center; width: 32px; height: 32px; margin: 0 !important; padding: 0 !important; border: 1px solid rgba(0,229,255,.4) !important; border-radius: 50% !important; background: transparent !important; color: #c7d8e5 !important; font-size: 15px !important; }
+.v2-root .v2-map-period-slot { flex: 0 0 auto; }
+.v2-root .v2-period-selector { gap: 0; padding: 3px; border: 1px solid rgba(0,229,255,.25); border-radius: 14px; background: rgba(7,27,49,.88); }
+.v2-root .v2-period-arrow { width: 44px; height: 44px; border-radius: 10px; font-size: 22px; }
+.v2-root .v2-period-arrow:hover:not(:disabled) { background: rgba(0,229,255,.1); }
+.v2-root .v2-period-trigger { min-height: 40px; border-color: transparent; background: transparent; }
+.v2-root .v2-kpi-context { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 0 2px; color: #a9bfce; font-size: 12px; }
+.v2-root .v2-kpi-context strong { color: #e6f1f8; font-size: 14px; }
+.v2-root .v2-kpi-context span { white-space: nowrap; }
+.v2-root .v2-kpi-stack .v2-estado-badge--real { display: none; }
+.v2-root .v2-zone-search-selection nav { display: flex; align-items: center; gap: 6px; min-width: 0; }
+.v2-root .v2-zone-search-selection nav button { padding: 0; border: 0; background: transparent; color: #8fa8bf; font: inherit; cursor: pointer; }
+.v2-root .v2-zone-search-selection nav button:hover { color: #00e5ff; }
+.v2-root .v2-zone-search-selection nav span { color: #60788e; }
+.v2-root .v2-zone-search-selection nav strong { overflow: hidden; color: #00d9f2; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
 .v2-root .v2-explorer-header { position: relative; z-index: 30; overflow: visible; }
 .v2-root .v2-rank-settings { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
 .v2-root .v2-compare-desktop-toolbar { position: relative; z-index: 30; display: flex; align-items: center; gap: 14px; }
