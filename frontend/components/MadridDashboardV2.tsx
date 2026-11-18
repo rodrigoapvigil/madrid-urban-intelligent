@@ -2891,7 +2891,6 @@ const MadridDashboardV2: React.FC = () => {
                         setDesktopPinnedZone(null);
                       }}
                     />
-                    <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />
                   </div>}
 
                   {activeProfile.id === 'alquiler' && (() => {
@@ -3702,6 +3701,7 @@ const MadridDashboardV2: React.FC = () => {
                     onHelp={() => setShowMapHelpModal(true)}
                   >
                     {isMobile && <FullscreenToggle targetSelector=".v2-map-card" mobileOnly mobilePlatform />}
+                    {!isMobile && <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />}
                   </DashboardMapStatus>
 
                   <div className="v2-map-fullscreen-info" aria-live="polite">
