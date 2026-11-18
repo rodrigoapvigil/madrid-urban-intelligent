@@ -6,6 +6,12 @@ import { RotateCw } from "lucide-react";
 import "./loading-screen.css";
 
 const NEIGHBORHOOD_DOTS = Array.from({ length: 131 }, (_, index) => index);
+const WAITING_PHRASES = [
+  "Aguanta un poco más.",
+  "Los buenos datos se hacen esperar.",
+  "¿Cuánto cuesta vivir aquí de verdad?",
+  "Entras, miras y decides.",
+];
 
 export type LoadingScreenProps = {
   ready?: boolean;
@@ -23,6 +29,7 @@ export default function LoadingScreen({
   onRetry,
 }: LoadingScreenProps) {
   const [leaving, setLeaving] = useState(false);
+  const [phraseIndex, setPhraseIndex] = useState(0);
   const onExitedRef = useRef(onExited);
   onExitedRef.current = onExited;
 
@@ -59,6 +66,14 @@ export default function LoadingScreen({
 
   const failed = Boolean(error);
 
+  useEffect(() => {
+    if (ready || failed || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const interval = window.setInterval(() => {
+      setPhraseIndex((current) => (current + 1) % WAITING_PHRASES.length);
+    }, 7000);
+    return () => window.clearInterval(interval);
+  }, [failed, ready]);
+
   return (
     <div className="dmiyc-ls" data-leaving={leaving} data-error={failed} aria-busy={!ready && !failed}>
       <header className="dmiyc-ls__top">
@@ -83,6 +98,11 @@ export default function LoadingScreen({
             <p className="dmiyc-ls__sub">
               {failed ? error : "Preparamos el mapa de precios por distritos y barrios."}
             </p>
+            {!failed && !ready && (
+              <p key={phraseIndex} className="dmiyc-ls__mood" aria-hidden="true">
+                {WAITING_PHRASES[phraseIndex]}
+              </p>
+            )}
             {onRetry && !ready && (
               <button className="dmiyc-ls__retry" type="button" onClick={onRetry}>
                 <RotateCw size={15} aria-hidden="true" />

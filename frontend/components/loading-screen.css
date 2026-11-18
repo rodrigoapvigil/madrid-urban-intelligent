@@ -44,15 +44,16 @@
 .dmiyc-ls__headline { max-width: 12ch; margin: 0; color: #eaf8ff; font-size: clamp(58px, 8.5vw, 142px); font-weight: 700; letter-spacing: -.065em; line-height: .94; text-wrap: balance; }
 .dmiyc-ls__message { max-width: 42ch; margin: clamp(24px, 4vh, 42px) 0 0; color: #e7f3fa; font-size: clamp(20px, 2.1vw, 30px); font-weight: 550; letter-spacing: -.025em; line-height: 1.25; overflow-wrap: anywhere; }
 .dmiyc-ls__sub { max-width: 48ch; margin: 12px 0 0; color: #c4d6e2; font-size: clamp(14px, 1.25vw, 17px); line-height: 1.55; overflow-wrap: anywhere; }
+.dmiyc-ls__mood { min-height: 1.5em; max-width: 48ch; margin: 10px 0 0; color: #91b6c9; font-size: clamp(13px, 1.05vw, 15px); line-height: 1.5; animation: dmiyc-ls-phrase-in .55s ease both; }
 .dmiyc-ls__visuals { grid-column: 2; grid-row: 1 / span 2; display: flex; flex-direction: column; justify-content: center; gap: clamp(28px, 6vh, 64px); min-width: 0; padding-top: 18px; }
 .dmiyc-ls__chart { position: relative; width: 100%; padding: 20px 0 26px; border-top: 1px solid rgba(143, 176, 200, .15); border-bottom: 1px solid rgba(143, 176, 200, .13); }
 .dmiyc-ls__chart svg { display: block; width: 100%; height: clamp(110px, 17vh, 185px); overflow: visible; }
 .dmiyc-ls__chart-area { fill: rgba(0, 229, 255, .08); }
-.dmiyc-ls__chart-line { fill: none; stroke: var(--ls-cyan); stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 7px rgba(0, 229, 255, .45)); }
-.dmiyc-ls__chart-point { fill: var(--ls-cyan); stroke: #b8fbff; stroke-width: 2; }
+.dmiyc-ls__chart-line { fill: none; stroke: var(--ls-cyan); stroke-width: 3; stroke-linecap: round; filter: drop-shadow(0 0 7px rgba(0, 229, 255, .45)); animation: dmiyc-ls-chart-glow 5s ease-in-out infinite alternate; }
+.dmiyc-ls__chart-point { fill: var(--ls-cyan); stroke: #b8fbff; stroke-width: 2; animation: dmiyc-ls-point-glow 4s ease-in-out infinite alternate; }
 .dmiyc-ls__visual-caption { display: block; margin-top: 12px; color: #a9bfd0; font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
 .dmiyc-ls__neighborhoods { display: grid; grid-template-columns: repeat(22, minmax(4px, 8px)); justify-content: space-between; gap: clamp(8px, 1.4vh, 14px) 6px; width: min(100%, 480px); }
-.dmiyc-ls__neighborhoods i { width: 6px; aspect-ratio: 1; border-radius: 50%; background: rgba(143, 176, 200, .28); box-shadow: 0 0 8px rgba(0, 229, 255, .08); }
+.dmiyc-ls__neighborhoods i { width: 6px; aspect-ratio: 1; border-radius: 50%; background: rgba(143, 176, 200, .28); box-shadow: 0 0 8px rgba(0, 229, 255, .08); animation: dmiyc-ls-dots 7s ease-in-out infinite alternate; }
 .dmiyc-ls__load-state { grid-column: 1; grid-row: 2; display: flex; align-items: center; gap: 14px; width: fit-content; max-width: 100%; }
 .dmiyc-ls__load-state > div { display: grid; gap: 4px; }
 .dmiyc-ls__load-state strong { color: #dcebf5; font-size: 13px; font-weight: 650; }
@@ -62,6 +63,10 @@
 .dmiyc-ls__retry:hover { border-color: rgba(0, 229, 255, .7); background: rgba(0, 229, 255, .16); }
 .dmiyc-ls__retry:focus-visible { outline: 2px solid #eaf8ff; outline-offset: 3px; }
 @keyframes dmiyc-ls-spin { to { transform: rotate(360deg); } }
+@keyframes dmiyc-ls-phrase-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes dmiyc-ls-chart-glow { from { filter: drop-shadow(0 0 4px rgba(0, 229, 255, .28)); } to { filter: drop-shadow(0 0 8px rgba(0, 229, 255, .52)); } }
+@keyframes dmiyc-ls-point-glow { from { filter: drop-shadow(0 0 2px rgba(0, 229, 255, .35)); } to { filter: drop-shadow(0 0 7px rgba(0, 229, 255, .72)); } }
+@keyframes dmiyc-ls-dots { from { opacity: .72; } to { opacity: 1; } }
 
 @media (max-width: 760px) {
   .dmiyc-ls { padding-inline: max(24px, env(safe-area-inset-left)) max(24px, env(safe-area-inset-right)); }
@@ -72,6 +77,7 @@
   .dmiyc-ls__headline { max-width: 10ch; font-size: clamp(56px, 14vw, 88px); }
   .dmiyc-ls__brand-line { margin-top: 26px; }
   .dmiyc-ls__message { margin-top: 20px; font-size: clamp(19px, 5vw, 24px); }
+  .dmiyc-ls__mood { min-height: 3em; }
   .dmiyc-ls__visuals { grid-column: 1; grid-row: 2; gap: 24px; padding-top: 0; }
   .dmiyc-ls__chart { padding-block: 12px 18px; }
   .dmiyc-ls__chart svg { height: 108px; }
@@ -97,4 +103,8 @@
 @media (prefers-reduced-motion: reduce) {
   .dmiyc-ls, .dmiyc-ls__retry { transition: none; }
   .dmiyc-ls__spinner { animation: none; border-top-color: rgba(0, 229, 255, .65); }
+  .dmiyc-ls__mood,
+  .dmiyc-ls__chart-line,
+  .dmiyc-ls__chart-point,
+  .dmiyc-ls__neighborhoods i { animation: none; }
 }
