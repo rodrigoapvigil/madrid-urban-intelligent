@@ -1079,6 +1079,7 @@ const MadridDashboardV2: React.FC = () => {
   const [rankings, setRankings] = useState<{ topDist: any[], botDist: any[], topBarr: any[], botBarr: any[] }>({
     topDist: [], botDist: [], topBarr: [], botBarr: []
   });
+  const [rankingPreviousValues, setRankingPreviousValues] = useState<Record<string, number>>({});
   const [isRankingsLoading, setIsRankingsLoading] = useState(true);
   const [affordabilityData, setAffordabilityData] = useState<any[]>([]);
   const [seasonalTrend, setSeasonalTrend] = useState<any[]>([]);
@@ -1087,6 +1088,7 @@ const MadridDashboardV2: React.FC = () => {
   const [heatmapSearch, setHeatmapSearch] = useState('');
   const [rankingLevel, setRankingLevel] = useState<'Distritos' | 'Barrios'>('Distritos');
   const [rankingMetric, setRankingMetric] = useState<'total' | 'unit'>('total');
+  const [rankingOrder, setRankingOrder] = useState('affordable');
   const [scatterData, setScatterData] = useState<any[]>([]);
   const [connectivityData, setConnectivityData] = useState<any>(null);
   const [liquidityLevel, setLiquidityLevel] = useState<'distrito' | 'barrio'>('distrito');
@@ -1495,10 +1497,13 @@ const MadridDashboardV2: React.FC = () => {
       Promise.all([
         apiFetch(`/liquidity?year=${selectedYear}&level=distrito`).then(r => r.ok ? r.json() : []).catch(() => []),
         apiFetch(`/liquidity?year=${selectedYear}&level=barrio`).then(r => r.ok ? r.json() : []).catch(() => []),
-      ]).then(([dist, barr]) => {
+        Number(selectedYear) > 2023 ? apiFetch(`/liquidity?year=${Number(selectedYear) - 1}&level=distrito`).then(r => r.ok ? r.json() : []).catch(() => []) : Promise.resolve([]),
+        Number(selectedYear) > 2023 ? apiFetch(`/liquidity?year=${Number(selectedYear) - 1}&level=barrio`).then(r => r.ok ? r.json() : []).catch(() => []) : Promise.resolve([]),
+      ]).then(([dist, barr, previousDist, previousBarr]) => {
         if (!isCurrent) return;
         const mapLiquidity = (list: any[]) => list.map(item => ({ name: item.name, value: item.transactions }));
         setRankings({ topDist: mapLiquidity(dist || []), botDist: mapLiquidity(dist || []), topBarr: mapLiquidity(barr || []), botBarr: mapLiquidity(barr || []) });
+        setRankingPreviousValues(Object.fromEntries([...(previousDist || []), ...(previousBarr || [])].map((item: any) => [normalizeZoneLabel(String(item.name || '')), Number(item.transactions)])));
         setIsRankingsLoading(false);
       });
     } else {
@@ -1507,7 +1512,9 @@ const MadridDashboardV2: React.FC = () => {
       Promise.all([
         apiFetch(`/rankings?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&level=distrito&category=${encodeURIComponent(category)}`).then(r => r.ok ? r.json() : []).catch(() => []),
         apiFetch(`/rankings?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&level=barrio&category=${encodeURIComponent(category)}${district}`).then(r => r.ok ? r.json() : []).catch(() => []),
-      ]).then(([dist, barr]) => {
+        Number(selectedYear) > 2023 ? apiFetch(`/rankings?year=${Number(selectedYear) - 1}&month=${selectedMonth}&op=${activeProfile.op}&level=distrito&category=${encodeURIComponent(category)}`).then(r => r.ok ? r.json() : []).catch(() => []) : Promise.resolve([]),
+        Number(selectedYear) > 2023 ? apiFetch(`/rankings?year=${Number(selectedYear) - 1}&month=${selectedMonth}&op=${activeProfile.op}&level=barrio&category=${encodeURIComponent(category)}${district}`).then(r => r.ok ? r.json() : []).catch(() => []) : Promise.resolve([]),
+      ]).then(([dist, barr, previousDist, previousBarr]) => {
         if (!isCurrent) return;
         if (activeProfile.id === 'alquiler') {
           const maxAllowed = rankingMetric === 'unit' ? 100 : 10000;
@@ -1521,6 +1528,7 @@ const MadridDashboardV2: React.FC = () => {
         const withObservedValue = (rows: any[]) => (rows || []).filter((item: any) => Number.isFinite(Number(item.value)) && Number(item.value) > 0);
         const observedDist = withObservedValue(dist);
         const observedBarr = withObservedValue(barr);
+        setRankingPreviousValues(Object.fromEntries([...(previousDist || []), ...(previousBarr || [])].map((item: any) => [normalizeZoneLabel(String(item.name || '')), Number(item.value)])));
         setRankings({ topDist: observedDist, botDist: [...observedDist].sort((a: any, b: any) => a.value - b.value), topBarr: observedBarr, botBarr: [...observedBarr].sort((a: any, b: any) => a.value - b.value) });
         setIsRankingsLoading(false);
       });
@@ -2563,6 +2571,8 @@ const MadridDashboardV2: React.FC = () => {
     if (newIdx === profileIdx || isTransitioning) return;
     setPrevIdx(profileIdx);
     setProfileIdx(newIdx);
+    const nextProfile = PROFILES[newIdx];
+    setRankingOrder(nextProfile?.id === 'venta' ? 'demand-high' : nextProfile?.id === 'inversion' ? 'yield-high' : 'affordable');
     setIsTransitioning(true);
     setTimeout(() => setIsTransitioning(false), 480);
   };
@@ -2638,7 +2648,6 @@ const MadridDashboardV2: React.FC = () => {
       <td><span style={{ display: 'block', width: `${40 + (index % 3) * 10}%`, height: '10px', marginLeft: 'auto', borderRadius: '6px', background: 'rgba(0, 229, 255, 0.13)' }} /></td>
     </tr>
   ));
-  const rankingValueMax = Math.max(1, ...rankingRows.map(item => Number(item.value) || 0));
   const normalizeZoneName = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
   const highlightedRankingZone = rankingLevel === 'Distritos' ? selectedDistrict : selectedBarrio;
   const selectedRankingZone = rankingLevel === 'Distritos'
@@ -3830,15 +3839,21 @@ const MadridDashboardV2: React.FC = () => {
                   loading={isRankingsLoading}
                   loadingRows={rankingLoadingRows}
                   highlightedZone={highlightedRankingZone}
-                  valueMax={rankingValueMax}
                   isMobile={isMobile}
                   metric={rankingMetric}
                   onMetricChange={setRankingMetric}
                   formatName={formatMadridName}
-                  formatZone={formatZoneOption}
-                  normalizeName={normalizeZoneName}
                   formatNumber={formatNumber}
                   formatEuro={formatEuro}
+                  monthlyRows={heatmapData}
+                  previousValues={rankingPreviousValues}
+                  districtForZone={(zone) => {
+                    const feature = mapData.neighborhoods.find((item: any) => normalizeZoneLabel(String(item.barrio || '')) === normalizeZoneLabel(zone));
+                    return feature?.distrito || feature?.district;
+                  }}
+                  order={rankingOrder}
+                  onOrderChange={setRankingOrder}
+                  hasAnnualVariation={Object.keys(rankingPreviousValues).length > 0}
                 />
               </div>
 

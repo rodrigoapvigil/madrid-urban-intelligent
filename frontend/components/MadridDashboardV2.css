@@ -4218,3 +4218,23 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-heatmap-table td.is-hovered-column { box-shadow: inset 1px 0 rgba(234,245,255,.4), inset -1px 0 rgba(234,245,255,.4); }
 .v2-root .v2-heatmap-table tr.is-hovered-row > td.is-hovered-column { box-shadow: inset 1px 0 rgba(234,245,255,.55), inset -1px 0 rgba(234,245,255,.55), inset 0 1px rgba(234,245,255,.45), inset 0 -1px rgba(234,245,255,.45); }
 .v2-root .v2-heatmap-table td.v2-heatmap-no-data { border-radius: 6px; }
+
+/* Ranking rows pair each zone with its monthly trend and annual change. */
+.v2-root .v2-ranking-controls { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin: 8px 0 10px; }
+.v2-root .v2-ranking-order { min-height: 34px; max-width: 100%; padding: 0 30px 0 10px; border: 1px solid rgba(186,204,214,.2); border-radius: 10px; background: #091b30; color: #d8e5ef; font: inherit; font-size: 11px; }
+.v2-root .v2-ranking-table-informative { table-layout: fixed; }
+.v2-root .v2-ranking-table-informative th:first-child { width: 58%; }
+.v2-root .v2-ranking-table-informative th:last-child { width: 42%; }
+.v2-root .v2-ranking-table-informative tbody tr { height: 56px !important; }
+.v2-root .v2-ranking-zone { display: flex; align-items: center; gap: 8px; min-width: 0; height: 56px; }
+.v2-root .v2-ranking-position { flex: 0 0 22px; color: #aebfcd; font-variant-numeric: tabular-nums; }
+.v2-root .v2-ranking-label { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+.v2-root .v2-ranking-name { white-space: normal; overflow-wrap: anywhere; line-height: 1.15; }
+.v2-root .v2-ranking-district { margin-top: 2px; color: #8fa6b9; font-size: 10px; font-weight: 500; line-height: 1.1; }
+.v2-root .v2-ranking-value { overflow: visible; white-space: normal; }
+.v2-root .v2-ranking-value-line { display: flex; align-items: center; justify-content: flex-end; gap: 7px; white-space: nowrap; }
+.v2-root .v2-ranking-sparkline { flex: 0 0 48px; width: 48px; height: 20px; opacity: .8; }
+.v2-root .v2-ranking-annual-change { display: block; margin-top: 2px; color: #aebfcd; font-size: 10px; font-weight: 500; }
+@media (min-width: 769px) {
+  .v2-root .v2-ranking-sparkline { flex-basis: 60px; width: 60px; }
+}
