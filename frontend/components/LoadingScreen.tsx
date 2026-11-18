@@ -5,6 +5,8 @@ import Image from "next/image";
 import { RotateCw } from "lucide-react";
 import "./loading-screen.css";
 
+const NEIGHBORHOOD_DOTS = Array.from({ length: 131 }, (_, index) => index);
+
 export type LoadingScreenProps = {
   ready?: boolean;
   loadingMessage?: string;
@@ -42,6 +44,11 @@ export default function LoadingScreen({
       setLeaving(false);
       return;
     }
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setLeaving(true);
+      onExitedRef.current?.();
+      return;
+    }
     const fade = window.setTimeout(() => setLeaving(true), 500);
     const exit = window.setTimeout(() => onExitedRef.current?.(), 950);
     return () => {
@@ -62,35 +69,50 @@ export default function LoadingScreen({
       </header>
 
       <main className="dmiyc-ls__main">
-        <section className="dmiyc-ls__card" aria-labelledby="dmiyc-loading-title">
-          <div className="dmiyc-ls__pill" data-error={failed}>
-            <i aria-hidden="true" />
-            {failed ? "No se pudo completar la carga" : ready ? "Datos preparados" : "Primera carga"}
+        <section className="dmiyc-ls__experience" aria-labelledby="dmiyc-loading-title">
+          <div className="dmiyc-ls__copy">
+            <div className="dmiyc-ls__pill" data-error={failed}>
+              <i aria-hidden="true" />
+              {failed ? "Carga interrumpida" : ready ? "Datos preparados" : "Primera carga"}
+            </div>
+            <p className="dmiyc-ls__brand-line">Datos para decidir Madrid</p>
+            <h1 id="dmiyc-loading-title" className="dmiyc-ls__headline">Madrid despierta.</h1>
+            <p className="dmiyc-ls__message" role={failed ? "alert" : "status"} aria-live={failed ? "assertive" : "polite"}>
+              {failed ? "No se han podido cargar los datos." : ready ? "Abriendo el mapa de Madrid…" : loadingMessage}
+            </p>
+            <p className="dmiyc-ls__sub">
+              {failed ? error : "Preparamos el mapa de precios por distritos y barrios."}
+            </p>
+            {onRetry && !ready && (
+              <button className="dmiyc-ls__retry" type="button" onClick={onRetry}>
+                <RotateCw size={15} aria-hidden="true" />
+                {failed ? "Reintentar" : "¿Problemas? Reintentar"}
+              </button>
+            )}
           </div>
-          <p className="dmiyc-ls__brand-line">Madrid despierta.</p>
-          <h1 id="dmiyc-loading-title" className="dmiyc-ls__headline" role={failed ? "alert" : "status"} aria-live={failed ? "assertive" : "polite"}>
-            {failed ? "No se han podido cargar los datos" : ready ? "Abriendo el mapa de Madrid…" : loadingMessage}
-          </h1>
-          {failed ? (
-            <p className="dmiyc-ls__sub">{error} Puedes volver a intentarlo ahora.</p>
-          ) : (
-            <p className="dmiyc-ls__sub">Estamos preparando los datos iniciales del mercado. La duración depende de la conexión.</p>
-          )}
+
+          <div className="dmiyc-ls__visuals" aria-hidden="true">
+            <div className="dmiyc-ls__chart">
+              <svg viewBox="0 0 600 150" preserveAspectRatio="none">
+                <path className="dmiyc-ls__chart-area" d="M0 112 C36 88 46 92 72 98 S112 79 145 94 S185 109 220 86 S264 76 296 83 S342 99 374 72 S424 61 452 68 S488 73 518 49 S564 40 600 30 V150 H0 Z" />
+                <path className="dmiyc-ls__chart-line" d="M0 112 C36 88 46 92 72 98 S112 79 145 94 S185 109 220 86 S264 76 296 83 S342 99 374 72 S424 61 452 68 S488 73 518 49 S564 40 600 30" />
+                <circle className="dmiyc-ls__chart-point" cx="600" cy="30" r="5" />
+              </svg>
+              <span className="dmiyc-ls__visual-caption">Madrid · distritos y barrios</span>
+            </div>
+            <div className="dmiyc-ls__neighborhoods">
+              {NEIGHBORHOOD_DOTS.map((dot) => <i key={dot} />)}
+            </div>
+          </div>
 
           {!ready && !failed && (
-            <div className="dmiyc-ls__progress-group">
-              <div className="dmiyc-ls__progress" role="progressbar" aria-label="Carga de datos de Madrid" aria-valuetext="Progreso indeterminado">
-                <span />
+            <div className="dmiyc-ls__load-state">
+              <span className="dmiyc-ls__spinner" aria-hidden="true" />
+              <div>
+                <strong>Carga en curso</strong>
+                <span>Preparando el mapa de Madrid.</span>
               </div>
-              <span className="dmiyc-ls__progress-label">Carga en curso</span>
             </div>
-          )}
-
-          {onRetry && (
-            <button className="dmiyc-ls__retry" type="button" onClick={onRetry}>
-              <RotateCw size={15} aria-hidden="true" />
-              {failed ? "Reintentar carga" : "¿No avanza? Reintentar"}
-            </button>
           )}
         </section>
       </main>
