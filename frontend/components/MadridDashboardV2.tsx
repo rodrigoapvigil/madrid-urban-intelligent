@@ -412,17 +412,6 @@ const getMapLegendLabels = (profileId: string) => {
   return ['< 16 €/m²', '16–19 €/m²', '19–22 €/m²', '22–25 €/m²', '≥ 25 €/m²'];
 };
 
-function MapInlineScale({ metricLabel }: { metricLabel: string }) {
-  return (
-    <div className="v2-map-inline-legend" aria-label={`Escala de color de menor a mayor para ${metricLabel}. Las zonas rayadas indican que no hay datos disponibles.`}>
-      <span>Menor</span>
-      <div className="v2-map-legend-swatches" aria-hidden="true"><i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" /></div>
-      <span>Mayor</span>
-      <span className="v2-map-inline-no-data"><i aria-hidden="true" />Sin datos</span>
-    </div>
-  );
-}
-
 const MAP_DATA_SOURCE = 'Banco de Datos del Ayuntamiento de Madrid';
 
 const MONTHS_ES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -3530,7 +3519,7 @@ const MadridDashboardV2: React.FC = () => {
                           onZoneHover={isMobile ? undefined : handleDesktopZoneHover}
                           onDistrictClick={handleMapDistrictClick}
                         />
-                        {!isMobile && <><div className="v2-map-panel-heading"><strong>Distritos · {mapMetricLabel}</strong><button type="button" aria-label="Cómo leer los mapas y su escala" title="Cómo leer los mapas y su escala" onClick={() => setShowMapHelpModal(true)}><HelpCircle size={14} /></button></div><MapInlineScale metricLabel={mapMetricLabel} /></>}
+                        {!isMobile && <div className="v2-map-panel-heading"><strong>Distritos · {mapMetricLabel}</strong><button type="button" aria-label="Cómo leer los mapas y su escala" title="Cómo leer los mapas y su escala" onClick={() => setShowMapHelpModal(true)}><HelpCircle size={14} /></button></div>}
                       </div>
                     </div>
                     <div className="v2-map-sub" data-map-level="neighborhoods">
@@ -3552,7 +3541,7 @@ const MadridDashboardV2: React.FC = () => {
                           onDistrictClick={handleMapDistrictClick}
                           onBarrioClick={handleMapBarrioClick}
                         />
-                        {!isMobile && <><div className="v2-map-panel-heading"><strong>Barrios · {mapMetricLabel}</strong></div><MapInlineScale metricLabel={mapMetricLabel} /></>}
+                        {!isMobile && <div className="v2-map-panel-heading"><strong>Barrios · {mapMetricLabel}</strong></div>}
                       </div>
                     </div>
                   </div>
