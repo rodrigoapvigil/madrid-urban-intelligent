@@ -3500,6 +3500,8 @@ body.v2-fullscreen-open .v2-panel.v2-active { transform: none !important; }
 .v2-root .v2-compare-help-inline { display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 1px solid rgba(143,163,184,.28); border-radius: 50%; background: transparent; color: #91a9bd; cursor: pointer; }
 .v2-root .v2-compare-help-inline:hover { border-color: rgba(0,229,255,.65); color: #00e5ff; }
 .v2-root .v2-compare-title-block > span { color: #8fa3b8; font-size: 13px; }
+.v2-root .v2-comp-kpis-row .v2-mini-kpi-card { padding-bottom: 34px !important; }
+.v2-root .v2-comp-kpis-row .v2-mini-kpi-card .l .v2-estado-badge { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); }
 .v2-root .v2-compare-zone-selectors { grid-template-columns: minmax(0,1fr) 42px minmax(0,1fr) !important; gap: 10px !important; align-items: center; }
 .v2-root .v2-compare-zone-select { min-width: 0; padding: 10px 12px; border: 1px solid rgba(186,204,214,.13); border-radius: 14px; background: rgba(255,255,255,.035); }
 .v2-root .v2-compare-zone-select .v2-filter-label { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
