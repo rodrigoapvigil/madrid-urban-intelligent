@@ -98,32 +98,37 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
       {!compact && <span className="v2-zone-filter-title">{title}</span>}
       <div className="v2-zone-search-control">
         <div className="v2-zone-search-field">
-          <Search size={16} aria-hidden="true" />
-          <input
-            id={inputId}
-            type="search"
-            value={query}
-            placeholder="Busca un distrito o barrio"
-            aria-label={`${title}: busca un distrito o barrio`}
-            autoComplete="off"
-            role="combobox"
-            aria-autocomplete="list"
-            aria-expanded={open && Boolean(query)}
-            aria-controls={open && Boolean(query) && results.length ? listId : undefined}
-            aria-describedby={`${inputId}-hint`}
-            aria-activedescendant={open && results[activeIndex] ? `${listId}-${activeIndex}` : undefined}
-            onFocus={() => setOpen(true)}
-            onChange={event => { setQuery(event.target.value); setOpen(true); setActiveIndex(0); }}
-            onKeyDown={event => {
-              if (event.key === 'Escape') { setOpen(false); setQuery(''); }
-              else if (event.key === 'ArrowDown' && results.length) { event.preventDefault(); setOpen(true); setActiveIndex(index => (index + 1) % results.length); }
-              else if (event.key === 'ArrowUp' && results.length) { event.preventDefault(); setActiveIndex(index => (index - 1 + results.length) % results.length); }
-              else if (event.key === 'Enter' && results[activeIndex]) { event.preventDefault(); choose(results[activeIndex]); }
-            }}
-          />
-          {query && <button type="button" aria-label="Limpiar búsqueda y volver a Madrid" onClick={() => choose({ id: 'city-madrid', name: 'Madrid', kind: 'city' })}><X size={16} /></button>}
+          {selection ? (
+            <div className="v2-zone-search-selected-chip" aria-live="polite">
+              <span>{formatName(selection.name)}</span>
+              <button type="button" aria-label={`${formatName(selection.name)} seleccionada. Volver a Madrid`} onClick={() => choose({ id: 'city-madrid', name: 'Madrid', kind: 'city' })}><X size={16} aria-hidden="true" /></button>
+            </div>
+          ) : <>
+            <Search size={16} aria-hidden="true" />
+            <input
+              id={inputId}
+              type="search"
+              value={query}
+              placeholder="Busca un distrito o barrio"
+              aria-label={`${title}: busca un distrito o barrio`}
+              autoComplete="off"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={open && Boolean(query)}
+              aria-controls={open && Boolean(query) && results.length ? listId : undefined}
+              aria-activedescendant={open && results[activeIndex] ? `${listId}-${activeIndex}` : undefined}
+              onFocus={() => setOpen(true)}
+              onChange={event => { setQuery(event.target.value); setOpen(true); setActiveIndex(0); }}
+              onKeyDown={event => {
+                if (event.key === 'Escape') { setOpen(false); setQuery(''); }
+                else if (event.key === 'ArrowDown' && results.length) { event.preventDefault(); setOpen(true); setActiveIndex(index => (index + 1) % results.length); }
+                else if (event.key === 'ArrowUp' && results.length) { event.preventDefault(); setActiveIndex(index => (index - 1 + results.length) % results.length); }
+                else if (event.key === 'Enter' && results[activeIndex]) { event.preventDefault(); choose(results[activeIndex]); }
+              }}
+            />
+            {query && <button type="button" aria-label="Limpiar búsqueda y volver a Madrid" onClick={() => choose({ id: 'city-madrid', name: 'Madrid', kind: 'city' })}><X size={16} /></button>}
+          </>}
         </div>
-        <small id={`${inputId}-hint`} className="v2-zone-search-hint">Busca una zona o selecciónala en el mapa; las métricas se actualizarán.</small>
 
       {open && query && <>
         <div className={`v2-zone-search-announcement ${results.length ? 'is-count' : 'is-empty'}`} role="status" aria-live="polite">
@@ -143,13 +148,6 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
       </>}
       </div>
 
-      <div className="v2-zone-search-selection" aria-live="polite">
-        <nav aria-label="Ubicación seleccionada">
-          <button type="button" onClick={() => choose({ id: 'city-madrid', name: 'Madrid', kind: 'city' })}>Madrid</button>
-          {selection?.kind === 'district' && <><span>›</span><button type="button" onClick={() => choose(selection)}>{formatName(selection.name)}</button></>}
-          {selection?.kind === 'barrio' && <><span>›</span><button type="button" onClick={() => choose({ id: `district:${selection.district}`, name: selection.district || '', kind: 'district' })}>{formatName(selection.district || '')}</button><span>›</span><strong>{formatName(selection.name)}</strong></>}
-        </nav>
-      </div>
     </div>
   );
 }
