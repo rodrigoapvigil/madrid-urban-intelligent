@@ -4235,6 +4235,9 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-ranking-value-line { display: flex; align-items: center; justify-content: flex-end; gap: 7px; white-space: nowrap; }
 .v2-root .v2-ranking-sparkline { flex: 0 0 48px; width: 48px; height: 20px; opacity: .8; }
 .v2-root .v2-ranking-annual-change { display: block; margin-top: 2px; color: #aebfcd; font-size: 10px; font-weight: 500; }
+.v2-root .v2-estado-badge { display: inline-flex; align-items: center; white-space: nowrap; padding: 2px 8px; border: 1px solid; border-radius: 6px; font-size: 9px; font-weight: 700; line-height: 1.35; text-transform: uppercase; letter-spacing: .04em; }
+.v2-root .v2-estado-badge--real { color: #7df3ff; background: rgba(0,229,255,.13); border-color: rgba(0,229,255,.48); }
+.v2-root .v2-estado-badge--estimate { color: #ffd27a; background: rgba(255,178,66,.12); border-color: rgba(255,190,92,.56); }
 @media (min-width: 769px) {
   .v2-root .v2-ranking-sparkline { flex-basis: 60px; width: 60px; }
 }
