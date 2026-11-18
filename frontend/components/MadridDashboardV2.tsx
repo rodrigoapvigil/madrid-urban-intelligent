@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { cssColorResolverPlugin, colorWithAlpha, resolveCssColor } from '../lib/colors';
-import { Activity, Building2, ChevronDown, HelpCircle, Database, Home, MapPinned, Maximize2, RotateCcw, RotateCw, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Activity, Building2, ChevronDown, HelpCircle, Home, Maximize2, RotateCcw, RotateCw, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
 import './MadridDashboardV2.css';
 import { apiFetch } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
@@ -1036,7 +1036,6 @@ const MadridDashboardV2: React.FC = () => {
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
   const [isDashboardLoading, setIsDashboardLoading] = useState(true);
   const [showDashboardLoader, setShowDashboardLoader] = useState(true);
-  const [loadingStage, setLoadingStage] = useState(0);
   const [dashboardLoadError, setDashboardLoadError] = useState<string | null>(null);
   const [filtersReady, setFiltersReady] = useState(false);
   const [filtersAttempt, setFiltersAttempt] = useState(0);
@@ -1227,21 +1226,6 @@ const MadridDashboardV2: React.FC = () => {
     desktopZoneHoverRef.current = context;
     setDesktopZoneHover(context);
   }, [hoverZone]);
-  const loadingStages = [
-    { label: 'Conectando con la API', icon: Activity },
-    { label: 'Procesando datos del mercado', icon: Database },
-    { label: 'Preparando mapas y gráficas', icon: MapPinned },
-  ];
-
-  useEffect(() => {
-    if (!isDashboardLoading) return;
-    setLoadingStage(0);
-    const timer = window.setInterval(() => {
-      setLoadingStage((stage) => (stage + 1) % loadingStages.length);
-    }, 1800);
-    return () => window.clearInterval(timer);
-  }, [isDashboardLoading, loadingStages.length]);
-
   // Handle initial profile from query param
   useEffect(() => {
     if (profileParam) {
@@ -2664,10 +2648,11 @@ const MadridDashboardV2: React.FC = () => {
       <div className="mi-atmosphere" aria-hidden="true"/>
       {showDashboardLoader && (
         <LoadingScreen
-          ready={!isDashboardLoading}
-          estimatedSeconds={25}
+          ready={!isDashboardLoading && !dashboardLoadError}
+          loadingMessage={filtersReady ? 'Cargando datos del mercado de Madrid…' : 'Conectando con los datos de Madrid…'}
+          error={dashboardLoadError}
           onExited={() => setShowDashboardLoader(false)}
-          onRetry={() => window.location.reload()}
+          onRetry={() => filtersReady ? setLoadAttempt(value => value + 1) : setFiltersAttempt(value => value + 1)}
         />
       )}
 
