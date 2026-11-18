@@ -34,8 +34,8 @@ ChartJS.register(ChartDataLabels, cssColorResolverPlugin);
 const COMPARISON_COLORS = {
   zoneA: '#00E5FF',
   zoneB: '#FFB65C',
-  forecastA: '#A78BFA',
-  forecastB: '#FF7AA8',
+  forecastA: '#00E5FF',
+  forecastB: '#FFB65C',
 } as const;
 
 const COMPARISON_MEDIA_COLOR = '#E5F2F7';
