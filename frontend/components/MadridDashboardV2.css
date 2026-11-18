@@ -4323,6 +4323,10 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-explorer-header .v2-rank-title { margin: 0 0 4px !important; }
 .v2-root .v2-explorer-header .v2-rank-desc { margin: 0; color: #aebfcd; font-size: 13px; }
 @media (min-width: 769px) {
+  .v2-root .v2-explorer-header .v2-rank-settings { flex-direction: row !important; flex-wrap: nowrap; align-items: center; justify-content: flex-end; gap: 12px; width: auto; }
+  .v2-root .v2-explorer-header .v2-rank-settings > * { flex: 0 0 auto; }
+}
+@media (min-width: 769px) {
   .v2-root .v2-heatmap-card:not(.v2-is-fullscreen) .v2-heatmap-scroll { flex-basis: 560px !important; height: 560px !important; min-height: 560px !important; max-height: 560px !important; }
   .v2-root .v2-heatmap-table { border-collapse: separate !important; border-spacing: 0 !important; }
   .v2-root .v2-heatmap-table th,
