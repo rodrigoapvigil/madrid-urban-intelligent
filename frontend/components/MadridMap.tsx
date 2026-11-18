@@ -14,7 +14,6 @@ interface MapProps {
   selectedBarrio?: string | null;
   selectedZone?: string | null;
   selectedZoneType?: 'districts' | 'neighborhoods';
-  neighborhoodCount?: number;
   drillDownOnSelection?: boolean;
   compareZoneA?: string;
   compareZoneB?: string;
@@ -233,7 +232,7 @@ let cachedBarriosGeoJson: any = null;
 
 const MadridMap: React.FC<MapProps> = ({ 
   type, data, selectedYear, selectedMonth, selectedProfile, 
-  selectedDistrict, selectedBarrio, selectedZone = null, selectedZoneType, neighborhoodCount, drillDownOnSelection = true, compareZoneA, compareZoneB, onDistrictClick, onBarrioClick, onZoneHover
+  selectedDistrict, selectedBarrio, selectedZone = null, selectedZoneType, drillDownOnSelection = true, compareZoneA, compareZoneB, onDistrictClick, onBarrioClick, onZoneHover
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
@@ -527,26 +526,6 @@ const MadridMap: React.FC<MapProps> = ({
           background: 'transparent'
         }} 
       />
-      <div className="v2-map-location-label" style={{
-        position: 'absolute',
-        bottom: '8px',
-        left: '12px',
-        right: '12px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        pointerEvents: 'none',
-        zIndex: 500,
-        fontSize: '10px',
-        fontWeight: 600,
-        letterSpacing: '0.08em',
-        textTransform: 'uppercase',
-        color: 'rgba(186, 204, 214, 0.55)',
-        textShadow: '0 2px 8px rgba(0,0,0,0.8)'
-      }}>
-        <span>Madrid · Red Urbana</span>
-        <span>{type === 'districts' ? '21 Distritos' : `${neighborhoodCount || 131} Barrios`}</span>
-      </div>
     </div>
   );
 };

@@ -3708,7 +3708,7 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                   <div className="v2-dual-maps">
                     <div className="v2-map-sub" data-map-level="districts">
-                      <span>Distritos · 21</span>
+                      <div className="v2-map-panel-heading"><span>Madrid · Red Urbana</span><strong>21 Distritos</strong></div>
                       <div className="v2-map-placeholder" style={{ border: 'none' }}>
                         <MadridMap
                           key="districts-map"
@@ -3728,13 +3728,12 @@ const MadridDashboardV2: React.FC = () => {
                       </div>
                     </div>
                     <div className="v2-map-sub" data-map-level="neighborhoods">
-                      <span>Barrios · 131</span>
+                      <div className="v2-map-panel-heading"><span>Madrid · Red Urbana</span><strong>{neighborhoodFeatureCount || 131} Barrios</strong></div>
                       <div className="v2-map-placeholder" style={{ border: 'none' }}>
                         <MadridMap
                           key="neighborhoods-map"
                           type="neighborhoods"
                           data={mapData.neighborhoods}
-                          neighborhoodCount={isMobile ? undefined : neighborhoodFeatureCount}
                           selectedYear={Number(selectedYear)}
                           selectedMonth={selectedMonth}
                           selectedProfile={activeProfile.label}

@@ -4320,6 +4320,9 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-heatmap-heading-copy { display: grid; gap: 5px; min-width: 0; }
 .v2-root .v2-heatmap-heading-copy small { color: #91a9bd; font-size: 11px; font-weight: 500; }
 .v2-root .v2-heatmap-search { width: min(100%, 440px) !important; max-width: 440px !important; margin: 4px 0 14px !important; }
+.v2-root .v2-map-panel-heading { display: flex; flex: 0 0 auto; align-items: center; justify-content: space-between; gap: 12px; min-height: 42px; margin: 0 0 10px; padding: 0 12px; border: 1px solid rgba(186,204,214,.14); border-radius: 10px; background: rgba(1,16,36,.48); color: #9db2c5; font-size: 12px; font-weight: 650; letter-spacing: .055em; text-transform: uppercase; }
+.v2-root .v2-map-panel-heading span { margin: 0 !important; color: #9db2c5; font-size: inherit; }
+.v2-root .v2-map-panel-heading strong { color: #c8d8e6; font-size: inherit; font-weight: 700; white-space: nowrap; }
 .v2-root .v2-explorer-header { position: relative; z-index: 30; overflow: visible; }
 .v2-root .v2-rank-settings { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
 .v2-root .v2-compare-desktop-toolbar { position: relative; z-index: 30; display: flex; align-items: center; gap: 14px; }
