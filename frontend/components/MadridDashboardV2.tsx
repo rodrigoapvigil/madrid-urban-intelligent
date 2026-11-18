@@ -26,6 +26,7 @@ import DashboardHeatmapTable from './DashboardHeatmapTable';
 import DashboardRankingTable from './DashboardRankingTable';
 import EstadoBadge from './EstadoBadge';
 import PeriodSelector from './PeriodSelector';
+import ZoneSearch, { ZoneSearchOption } from './ZoneSearch';
 import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
 import type { MapZoneHoverContext } from './MadridMap';
 
@@ -1045,6 +1046,24 @@ const MadridDashboardV2: React.FC = () => {
   const [showHeatmapHelpModal, setShowHeatmapHelpModal] = useState(false);
   const [showCompareHelpModal, setShowCompareHelpModal] = useState(false);
   const [mapData, setMapData] = useState<{districts: any[], neighborhoods: any[]}>({ districts: [], neighborhoods: [] });
+  const zoneSearchOptions = useMemo<ZoneSearchOption[]>(() => {
+    const districts = Array.from(new Set([
+      ...availableDistricts.filter(name => name !== 'Todos'),
+      ...mapData.districts.map((item: any) => String(item.distrito || item.nombre || item.name || '')).filter(Boolean),
+    ]));
+    const barrios = new Map<string, ZoneSearchOption>();
+    mapData.neighborhoods.forEach((item: any) => {
+      const name = String(item.barrio || item.nombre || item.name || '').trim();
+      const district = String(item.distrito || item.district || '').trim();
+      if (!name || !district) return;
+      barrios.set(`${normalizeZoneLabel(district)}:${normalizeZoneLabel(name)}`, { id: `barrio:${district}:${name}`, name, district, kind: 'barrio' });
+    });
+    return [
+      { id: 'city-madrid', name: 'Madrid', kind: 'city' },
+      ...districts.map(name => ({ id: `district:${name}`, name, kind: 'district' as const })),
+      ...Array.from(barrios.values()),
+    ];
+  }, [availableDistricts, mapData.districts, mapData.neighborhoods]);
   const {
     selectedZone: selectedMapFeature,
     activeZone: activeMapFeature,
@@ -2854,29 +2873,26 @@ const MadridDashboardV2: React.FC = () => {
 
             {/* KPI & MAPA SECTION */}
             <div className="v2-grid-main" data-dashboard-section="summary">
-              {!isMobile && <div className="v2-zone-filter-row" aria-label="Filtros de zona">
-                <span className="v2-zone-filter-title">Zona</span>
-                <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
-                  <span className="v2-filter-label">Distrito</span>
-                  <DashboardSelect value={formatZoneOption(selectedDistrict)} expanded={activeDropdown === 'dist'} onToggle={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')} />
-                  {activeDropdown === 'dist' && <div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
-                    {availableDistricts.map(d => <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={selectedDistrict === d} onClick={event => { event.stopPropagation(); setSelectedDistrict(d); setSelectedBarrio('Todos'); setActiveDropdown(null); }}>{formatZoneOption(d)}</button>)}
-                  </div>}
-                </div>
-                <div className={`v2-dropdown-container ${activeDropdown === 'barrio' ? 'v2-z-up' : ''}`}>
-                  <span className="v2-filter-label">Barrio</span>
-                  <DashboardSelect value={selectedDistrict === 'Todos' ? 'Elige un distrito' : formatZoneOption(selectedBarrio)} disabled={selectedDistrict === 'Todos'} expanded={activeDropdown === 'barrio'} onToggle={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')} />
-                  {activeDropdown === 'barrio' && selectedDistrict !== 'Todos' && <div className="v2-dropdown-menu" role="listbox" aria-label="Barrio">
-                    <input className="v2-dropdown-search" aria-label="Buscar barrio" placeholder="Buscar barrio…" onClick={event => event.stopPropagation()} onChange={event => {
-                      const query = event.currentTarget.value.toLocaleLowerCase('es-ES');
-                      event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>('.v2-dropdown-item').forEach(item => { item.hidden = query.length > 0 && !item.textContent?.toLocaleLowerCase('es-ES').includes(query); });
-                    }} />
-                    {availableBarrios.map(b => <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={selectedBarrio === b} onClick={event => { event.stopPropagation(); setSelectedBarrio(b); setActiveDropdown(null); }}>{formatZoneOption(b)}</button>)}
-                  </div>}
-                </div>
-              </div>}
               <div className="v2-kpi-col">
                 <div className="v2-kpi-stack">
+
+                  {!isMobile && <div className="v2-zone-period-controls">
+                    <ZoneSearch
+                      options={zoneSearchOptions}
+                      district={selectedDistrict}
+                      barrio={selectedBarrio}
+                      formatName={formatZoneOption}
+                      onSelect={({ district, barrio }) => {
+                        setSelectedDistrict(district);
+                        setSelectedBarrio(barrio);
+                        selectZone(barrio !== 'Todos' ? barrio : district !== 'Todos' ? district : null);
+                        desktopZoneHoverRef.current = null;
+                        setDesktopZoneHover(null);
+                        setDesktopPinnedZone(null);
+                      }}
+                    />
+                    <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />
+                  </div>}
 
                   {activeProfile.id === 'alquiler' && (() => {
                     const rent = kpiData.p_vivienda || 0;
@@ -3686,7 +3702,6 @@ const MadridDashboardV2: React.FC = () => {
                     onHelp={() => setShowMapHelpModal(true)}
                   >
                     {isMobile && <FullscreenToggle targetSelector=".v2-map-card" mobileOnly mobilePlatform />}
-                    {!isMobile && <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />}
                   </DashboardMapStatus>
 
                   <div className="v2-map-fullscreen-info" aria-live="polite">
