@@ -4464,6 +4464,9 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-period-trigger:focus-visible,
 .v2-root .v2-period-arrow:focus-visible,
 .v2-root .v2-map-panel-heading button:focus-visible { outline: 2px solid #00e5ff; outline-offset: 3px; }
+.v2-root .v2-map-help-icon { display: grid; place-items: center; flex: 0 0 32px; width: 32px; height: 32px; padding: 0; border: 1px solid rgba(0,229,255,.36); border-radius: 50%; background: rgba(0,229,255,.07); color: #9bdce5; font: inherit; font-size: 17px; font-weight: 700; line-height: 1; cursor: pointer; transition: background-color .16s ease, border-color .16s ease, color .16s ease; }
+.v2-root .v2-map-help-icon:hover { color: #fff; border-color: #00e5ff; background: rgba(0,229,255,.16); }
+.v2-root .v2-map-help-icon:focus-visible { outline: 2px solid #00e5ff; outline-offset: 3px; }
 @media (prefers-reduced-motion: reduce) {
   .v2-root .v2-guide-modal { animation: none !important; }
   .v2-root .v2-guide-modal,

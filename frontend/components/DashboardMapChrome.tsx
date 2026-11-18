@@ -45,6 +45,15 @@ export function DashboardMapStatus({
         {children}
       </> : <>
         <div className="v2-map-period-slot">{children}</div>
+        <button
+          type="button"
+          className="v2-map-help-icon"
+          aria-label="Cómo leer el mapa"
+          title="Cómo leer el mapa"
+          onClick={onHelp}
+        >
+          ?
+        </button>
       </>}
     </div>
   );

@@ -3522,7 +3522,7 @@ const MadridDashboardV2: React.FC = () => {
                           onZoneHover={isMobile ? undefined : handleDesktopZoneHover}
                           onDistrictClick={handleMapDistrictClick}
                         />
-                        {!isMobile && <div className="v2-map-panel-heading"><strong>Distritos · {mapMetricLabel}</strong><button type="button" aria-label="Cómo leer los mapas y su escala" title="Cómo leer los mapas y su escala" onClick={() => setShowMapHelpModal(true)}><HelpCircle size={14} /></button></div>}
+                        {!isMobile && <div className="v2-map-panel-heading"><strong>Distritos · {mapMetricLabel}</strong></div>}
                       </div>
                     </div>
                     <div className="v2-map-sub" data-map-level="neighborhoods">
