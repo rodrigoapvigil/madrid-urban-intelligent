@@ -1602,6 +1602,34 @@ const MadridDashboardV2: React.FC = () => {
                 mode: 'index',
                 intersect: false
               },
+              onHover: (_event: any, active: any[]) => {
+                if (isMobile || !otherRawData) return;
+
+                const partnerId = ctx.id.includes('chartA-')
+                  ? ctx.id.replace('chartA-', 'chartB-')
+                  : ctx.id.includes('chartB-') ? ctx.id.replace('chartB-', 'chartA-') : null;
+                const partnerCanvas = partnerId ? document.getElementById(partnerId) as HTMLCanvasElement | null : null;
+                const partner = partnerCanvas ? ChartJS.getChart(partnerCanvas) as any : undefined;
+                if (!partner) return;
+
+                const index = active[0]?.index;
+                if (index === undefined) {
+                  partner.setActiveElements([]);
+                  partner.tooltip?.setActiveElements([], { x: 0, y: 0 });
+                  partner.draw();
+                  return;
+                }
+
+                const partnerPoint = otherRawData.find(d => Number(d.mes) === index + 1);
+                const zoneDatasetIndex = partnerPoint?.is_prediction ? 2 : 1;
+                const activeElements = [0, zoneDatasetIndex]
+                  .filter(datasetIndex => Number.isFinite(Number(partner.data.datasets[datasetIndex]?.data?.[index])))
+                  .map(datasetIndex => ({ datasetIndex, index }));
+                const position = { x: partner.scales.x.getPixelForValue(index), y: partner.chartArea.top };
+                partner.setActiveElements(activeElements);
+                partner.tooltip?.setActiveElements(activeElements, position);
+                partner.draw();
+              },
               layout: { padding: { top: 15, right: 30, bottom: 20, left: 0 } },
               plugins: {
                 legend: {
