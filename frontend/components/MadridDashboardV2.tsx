@@ -25,6 +25,7 @@ import DashboardSelect from './DashboardSelect';
 import DashboardHeatmapTable from './DashboardHeatmapTable';
 import DashboardRankingTable from './DashboardRankingTable';
 import EstadoBadge from './EstadoBadge';
+import PeriodSelector from './PeriodSelector';
 import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
 import type { MapZoneHoverContext } from './MadridMap';
 
@@ -3685,6 +3686,7 @@ const MadridDashboardV2: React.FC = () => {
                     onHelp={() => setShowMapHelpModal(true)}
                   >
                     {isMobile && <FullscreenToggle targetSelector=".v2-map-card" mobileOnly mobilePlatform />}
+                    {!isMobile && <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />}
                   </DashboardMapStatus>
 
                   <div className="v2-map-fullscreen-info" aria-live="polite">
@@ -3801,6 +3803,7 @@ const MadridDashboardV2: React.FC = () => {
                         : 'Zonas más asequibles'}
                 </div>
                 <div className="v2-rank-settings">
+                  {!isMobile && <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />}
                   <div className={isMobile ? 'v2-mobile-segmented-control' : 'v2-segmented-with-label'}>
                     {!isMobile && <span>Ver por:</span>}
                     <SegmentedControl<'Distritos' | 'Barrios'>
@@ -4020,6 +4023,7 @@ const MadridDashboardV2: React.FC = () => {
                 </div>
                 {!isMobile && <div className="v2-compare-desktop-toolbar">
                   <button type="button" className="v2-compare-help" onClick={() => setShowCompareHelpModal(true)}><HelpCircle size={15} /> ¿Cómo usar la comparación?</button>
+                  <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />
                   <div className="v2-segmented-with-label">
                     <span>Ver por:</span>
                     <SegmentedControl<'Distritos' | 'Barrios'>
