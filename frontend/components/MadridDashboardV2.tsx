@@ -1085,7 +1085,6 @@ const MadridDashboardV2: React.FC = () => {
   const [heatmapData, setHeatmapData] = useState<any[]>([]);
   const [heatmapDataSourceKey, setHeatmapDataSourceKey] = useState('');
   const [heatmapSearch, setHeatmapSearch] = useState('');
-  const [heatmapVisibleCount, setHeatmapVisibleCount] = useState(15);
   const [rankingLevel, setRankingLevel] = useState<'Distritos' | 'Barrios'>('Distritos');
   const [rankingMetric, setRankingMetric] = useState<'total' | 'unit'>('total');
   const [scatterData, setScatterData] = useState<any[]>([]);
@@ -3692,7 +3691,7 @@ const MadridDashboardV2: React.FC = () => {
                     firstProjectionMonth={firstProjectionMonth}
                     onHelp={() => setShowMapHelpModal(true)}
                   >
-                    <FullscreenToggle targetSelector=".v2-map-card" mobileOnly mobilePlatform={isMobile} />
+                    {isMobile && <FullscreenToggle targetSelector=".v2-map-card" mobileOnly mobilePlatform />}
                   </DashboardMapStatus>
 
                   <div className="v2-map-fullscreen-info" aria-live="polite">
@@ -3848,7 +3847,7 @@ const MadridDashboardV2: React.FC = () => {
                 <div className="v2-heatmap-card">
                   <div className="v2-heatmap-head" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '8px' }}>
                     <span>{activeProfile.id === 'inversion' ? 'Evolución mensual de rentabilidad (%)' : activeProfile.id === 'alquiler' ? 'Evolución mensual del alquiler (€/m²)' : 'Evolución mensual de venta (€/m²)'}</span>
-                    <FullscreenToggle targetSelector=".v2-heatmap-card" mobilePlatform={isMobile} />
+                    {isMobile && <FullscreenToggle targetSelector=".v2-heatmap-card" mobilePlatform />}
                     <button
                       onClick={() => setShowHeatmapHelpModal(true)}
                       style={{
@@ -3902,7 +3901,7 @@ const MadridDashboardV2: React.FC = () => {
                       * Nota: Los meses de {selectedYear} se muestran como <strong>estimaciones</strong> basadas en datos históricos. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un valor €/m² más alto.'}
                     </div>
                   )}
-                  <input className="v2-heatmap-search" type="search" value={heatmapSearch} onChange={event => { setHeatmapSearch(event.target.value); setHeatmapVisibleCount(15); }} placeholder={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'}…`} aria-label={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'} en el mapa de calor`} />
+                  <input className="v2-heatmap-search" type="search" value={heatmapSearch} onChange={event => setHeatmapSearch(event.target.value)} placeholder={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'}…`} aria-label={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'} en el mapa de calor`} />
                   <DashboardHeatmapTable
                     rows={filteredHeatmapRows}
                     profileId={activeProfile.id}
@@ -3910,8 +3909,6 @@ const MadridDashboardV2: React.FC = () => {
                     year={selectedYear}
                     min={heatmapMin}
                     max={heatmapMax}
-                    visibleCount={heatmapVisibleCount}
-                    onShowMore={() => setHeatmapVisibleCount(count => count + 15)}
                     formatValue={value => formatNumber(activeProfile.id === 'inversion' ? value * 100 : value, 1)}
                   />
                 </div>

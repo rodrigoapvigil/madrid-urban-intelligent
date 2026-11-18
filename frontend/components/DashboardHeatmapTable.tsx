@@ -12,8 +12,6 @@ export default function DashboardHeatmapTable({
   year,
   min,
   max,
-  visibleCount,
-  onShowMore,
   formatValue,
 }: {
   rows: Array<Record<string, any> & { zona: string }>;
@@ -22,8 +20,6 @@ export default function DashboardHeatmapTable({
   year: string;
   min: number;
   max: number;
-  visibleCount: number;
-  onShowMore: () => void;
   formatValue: (value: number) => string;
 }) {
   const cellColor = profileId === 'venta' || profileId === 'compra' ? '#FF8B6A' : '#00DDF0';
@@ -33,7 +29,7 @@ export default function DashboardHeatmapTable({
         <thead><tr><th>{level === 'Distritos' ? 'Distrito' : 'Barrio'}</th>{MONTHS.map(month => <th key={month}>{month.slice(0, 3)}</th>)}</tr></thead>
         <tbody>
           {rows.length > 0 ? rows.map((row, idx) => (
-            <tr key={idx} className={idx >= visibleCount ? 'v2-heatmap-extra-row' : undefined}>
+            <tr key={idx}>
               <td className="zona-name">{row.zona}</td>
               {MONTHS.map((_, monthIndex) => {
                 const value = Number(row[`m${monthIndex + 1}`]);
@@ -44,7 +40,6 @@ export default function DashboardHeatmapTable({
           )) : <tr><td colSpan={13} style={{ padding: '40px', textAlign: 'center', color: 'var(--azul-linea)' }}>No hay datos disponibles para el año {year}</td></tr>}
         </tbody>
       </table>
-      {rows.length > visibleCount && <button className="v2-heatmap-more" type="button" onClick={onShowMore}>Mostrar 15 más</button>}
     </div>
   );
 }
