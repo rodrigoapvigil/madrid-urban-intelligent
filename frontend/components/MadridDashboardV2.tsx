@@ -2500,7 +2500,6 @@ const MadridDashboardV2: React.FC = () => {
             <span>Filtros</span><b>{Number(selectedDistrict !== 'Todos') + Number(selectedBarrio !== 'Todos') + Number(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month)}</b>
           </button>
         ) : undefined}
-        desktopAction={!isMobile ? <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} /> : undefined}
         profileTabs={PROFILES.map(p => ({ id: p.id, label: p.label }))}
         activeProfileId={activeProfile.id}
         onSelectProfile={(id) => {
@@ -3490,7 +3489,7 @@ const MadridDashboardV2: React.FC = () => {
                     onHelp={() => setShowMapHelpModal(true)}
                   >
                     {isMobile && <FullscreenToggle targetSelector=".v2-map-card" mobileOnly mobilePlatform />}
-                    {!isMobile && <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />}
+                    {!isMobile && <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} hideMonthArrows keyboardMonthNavigation showYearShortcut={false} />}
                   </DashboardMapStatus>
 
                   <div className="v2-map-fullscreen-info" aria-live="polite">

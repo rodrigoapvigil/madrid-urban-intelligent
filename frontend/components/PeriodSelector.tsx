@@ -6,12 +6,15 @@ import EstadoBadge from './EstadoBadge';
 
 const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
-export default function PeriodSelector({ year, month, years, latestReal, onChange }: {
+export default function PeriodSelector({ year, month, years, latestReal, onChange, hideMonthArrows = false, keyboardMonthNavigation = false, showYearShortcut = true }: {
   year: string;
   month: string;
   years: string[];
   latestReal: { year: string; month: string };
   onChange: (year: string, month: string) => void;
+  hideMonthArrows?: boolean;
+  keyboardMonthNavigation?: boolean;
+  showYearShortcut?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const [calendarYear, setCalendarYear] = useState(year);
@@ -29,13 +32,19 @@ export default function PeriodSelector({ year, month, years, latestReal, onChang
   const availableYears = years.length ? years : ['2023', '2024', '2025', '2026', '2027', '2028'];
 
   return <div className="v2-period-selector" data-period-selector>
-    <button type="button" className="v2-period-arrow" aria-label="Mes anterior" onClick={() => move(-1)}>‹</button>
-    <button type="button" className={`v2-period-trigger ${open ? 'is-open' : ''}`} aria-label={`${month} ${year}, ${estimated ? 'estimación' : 'dato real'}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { setCalendarYear(year); setOpen(value => !value); }}>
+    {!hideMonthArrows && <button type="button" className="v2-period-arrow" aria-label="Mes anterior" onClick={() => move(-1)}>‹</button>}
+    <button type="button" className={`v2-period-trigger ${open ? 'is-open' : ''}`} aria-label={`${month} ${year}, ${estimated ? 'estimación' : 'dato real'}`} aria-haspopup="dialog" aria-expanded={open} onClick={() => { setCalendarYear(year); setOpen(value => !value); }} onKeyDown={event => {
+      if (!keyboardMonthNavigation) return;
+      if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        event.preventDefault();
+        move(event.key === 'ArrowLeft' ? -1 : 1);
+      }
+    }}>
       <strong>{month} {year}</strong>
       <EstadoBadge status={estimated ? 'estimate' : 'real'} />
       <ChevronDown className="v2-period-chevron" size={16} strokeWidth={2.25} aria-hidden="true" />
     </button>
-    <button type="button" className="v2-period-arrow" aria-label="Mes siguiente" onClick={() => move(1)}>›</button>
+    {!hideMonthArrows && <button type="button" className="v2-period-arrow" aria-label="Mes siguiente" onClick={() => move(1)}>›</button>}
     {open && <div className="v2-period-popover" role="dialog" aria-label="Elegir periodo">
       <div className="v2-period-year-row">
         <button type="button" aria-label="Año anterior" disabled={Number(calendarYear) <= Number(availableYears[0])} onClick={() => setCalendarYear(String(Number(calendarYear) - 1))}>‹</button>
@@ -49,7 +58,7 @@ export default function PeriodSelector({ year, month, years, latestReal, onChang
       })}</div>
       <div className="v2-period-shortcuts">
         <button type="button" onClick={() => { onChange(latestReal.year, latestReal.month); setOpen(false); }}>Último dato real</button>
-        <button type="button" onClick={() => { const targetYear = String(Math.max(Number(availableYears[0]), Number(year) - 1)); onChange(targetYear, month); setOpen(false); }}>Hace 1 año</button>
+        {showYearShortcut && <button type="button" onClick={() => { const targetYear = String(Math.max(Number(availableYears[0]), Number(year) - 1)); onChange(targetYear, month); setOpen(false); }}>Hace 1 año</button>}
       </div>
     </div>}
   </div>;
