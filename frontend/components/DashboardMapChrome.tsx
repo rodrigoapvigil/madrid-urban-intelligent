@@ -57,6 +57,8 @@ export function DashboardMapLegend({
   dataCount,
   totalCount,
   dataSource,
+  observedThrough,
+  estimatesFrom,
 }: {
   isMobile: boolean;
   title: string;
@@ -64,9 +66,12 @@ export function DashboardMapLegend({
   dataCount: number;
   totalCount: number;
   dataSource: string;
+  observedThrough: string;
+  estimatesFrom: string;
 }) {
   const note = `Rayado: sin datos publicados en la fuente oficial (${dataSource}). No los estimamos.`;
   const countNote = `${dataCount} de ${totalCount} barrios tienen dato en este periodo.`;
+  const periodNote = `Corte general observado: ${observedThrough}. Las estimaciones comienzan en ${estimatesFrom}.`;
   return (
     <div className="v2-map-legend" aria-label="Leyenda del mapa">
       {isMobile ? (
@@ -76,10 +81,11 @@ export function DashboardMapLegend({
           <div className="v2-map-legend-labels">{labels.map(label => <span key={label}>{label}</span>)}<span className="no-data-label"><i /> Sin datos</span></div>
           <small>Los tonos comparan las zonas del periodo seleccionado. {note}</small>
           <small>{countNote}</small>
+          <small>{periodNote}</small>
         </>
       ) : (
         <div className="v2-map-legend-desktop">
-          <div className="v2-map-legend-notes"><small>{note}</small><small>{countNote}</small></div>
+          <div className="v2-map-legend-notes"><small>{note}</small><small>{countNote}</small><small>{periodNote}</small></div>
           <div className="v2-map-legend-visual">
             <div className="v2-map-legend-title">{title}</div>
             <div className="v2-map-legend-scale" aria-label="Escala de menor a mayor valor"><span>Más bajo</span><div className="v2-map-legend-swatches" aria-hidden="true"><i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" /></div><span>Más alto</span></div>

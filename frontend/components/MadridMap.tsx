@@ -9,6 +9,7 @@ interface MapProps {
   data: any[]; // Data from /api/map
   selectedYear: number;
   selectedMonth: string;
+  isProjection?: boolean;
   selectedProfile: string;
   selectedDistrict: string | null;
   selectedBarrio?: string | null;
@@ -231,7 +232,7 @@ let cachedDistritosGeoJson: any = null;
 let cachedBarriosGeoJson: any = null;
 
 const MadridMap: React.FC<MapProps> = ({ 
-  type, data, selectedYear, selectedMonth, selectedProfile, 
+  type, data, selectedYear, selectedMonth, isProjection = false, selectedProfile, 
   selectedDistrict, selectedBarrio, selectedZone = null, selectedZoneType, drillDownOnSelection = true, compareZoneA, compareZoneB, onDistrictClick, onBarrioClick, onZoneHover
 }) => {
   const mapRef = useRef<L.Map | null>(null);
@@ -295,7 +296,7 @@ const MadridMap: React.FC<MapProps> = ({
       color: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#FFFFFF' : 'rgba(0, 240, 255, 0.45)',
       fillOpacity: isExcluded ? 0.25 : 1.0,
     };
-  }, [data, selectedDistrict, selectedBarrio, selectedZone, selectedZoneType, type, selectedProfile, compareZoneA, compareZoneB]);
+  }, [data, selectedDistrict, selectedBarrio, selectedZone, selectedZoneType, type, selectedProfile, compareZoneA, compareZoneB, containerId]);
 
   useEffect(() => {
     const initializeMap = () => {
@@ -381,6 +382,7 @@ const MadridMap: React.FC<MapProps> = ({
     }
 
     const loadGeoJson = async () => {
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       let geoData: any = type === 'districts' ? cachedDistritosGeoJson : cachedBarriosGeoJson;
       if (!geoData) {
         const url = type === 'districts' ? '/madrid_distritos.geojson' : '/barrios_polygons.geojson';
@@ -410,6 +412,15 @@ const MadridMap: React.FC<MapProps> = ({
           const item = exactItem;
           const zoneId = String(item?.[type === 'districts' ? 'distrito' : 'barrio'] || rawZoneId);
           const zoneRank = rankedMapRows.findIndex(entry => normalize(String(entry[type === 'districts' ? 'distrito' : 'barrio'] || '')) === normalize(zoneId)) + 1;
+          const mapValue = Number(selectedProfile === 'Inversión' ? item?.rentabilidad : item?.precio_m2) || 0;
+          const hasMapValue = Number.isFinite(mapValue) && mapValue > 0;
+          const selectedFeatureId = type === 'districts'
+            ? props.distrito || props.distrito_nombre || props.nombre || props.name
+            : props.barrio || props.nombre || props.name;
+          const nameForZoneSelection = selectedZoneType === type ? selectedFeatureId : rawName;
+          const isSelected = Boolean(selectedZone && (!selectedZoneType || selectedZoneType === type) && normalize(nameForZoneSelection) === normalize(selectedZone)) || (type === 'districts'
+            ? Boolean(selectedDistrict && normalize(rawName) === normalize(selectedDistrict))
+            : Boolean(selectedBarrio && normalize(rawName) === normalize(selectedBarrio)));
 
           const getHoverContext = (event: any): MapZoneHoverContext | undefined => {
             const nativeEvent = event?.originalEvent;
@@ -427,6 +438,16 @@ const MadridMap: React.FC<MapProps> = ({
               bounds: { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom },
             };
           };
+
+          const activateFeature = () => {
+            if (type === 'districts') {
+              const targetName = drillDownOnSelection ? districtName : zoneId;
+              onDistrictClick(compareZoneA !== undefined ? targetName : normalize(targetName) === normalize(selectedDistrict) ? null : targetName);
+            } else if (onBarrioClick) {
+              const targetName = drillDownOnSelection ? name : zoneId;
+              onBarrioClick(compareZoneA !== undefined ? targetName : normalize(targetName) === normalize(selectedBarrio) ? null : targetName);
+            }
+          };
           
           const hasHoverPointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
           layer.on({
@@ -436,9 +457,7 @@ const MadridMap: React.FC<MapProps> = ({
               const l = e.target;
               l.setStyle({
                 weight: 2,
-                color: '#00F0FF',
-                fillColor: '#00F0FF',
-                fillOpacity: 1
+                color: '#FFFFFF'
               });
             },
             mouseout: (e) => {
@@ -451,14 +470,44 @@ const MadridMap: React.FC<MapProps> = ({
               if (!hasHoverPointer) return;
               onZoneHoverRef.current?.(zoneId, getHoverContext(e));
             },
-            click: () => {
-              if (type === 'districts') {
-                const targetName = drillDownOnSelection ? districtName : zoneId;
-                onDistrictClick(compareZoneA !== undefined ? targetName : normalize(targetName) === normalize(selectedDistrict) ? null : targetName);
-              } else if (onBarrioClick) {
-                const targetName = drillDownOnSelection ? name : zoneId;
-                onBarrioClick(compareZoneA !== undefined ? targetName : normalize(targetName) === normalize(selectedBarrio) ? null : targetName);
-              }
+            click: activateFeature,
+            add: () => {
+              const path = (layer as L.Path).getElement() as SVGPathElement | null;
+              if (!path) return;
+              const mapPaths = path.ownerSVGElement?.querySelectorAll<SVGPathElement>('path[role="button"]');
+              path.setAttribute('tabindex', mapPaths?.[0] === path ? '0' : '-1');
+              path.setAttribute('role', 'button');
+              path.setAttribute('aria-pressed', String(isSelected));
+              const unit = selectedProfile === 'Inversión' ? '%' : '€/m²';
+              const displayValue = hasMapValue
+                ? selectedProfile === 'Inversión'
+                  ? `${(mapValue * 100).toLocaleString('es-ES', { maximumFractionDigits: 1 })} ${unit}`
+                  : `${mapValue.toLocaleString('es-ES', { maximumFractionDigits: 1 })} ${unit}`
+                : 'sin datos disponibles';
+              const levelName = type === 'districts' ? 'Distrito' : 'Barrio';
+              const periodName = `${selectedMonth} ${selectedYear}${isProjection ? ', estimación' : hasMapValue ? ', dato observado' : ', sin dato publicado'}`;
+              path.setAttribute('aria-label', `${levelName} ${formatMadridName(name)}: ${displayValue}, ${periodName}. Usa las flechas para recorrer zonas y pulsa Intro para seleccionar.`);
+              const onPathKeyDown = (event: KeyboardEvent) => {
+                if (['ArrowRight', 'ArrowDown', 'ArrowLeft', 'ArrowUp', 'Home', 'End'].includes(event.key)) {
+                  event.preventDefault();
+                  const paths = Array.from(path.ownerSVGElement?.querySelectorAll<SVGPathElement>('path[role="button"]') || []);
+                  const currentIndex = paths.indexOf(path);
+                  const nextIndex = event.key === 'Home'
+                    ? 0
+                    : event.key === 'End'
+                      ? paths.length - 1
+                      : (currentIndex + (event.key === 'ArrowRight' || event.key === 'ArrowDown' ? 1 : -1) + paths.length) % paths.length;
+                  paths.forEach((entry, index) => entry.setAttribute('tabindex', index === nextIndex ? '0' : '-1'));
+                  paths[nextIndex]?.focus();
+                  return;
+                }
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  activateFeature();
+                }
+              };
+              path.addEventListener('keydown', onPathKeyDown);
+              layer.once('remove', () => path.removeEventListener('keydown', onPathKeyDown));
             }
           });
         }
@@ -478,7 +527,8 @@ const MadridMap: React.FC<MapProps> = ({
           }
         });
         if (bounds.isValid()) {
-          mapRef.current?.flyToBounds(bounds, { padding: [64, 64], maxZoom: 12.2, duration: 1.5 });
+          if (prefersReducedMotion) mapRef.current?.fitBounds(bounds, { padding: [64, 64], maxZoom: 12.2, animate: false });
+          else mapRef.current?.flyToBounds(bounds, { padding: [64, 64], maxZoom: 12.2, duration: 1.5 });
         }
       } else if (drillDownOnSelection && selectedDistrict) {
         const bounds = L.latLngBounds([]);
@@ -490,16 +540,19 @@ const MadridMap: React.FC<MapProps> = ({
           }
         });
         if (bounds.isValid()) {
-          mapRef.current?.flyToBounds(bounds, { padding: [64, 64], maxZoom: 11.5, duration: 1.5 });
+          if (prefersReducedMotion) mapRef.current?.fitBounds(bounds, { padding: [64, 64], maxZoom: 11.5, animate: false });
+          else mapRef.current?.flyToBounds(bounds, { padding: [64, 64], maxZoom: 11.5, duration: 1.5 });
         }
       } else if (!hasInitialViewRef.current) {
         if (type === 'districts') {
           const urbanBounds = L.latLngBounds([40.285, -3.890], [40.640, -3.470]);
-          mapRef.current?.flyToBounds(urbanBounds, { padding: [20, 15], duration: 1 });
+          if (prefersReducedMotion) mapRef.current?.fitBounds(urbanBounds, { padding: [20, 15], animate: false });
+          else mapRef.current?.flyToBounds(urbanBounds, { padding: [20, 15], duration: 1 });
         } else {
           const bounds = geoJsonLayerRef.current.getBounds();
           if (bounds.isValid()) {
-            mapRef.current?.flyToBounds(bounds, { padding: [10, 10], duration: 1 });
+            if (prefersReducedMotion) mapRef.current?.fitBounds(bounds, { padding: [10, 10], animate: false });
+            else mapRef.current?.flyToBounds(bounds, { padding: [10, 10], duration: 1 });
           }
         }
         hasInitialViewRef.current = true;

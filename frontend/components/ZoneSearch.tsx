@@ -109,7 +109,8 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
             role="combobox"
             aria-autocomplete="list"
             aria-expanded={open && Boolean(query)}
-            aria-controls={listId}
+            aria-controls={open && Boolean(query) && results.length ? listId : undefined}
+            aria-describedby={`${inputId}-hint`}
             aria-activedescendant={open && results[activeIndex] ? `${listId}-${activeIndex}` : undefined}
             onFocus={() => setOpen(true)}
             onChange={event => { setQuery(event.target.value); setOpen(true); setActiveIndex(0); }}
@@ -122,9 +123,13 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
           />
           {query && <button type="button" aria-label="Limpiar búsqueda y volver a Madrid" onClick={() => choose({ id: 'city-madrid', name: 'Madrid', kind: 'city' })}><X size={16} /></button>}
         </div>
+        <small id={`${inputId}-hint`} className="v2-zone-search-hint">Busca una zona o selecciónala en el mapa; las métricas se actualizarán.</small>
 
-      {open && query && <div id={listId} className="v2-zone-search-results" role="listbox" aria-label="Resultados de zonas">
-        {results.length ? <>
+      {open && query && <>
+        <div className={`v2-zone-search-announcement ${results.length ? 'is-count' : 'is-empty'}`} role="status" aria-live="polite">
+          {results.length ? `${results.length} ${results.length === 1 ? 'zona encontrada' : 'zonas encontradas'}` : 'No encontramos esa zona. Prueba otro nombre.'}
+        </div>
+        {results.length > 0 && <div id={listId} className="v2-zone-search-results" role="listbox" aria-label="Resultados de zonas">
           {groupedResults.districts.length > 0 && <div role="group" aria-label="Distritos">
             <span className="v2-zone-search-group-label">Distritos</span>
             {groupedResults.districts.map(({ option, index }) => <ZoneResult key={option.id} option={option} index={index} listId={listId} formatName={formatName} active={index === activeIndex} onActivate={setActiveIndex} onChoose={choose} />)}
@@ -134,8 +139,8 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
             {groupedResults.barrios.map(({ option, index }) => <ZoneResult key={option.id} option={option} index={index} listId={listId} formatName={formatName} active={index === activeIndex} onActivate={setActiveIndex} onChoose={choose} />)}
           </div>}
           {groupedResults.city.map(({ option, index }) => <ZoneResult key={option.id} option={option} index={index} listId={listId} formatName={formatName} active={index === activeIndex} onActivate={setActiveIndex} onChoose={choose} />)}
-        </> : <p className="v2-zone-search-empty">Sin resultados</p>}
-      </div>}
+        </div>}
+      </>}
       </div>
 
       <div className="v2-zone-search-selection" aria-live="polite">

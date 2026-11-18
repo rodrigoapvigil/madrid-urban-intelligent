@@ -394,150 +394,6 @@ const ComparisonSeriesChips = ({ chartId, zoneA, zoneB }: { chartId: string; zon
 
 const MadridMap = dynamic(() => import('./MadridMap'), { ssr: false });
 
-const DEFAULT_BASELINE_SERIES: Record<string, Record<string, Array<{ mes: number; precio_m2: number; is_prediction: boolean; mes_nombre: string }>>> = {
-  alquiler: {
-    madrid: [
-      { mes: 1, precio_m2: 20.2, is_prediction: false, mes_nombre: 'Enero' },
-      { mes: 2, precio_m2: 20.5, is_prediction: false, mes_nombre: 'Febrero' },
-      { mes: 3, precio_m2: 20.8, is_prediction: false, mes_nombre: 'Marzo' },
-      { mes: 4, precio_m2: 21.0, is_prediction: false, mes_nombre: 'Abril' },
-      { mes: 5, precio_m2: 21.2, is_prediction: false, mes_nombre: 'Mayo' },
-      { mes: 6, precio_m2: 21.4, is_prediction: false, mes_nombre: 'Junio' },
-      { mes: 7, precio_m2: 21.3, is_prediction: true, mes_nombre: 'Julio' },
-      { mes: 8, precio_m2: 21.1, is_prediction: true, mes_nombre: 'Agosto' },
-      { mes: 9, precio_m2: 21.4, is_prediction: true, mes_nombre: 'Septiembre' },
-      { mes: 10, precio_m2: 21.6, is_prediction: true, mes_nombre: 'Octubre' },
-      { mes: 11, precio_m2: 21.3, is_prediction: true, mes_nombre: 'Noviembre' },
-      { mes: 12, precio_m2: 21.5, is_prediction: true, mes_nombre: 'Diciembre' },
-    ],
-    salamanca: [
-      { mes: 1, precio_m2: 27.56, is_prediction: false, mes_nombre: 'Enero' },
-      { mes: 2, precio_m2: 27.94, is_prediction: false, mes_nombre: 'Febrero' },
-      { mes: 3, precio_m2: 27.59, is_prediction: false, mes_nombre: 'Marzo' },
-      { mes: 4, precio_m2: 27.65, is_prediction: false, mes_nombre: 'Abril' },
-      { mes: 5, precio_m2: 27.92, is_prediction: false, mes_nombre: 'Mayo' },
-      { mes: 6, precio_m2: 28.10, is_prediction: false, mes_nombre: 'Junio' },
-      { mes: 7, precio_m2: 28.35, is_prediction: true, mes_nombre: 'Julio' },
-      { mes: 8, precio_m2: 28.48, is_prediction: true, mes_nombre: 'Agosto' },
-      { mes: 9, precio_m2: 28.72, is_prediction: true, mes_nombre: 'Septiembre' },
-      { mes: 10, precio_m2: 28.90, is_prediction: true, mes_nombre: 'Octubre' },
-      { mes: 11, precio_m2: 28.66, is_prediction: true, mes_nombre: 'Noviembre' },
-      { mes: 12, precio_m2: 29.15, is_prediction: true, mes_nombre: 'Diciembre' },
-    ],
-    centro: [
-      { mes: 1, precio_m2: 26.10, is_prediction: false, mes_nombre: 'Enero' },
-      { mes: 2, precio_m2: 26.35, is_prediction: false, mes_nombre: 'Febrero' },
-      { mes: 3, precio_m2: 26.50, is_prediction: false, mes_nombre: 'Marzo' },
-      { mes: 4, precio_m2: 26.80, is_prediction: false, mes_nombre: 'Abril' },
-      { mes: 5, precio_m2: 27.05, is_prediction: false, mes_nombre: 'Mayo' },
-      { mes: 6, precio_m2: 27.20, is_prediction: false, mes_nombre: 'Junio' },
-      { mes: 7, precio_m2: 27.42, is_prediction: true, mes_nombre: 'Julio' },
-      { mes: 8, precio_m2: 27.30, is_prediction: true, mes_nombre: 'Agosto' },
-      { mes: 9, precio_m2: 27.55, is_prediction: true, mes_nombre: 'Septiembre' },
-      { mes: 10, precio_m2: 27.75, is_prediction: true, mes_nombre: 'Octubre' },
-      { mes: 11, precio_m2: 27.25, is_prediction: true, mes_nombre: 'Noviembre' },
-      { mes: 12, precio_m2: 27.90, is_prediction: true, mes_nombre: 'Diciembre' },
-    ],
-  },
-  compra: {
-    madrid: [
-      { mes: 1, precio_m2: 4250, is_prediction: false, mes_nombre: 'Enero' },
-      { mes: 2, precio_m2: 4280, is_prediction: false, mes_nombre: 'Febrero' },
-      { mes: 3, precio_m2: 4310, is_prediction: false, mes_nombre: 'Marzo' },
-      { mes: 4, precio_m2: 4340, is_prediction: false, mes_nombre: 'Abril' },
-      { mes: 5, precio_m2: 4380, is_prediction: false, mes_nombre: 'Mayo' },
-      { mes: 6, precio_m2: 4410, is_prediction: false, mes_nombre: 'Junio' },
-      { mes: 7, precio_m2: 4440, is_prediction: true, mes_nombre: 'Julio' },
-      { mes: 8, precio_m2: 4460, is_prediction: true, mes_nombre: 'Agosto' },
-      { mes: 9, precio_m2: 4500, is_prediction: true, mes_nombre: 'Septiembre' },
-      { mes: 10, precio_m2: 4540, is_prediction: true, mes_nombre: 'Octubre' },
-      { mes: 11, precio_m2: 4580, is_prediction: true, mes_nombre: 'Noviembre' },
-      { mes: 12, precio_m2: 4620, is_prediction: true, mes_nombre: 'Diciembre' },
-    ],
-    salamanca: [
-      { mes: 1, precio_m2: 7200, is_prediction: false, mes_nombre: 'Enero' },
-      { mes: 2, precio_m2: 7260, is_prediction: false, mes_nombre: 'Febrero' },
-      { mes: 3, precio_m2: 7310, is_prediction: false, mes_nombre: 'Marzo' },
-      { mes: 4, precio_m2: 7360, is_prediction: false, mes_nombre: 'Abril' },
-      { mes: 5, precio_m2: 7420, is_prediction: false, mes_nombre: 'Mayo' },
-      { mes: 6, precio_m2: 7480, is_prediction: false, mes_nombre: 'Junio' },
-      { mes: 7, precio_m2: 7530, is_prediction: true, mes_nombre: 'Julio' },
-      { mes: 8, precio_m2: 7580, is_prediction: true, mes_nombre: 'Agosto' },
-      { mes: 9, precio_m2: 7640, is_prediction: true, mes_nombre: 'Septiembre' },
-      { mes: 10, precio_m2: 7700, is_prediction: true, mes_nombre: 'Octubre' },
-      { mes: 11, precio_m2: 7750, is_prediction: true, mes_nombre: 'Noviembre' },
-      { mes: 12, precio_m2: 7820, is_prediction: true, mes_nombre: 'Diciembre' },
-    ],
-    centro: [
-      { mes: 1, precio_m2: 6050, is_prediction: false, mes_nombre: 'Enero' },
-      { mes: 2, precio_m2: 6100, is_prediction: false, mes_nombre: 'Febrero' },
-      { mes: 3, precio_m2: 6150, is_prediction: false, mes_nombre: 'Marzo' },
-      { mes: 4, precio_m2: 6200, is_prediction: false, mes_nombre: 'Abril' },
-      { mes: 5, precio_m2: 6250, is_prediction: false, mes_nombre: 'Mayo' },
-      { mes: 6, precio_m2: 6300, is_prediction: false, mes_nombre: 'Junio' },
-      { mes: 7, precio_m2: 6350, is_prediction: true, mes_nombre: 'Julio' },
-      { mes: 8, precio_m2: 6390, is_prediction: true, mes_nombre: 'Agosto' },
-      { mes: 9, precio_m2: 6440, is_prediction: true, mes_nombre: 'Septiembre' },
-      { mes: 10, precio_m2: 6490, is_prediction: true, mes_nombre: 'Octubre' },
-      { mes: 11, precio_m2: 6540, is_prediction: true, mes_nombre: 'Noviembre' },
-      { mes: 12, precio_m2: 6600, is_prediction: true, mes_nombre: 'Diciembre' },
-    ],
-  },
-  inversion: {
-    madrid: [
-      { mes: 1, precio_m2: 4.15, is_prediction: false, mes_nombre: 'Enero' },
-      { mes: 2, precio_m2: 4.18, is_prediction: false, mes_nombre: 'Febrero' },
-      { mes: 3, precio_m2: 4.22, is_prediction: false, mes_nombre: 'Marzo' },
-      { mes: 4, precio_m2: 4.25, is_prediction: false, mes_nombre: 'Abril' },
-      { mes: 5, precio_m2: 4.29, is_prediction: false, mes_nombre: 'Mayo' },
-      { mes: 6, precio_m2: 4.32, is_prediction: false, mes_nombre: 'Junio' },
-      { mes: 7, precio_m2: 4.35, is_prediction: true, mes_nombre: 'Julio' },
-      { mes: 8, precio_m2: 4.37, is_prediction: true, mes_nombre: 'Agosto' },
-      { mes: 9, precio_m2: 4.41, is_prediction: true, mes_nombre: 'Septiembre' },
-      { mes: 10, precio_m2: 4.44, is_prediction: true, mes_nombre: 'Octubre' },
-      { mes: 11, precio_m2: 4.48, is_prediction: true, mes_nombre: 'Noviembre' },
-      { mes: 12, precio_m2: 4.52, is_prediction: true, mes_nombre: 'Diciembre' },
-    ],
-    salamanca: [
-      { mes: 1, precio_m2: 3.45, is_prediction: false, mes_nombre: 'Enero' },
-      { mes: 2, precio_m2: 3.48, is_prediction: false, mes_nombre: 'Febrero' },
-      { mes: 3, precio_m2: 3.52, is_prediction: false, mes_nombre: 'Marzo' },
-      { mes: 4, precio_m2: 3.55, is_prediction: false, mes_nombre: 'Abril' },
-      { mes: 5, precio_m2: 3.58, is_prediction: false, mes_nombre: 'Mayo' },
-      { mes: 6, precio_m2: 3.61, is_prediction: false, mes_nombre: 'Junio' },
-      { mes: 7, precio_m2: 3.63, is_prediction: true, mes_nombre: 'Julio' },
-      { mes: 8, precio_m2: 3.65, is_prediction: true, mes_nombre: 'Agosto' },
-      { mes: 9, precio_m2: 3.67, is_prediction: true, mes_nombre: 'Septiembre' },
-      { mes: 10, precio_m2: 3.69, is_prediction: true, mes_nombre: 'Octubre' },
-      { mes: 11, precio_m2: 3.66, is_prediction: true, mes_nombre: 'Noviembre' },
-      { mes: 12, precio_m2: 3.72, is_prediction: true, mes_nombre: 'Diciembre' },
-    ],
-    centro: [
-      { mes: 1, precio_m2: 4.05, is_prediction: false, mes_nombre: 'Enero' },
-      { mes: 2, precio_m2: 4.10, is_prediction: false, mes_nombre: 'Febrero' },
-      { mes: 3, precio_m2: 4.14, is_prediction: false, mes_nombre: 'Marzo' },
-      { mes: 4, precio_m2: 4.18, is_prediction: false, mes_nombre: 'Abril' },
-      { mes: 5, precio_m2: 4.22, is_prediction: false, mes_nombre: 'Mayo' },
-      { mes: 6, precio_m2: 4.26, is_prediction: false, mes_nombre: 'Junio' },
-      { mes: 7, precio_m2: 4.30, is_prediction: true, mes_nombre: 'Julio' },
-      { mes: 8, precio_m2: 4.33, is_prediction: true, mes_nombre: 'Agosto' },
-      { mes: 9, precio_m2: 4.36, is_prediction: true, mes_nombre: 'Septiembre' },
-      { mes: 10, precio_m2: 4.39, is_prediction: true, mes_nombre: 'Octubre' },
-      { mes: 11, precio_m2: 4.37, is_prediction: true, mes_nombre: 'Noviembre' },
-      { mes: 12, precio_m2: 4.42, is_prediction: true, mes_nombre: 'Diciembre' },
-    ],
-  },
-};
-DEFAULT_BASELINE_SERIES.venta = DEFAULT_BASELINE_SERIES.compra;
-
-const resolveFallbackSeries = (profileId: string, zoneName: string) => {
-  const profileKey = (profileId && profileId in DEFAULT_BASELINE_SERIES) ? profileId : 'alquiler';
-  const profileMap = DEFAULT_BASELINE_SERIES[profileKey];
-  const zKey = (zoneName || '').toLowerCase().trim();
-  const matched = Object.keys(profileMap).find(k => k === zKey || zKey.includes(k) || k.includes(zKey));
-  return matched ? profileMap[matched] : profileMap.madrid;
-};
-
 const PROFILES = [
   { id: 'alquiler', label: 'Alquiler', color: 'var(--azul-linea)', op: 'alquiler' },
   { id: 'compra', label: 'Compra', color: 'var(--azul-linea)', op: 'venta' },
@@ -555,6 +411,17 @@ const getMapLegendLabels = (profileId: string) => {
   if (profileId === 'venta' || profileId === 'compra') return ['< 2.100 €/m²', '2.100–3.100 €/m²', '3.100–4.200 €/m²', '4.200–5.400 €/m²', '≥ 5.400 €/m²'];
   return ['< 16 €/m²', '16–19 €/m²', '19–22 €/m²', '22–25 €/m²', '≥ 25 €/m²'];
 };
+
+function MapInlineScale({ metricLabel }: { metricLabel: string }) {
+  return (
+    <div className="v2-map-inline-legend" aria-label={`Escala de color de menor a mayor para ${metricLabel}. Las zonas rayadas indican que no hay datos disponibles.`}>
+      <span>Menor</span>
+      <div className="v2-map-legend-swatches" aria-hidden="true"><i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" /></div>
+      <span>Mayor</span>
+      <span className="v2-map-inline-no-data"><i aria-hidden="true" />Sin datos</span>
+    </div>
+  );
+}
 
 const MAP_DATA_SOURCE = 'Banco de Datos del Ayuntamiento de Madrid';
 
@@ -706,69 +573,6 @@ const getActivityLabel = (speed: string) => {
   if (normalized.includes('moderado')) return 'Actividad media';
   if (normalized.includes('lento')) return 'Actividad baja';
   return 'Actividad no disponible';
-};
-
-const getZoneReliability = (district: string, isPrediction: boolean) => {
-  if (!isPrediction) {
-    return {
-      type: 'real',
-      tag: 'DATO REAL',
-      title: 'Dato real registrado',
-      titleColor: 'var(--precio-subida)',
-      borderColor: 'color-mix(in srgb, var(--precio-subida) 25%, transparent)',
-      bg: 'color-mix(in srgb, var(--precio-subida) 6%, transparent)',
-      icon: '',
-      description: 'Precio observado en la serie histórica del Banco de Datos del Ayuntamiento de Madrid.'
-    };
-  }
-
-  const d = (district || '').toLowerCase();
-  if (d.includes('centro') || d.includes('moncloa')) {
-    return {
-      type: 'hot',
-      tag: 'PRECIOS RÁPIDOS',
-      title: 'Zona de Alta Demanda (Precios Rápidos)',
-      titleColor: 'var(--coral-texto)',
-      borderColor: 'color-mix(in srgb, var(--coral) 35%, transparent)',
-      bg: 'color-mix(in srgb, var(--coral) 8%, transparent)',
-      icon: '',
-      description: 'Mucha rotación y estudiantes. Los precios se mueven rápido y pueden fluctuar más de lo habitual.'
-    };
-  }
-  if (d.includes('usera') || d.includes('villaverde') || d.includes('carabanchel')) {
-    return {
-      type: 'growth',
-      tag: 'EN AUGE',
-      title: 'Zona en Auge (Fuerte Demanda)',
-      titleColor: 'var(--coral-texto)',
-      borderColor: 'color-mix(in srgb, var(--coral) 35%, transparent)',
-      bg: 'color-mix(in srgb, var(--coral) 8%, transparent)',
-      icon: '',
-      description: 'Desplazamiento de demanda hacia zonas con precios más accesibles, empujando la tendencia al alza.'
-    };
-  }
-  if (d.includes('salamanca') || d.includes('retiro') || d.includes('chamberí') || d.includes('chamartín') || d.includes('arganzuela')) {
-    return {
-      type: 'stable',
-      tag: 'ALTA FIABILIDAD',
-      title: 'Zona estable (dato real)',
-      titleColor: 'var(--azul-linea)',
-      borderColor: 'color-mix(in srgb, var(--azul-linea) 35%, transparent)',
-      bg: 'color-mix(in srgb, var(--azul-linea) 8%, transparent)',
-      icon: '',
-      description: 'Barrio consolidado con precios firmes. La estimación del modelo presenta una tendencia estable.'
-    };
-  }
-  return {
-    type: 'ai',
-    tag: 'PROYECCIÓN',
-    title: 'Estimación del modelo',
-    titleColor: 'var(--azul-linea)',
-    borderColor: 'color-mix(in srgb, var(--precio-subida) 25%, transparent)',
-    bg: 'color-mix(in srgb, var(--precio-subida) 7%, transparent)',
-    icon: '',
-    description: 'Estimación calculada a partir de históricos y tendencias del mercado.'
-  };
 };
 
 const InfoTooltip: React.FC<{
@@ -1029,7 +833,7 @@ const MadridDashboardV2: React.FC = () => {
   const [kpiDataB, setKpiDataB] = useState<any>({});
   const [seriesA, setSeriesA] = useState<any[]>([]);
   const [seriesB, setSeriesB] = useState<any[]>([]);
-  const [seriesMadrid, setSeriesMadrid] = useState<any[]>(() => DEFAULT_BASELINE_SERIES.alquiler.madrid);
+  const [seriesMadrid, setSeriesMadrid] = useState<any[]>([]);
   const comparisonAHasData = seriesA.some(point => Number(point?.precio_m2) > 0);
   const comparisonBHasData = seriesB.some(point => Number(point?.precio_m2) > 0);
 
@@ -1121,19 +925,51 @@ const MadridDashboardV2: React.FC = () => {
   const latestDashboardRequest = useRef(0);
   const hasLoadedPrimaryKpis = useRef(false);
 
+  useEffect(() => {
+    if (!showHelpModal && !showMapHelpModal && !showHeatmapHelpModal && !showCompareHelpModal) return;
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const closeButton = document.querySelector<HTMLElement>('.v2-help-modal-close');
+    closeButton?.focus();
+    const handleHelpKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowHelpModal(false);
+        setShowMapHelpModal(false);
+        setShowHeatmapHelpModal(false);
+        setShowCompareHelpModal(false);
+      } else if (event.key === 'Tab') {
+        const dialog = document.querySelector<HTMLElement>('.v2-guide-modal[role="dialog"]');
+        const focusable = Array.from(dialog?.querySelectorAll<HTMLElement>('button:not(:disabled), a[href], input:not(:disabled), [tabindex]:not([tabindex="-1"])') || [])
+          .filter(element => element.getAttribute('aria-hidden') !== 'true');
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && (document.activeElement === first || !dialog?.contains(document.activeElement))) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    };
+    document.addEventListener('keydown', handleHelpKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleHelpKeyDown);
+      previousFocus?.focus();
+    };
+  }, [showHelpModal, showMapHelpModal, showHeatmapHelpModal, showCompareHelpModal]);
+
   const activeProfile = PROFILES[profileIdx];
   const selectedMonthIndex = MONTHS_ES.indexOf(selectedMonth);
   const latestObservedMonthIndex = MONTHS_ES.indexOf(latestAvailablePeriod.month);
   const isProjectionPeriod = Number(selectedYear) > Number(latestAvailablePeriod.year) || (Number(selectedYear) === Number(latestAvailablePeriod.year) && selectedMonthIndex > latestObservedMonthIndex);
   const periodStatusLabel = isProjectionPeriod ? 'Estimación' : 'Dato real';
-  const realSeriesPoints = seriesMadrid.filter(point => point && !point.is_prediction);
-  const latestRealPoint = realSeriesPoints[realSeriesPoints.length - 1];
-  const latestRealMonth = latestRealPoint?.mes_nombre || latestAvailablePeriod.month;
-  const latestRealYear = Number(latestRealPoint?.anio || latestAvailablePeriod.year);
+  const latestRealMonth = latestAvailablePeriod.month;
+  const latestRealYear = Number(latestAvailablePeriod.year);
   const visibleFilters = isMobileFiltersOpen ? draftFilters : { year: selectedYear, month: selectedMonth, district: selectedDistrict, barrio: selectedBarrio };
-  const firstProjectionMonth = latestRealPoint
-    ? MONTHS_ES[Number(latestRealPoint.mes)] || 'Enero'
-    : MONTHS_ES[latestObservedMonthIndex + 1] || 'Enero';
+  const firstProjectionMonthIndex = (latestObservedMonthIndex + 1) % MONTHS_ES.length;
+  const firstProjectionYear = latestRealYear + (latestObservedMonthIndex === MONTHS_ES.length - 1 ? 1 : 0);
+  const firstProjectionMonth = `${MONTHS_ES[firstProjectionMonthIndex]} de ${firstProjectionYear}`;
   const heatmapValues = useMemo(
     () => heatmapData.flatMap(row => Object.keys(row)
       .filter(key => key.startsWith('m'))
@@ -1166,12 +1002,16 @@ const MadridDashboardV2: React.FC = () => {
       ? [...mapFeatureRankRows].sort((a, b) => Number(activeProfile.id === 'inversion' ? b.rentabilidad || 0 : b.precio_m2 || 0) - Number(activeProfile.id === 'inversion' ? a.rentabilidad || 0 : a.precio_m2 || 0)).findIndex(item => normalizeZoneLabel(String(mapFeatureIsDistrict ? item.distrito : item.barrio || '')) === normalizeZoneLabel(displayedMapFeature)) + 1
       : 0;
   const mapFeatureTotal = !isMobile && desktopDisplayedZone ? desktopDisplayedZone.total : mapFeatureRankRows.length;
-  const mapFeatureAverage = mapFeatureRankRows.length ? mapFeatureRankRows.reduce((sum, item) => sum + Number(item.precio_m2 || 0), 0) / mapFeatureRankRows.length : 0;
-  const mapFeatureDelta = mapFeatureAverage && mapFeatureItem ? (Number(mapFeatureItem.precio_m2 || 0) - mapFeatureAverage) / mapFeatureAverage * 100 : null;
+  const mapMetricValue = (item: any) => Number(activeProfile.id === 'inversion' ? item.rentabilidad || 0 : item.precio_m2 || 0);
+  const mapFeatureAverage = mapFeatureRankRows.length ? mapFeatureRankRows.reduce((sum, item) => sum + mapMetricValue(item), 0) / mapFeatureRankRows.length : 0;
+  const mapFeatureDelta = mapFeatureAverage && mapFeatureItem ? (mapMetricValue(mapFeatureItem) - mapFeatureAverage) / mapFeatureAverage * 100 : null;
   const observedDistrictRows = mapData.districts.filter((item: any) => Number(item.precio_m2) > 0);
   const madridDistrictAverage = observedDistrictRows.length ? observedDistrictRows.reduce((sum, item) => sum + Number(item.precio_m2 || 0), 0) / observedDistrictRows.length : 0;
   const madridMonthlyAverage = mapData.districts.length ? mapData.districts.reduce((sum, item) => sum + Number(item.precio_vivienda || 0), 0) / mapData.districts.length : 0;
   const mapFeaturePrimaryLabel = activeProfile.id === 'inversion' ? 'Rentabilidad' : 'Precio medio';
+  const mapMetricLabel = activeProfile.id === 'inversion'
+    ? 'Rentabilidad bruta (%)'
+    : `Precio ${activeProfile.id === 'alquiler' ? 'de alquiler' : activeProfile.id === 'compra' ? 'de compra' : 'de venta'} (€/m²)`;
   const mapFeaturePrimary = activeProfile.id === 'inversion'
     ? mapFeatureHasData ? `${(Number(mapFeatureItem!.rentabilidad) * 100).toFixed(1)}%` : displayedMapFeature ? '' : `${(Number(mapData.districts.reduce((sum, item) => sum + Number(item.rentabilidad || 0), 0)) / Math.max(1, mapData.districts.length) * 100).toFixed(1)}%`
     : mapFeatureHasData ? `${formatNumber(Number(mapFeatureItem!.precio_m2), 1)} €/m²` : displayedMapFeature ? '' : `${formatNumber(madridDistrictAverage, 1)} €/m²`;
@@ -1685,9 +1525,7 @@ const MadridDashboardV2: React.FC = () => {
           // Zone series stay empty when the source has no official observations.
           const effectiveData = Array.isArray(rawData) ? rawData : [];
 
-          const effectiveMadridSeries = (seriesMadrid && seriesMadrid.length > 0 && seriesMadrid.some(d => d && d.precio_m2 != null))
-            ? seriesMadrid
-            : resolveFallbackSeries(activeProfile.id, 'madrid');
+          const effectiveMadridSeries = Array.isArray(seriesMadrid) ? seriesMadrid : [];
 
           // Align data to exactly 12 months (1 to 12)
           const alignedPrices = Array.from({ length: 12 }, (_, i) => {
@@ -1996,9 +1834,7 @@ const MadridDashboardV2: React.FC = () => {
           const overlayMultiplier = comparisonMetric.multiplier;
           const effA = comparisonAHasData ? seriesA : [];
           const effB = comparisonBHasData ? seriesB : [];
-          const effMad = (seriesMadrid && seriesMadrid.length > 0 && seriesMadrid.some(d => d && d.precio_m2 != null))
-            ? seriesMadrid
-            : resolveFallbackSeries(activeProfile.id, 'madrid');
+          const effMad = Array.isArray(seriesMadrid) ? seriesMadrid : [];
 
           const overlayA = Array.from({ length: 12 }, (_, i) => { const found = effA.find(d => Number(d.mes) === i + 1); return found ? found.precio_m2 * overlayMultiplier : null; });
           const overlayB = Array.from({ length: 12 }, (_, i) => { const found = effB.find(d => Number(d.mes) === i + 1); return found ? found.precio_m2 * overlayMultiplier : null; });
@@ -2885,7 +2721,7 @@ const MadridDashboardV2: React.FC = () => {
                     const rent = kpiData.p_vivienda || 0;
                     const incomeMonthly = (kpiData.renta_media || 0) / 12;
                     const effort = incomeMonthly > 0 ? (rent / incomeMonthly) * 100 : 0;
-                    const effortColor = effort <= 30 ? '#00E5EE' : effort <= 40 ? '#F4B860' : '#F08080';
+                    const effortColor = '#00D9F2';
                     const salary = Number.parseFloat(userRentSalary);
                     const personalEffort = salary > 0 ? (rent / salary) * 100 : 0;
                     const money = (value: number) => new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(value);
@@ -2923,7 +2759,6 @@ const MadridDashboardV2: React.FC = () => {
                             <div className="v2-rent-effort-head"><span className="v2-rent-eyebrow">Esfuerzo de alquiler</span><strong style={{ color: effortColor }}>{effort > 0 ? `${effort.toFixed(0)}%` : '—'}</strong></div>
                             <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(effort, 100)}%`, background: effortColor }} /><b style={{ left: '30%' }} /></div>
                             <span className="v2-rent-effort-caption">{money(rent)} € de alquiler · {money(incomeMonthly)} € de renta (INE)</span>
-                            <span className="v2-rent-effort-note">30% recomendado</span>
                             <button className="v2-rent-calc-toggle" type="button" onClick={() => setShowRentCalculator(value => !value)} aria-expanded={showRentCalculator}>
                               {showRentCalculator ? 'Cerrar cálculo' : 'Calcula con tu sueldo'} <span aria-hidden="true">{showRentCalculator ? '↑' : '→'}</span>
                             </button>
@@ -2940,38 +2775,26 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-kpi-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <label>{activeProfile.id === 'inversion' ? 'Rentabilidad' : 'Precio m²'}</label>
+                        <label>{activeProfile.id === 'inversion' ? 'Rentabilidad bruta anual' : 'Precio medio por m²'}</label>
                         <InfoTooltip
-                          title={activeProfile.id === 'inversion' ? 'Rentabilidad Bruta (Yield)' : 'Precio por Metro Cuadrado'}
+                          title={activeProfile.id === 'inversion' ? 'Rentabilidad bruta anual' : activeProfile.id === 'alquiler' ? 'Precio de alquiler por metro cuadrado' : 'Precio de venta por metro cuadrado'}
                           description={activeProfile.id === 'inversion'
-                            ? 'Porcentaje anual que rinde la vivienda a través del alquiler respecto al precio de compra.'
-                            : 'El precio unitario promedio que cuesta cada metro cuadrado de vivienda en esta zona.'}
+                            ? 'Compara los ingresos anuales estimados por alquiler con el precio de compra de la vivienda.'
+                            : activeProfile.id === 'alquiler'
+                              ? 'Media mensual del alquiler por cada metro cuadrado para la zona y el periodo seleccionados.'
+                              : 'Media del precio de venta por cada metro cuadrado para la zona y el periodo seleccionados.'}
                           example={activeProfile.id === 'inversion'
-                            ? 'Si compras por 200.000€ y alquilas por 800€/mes (9.600€/año), la rentabilidad bruta es del 4,8% anual.'
-                            : 'Si un piso tiene 80 m² y el precio es 20 €/m², el alquiler rondará los 1.600 €/mes.'}
+                            ? 'El cálculo anualiza el alquiler y lo compara con el precio de compra; no descuenta gastos ni financiación.'
+                            : activeProfile.id === 'alquiler'
+                              ? 'A 20 €/m²/mes, una vivienda de 80 m² equivaldría a 1.600 €/mes.'
+                              : 'A 3.000 €/m², una vivienda de 80 m² equivaldría a 240.000 € antes de gastos.'}
                           ruleOfThumb={activeProfile.id === 'inversion'
-                            ? 'En Madrid, una rentabilidad bruta superior al 5% se considera muy atractiva.'
-                            : 'Dato clave para comparar el valor real de distintas viviendas independientemente de su tamaño.'}
+                            ? 'La fórmula no incorpora gastos, impuestos, vacancia ni financiación.'
+                            : 'Comparar el precio por m² ayuda a comparar zonas con viviendas de distinto tamaño.'}
                         />
                       </div>
-                      {kpiData.is_prediction && (
-                        <span
-                          style={{
-                            fontSize: '9px',
-                            fontWeight: '700',
-                            color: getZoneReliability(selectedDistrict, true).titleColor,
-                            backgroundColor: getZoneReliability(selectedDistrict, true).bg,
-                            border: `0.5px solid ${getZoneReliability(selectedDistrict, true).borderColor}`,
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.4px',
-                            display: 'inline-block'
-                          }}
-                          title={getZoneReliability(selectedDistrict, true).description}
-                        >
-                          {getZoneReliability(selectedDistrict, true).tag}
-                        </span>
+                      {(kpiData.is_prediction || isProjectionPeriod) && Number(kpiData.p_m2) > 0 && (
+                        <EstadoBadge status="estimate" />
                       )}
                     </div>
                     <div className="v2-val">
@@ -2987,12 +2810,16 @@ const MadridDashboardV2: React.FC = () => {
                         <label>{activeProfile.id === 'inversion' ? 'Precio de inversión' : activeProfile.id === 'alquiler' ? 'Alquiler medio' : 'Precio medio de vivienda'}</label>
                         <InfoTooltip
                           title={activeProfile.id === 'inversion' ? 'Precio de inversión' : activeProfile.id === 'alquiler' ? 'Alquiler medio mensual' : 'Precio medio de vivienda'}
-                          description="Estimación del coste total mensual o de compra, según el perfil seleccionado, a partir del valor por metro cuadrado y la superficie media observada."
-                          example="Sirve para interpretar el valor total de una vivienda tipo, además del precio unitario por m²."
-                          ruleOfThumb="Comprueba siempre la superficie y el periodo antes de comparar dos zonas."
+                          description={activeProfile.id === 'inversion'
+                            ? 'Importe medio de compra de la zona, calculado con el precio de venta y la superficie media registrada.'
+                            : `Importe medio ${activeProfile.id === 'alquiler' ? 'mensual de alquiler' : 'de venta'} de la zona, calculado con el precio por m² y la superficie media registrada.`}
+                          example={activeProfile.id === 'alquiler'
+                            ? 'Es un valor mensual calculado con la superficie media de la zona; no representa el precio de un anuncio concreto.'
+                            : 'Es un valor calculado con la superficie media de la zona; no representa el precio de un inmueble concreto.'}
+                          ruleOfThumb="El ámbito y el periodo aparecen junto a las métricas."
                         />
                       </div>
-                      <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
+                      {Number(kpiData.p_vivienda) > 0 && <EstadoBadge status={kpiData.is_prediction || isProjectionPeriod ? 'estimate' : 'real'} />}
                     </div>
                     <div className="v2-val">
                       {new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiData.p_vivienda || 0)} {activeProfile.id === 'alquiler' ? '€/mes' : '€'}
@@ -3693,6 +3520,7 @@ const MadridDashboardV2: React.FC = () => {
                           data={mapData.districts}
                           selectedYear={Number(selectedYear)}
                           selectedMonth={selectedMonth}
+                          isProjection={isProjectionPeriod}
                           selectedProfile={activeProfile.label}
                           selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
                           selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
@@ -3702,7 +3530,7 @@ const MadridDashboardV2: React.FC = () => {
                           onZoneHover={isMobile ? undefined : handleDesktopZoneHover}
                           onDistrictClick={handleMapDistrictClick}
                         />
-                        {!isMobile && <><div className="v2-map-panel-heading"><strong>21 Distritos</strong><button type="button" aria-label="Cómo leer el mapa" title="Cómo leer el mapa" onClick={() => setShowMapHelpModal(true)}><HelpCircle size={14} /></button></div><div className="v2-map-inline-legend" aria-label={`Escala de menor a mayor ${activeProfile.id === 'inversion' ? 'rentabilidad' : 'precio'}`}><span>Menor</span><div className="v2-map-legend-swatches" aria-hidden="true"><i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" /></div><span>Mayor</span></div></>}
+                        {!isMobile && <><div className="v2-map-panel-heading"><strong>Distritos · {mapMetricLabel}</strong><button type="button" aria-label="Cómo leer los mapas y su escala" title="Cómo leer los mapas y su escala" onClick={() => setShowMapHelpModal(true)}><HelpCircle size={14} /></button></div><MapInlineScale metricLabel={mapMetricLabel} /></>}
                       </div>
                     </div>
                     <div className="v2-map-sub" data-map-level="neighborhoods">
@@ -3713,6 +3541,7 @@ const MadridDashboardV2: React.FC = () => {
                           data={mapData.neighborhoods}
                           selectedYear={Number(selectedYear)}
                           selectedMonth={selectedMonth}
+                          isProjection={isProjectionPeriod}
                           selectedProfile={activeProfile.label}
                           selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
                           selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
@@ -3723,7 +3552,7 @@ const MadridDashboardV2: React.FC = () => {
                           onDistrictClick={handleMapDistrictClick}
                           onBarrioClick={handleMapBarrioClick}
                         />
-                        {!isMobile && <><div className="v2-map-panel-heading"><strong>{neighborhoodFeatureCount || 131} Barrios</strong></div><div className="v2-map-inline-legend" aria-label={`Escala de menor a mayor ${activeProfile.id === 'inversion' ? 'rentabilidad' : 'precio'}`}><span>Menor</span><div className="v2-map-legend-swatches" aria-hidden="true"><i className="tier-1" /><i className="tier-2" /><i className="tier-3" /><i className="tier-4" /><i className="tier-5" /></div><span>Mayor</span></div></>}
+                        {!isMobile && <><div className="v2-map-panel-heading"><strong>Barrios · {mapMetricLabel}</strong></div><MapInlineScale metricLabel={mapMetricLabel} /></>}
                       </div>
                     </div>
                   </div>
@@ -3760,16 +3589,16 @@ const MadridDashboardV2: React.FC = () => {
                   >
                     <div className="v2-map-sheet-actions"><button type="button" onClick={() => { const level = mapFeatureIsDistrict ? 'Distritos' : 'Barrios'; const zones = level === 'Distritos' ? availableDistricts : availableBarrios; setCompareLevel(level); setSelectedZoneA(selectedMapFeature); if (selectedZoneB === selectedMapFeature) setSelectedZoneB(zones.find(zone => zone !== selectedMapFeature) || 'Todos'); clearSelection(); scrollToDashboardSection('compare'); }}>Ver evolución →</button><button type="button" onClick={() => { clearSelection(); setSelectedBarrio('Todos'); setSelectedDistrict('Todos'); setMapLevel('districts'); }}>Ver Madrid</button></div>
                   </FichaZonaMovil>}
-                  {isMobile && <DashboardMapLegend
+                  <DashboardMapLegend
                     isMobile={isMobile}
-                    title={isMobile
-                      ? `Intensidad de ${activeProfile.id === 'inversion' ? 'rentabilidad bruta · %' : 'precio · €/m²'}`
-                      : `Intensidad de ${activeProfile.id === 'inversion' ? 'rentabilidad bruta (%)' : 'precio por m² (€/m²)'}`}
+                    title={`Intensidad · ${mapMetricLabel}`}
                     labels={getMapLegendLabels(activeProfile.id)}
                     dataCount={mapData.neighborhoods.filter((item: any) => Number(activeProfile.id === 'inversion' ? item.rentabilidad : item.precio_m2) > 0).length}
                     totalCount={neighborhoodFeatureCount || mapData.neighborhoods.length}
                     dataSource={MAP_DATA_SOURCE}
-                  />}
+                    observedThrough={`${latestRealMonth} de ${latestRealYear}`}
+                    estimatesFrom={firstProjectionMonth}
+                  />
                 </div>
               </div>
             </div>
@@ -4576,6 +4405,9 @@ const MadridDashboardV2: React.FC = () => {
         >
           <div
             className="v2-guide-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="v2-prices-help-title"
             style={{
               backgroundColor: 'var(--blanco-humo)',
               borderRadius: '24px',
@@ -4591,7 +4423,7 @@ const MadridDashboardV2: React.FC = () => {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--azul-noche)' }}>
+                <h3 id="v2-prices-help-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--azul-noche)' }}>
                   ¿Cómo entender estos precios?
                 </h3>
                 <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--azul-linea)' }}>
@@ -4599,6 +4431,9 @@ const MadridDashboardV2: React.FC = () => {
                 </p>
               </div>
               <button
+                className="v2-help-modal-close"
+                type="button"
+                aria-label="Cerrar ayuda de precios"
                 onClick={() => setShowHelpModal(false)}
                 style={{
                   background: 'var(--blanco-humo)',
@@ -4691,7 +4526,7 @@ const MadridDashboardV2: React.FC = () => {
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--precio-subida)')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--precio-subida)')}
             >
-              ¡Entendido, gracias!
+              Entendido
             </button>
           </div>
         </div>
@@ -4718,6 +4553,9 @@ const MadridDashboardV2: React.FC = () => {
         >
           <div
             className="v2-guide-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="v2-map-help-title"
             style={{
               backgroundColor: 'var(--blanco-humo)',
               borderRadius: '24px',
@@ -4733,7 +4571,7 @@ const MadridDashboardV2: React.FC = () => {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--azul-noche)' }}>
+                <h3 id="v2-map-help-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--azul-noche)' }}>
                   ¿Cómo usar los mapas interactivos?
                 </h3>
                 <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--azul-linea)' }}>
@@ -4741,6 +4579,9 @@ const MadridDashboardV2: React.FC = () => {
                 </p>
               </div>
               <button
+                className="v2-help-modal-close"
+                type="button"
+                aria-label="Cerrar ayuda del mapa"
                 onClick={() => setShowMapHelpModal(false)}
                 style={{
                   background: 'var(--blanco-humo)',
@@ -4789,7 +4630,7 @@ const MadridDashboardV2: React.FC = () => {
                     Haz clic en un distrito para ver sus barrios
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
-                    Al pulsar sobre cualquier distrito en el mapa izquierdo, la cámara enfoca automáticamente y el mapa de la derecha te muestra todos sus barrios al detalle. Si haces clic de nuevo sobre el mismo distrito, vuelves a la vista general de Madrid.
+                    Al seleccionar un distrito, se filtran sus barrios en el mapa derecho y se actualizan las métricas de la zona. Selecciónalo de nuevo para quitar el filtro.
                   </div>
                 </div>
               </div>
@@ -4801,38 +4642,25 @@ const MadridDashboardV2: React.FC = () => {
                 </div>
                 <div>
                   <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--azul-noche)', marginBottom: '2px' }}>
-                    Precios al pasar el cursor
+                    Selecciona una zona para ver su ficha
                   </div>
                   <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
-                    Apoya el puntero o pulsa cualquier barrio o distrito para ver su precio por m², el coste estimado de una vivienda, su ranking y si es un dato real o una estimación.
+                    Al seleccionar un distrito o barrio, la ficha muestra las métricas disponibles para esa zona y el periodo elegido. Usa Tab para entrar en el mapa, las flechas para recorrer zonas e Intro o Espacio para seleccionar.
                   </div>
                 </div>
               </div>
 
-              {/* Paso 4: Mapa Fijo */}
-              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: 'var(--blanco-humo)', borderRadius: '16px', border: '0.5px solid color-mix(in srgb, var(--azul-noche) 4%, transparent)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: 'var(--blanco-humo)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
-                  4
-                </div>
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--azul-noche)', marginBottom: '2px' }}>
-                    Mapa Estático y Estable
-                  </div>
-                  <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
-                    El mapa está fijado para que puedas hacer scroll por la página con total tranquilidad sin riesgo de desplazar o perder de vista Madrid por accidente.
-                  </div>
-                </div>
-              </div>
             </div>
 
             <button
+              type="button"
               onClick={() => setShowMapHelpModal(false)}
               style={{
                 marginTop: '20px',
                 width: '100%',
                 padding: '12px',
                 backgroundColor: 'var(--precio-subida)',
-                color: 'var(--blanco-humo)',
+                color: '#03141c',
                 border: 'none',
                 borderRadius: '14px',
                 fontSize: '14px',
@@ -4843,7 +4671,7 @@ const MadridDashboardV2: React.FC = () => {
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--precio-subida)')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--precio-subida)')}
             >
-              ¡Entendido, gracias!
+              Entendido
             </button>
           </div>
         </div>
@@ -4869,6 +4697,10 @@ const MadridDashboardV2: React.FC = () => {
           onClick={() => setShowHeatmapHelpModal(false)}
         >
           <div
+            className="v2-guide-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="v2-heatmap-help-title"
             style={{
               backgroundColor: 'var(--blanco-humo)',
               borderRadius: '24px',
@@ -4886,7 +4718,7 @@ const MadridDashboardV2: React.FC = () => {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--azul-noche)' }}>
+                <h3 id="v2-heatmap-help-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--azul-noche)' }}>
                   ¿Cómo usar el mapa de calor?
                 </h3>
                 <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--azul-linea)' }}>
@@ -4894,6 +4726,9 @@ const MadridDashboardV2: React.FC = () => {
                 </p>
               </div>
               <button
+                className="v2-help-modal-close"
+                type="button"
+                aria-label="Cerrar ayuda de la tabla"
                 onClick={() => setShowHeatmapHelpModal(false)}
                 style={{
                   background: 'var(--blanco-humo)',
@@ -5026,6 +4861,10 @@ const MadridDashboardV2: React.FC = () => {
           onClick={() => setShowCompareHelpModal(false)}
         >
           <div
+            className="v2-guide-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="v2-compare-help-title"
             style={{
               backgroundColor: 'var(--blanco-humo)',
               borderRadius: '24px',
@@ -5043,7 +4882,7 @@ const MadridDashboardV2: React.FC = () => {
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--azul-noche)' }}>
+                <h3 id="v2-compare-help-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--azul-noche)' }}>
                   ¿Cómo usar la comparación de zonas?
                 </h3>
                 <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--azul-linea)' }}>
@@ -5051,6 +4890,9 @@ const MadridDashboardV2: React.FC = () => {
                 </p>
               </div>
               <button
+                className="v2-help-modal-close"
+                type="button"
+                aria-label="Cerrar ayuda de comparación"
                 onClick={() => setShowCompareHelpModal(false)}
                 style={{
                   background: 'var(--blanco-humo)',
