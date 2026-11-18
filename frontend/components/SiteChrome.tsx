@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { ReactNode } from 'react';
-import { ArrowUpRight, Linkedin, X } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, Linkedin, X } from 'lucide-react';
 import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
 
 type SiteHeaderProps = {
@@ -18,6 +18,7 @@ type SiteHeaderProps = {
   ctaText?: string;
   ctaHref?: string;
   appearance?: 'default' | 'aurora';
+  compactBrand?: boolean;
 };
 
 export function SiteHeader({
@@ -31,6 +32,7 @@ export function SiteHeader({
   ctaText,
   ctaHref,
   appearance = 'default',
+  compactBrand = false,
 }: SiteHeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -63,15 +65,15 @@ export function SiteHeader({
 
   return (
     <>
-      <header className={`mi-header site-header${appearance === 'aurora' ? ' site-header--aurora' : ''}`} role="banner">
+      <header className={`mi-header site-header${appearance === 'aurora' ? ' site-header--aurora' : ''}${compactBrand ? ' site-header--compact-brand' : ''}`} role="banner">
         {/* Brand: Logo + Title */}
-        <Link href="/" className="mi-brand site-brand" aria-label="DMIYC - Decide Madrid: Invierte Y Compra">
+        <Link href="/" className="mi-brand site-brand" aria-label={compactBrand ? 'DMIYC, inicio' : 'DMIYC - Decide Madrid: Invierte Y Compra'}>
           <span className="mi-brand__mark">
             <Image src="/dmiyc-logo-glow-transparent.png" alt="DMIYC" width={40} height={40} priority unoptimized />
           </span>
           <span className="mi-brand__text">
             <strong className="mi-brand__acronym">DMIYC</strong>
-            <small className="mi-brand__subtitle">DECIDE MADRID: INVIERTE Y COMPRA</small>
+            {!compactBrand && <small className="mi-brand__subtitle">DECIDE MADRID: INVIERTE Y COMPRA</small>}
           </span>
         </Link>
 
@@ -95,7 +97,17 @@ export function SiteHeader({
           <nav className="mi-nav site-navigation" aria-label="Navegación">{children}</nav>
         ) : (
           <nav className="mi-nav site-navigation" aria-label="Navegación principal">
-            <Link href="/madrid">Plataforma</Link>
+            {compactBrand ? (
+              <details className="mi-nav-dropdown">
+                <summary>Plataforma <ChevronDown size={13} aria-hidden="true" /></summary>
+                <div className="mi-nav-dropdown__menu">
+                  <Link href="/madrid?profile=alquiler">Alquiler</Link>
+                  <Link href="/madrid?profile=compra">Compra</Link>
+                  <Link href="/madrid?profile=venta">Venta</Link>
+                  <Link href="/madrid?profile=inversion">Inversión</Link>
+                </div>
+              </details>
+            ) : <Link href="/madrid">Plataforma</Link>}
             <Link href="/#impacto">A quién ayuda</Link>
             <Link href="/madrid/chat" className={activePath === '/madrid/chat' ? 'active' : ''}>AMBI</Link>
             <Link href="/madrid/veredicto" className={activePath === '/madrid/veredicto' ? 'active' : ''}>{PRICE_ANALYSIS_LABEL}</Link>
@@ -156,7 +168,7 @@ export function SiteHeader({
               </span>
               <span className="mi-brand__text">
                 <strong className="mi-brand__acronym">DMIYC</strong>
-                <small className="mi-brand__subtitle">DECIDE MADRID: INVIERTE Y COMPRA</small>
+                {!compactBrand && <small className="mi-brand__subtitle">DECIDE MADRID: INVIERTE Y COMPRA</small>}
               </span>
             </Link>
 

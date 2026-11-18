@@ -6,7 +6,7 @@ import BackgroundAurora from './BackgroundAurora';
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { ArrowDown, ArrowUpRight } from 'lucide-react';
+import { ArrowUpRight } from 'lucide-react';
 import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
 import DeferredMadridDistrictMap from './DeferredMadridDistrictMap';
 import MadridHeroArtwork from './MadridHeroArtwork';
@@ -29,7 +29,7 @@ export default function MadridLanding() {
   return (
     <div className="mi-home" id="inicio">
       <BackgroundAurora />
-      <SiteHeader activePath="/" ctaText="Colabora con nosotros" ctaHref="/contacto" appearance="aurora" />
+      <SiteHeader activePath="/" ctaText="Colabora con nosotros" ctaHref="/contacto" appearance="aurora" compactBrand />
 
       <main id="contenido-principal">
         {/* 0. HERO: Claridad en 3 segundos */}
@@ -37,12 +37,11 @@ export default function MadridLanding() {
           <div className="mi-hero__content">
             <p className="mi-hero__kicker">DMIYC</p>
             <h1 id="mi-title">No adivines.<br/><span>Decide con datos.</span></h1>
-            <p className="mi-hero__lead">Compra o alquila con precios de cierre oficial en los 131 barrios de Madrid, sin caer en precios inflados.</p>
+            <p className="mi-hero__lead">Precios de cierre oficiales para decidir en los 131 barrios de Madrid.</p>
             <Link href="/madrid" className="mi-hero__cta-main">Explorar precios de Madrid <ArrowUpRight aria-hidden="true"/></Link>
           </div>
           <MadridHeroArtwork />
           <div className="mi-hero__meta"><span>21 distritos</span><i/><span>131 barrios auditados</span></div>
-          <a className="mi-scroll" href="#lectura"><span>Desplázate para descubrir tu barrio</span><ArrowDown aria-hidden="true"/></a>
         </section>
 
         {/* 1. EL DOLOR: Desfase entre el precio anunciado y el precio de cierre oficial */}
