@@ -6,3 +6,4 @@
 - When something appears missing, trace its implementation and history first; restore only the missing behavior while keeping newer changes around it.
 - Before committing or publishing, inspect the complete diff against the intended base and check that unrelated files and features were not removed. Keep unrelated untracked files untouched.
 - Do not publish to `main` or production unless the user explicitly requests it. When they do, compare the target branch and all intended recent work before merging so newer approved changes are not omitted.
+- The user has explicitly requested that changes made for them be published to the production website by default. After each requested change, build and publish the intended tracked changes to `main`/Vercel; do not leave the requested change only in the local working tree. Keep unrelated untracked files out of commits.

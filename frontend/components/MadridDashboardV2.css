@@ -4498,8 +4498,11 @@ body.v2-fullscreen-open footer { display: none !important; }
 
 /* Heatmap: explicit scale and period context, with stable sticky headers and zone names. */
 .v2-root .v2-heatmap-heading-copy h3 { margin: 0; color: #eaf5ff; font-size: 16px; font-weight: 700; line-height: 1.25; }
-.v2-root .v2-heatmap-heading-copy small { color: #aebfcd; font-size: 12px; line-height: 1.35; }
-.v2-root .v2-heatmap-legend { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: -4px 0 7px; color: #b9cad8; font-size: 11px; }
+.v2-root .v2-heatmap-head { display: grid; grid-template-columns: minmax(0,1fr) auto; align-items: start; gap: 10px 24px; margin-bottom: 8px !important; }
+.v2-root .v2-heatmap-heading-copy { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; min-width: 0; }
+.v2-root .v2-heatmap-meta { display: grid; justify-items: end; gap: 7px; min-width: 0; }
+.v2-root .v2-heatmap-period { color: #aebfcd; font-size: 12px; line-height: 1.35; text-align: right; }
+.v2-root .v2-heatmap-legend { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin: 0; color: #b9cad8; font-size: 11px; }
 .v2-root .v2-heatmap-legend-scale { width: 112px; height: 8px; border-radius: 99px; background: linear-gradient(90deg, rgba(0,221,240,.22), #00ddf0); }
 .v2-root .v2-heatmap-legend[data-profile="compra"] .v2-heatmap-legend-scale,
 .v2-root .v2-heatmap-legend[data-profile="venta"] .v2-heatmap-legend-scale { background: linear-gradient(90deg, rgba(255,139,106,.22), #ff8b6a); }
@@ -4517,6 +4520,12 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-heatmap-table tbody th.zona-name { position: sticky !important; left: 0 !important; z-index: 5 !important; width: 168px !important; min-width: 168px !important; max-width: 168px !important; overflow: hidden; background: #061426 !important; text-align: left !important; text-overflow: ellipsis; }
 .v2-root .v2-heatmap-table tbody td { border-bottom: 1px solid rgba(186,204,214,.12); }
 .v2-root .v2-heatmap-table .v2-heatmap-estimated-start { border-left: 2px solid rgba(255,255,255,.38) !important; }
+@media (max-width: 1000px) {
+  .v2-root .v2-heatmap-head { grid-template-columns: minmax(0,1fr); gap: 8px; }
+  .v2-root .v2-heatmap-meta { justify-items: start; gap: 5px; }
+  .v2-root .v2-heatmap-period { text-align: left; }
+  .v2-root .v2-heatmap-legend { justify-content: flex-start; }
+}
 @media (max-width: 768px) {
   .v2-root .v2-heatmap-legend { gap: 6px; font-size: 10px; }
   .v2-root .v2-heatmap-legend-scale { width: 76px; }
