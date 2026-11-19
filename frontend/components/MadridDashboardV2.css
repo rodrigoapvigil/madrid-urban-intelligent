@@ -4753,3 +4753,15 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-compare-zone-select .v2-zone-search-picked-copy strong { font-size: 14px; }
 .v2-root .v2-compare-zone-select.zone-a .v2-zone-search-picked:focus-visible { outline-color: #00e5ff; }
 .v2-root .v2-compare-zone-select.zone-b .v2-zone-search-picked:focus-visible { outline-color: #ffb65c; }
+
+/* Keep comparison data-status badges below their labels instead of overlaying
+   the metric text. */
+.v2-root .v2-comp-kpis-row .v2-mini-kpi-card:has(.l .v2-estado-badge) { padding-bottom: 18px !important; }
+.v2-root .v2-comp-kpis-row .v2-mini-kpi-card .l:has(.v2-estado-badge) {
+  flex-direction: column;
+  gap: 6px !important;
+}
+.v2-root .v2-comp-kpis-row .v2-mini-kpi-card .l .v2-estado-badge {
+  position: static;
+  transform: none;
+}
