@@ -423,6 +423,7 @@
   max-width: 680px;
   margin: 0 auto;
 }
+.mi-district-map__svg-wrap,
 .mi-district-map__canvas-wrap {
   position: relative;
   width: 100%;
@@ -432,22 +433,43 @@
   border-radius: 10px;
   touch-action: pan-y;
 }
-.mi-district-map,
-.mi-district-map__canvas-wrap,
-.mi-district-map__canvas-wrap canvas,
-.mi-city-visual {
-  cursor: default !important;
-}
-.mi-district-map__pill {
-  display: none !important;
-}
-.mi-district-map__canvas-wrap canvas {
-  position: absolute;
-  inset: 0;
-  display: block;
+.mi-district-map__svg {
   width: 100%;
   height: 100%;
-  cursor: default !important;
+  display: block;
+}
+.mi-district-map,
+.mi-district-map__svg-wrap,
+.mi-district-map__canvas-wrap,
+.mi-city-visual {
+  cursor: default;
+}
+.mi-district-map__legend-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 0 14px;
+}
+.mi-district-map__legend-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--mi-silver);
+  white-space: nowrap;
+}
+.mi-district-map__legend-swatches {
+  display: flex;
+  flex: 1;
+  max-width: 200px;
+  height: 8px;
+  border-radius: 99px;
+  overflow: hidden;
+  border: 1px solid rgba(186, 204, 214, 0.18);
+}
+.mi-district-map__legend-swatches i {
+  flex: 1;
+  height: 100%;
 }
 .mi-district-map__caption {
   display: flex;
