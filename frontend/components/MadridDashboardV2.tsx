@@ -2517,6 +2517,18 @@ const MadridDashboardV2: React.FC = () => {
       <SiteHeader
         activePath="/madrid"
         appearance={isMobile ? 'aurora' : 'default'}
+        desktopAction={!isMobile ? (
+          <PeriodSelector
+            year={selectedYear}
+            month={selectedMonth}
+            years={availableYears}
+            latestReal={latestAvailablePeriod}
+            onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }}
+            hideMonthArrows
+            keyboardMonthNavigation
+            showYearShortcut={false}
+          />
+        ) : undefined}
         mobileAction={isMobile ? (
           <button type="button" className="v2-mobile-filter-trigger" aria-expanded={isMobileFiltersOpen} aria-controls="v2-filter-panel" onClick={openMobileFilters}>
             <SlidersHorizontal size={17} aria-hidden="true" />
