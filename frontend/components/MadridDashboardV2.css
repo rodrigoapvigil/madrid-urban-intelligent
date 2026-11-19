@@ -4714,3 +4714,42 @@ body.v2-fullscreen-open footer { display: none !important; }
     height: auto;
   }
 }
+
+/* Keep comparison pickers as the same light search control used in the
+   sidebar, without a second card surface around each field. */
+.v2-root .v2-compare-zone-select,
+.v2-root .v2-compare-zone-select.zone-a,
+.v2-root .v2-compare-zone-select.zone-b {
+  min-height: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.v2-root .v2-compare-zone-select .v2-filter-label {
+  display: block;
+  margin: 0 0 5px !important;
+  color: #8fa8bf !important;
+  font-size: 10px !important;
+  letter-spacing: .07em;
+}
+.v2-root .v2-compare-zone-select .v2-filter-label i { display: none !important; }
+.v2-root .v2-compare-zone-select .v2-zone-search-field,
+.v2-root .v2-compare-zone-select .v2-zone-search-field:focus-within {
+  min-height: 42px !important;
+  gap: 9px;
+  padding: 0 11px !important;
+  border: 1px solid rgba(0, 229, 255, .28) !important;
+  border-radius: 11px !important;
+  background: rgba(1, 16, 36, .72) !important;
+  box-shadow: none;
+}
+.v2-root .v2-compare-zone-select.zone-a .v2-zone-search-field { border-color: rgba(0, 229, 255, .34) !important; }
+.v2-root .v2-compare-zone-select.zone-b .v2-zone-search-field { border-color: rgba(255, 182, 92, .38) !important; }
+.v2-root .v2-compare-zone-select.zone-a .v2-zone-search-field:focus-within { border-color: #00cde7 !important; box-shadow: 0 0 0 2px rgba(0, 205, 231, .12); }
+.v2-root .v2-compare-zone-select.zone-b .v2-zone-search-field:focus-within { border-color: #ffb65c !important; box-shadow: 0 0 0 2px rgba(255, 182, 92, .12); }
+.v2-root .v2-compare-zone-select .v2-zone-search-picked { min-height: 40px; }
+.v2-root .v2-compare-zone-select .v2-zone-search-picked-copy strong { font-size: 14px; }
+.v2-root .v2-compare-zone-select.zone-a .v2-zone-search-picked:focus-visible { outline-color: #00e5ff; }
+.v2-root .v2-compare-zone-select.zone-b .v2-zone-search-picked:focus-visible { outline-color: #ffb65c; }
