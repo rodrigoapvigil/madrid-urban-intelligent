@@ -3622,6 +3622,7 @@ const MadridDashboardV2: React.FC = () => {
                     totalCount={neighborhoodFeatureCount || mapData.neighborhoods.length}
                     observedThrough={`${latestRealMonth} de ${latestRealYear}`}
                     estimatesFrom={firstProjectionMonth}
+                    profileId={activeProfile.id}
                   />
                 </div>
               </div>

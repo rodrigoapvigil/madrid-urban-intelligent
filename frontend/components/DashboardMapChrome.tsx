@@ -67,19 +67,21 @@ export function DashboardMapLegend({
   totalCount,
   observedThrough,
   estimatesFrom,
+  profileId = 'alquiler',
 }: {
   title: string;
   labels: string[];
   dataCount: number;
   totalCount: number;
   observedThrough: string;
-  estimatesFrom: string;
+  estimatesFrom?: string;
+  profileId?: string;
 }) {
   const countNote = `${dataCount} de ${totalCount} barrios tienen datos disponibles.`;
-  const periodNote = `Datos observados hasta ${observedThrough.toLocaleLowerCase('es')} · Estimaciones desde ${estimatesFrom.toLocaleLowerCase('es')}`;
+  const periodNote = `Datos observados hasta ${observedThrough.toLocaleLowerCase('es')}${estimatesFrom ? ` · Estimaciones desde ${estimatesFrom.toLocaleLowerCase('es')}` : ''}`;
   const noDataNote = 'Rayado: la fuente oficial no publica datos para este periodo; no se estiman.';
   return (
-    <div className="v2-map-legend" role="group" aria-label="Estado de datos y leyenda del mapa">
+    <div className="v2-map-legend" data-profile={profileId} role="group" aria-label="Estado de datos y leyenda del mapa">
       <div className="v2-map-legend-desktop">
         <div className="v2-map-legend-status">
           <strong>{countNote}</strong>

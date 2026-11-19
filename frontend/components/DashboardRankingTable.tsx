@@ -44,7 +44,11 @@ export default function DashboardRankingTable({
   const isDemand = profileId === 'venta';
   const isInvestment = profileId === 'inversion';
   const isPriceProfile = !isDemand && !isInvestment;
-  const accent = isDemand ? '#00E5FF' : isInvestment ? '#00E5FF' : '#00E5FF';
+  const accent =
+    profileId === 'compra' ? '#FFC247' :
+    profileId === 'venta' ? '#3DDC97' :
+    profileId === 'inversion' ? '#E879F9' :
+    '#00E5FF';
   const zoneLabel = level === 'Distritos' ? 'distritos' : 'barrios';
   const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').trim();
   const monthlyByZone = useMemo(() => new Map(monthlyRows.map(row => [normalize(String(row.zona || '')), row])), [monthlyRows]);

@@ -3007,13 +3007,34 @@
 .v2-map-legend-title { color: #fff; font-weight: 700; }
 .v2-map-legend-desktop { display: grid; grid-template-columns: minmax(0,1fr); gap: 12px; }
 .v2-map-legend-scale { display: flex; align-items: center; gap: 10px; }
-.v2-map-legend-swatches { display: flex; flex: 1; height: 9px; overflow: hidden; border-radius: 999px; }
+.v2-map-legend-swatches { display: flex; flex: 1; height: 9px; overflow: hidden; border-radius: 99px; }
 .v2-map-legend-swatches i { flex: 1; }
 .v2-map-legend-swatches .tier-1 { background: #08254a; }
 .v2-map-legend-swatches .tier-2 { background: #0a3b68; }
 .v2-map-legend-swatches .tier-3 { background: #075d86; }
 .v2-map-legend-swatches .tier-4 { background: #058caf; }
 .v2-map-legend-swatches .tier-5 { background: #00c8e6; }
+
+/* Compra: Ámbar */
+.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-1 { background: #3a2208; }
+.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-2 { background: #613909; }
+.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-3 { background: #94590b; }
+.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-4 { background: #ca8014; }
+.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-5 { background: #ffc247; }
+
+/* Venta: Esmeralda */
+.v2-map-legend[data-profile="venta"] .v2-map-legend-swatches .tier-1 { background: #062817; }
+.v2-map-legend[data-profile="venta"] .v2-map-legend-swatches .tier-2 { background: #0a4a2b; }
+.v2-map-legend[data-profile="venta"] .v2-map-legend-swatches .tier-3 { background: #127343; }
+.v2-map-legend[data-profile="venta"] .v2-map-legend-swatches .tier-4 { background: #1fa261; }
+.v2-map-legend[data-profile="venta"] .v2-map-legend-swatches .tier-5 { background: #3ddc97; }
+
+/* Inversión: Fucsia */
+.v2-map-legend[data-profile="inversion"] .v2-map-legend-swatches .tier-1 { background: #33103d; }
+.v2-map-legend[data-profile="inversion"] .v2-map-legend-swatches .tier-2 { background: #571c66; }
+.v2-map-legend[data-profile="inversion"] .v2-map-legend-swatches .tier-3 { background: #872b9d; }
+.v2-map-legend[data-profile="inversion"] .v2-map-legend-swatches .tier-4 { background: #be46dc; }
+.v2-map-legend[data-profile="inversion"] .v2-map-legend-swatches .tier-5 { background: #e879f9; }
 .v2-map-legend-labels { display: flex; flex-wrap: wrap; gap: 8px 14px; color: #d4e5ed; font-size: 12px; }
 .v2-map-legend-labels .no-data-label { display: inline-flex; align-items: center; gap: 5px; }
 .v2-map-legend-labels .no-data-label i { width: 14px; height: 10px; display: inline-block; background: repeating-linear-gradient(135deg, #17263b 0 4px, #71859a 4px 5px); border-radius: 2px; }
@@ -4512,9 +4533,11 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-heatmap-meta { display: grid; justify-items: end; gap: 7px; min-width: 0; }
 .v2-root .v2-heatmap-period { color: #aebfcd; font-size: 12px; line-height: 1.35; text-align: right; }
 .v2-root .v2-heatmap-legend { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 8px; margin: 0; color: #b9cad8; font-size: 11px; }
-.v2-root .v2-heatmap-legend-scale { width: 112px; height: 8px; border-radius: 99px; background: linear-gradient(90deg, rgba(0,221,240,.22), #00ddf0); }
-.v2-root .v2-heatmap-legend[data-profile="compra"] .v2-heatmap-legend-scale,
-.v2-root .v2-heatmap-legend[data-profile="venta"] .v2-heatmap-legend-scale { background: linear-gradient(90deg, rgba(255,139,106,.22), #ff8b6a); }
+.v2-root .v2-heatmap-legend-scale { width: 112px; height: 8px; border-radius: 99px; background: linear-gradient(90deg, rgba(0,229,255,.22), #00e5ff); }
+.v2-root .v2-heatmap-legend[data-profile="alquiler"] .v2-heatmap-legend-scale { background: linear-gradient(90deg, rgba(0,229,255,.22), #00e5ff); }
+.v2-root .v2-heatmap-legend[data-profile="compra"] .v2-heatmap-legend-scale { background: linear-gradient(90deg, rgba(255,194,71,.22), #ffc247); }
+.v2-root .v2-heatmap-legend[data-profile="venta"] .v2-heatmap-legend-scale { background: linear-gradient(90deg, rgba(61,220,151,.22), #3ddc97); }
+.v2-root .v2-heatmap-legend[data-profile="inversion"] .v2-heatmap-legend-scale { background: linear-gradient(90deg, rgba(232,121,249,.22), #e879f9); }
 .v2-root .v2-heatmap-legend .v2-info-tooltip-trigger > button:focus-visible { outline: 2px solid #00dff3 !important; outline-offset: 2px; }
 .v2-root .v2-heatmap-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; clip-path: inset(50%); }
 .v2-root .v2-heatmap-scroll { scrollbar-width: auto; scrollbar-color: #315c7d #041226; scrollbar-gutter: stable; }

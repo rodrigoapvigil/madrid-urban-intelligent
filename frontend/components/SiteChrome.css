@@ -462,6 +462,26 @@
   box-shadow: 0 2px 14px rgba(0, 240, 255, 0.55) !important;
 }
 
+.mi-nav__profile-pill.active[data-profile-tab="alquiler"] {
+  background: #00E5FF !important;
+  box-shadow: 0 2px 14px rgba(0, 229, 255, 0.55) !important;
+}
+
+.mi-nav__profile-pill.active[data-profile-tab="compra"] {
+  background: #FFC247 !important;
+  box-shadow: 0 2px 14px rgba(255, 194, 71, 0.55) !important;
+}
+
+.mi-nav__profile-pill.active[data-profile-tab="venta"] {
+  background: #3DDC97 !important;
+  box-shadow: 0 2px 14px rgba(61, 220, 151, 0.55) !important;
+}
+
+.mi-nav__profile-pill.active[data-profile-tab="inversion"] {
+  background: #E879F9 !important;
+  box-shadow: 0 2px 14px rgba(232, 121, 249, 0.55) !important;
+}
+
 .privacy-notice {
   position: fixed;
   z-index: 1000;
@@ -667,6 +687,30 @@
   border-color: #00F0FF;
   color: #FFFFFF;
   box-shadow: 0 0 16px rgba(0, 240, 255, 0.35);
+}
+
+.mi-mobile-drawer__profile-pill.active[data-profile-tab="alquiler"] {
+  background: rgba(0, 229, 255, 0.18);
+  border-color: #00E5FF;
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.35);
+}
+
+.mi-mobile-drawer__profile-pill.active[data-profile-tab="compra"] {
+  background: rgba(255, 194, 71, 0.18);
+  border-color: #FFC247;
+  box-shadow: 0 0 16px rgba(255, 194, 71, 0.35);
+}
+
+.mi-mobile-drawer__profile-pill.active[data-profile-tab="venta"] {
+  background: rgba(61, 220, 151, 0.18);
+  border-color: #3DDC97;
+  box-shadow: 0 0 16px rgba(61, 220, 151, 0.35);
+}
+
+.mi-mobile-drawer__profile-pill.active[data-profile-tab="inversion"] {
+  background: rgba(232, 121, 249, 0.18);
+  border-color: #E879F9;
+  box-shadow: 0 0 16px rgba(232, 121, 249, 0.35);
 }
 
 /* Vertical Navigation Links */

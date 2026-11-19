@@ -85,6 +85,7 @@ export function SiteHeader({
                 <button
                   key={tab.id}
                   type="button"
+                  data-profile-tab={tab.id}
                   className={`mi-nav__profile-pill ${activeProfileId === tab.id ? 'active' : ''}`}
                   onClick={() => onSelectProfile?.(tab.id)}
                 >
@@ -193,6 +194,7 @@ export function SiteHeader({
                     <button
                       key={tab.id}
                       type="button"
+                      data-profile-tab={tab.id}
                       className={`mi-mobile-drawer__profile-pill ${activeProfileId === tab.id ? 'active' : ''}`}
                       onClick={() => {
                         onSelectProfile?.(tab.id);

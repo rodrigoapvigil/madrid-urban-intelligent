@@ -18,7 +18,11 @@ export default function DashboardHeatmapTable({
   selectedMonth: string;
   formatValue: (value: number) => string;
 }) {
-  const cellColor = profileId === 'venta' || profileId === 'compra' ? '#FF8B6A' : '#00DDF0';
+  const cellColor =
+    profileId === 'compra' ? '#FFC247' :
+    profileId === 'venta' ? '#3DDC97' :
+    profileId === 'inversion' ? '#E879F9' :
+    '#00E5FF';
   const [hoveredRow, setHoveredRow] = useState<number | null>(null);
   const [hoveredMonth, setHoveredMonth] = useState<number | null>(null);
   const selectedYear = Number(year);

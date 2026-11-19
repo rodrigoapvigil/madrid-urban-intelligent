@@ -79,7 +79,12 @@ const getChoroplethTier = (val: number, profile: string): number => {
 interface TierConfig {
   size: number;
   r: number;
-  baseFill: string;
+  baseFill: {
+    alquiler: string;
+    compra: string;
+    venta: string;
+    inversion: string;
+  };
   dotColor: {
     alquiler: string;
     compra: string;
@@ -93,67 +98,97 @@ const TIER_CONFIGS: TierConfig[] = [
   {
     size: 13,
     r: 1.05,
-    baseFill: '#08254a',
+    baseFill: {
+      alquiler: '#08254a',
+      compra: '#3a2208',
+      venta: '#062817',
+      inversion: '#33103d',
+    },
     dotColor: {
       alquiler: '#023868',
-      compra: '#201844',
-      venta: '#38141c',
-      inversion: '#023868',
+      compra: '#523108',
+      venta: '#093d22',
+      inversion: '#481657',
     },
   },
   {
     size: 10.5,
     r: 1.25,
-    baseFill: '#0a3b68',
+    baseFill: {
+      alquiler: '#0a3b68',
+      compra: '#613909',
+      venta: '#0a4a2b',
+      inversion: '#571c66',
+    },
     dotColor: {
       alquiler: '#025894',
-      compra: '#3c207b',
-      venta: '#5e1728',
-      inversion: '#025894',
+      compra: '#7c490a',
+      venta: '#0e633a',
+      inversion: '#712485',
     },
   },
   {
     size: 8.8,
     r: 1.4,
-    baseFill: '#075d86',
+    baseFill: {
+      alquiler: '#075d86',
+      compra: '#94590b',
+      venta: '#127343',
+      inversion: '#872b9d',
+    },
     dotColor: {
       alquiler: '#0077b6',
-      compra: '#631fa0',
-      venta: '#931834',
-      inversion: '#0077b6',
+      compra: '#ab6b10',
+      venta: '#189155',
+      inversion: '#a436be',
     },
   },
   {
     size: 7.2,
     r: 1.55,
-    baseFill: '#058caf',
+    baseFill: {
+      alquiler: '#058caf',
+      compra: '#ca8014',
+      venta: '#1fa261',
+      inversion: '#be46dc',
+    },
     dotColor: {
       alquiler: '#0099cc',
-      compra: '#8c24e6',
-      venta: '#c81840',
-      inversion: '#0099cc',
+      compra: '#e0951f',
+      venta: '#28bf75',
+      inversion: '#d254f1',
     },
   },
   {
     size: 6.0,
     r: 1.75,
-    baseFill: '#00c8e6',
+    baseFill: {
+      alquiler: '#00c8e6',
+      compra: '#ffc247',
+      venta: '#3ddc97',
+      inversion: '#e879f9',
+    },
     dotColor: {
       alquiler: '#00c8e6',
-      compra: '#b060ff',
-      venta: '#f43f5e',
-      inversion: '#00c8e6',
+      compra: '#ffc247',
+      venta: '#3ddc97',
+      inversion: '#e879f9',
     },
   },
   {
     size: 4.8,
     r: 1.9,
-    baseFill: '#00f0ff',
+    baseFill: {
+      alquiler: '#00f0ff',
+      compra: '#ffe39d',
+      venta: '#8ef6c7',
+      inversion: '#f8baff',
+    },
     dotColor: {
       alquiler: '#00f0ff',
-      compra: '#d8b4fe',
-      venta: '#ff5c77',
-      inversion: '#00f0ff',
+      compra: '#ffe8aa',
+      venta: '#a3fad1',
+      inversion: '#fbcfff',
     },
     hasGlow: true,
   },
@@ -168,13 +203,14 @@ function getPatternDefsMarkup(instanceId: string): string {
       const s = tier.size;
       const r = tier.r;
       const c = tier.dotColor[prof];
+      const base = tier.baseFill[prof];
       const p1 = (s * 0.25).toFixed(2);
       const p2 = (s * 0.75).toFixed(2);
       const glowHtml = tier.hasGlow
         ? `<circle cx="${p1}" cy="${p1}" r="${(r * 0.5).toFixed(2)}" fill="#ffffff" /><circle cx="${p2}" cy="${p2}" r="${(r * 0.5).toFixed(2)}" fill="#ffffff" />`
         : '';
 
-      markup += `<pattern id="dot-pat-${instanceId}-${prof}-${index}" width="${s}" height="${s}" patternUnits="userSpaceOnUse"><rect width="${s}" height="${s}" fill="${tier.baseFill}" fill-opacity="0.94" /><circle cx="${p1}" cy="${p1}" r="${r}" fill="${c}" /><circle cx="${p2}" cy="${p2}" r="${r}" fill="${c}" />${glowHtml}</pattern>`;
+      markup += `<pattern id="dot-pat-${instanceId}-${prof}-${index}" width="${s}" height="${s}" patternUnits="userSpaceOnUse"><rect width="${s}" height="${s}" fill="${base}" fill-opacity="0.94" /><circle cx="${p1}" cy="${p1}" r="${r}" fill="${c}" /><circle cx="${p2}" cy="${p2}" r="${r}" fill="${c}" />${glowHtml}</pattern>`;
     });
   }
 
@@ -269,12 +305,28 @@ const MadridMap: React.FC<MapProps> = ({
     const hasObservedValue = Number.isFinite(Number(val)) && Number(val) > 0;
 
     const tier = getChoroplethTier(val, selectedProfile);
+    const pNorm = normalize(selectedProfile || '');
+    const profileKey: 'alquiler' | 'compra' | 'venta' | 'inversion' =
+      pNorm.includes('compra') ? 'compra' :
+      pNorm.includes('venta') ? 'venta' :
+      pNorm.includes('inversion') ? 'inversion' : 'alquiler';
+
+    const defaultStrokeColor =
+      profileKey === 'compra'
+        ? (type === 'districts' ? 'rgba(255, 194, 71, 0.50)' : 'rgba(215, 170, 85, 0.48)')
+        : profileKey === 'venta'
+        ? (type === 'districts' ? 'rgba(61, 220, 151, 0.50)' : 'rgba(90, 195, 145, 0.48)')
+        : profileKey === 'inversion'
+        // Fucsia sobre azul marino: borde claro para no perderse en la rampa baja
+        ? (type === 'districts' ? 'rgba(232, 121, 249, 0.60)' : 'rgba(215, 140, 235, 0.55)')
+        : (type === 'districts' ? 'rgba(0, 240, 255, 0.45)' : 'rgba(111, 183, 203, 0.48)');
+
     return {
       // Use five solid choropleth steps so the map reads as data, not texture.
-      fillColor: !hasObservedValue ? `url(#no-data-pat-${containerId})` : TIER_CONFIGS[tier].baseFill,
+      fillColor: !hasObservedValue ? `url(#no-data-pat-${containerId})` : TIER_CONFIGS[tier].baseFill[profileKey],
       weight: isCompareA || isCompareB ? 2.5 : isSelected ? 3 : type === 'districts' ? 1.2 : 0.55,
       opacity: isExcluded ? 0.20 : 0.95,
-      color: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#FFFFFF' : type === 'districts' ? 'rgba(0, 240, 255, 0.45)' : 'rgba(111, 183, 203, 0.48)',
+      color: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#FFFFFF' : defaultStrokeColor,
       fillOpacity: isExcluded ? 0.25 : 1.0,
     };
   }, [data, selectedDistrict, selectedBarrio, selectedZone, selectedZoneType, type, selectedProfile, compareZoneA, compareZoneB, containerId]);
