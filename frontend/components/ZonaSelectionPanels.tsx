@@ -57,7 +57,7 @@ export function FichaZonaDesktop({ zone, rank, primaryLabel, primaryValue, secon
     y = Math.max(minY, Math.min(y, bounds.bottom - panelRect.height - 8));
     panel.style.transform = `translate3d(${x}px, ${y}px, 0)`;
     panel.style.visibility = 'visible';
-  }, [position, zone, rank, primaryValue, secondaryValue, delta]);
+  }, [mounted, position, zone, rank, primaryValue, secondaryValue, delta]);
 
   if (!mounted || typeof document === 'undefined' || !position) return null;
   return createPortal(<aside ref={panelRef} className="zona-panel zona-panel-desktop" style={style} role="status" aria-live="polite">

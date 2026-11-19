@@ -1814,6 +1814,26 @@ footer.auros-footer,
   }
 }
 
+/* Desktop landing only: reproduce the roomier composition of 90% browser zoom. */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .mi-home {
+    zoom: 0.9;
+    width: 111.111111%;
+    min-height: 111.111111vh;
+  }
+
+  /* The fixed header stays full-bleed while its contents gain lateral breathing room. */
+  .mi-home > .mi-header {
+    width: 100%;
+    padding-inline: max(64px, calc((100vw / 0.9 - 1600px) / 2 + 64px));
+  }
+
+  /* Compensate the viewport-based hero height for the scaled landing root. */
+  .mi-home .mi-hero {
+    min-height: max(733.333333px, calc(100svh / 0.9 - 88px));
+  }
+}
+
 /* Cleaner landing header and a more restrained, single-line hero message. */
 .mi-home .mi-header.site-header--compact-brand .mi-brand__text { gap: 0; }
 .mi-home .mi-header__cta {

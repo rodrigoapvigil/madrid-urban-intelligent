@@ -4581,3 +4581,27 @@ body.v2-fullscreen-open footer { display: none !important; }
   .v2-root .v2-map-panel-heading { top: 16px; right: 18px; max-width: calc(100% - 96px); font-size: 12px; line-height: 1.35; text-align: right; }
   .v2-root .v2-map-panel-heading strong { white-space: normal; }
 }
+
+/* Match the user's preferred 90% browser-zoom composition on desktop only. */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .v2-root {
+    zoom: 0.9;
+    width: 111.111111%;
+    min-height: 111.111111vh !important;
+  }
+
+  /* Preserve viewport-relative dashboard/map heights after scaling the root. */
+  .v2-root .v2-explorer-grid { grid-template-rows: auto minmax(460px, min(80vh, 844px)); }
+  .v2-root .v2-dual-maps { min-height: clamp(600px, 75.555556vh, 760px); }
+  .v2-root .v2-map-sub { height: clamp(560px, 71.111111vh, 680px); }
+  .v2-root .v2-heatmap-scroll { max-height: min(66.666667vh, 704px); }
+
+  /* Keep fullscreen maps and charts edge-to-edge inside the scaled dashboard. */
+  .v2-root .v2-is-fullscreen { width: 111.111111vw !important; height: 111.111111dvh !important; max-height: 111.111111dvh !important; }
+  .v2-root .v2-is-fullscreen .v2-chart-wrap { height: calc(111.111111dvh - 166.666667px) !important; }
+  .v2-root .v2-is-fullscreen .v2-chart-wrap[style] { min-height: 0; }
+  .v2-root .v2-is-fullscreen.v2-overlay-wrapper .v2-chart-wrap { height: calc(111.111111dvh - 115.555556px) !important; }
+  .v2-root .v2-is-fullscreen.v2-map-card .v2-dual-maps { height: calc(111.111111dvh - 142.222222px) !important; }
+  .v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-scroll { max-height: calc(111.111111dvh - 111.111111px) !important; }
+  .v2-root dialog.v2-fullscreen-dialog { width: 111.111111vw; height: 111.111111dvh; }
+}
