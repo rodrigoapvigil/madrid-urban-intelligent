@@ -2491,7 +2491,7 @@ const MadridDashboardV2: React.FC = () => {
     : selectedBarrio !== 'Todos' ? selectedBarrio : null;
 
   return (
-    <div className="v2-root" data-profile={activeProfile.id} data-platform={isMobile ? 'mobile' : 'desktop'}>
+    <div className="v2-root" data-profile={activeProfile.id} data-platform={isMobile ? 'mobile' : 'desktop'} data-loading={showDashboardLoader ? 'true' : 'false'}>
       {isMobile && <BackgroundAurora animated={false} />}
       <div className="mi-atmosphere" aria-hidden="true"/>
       {showDashboardLoader && (
