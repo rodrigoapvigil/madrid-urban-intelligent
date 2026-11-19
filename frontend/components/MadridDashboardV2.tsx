@@ -3647,6 +3647,19 @@ const MadridDashboardV2: React.FC = () => {
                       onChange={setRankingLevel}
                     />
                   </div>
+                  <div className="v2-heatmap-meta v2-heatmap-meta--desktop">
+                    <small className="v2-heatmap-period">{rankingLevel} · enero–diciembre de {selectedYear}</small>
+                    <div className="v2-heatmap-legend" data-profile={activeProfile.id}>
+                      <span>{activeProfile.id === 'inversion' ? 'Menor rentabilidad' : 'Menor precio'}</span>
+                      <span className="v2-heatmap-legend-scale" aria-hidden="true" />
+                      <span>{activeProfile.id === 'inversion' ? 'Mayor rentabilidad' : 'Mayor precio'}</span>
+                      <InfoTooltip
+                        title="Escala de color"
+                        description="El tono más intenso indica un valor mayor; la escala se ajusta a los datos cargados."
+                        align="right"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -3685,7 +3698,7 @@ const MadridDashboardV2: React.FC = () => {
                       <h3>{activeProfile.id === 'inversion' ? 'Rentabilidad bruta' : activeProfile.id === 'alquiler' ? 'Precio medio de alquiler' : activeProfile.id === 'compra' ? 'Precio medio de compra' : 'Precio medio de venta'} · {activeProfile.id === 'inversion' ? '%' : '€/m²'}</h3>
                       {isMobile && <FullscreenToggle targetSelector=".v2-heatmap-card" mobilePlatform />}
                     </div>
-                    <div className="v2-heatmap-meta">
+                    <div className="v2-heatmap-meta v2-heatmap-meta--stacked">
                       <small className="v2-heatmap-period">{rankingLevel} · enero–diciembre de {selectedYear}</small>
                       <div className="v2-heatmap-legend" data-profile={activeProfile.id}>
                         <span>{activeProfile.id === 'inversion' ? 'Menor rentabilidad' : 'Menor precio'}</span>

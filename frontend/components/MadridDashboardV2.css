@@ -4605,3 +4605,31 @@ body.v2-fullscreen-open footer { display: none !important; }
   .v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-scroll { max-height: calc(111.111111dvh - 111.111111px) !important; }
   .v2-root dialog.v2-fullscreen-dialog { width: 111.111111vw; height: 111.111111dvh; }
 }
+
+/* Ranking heatmap heading: separate the table title from the ranking intro. */
+.v2-root .v2-heatmap-meta--desktop { display: none !important; }
+.v2-root .v2-heatmap-meta--stacked { display: grid !important; }
+
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .v2-root .v2-explorer-grid { column-gap: 36px !important; row-gap: 36px !important; }
+  .v2-root .v2-explorer-header { align-items: flex-start !important; }
+  .v2-root .v2-explorer-header .v2-rank-settings {
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    gap: 10px !important;
+  }
+  .v2-root .v2-heatmap-meta--desktop {
+    display: grid !important;
+    justify-items: end;
+    gap: 7px;
+    min-width: 0;
+    text-align: right;
+  }
+  .v2-root .v2-heatmap-meta--stacked { display: none !important; }
+  .v2-root .v2-is-fullscreen.v2-heatmap-card .v2-heatmap-meta--stacked { display: grid !important; }
+  .v2-root .v2-heatmap-head {
+    display: block !important;
+    margin-bottom: 8px !important;
+  }
+  .v2-root .v2-heatmap-heading-copy { display: block !important; }
+}
