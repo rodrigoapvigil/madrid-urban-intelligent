@@ -20,6 +20,13 @@ type ZoneSearchProps = {
   compact?: boolean;
   title?: string;
   showReset?: boolean;
+  picker?: {
+    selected: ZoneSearchOption;
+    excludedId?: string;
+    accent: 'a' | 'b';
+    onSelect: (option: ZoneSearchOption) => void;
+    onOpenChange?: (open: boolean) => void;
+  };
 };
 
 const normalize = (value: string) => value
@@ -29,10 +36,11 @@ const normalize = (value: string) => value
   .replace(/^\d+\.\s*/, '')
   .trim();
 
-export default function ZoneSearch({ options, district, barrio, onSelect, formatName, compact = false, title = 'Zona' }: ZoneSearchProps) {
+export default function ZoneSearch({ options, district, barrio, onSelect, formatName, compact = false, title = 'Zona', picker }: ZoneSearchProps) {
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [editing, setEditing] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const inputId = useId();
   const listId = useId();
@@ -48,6 +56,7 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
     if (!needle) return [];
     const matches = options
       .filter(option => {
+        if (picker && (option.id === picker.excludedId || option.kind === 'city')) return false;
         const searchable = [option.name, formatName(option.name), ...(option.aliases || [])].map(normalize);
         return searchable.some(value => value.includes(needle));
       })
@@ -63,7 +72,7 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
       ...matches.filter(option => option.kind === 'barrio'),
       ...matches.filter(option => option.kind === 'city'),
     ];
-  }, [options, query, formatName]);
+  }, [options, query, formatName, picker]);
   const groupedResults = useMemo(() => {
     let index = 0;
     const groups = { districts: [] as Array<{ option: ZoneSearchOption; index: number }>, barrios: [] as Array<{ option: ZoneSearchOption; index: number }>, city: [] as Array<{ option: ZoneSearchOption; index: number }> };
@@ -78,13 +87,27 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
 
   useEffect(() => {
     const handlePointerDown = (event: PointerEvent) => {
-      if (rootRef.current && !rootRef.current.contains(event.target as Node)) setOpen(false);
+      if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
+        setOpen(false);
+        setQuery('');
+        setEditing(false);
+        picker?.onOpenChange?.(false);
+      }
     };
     document.addEventListener('pointerdown', handlePointerDown);
     return () => document.removeEventListener('pointerdown', handlePointerDown);
-  }, []);
+  }, [picker]);
 
   const choose = (option: ZoneSearchOption) => {
+    if (picker) {
+      picker.onSelect(option);
+      setQuery('');
+      setOpen(false);
+      setEditing(false);
+      picker.onOpenChange?.(false);
+      setActiveIndex(0);
+      return;
+    }
     if (option.kind === 'city') onSelect({ district: 'Todos', barrio: 'Todos' });
     else if (option.kind === 'district') onSelect({ district: option.name, barrio: 'Todos' });
     else onSelect({ district: option.district || 'Todos', barrio: option.name });
@@ -94,11 +117,41 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
   };
 
   return (
-    <div ref={rootRef} className={`v2-zone-search ${compact ? 'is-compact' : ''}`}>
+    <div ref={rootRef} className={`v2-zone-search ${compact ? 'is-compact' : ''} ${picker ? `is-comparison-picker zone-${picker.accent}` : ''}`}>
       {!compact && <span className="v2-zone-filter-title">{title}</span>}
       <div className="v2-zone-search-control">
         <div className="v2-zone-search-field">
-          {selection ? (
+          {picker && !editing ? (
+            <button type="button" className="v2-zone-search-picked" aria-label={`Cambiar ${picker.accent === 'a' ? 'zona A' : 'zona B'}, actualmente ${formatName(picker.selected.name)} ${picker.selected.kind === 'district' ? 'Distrito' : 'Barrio'}`} onClick={() => { setEditing(true); setOpen(true); picker.onOpenChange?.(true); }}>
+              <span className="v2-zone-search-picked-copy"><strong>{formatName(picker.selected.name)}</strong><small>{picker.selected.kind === 'district' ? 'Distrito' : 'Barrio'}</small></span>
+              <Search size={17} aria-hidden="true" />
+            </button>
+          ) : picker ? <>
+            <Search size={16} aria-hidden="true" />
+            <input
+              id={inputId}
+              type="search"
+              value={query}
+              placeholder="Busca un distrito o barrio"
+              aria-label={`Buscar zona ${picker.accent.toUpperCase()}`}
+              autoComplete="off"
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded={open && Boolean(query)}
+              aria-controls={open && Boolean(query) && results.length ? listId : undefined}
+              aria-activedescendant={open && results[activeIndex] ? `${listId}-${activeIndex}` : undefined}
+              autoFocus
+              onFocus={() => setOpen(true)}
+              onChange={event => { setQuery(event.target.value); setOpen(true); setActiveIndex(0); }}
+              onKeyDown={event => {
+                if (event.key === 'Escape') { setOpen(false); setQuery(''); setEditing(false); picker.onOpenChange?.(false); }
+                else if (event.key === 'ArrowDown' && results.length) { event.preventDefault(); setOpen(true); setActiveIndex(index => (index + 1) % results.length); }
+                else if (event.key === 'ArrowUp' && results.length) { event.preventDefault(); setActiveIndex(index => (index - 1 + results.length) % results.length); }
+                else if (event.key === 'Enter' && results[activeIndex]) { event.preventDefault(); choose(results[activeIndex]); }
+              }}
+            />
+            {query && <button type="button" aria-label="Limpiar búsqueda" onClick={() => { setQuery(''); setActiveIndex(0); }}><X size={16} /></button>}
+          </> : selection ? (
             <div className="v2-zone-search-selected-chip" aria-live="polite">
               <span>{formatName(selection.name)}</span>
               <button type="button" aria-label={`${formatName(selection.name)} seleccionada. Volver a Madrid`} onClick={() => choose({ id: 'city-madrid', name: 'Madrid', kind: 'city' })}><X size={16} aria-hidden="true" /></button>
@@ -132,7 +185,7 @@ export default function ZoneSearch({ options, district, barrio, onSelect, format
 
       {open && query && <>
         <div className={`v2-zone-search-announcement ${results.length ? 'is-count' : 'is-empty'}`} role="status" aria-live="polite">
-          {results.length ? `${results.length} ${results.length === 1 ? 'zona encontrada' : 'zonas encontradas'}` : 'No encontramos esa zona. Prueba otro nombre.'}
+          {results.length ? `${results.length} ${results.length === 1 ? 'zona encontrada' : 'zonas encontradas'}` : picker ? 'Sin resultados' : 'No encontramos esa zona. Prueba otro nombre.'}
         </div>
         {results.length > 0 && <div id={listId} className="v2-zone-search-results" role="listbox" aria-label="Resultados de zonas">
           {groupedResults.districts.length > 0 && <div role="group" aria-label="Distritos">
@@ -172,6 +225,6 @@ function ZoneResult({ option, index, listId, formatName, active, onActivate, onC
     onClick={() => onChoose(option)}
   >
     <span>{formatName(option.name)}</span>
-    <small>{option.kind === 'district' ? 'Distrito' : option.kind === 'city' ? 'Ciudad' : `Barrio de ${formatName(option.district || '')}`}</small>
+    <small>{option.kind === 'district' ? 'Distrito' : option.kind === 'city' ? 'Ciudad' : 'Barrio'}</small>
   </button>;
 }

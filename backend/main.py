@@ -134,10 +134,11 @@ def get_series(
     year: int = 2026,
     op: str = "Venta",
     zona: Optional[str] = None,
-    tipo_zona: str = "distrito"
+    tipo_zona: str = "distrito",
+    zone_id: Optional[int] = None
 ):
     if zona and zona != "Todos":
-        df = data.get_monthly_series(year, op, zona, tipo_zona)
+        df = data.get_monthly_series(year, op, zona, tipo_zona, zone_id)
     else:
         df = data.get_madrid_average_series(year, op)
         if not df.empty:
