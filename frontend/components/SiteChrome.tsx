@@ -110,7 +110,7 @@ export function SiteHeader({
               </details>
             ) : <Link href="/madrid">Plataforma</Link>}
             <Link href="/#impacto">A quién ayuda</Link>
-            <Link href="/madrid/chat" className={activePath === '/madrid/chat' ? 'active' : ''}>AMBI</Link>
+            <Link href="/madrid/chat" className={activePath === '/madrid/chat' ? 'active' : ''}>Asistente AMBI</Link>
             <Link href="/madrid/veredicto" className={activePath === '/madrid/veredicto' ? 'active' : ''}>{PRICE_ANALYSIS_LABEL}</Link>
           </nav>
         )}

@@ -41,7 +41,7 @@ export default function MadridLanding() {
             <Link href="/madrid" className="mi-hero__cta-main">Explorar precios de Madrid <ArrowUpRight aria-hidden="true"/></Link>
           </div>
           <MadridHeroArtwork />
-          <div className="mi-hero__meta"><span>21 distritos</span><i/><span>131 barrios auditados</span></div>
+          <div className="mi-hero__meta"><span>21 distritos</span><i/><span>131 barrios auditados</span><i/><span>Fuentes: Registradores · Catastro · Ayto. Madrid</span></div>
         </section>
 
         {/* 1. EL DOLOR: Desfase entre el precio anunciado y el precio de cierre oficial */}
@@ -91,10 +91,10 @@ export default function MadridLanding() {
                       onMouseLeave={() => setTrendHighlight('all')}
                     >
                       <div className="mi-auros-feature__header">
-                        <h3>Machine Learning calibrado</h3>
+                        <h3>Modelado predictivo CatBoost (2023–2027)</h3>
                         <span className="mi-auros-arrow" aria-hidden="true"><ArrowUpRight /></span>
                       </div>
-                      <p>Modelos predictivos que proyectan la curva de precios de cada distrito distinguiendo el dato real de la estimación.</p>
+                      <p>Modelos predictivos calibrados por distrito que proyectan la evolución del precio distinguiendo el dato oficial de la estimación.</p>
                     </div>
 
                     <Link 
