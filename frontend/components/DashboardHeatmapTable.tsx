@@ -6,7 +6,7 @@ import { colorWithAlpha } from '../lib/colors';
 const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 export default function DashboardHeatmapTable({
-  rows, profileId, level, year, min, max, latestReal, selectedMonth, formatValue,
+  rows, profileId, level, year, min, max, latestReal, selectedMonth, formatValue, loading = false,
 }: {
   rows: Array<Record<string, any> & { zona: string }>;
   profileId: string;
@@ -17,6 +17,7 @@ export default function DashboardHeatmapTable({
   latestReal: { year: string; month: string };
   selectedMonth: string;
   formatValue: (value: number) => string;
+  loading?: boolean;
 }) {
   const cellColor =
     profileId === 'compra' ? '#FFC247' :
@@ -68,19 +69,34 @@ export default function DashboardHeatmapTable({
           })}</tr>
         </thead>
         <tbody>
-          {rows.length > 0 ? rows.map((row, rowIndex) => (
-            <tr key={rowIndex} className={hoveredRow === rowIndex ? 'is-hovered-row' : undefined} onMouseEnter={() => setHoveredRow(rowIndex)}>
-              <th scope="row" className="zona-name" title={row.zona}>{row.zona}</th>
-              {MONTHS.map((_, monthIndex) => {
-                const value = Number(row[`m${monthIndex + 1}`]);
-                const opacity = value > 0 ? Math.max(.22, Math.min(1, .22 + ((value - min) / (max - min || 1)) * .78)) : 0;
-                const monthStatus = monthIndex < realMonthCount ? 'dato real' : 'estimación';
-                const cellText = value > 0 ? `${formatValue(value)} ${unit}; ${monthStatus}` : `sin valor disponible; ${monthStatus}`;
-                const classes = [value > 0 ? '' : 'v2-heatmap-no-data', monthIndex === realMonthCount && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : '', selectedMonthIndex === monthIndex ? 'is-selected-month' : '', hoveredMonth === monthIndex ? 'is-hovered-column' : ''].filter(Boolean).join(' ');
-                return <td key={monthIndex} className={classes || undefined} onMouseEnter={() => setHoveredMonth(monthIndex)} aria-label={`${row.zona}, ${MONTHS[monthIndex]} ${year}: ${cellText}`} title={value > 0 ? `${MONTHS[monthIndex]} ${year} · ${monthStatus}` : 'Sin valor disponible para este mes'} style={{ backgroundColor: value > 0 ? colorWithAlpha(cellColor, opacity) : 'transparent', color: value > 0 ? textColorFor(opacity) : '#ffffff' }}>{value > 0 ? formatValue(value) : 'n/d'}</td>;
-              })}
-            </tr>
-          )) : <tr><td colSpan={13} style={{ padding: '40px', textAlign: 'center', color: 'var(--azul-linea)' }}>No hay datos disponibles para el año {year}</td></tr>}
+          {loading ? (
+            Array.from({ length: 8 }).map((_, rIdx) => (
+              <tr key={`skel-row-${rIdx}`} className="v2-heatmap-skel-row">
+                <th scope="row" className="zona-name">
+                  <div className="v2-shimmer-cell" style={{ width: '85px', height: '14px' }} />
+                </th>
+                {MONTHS.map((_, mIdx) => (
+                  <td key={`skel-td-${mIdx}`} style={{ padding: '8px 4px' }}>
+                    <div className="v2-shimmer-cell" style={{ width: '36px', height: '14px', margin: '0 auto' }} />
+                  </td>
+                ))}
+              </tr>
+            ))
+          ) : rows.length > 0 ? (
+            rows.map((row, rowIndex) => (
+              <tr key={rowIndex} className={hoveredRow === rowIndex ? 'is-hovered-row' : undefined} onMouseEnter={() => setHoveredRow(rowIndex)}>
+                <th scope="row" className="zona-name" title={row.zona}>{row.zona}</th>
+                {MONTHS.map((_, monthIndex) => {
+                  const value = Number(row[`m${monthIndex + 1}`]);
+                  const opacity = value > 0 ? Math.max(.22, Math.min(1, .22 + ((value - min) / (max - min || 1)) * .78)) : 0;
+                  const monthStatus = monthIndex < realMonthCount ? 'dato real' : 'estimación';
+                  const cellText = value > 0 ? `${formatValue(value)} ${unit}; ${monthStatus}` : `sin valor disponible; ${monthStatus}`;
+                  const classes = [value > 0 ? '' : 'v2-heatmap-no-data', monthIndex === realMonthCount && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : '', selectedMonthIndex === monthIndex ? 'is-selected-month' : '', hoveredMonth === monthIndex ? 'is-hovered-column' : ''].filter(Boolean).join(' ');
+                  return <td key={monthIndex} className={classes || undefined} onMouseEnter={() => setHoveredMonth(monthIndex)} aria-label={`${row.zona}, ${MONTHS[monthIndex]} ${year}: ${cellText}`} title={value > 0 ? `${MONTHS[monthIndex]} ${year} · ${monthStatus}` : 'Sin valor disponible para este mes'} style={{ backgroundColor: value > 0 ? colorWithAlpha(cellColor, opacity) : 'transparent', color: value > 0 ? textColorFor(opacity) : '#ffffff' }}>{value > 0 ? formatValue(value) : 'n/d'}</td>;
+                })}
+              </tr>
+            ))
+          ) : <tr><td colSpan={13} style={{ padding: '40px', textAlign: 'center', color: 'var(--azul-linea)' }}>No hay datos disponibles para los filtros seleccionados</td></tr>}
         </tbody>
       </table>
     </div>

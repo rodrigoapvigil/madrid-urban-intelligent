@@ -3664,6 +3664,57 @@ body.v2-fullscreen-open .v2-root .v2-filters { display: none !important; }
 .v2-no-data-notice > span { color: #00e5ff; font-size: 11px; font-weight: 700; }
 .v2-no-data-notice > strong { color: #fff; font-size: 15px; }
 .v2-no-data-notice > p { margin: 0; font-size: 12px; line-height: 1.45; }
+
+/* Estados de carga translúcidos para el comparador */
+.v2-comparison-loading-notice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 280px;
+  height: 100%;
+  padding: 32px 20px;
+  border: 1px solid rgba(0, 240, 255, 0.22);
+  border-radius: 12px;
+  background: radial-gradient(ellipse at center, rgba(0, 45, 84, 0.55) 0%, rgba(1, 16, 36, 0.82) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: #dce8f2;
+  text-align: center;
+}
+.v2-comparison-loading-notice .v2-comp-spinner {
+  width: 32px;
+  height: 32px;
+  border: 2px solid rgba(0, 240, 255, 0.2);
+  border-top-color: #00F0FF;
+  border-radius: 50%;
+  animation: v2Orbit 1s linear infinite;
+}
+.v2-comparison-loading-notice span {
+  color: #00F0FF;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.v2-comparison-loading-notice p {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(230, 240, 250, 0.78);
+}
+
+/* Skeleton shimmer para el heatmap */
+.v2-shimmer-cell {
+  border-radius: 4px;
+  background: linear-gradient(90deg, rgba(0, 229, 255, 0.05) 25%, rgba(0, 229, 255, 0.18) 50%, rgba(0, 229, 255, 0.05) 75%);
+  background-size: 200% 100%;
+  animation: v2Shimmer 1.8s infinite;
+}
+@keyframes v2Shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
 .v2-root .v2-heatmap-extra-row { display: none; }
 .v2-root .v2-heatmap-more { min-height: 38px; margin: 8px 0; padding: 0 12px; border: 1px solid rgba(0,229,238,.32); border-radius: 10px; background: rgba(0,229,238,.08); color: #8ef5ff; font-weight: 700; }
 body.v2-fullscreen-open .v2-mobile-profile-nav,

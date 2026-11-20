@@ -824,6 +824,7 @@ const MadridDashboardV2: React.FC = () => {
   const [kpiDataB, setKpiDataB] = useState<any>({});
   const [seriesA, setSeriesA] = useState<any[]>([]);
   const [seriesB, setSeriesB] = useState<any[]>([]);
+  const [isComparisonLoading, setIsComparisonLoading] = useState(false);
   const [seriesMadrid, setSeriesMadrid] = useState<any[]>([]);
   const comparisonAHasData = seriesA.some(point => Number(point?.precio_m2) > 0);
   const comparisonBHasData = seriesB.some(point => Number(point?.precio_m2) > 0);
@@ -894,6 +895,7 @@ const MadridDashboardV2: React.FC = () => {
   const [affordabilityData, setAffordabilityData] = useState<any[]>([]);
   const [seasonalTrend, setSeasonalTrend] = useState<any[]>([]);
   const [heatmapData, setHeatmapData] = useState<any[]>([]);
+  const [isHeatmapLoading, setIsHeatmapLoading] = useState(true);
   const [heatmapDataSourceKey, setHeatmapDataSourceKey] = useState('');
   const [heatmapSearch, setHeatmapSearch] = useState('');
   const [rankingLevel, setRankingLevel] = useState<'Distritos' | 'Barrios'>('Distritos');
@@ -1182,9 +1184,11 @@ const MadridDashboardV2: React.FC = () => {
     setSeriesMadrid([]);
     setSeriesA([]);
     setSeriesB([]);
+    setIsComparisonLoading(true);
     setMapData({ districts: [], neighborhoods: [] });
     setHeatmapData([]);
     setHeatmapDataSourceKey('');
+    setIsHeatmapLoading(true);
 
     apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
       .then(res => res.json())
@@ -1226,34 +1230,42 @@ const MadridDashboardV2: React.FC = () => {
       const id = Number(zone.id.split(':')[1]);
       return `/series?year=${selectedYear}&op=${op}&zona=${encodeURIComponent(zone.name)}&tipo_zona=${type}${Number.isFinite(id) ? `&zone_id=${id}` : ''}`;
     };
-    apiFetch(zoneSeriesUrl(comparisonZoneA))
+    const pSeriesA = apiFetch(zoneSeriesUrl(comparisonZoneA))
       .then(res => res.json())
-      .then(data => { if (isLatestRequest() && !rejectInvalidRentalSeries(data)) setSeriesA(data); });
+      .then(data => { if (isLatestRequest() && !rejectInvalidRentalSeries(data)) setSeriesA(data); })
+      .catch(() => { if (isLatestRequest()) setSeriesA([]); });
 
     // Series Zone B
-    apiFetch(zoneSeriesUrl(comparisonZoneB))
+    const pSeriesB = apiFetch(zoneSeriesUrl(comparisonZoneB))
       .then(res => res.json())
-      .then(data => { if (isLatestRequest() && !rejectInvalidRentalSeries(data)) setSeriesB(data); });
+      .then(data => { if (isLatestRequest() && !rejectInvalidRentalSeries(data)) setSeriesB(data); })
+      .catch(() => { if (isLatestRequest()) setSeriesB([]); });
 
     // KPIs Zone A
     const zoneAParam = comparisonZoneA.kind === 'district' ? `district=${encodeURIComponent(selectedZoneA)}` : `barrio=${encodeURIComponent(selectedZoneA)}`;
-    apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneAParam}`)
+    const pKpiA = apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneAParam}`)
       .then(res => res.json())
       .then(data => {
         if (!isLatestRequest()) return;
         if (activeProfile.id === 'alquiler' && Number(data.precio_m2) > 100) return;
         setKpiDataA({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra });
-      });
+      })
+      .catch(() => {});
 
     // KPIs Zone B
     const zoneBParam = comparisonZoneB.kind === 'district' ? `district=${encodeURIComponent(selectedZoneB)}` : `barrio=${encodeURIComponent(selectedZoneB)}`;
-    apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneBParam}`)
+    const pKpiB = apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneBParam}`)
       .then(res => res.json())
       .then(data => {
         if (!isLatestRequest()) return;
         if (activeProfile.id === 'alquiler' && Number(data.precio_m2) > 100) return;
         setKpiDataB({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra });
-      });
+      })
+      .catch(() => {});
+
+    Promise.allSettled([pSeriesA, pSeriesB, pKpiA, pKpiB]).finally(() => {
+      if (isLatestRequest()) setIsComparisonLoading(false);
+    });
 
     // Map Data
     apiFetch(`/map?year=${selectedYear}&month=${selectedMonth}&interest=${activeProfile.id === 'alquiler' ? 'Alquiler' : activeProfile.id === 'compra' ? 'Compra-venta' : activeProfile.id === 'venta' ? 'Venta' : 'Inversión'}`)
@@ -1288,6 +1300,7 @@ const MadridDashboardV2: React.FC = () => {
         .catch(() => { if (isLatestRequest()) setScatterData([]); });
     }
 
+    setIsHeatmapLoading(true);
     apiFetch(`/heatmap?year=${selectedYear}&op=${activeProfile.id}&level=${rankingLevel.toLowerCase().slice(0, -1)}`)
       .then(res => res.ok ? res.json() : [])
       .then(data => {
@@ -1300,7 +1313,8 @@ const MadridDashboardV2: React.FC = () => {
         setHeatmapData(Array.isArray(data) ? data : []);
         setHeatmapDataSourceKey(`${selectedYear}|${activeProfile.id}|${rankingLevel}`);
       })
-      .catch(() => { if (isLatestRequest()) setHeatmapData([]); });
+      .catch(() => { if (isLatestRequest()) setHeatmapData([]); })
+      .finally(() => { if (isLatestRequest()) setIsHeatmapLoading(false); });
 
     apiFetch(`/connectivity-analysis?district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
       .then(res => res.ok ? res.json() : null)
@@ -3724,6 +3738,7 @@ const MadridDashboardV2: React.FC = () => {
                   <input className="v2-heatmap-search" type="search" value={heatmapSearch} onChange={event => setHeatmapSearch(event.target.value)} placeholder={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'}…`} aria-label={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'} en el mapa de calor`} />
                   <DashboardHeatmapTable
                     rows={filteredHeatmapRows}
+                    loading={isHeatmapLoading}
                     profileId={activeProfile.id}
                     level={rankingLevel}
                     year={selectedYear}
@@ -3895,7 +3910,13 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneA}
                       </div>
-                      <div className="v2-chart-wrap">{comparisonAHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartA-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />}</div>
+                      <div className="v2-chart-wrap">{isComparisonLoading ? (
+                        <div className="v2-comparison-loading-notice">
+                          <div className="v2-comp-spinner" />
+                          <span>Consultando registros oficiales</span>
+                          <p>Cargando evolución histórica y predicción de {selectedZoneA}…</p>
+                        </div>
+                      ) : comparisonAHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartA-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />}</div>
                     </div>
                     {(() => {
                       if (!comparisonAHasData) return null;
@@ -4119,7 +4140,13 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneB}
                       </div>
-                      <div className="v2-chart-wrap">{comparisonBHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartB-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />}</div>
+                      <div className="v2-chart-wrap">{isComparisonLoading ? (
+                        <div className="v2-comparison-loading-notice">
+                          <div className="v2-comp-spinner" />
+                          <span>Consultando registros oficiales</span>
+                          <p>Cargando evolución histórica y predicción de {selectedZoneB}…</p>
+                        </div>
+                      ) : comparisonBHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartB-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />}</div>
                     </div>
                     {(() => {
                       if (!comparisonBHasData) return null;
@@ -4343,7 +4370,15 @@ const MadridDashboardV2: React.FC = () => {
                     <span>Comparativa superpuesta · {getComparisonMetric(p.id).label}</span>
                   </div>
                   <div className="v2-overlay-body">
-                    {isMobile ? <>
+                    {isComparisonLoading ? (
+                      <div className="v2-chart-wrap large" style={{ display: 'grid', placeContent: 'center', height: '420px' }}>
+                        <div className="v2-comparison-loading-notice" style={{ width: '100%', maxWidth: '520px', margin: '0 auto' }}>
+                          <div className="v2-comp-spinner" />
+                          <span>Procesando serie comparativa</span>
+                          <p>Generando trazado comparativo entre {selectedZoneA} y {selectedZoneB}…</p>
+                        </div>
+                      </div>
+                    ) : isMobile ? <>
                       <div className="v2-chart-wrap large"><ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile /><canvas id={`v2-overlay-${p.id}`}></canvas></div>
                       <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={comparisonAHasData ? formatZoneOption(selectedZoneA) : ''} zoneB={comparisonBHasData ? formatZoneOption(selectedZoneB) : ''} />
                     </> : <div className="v2-overlay-chart-stack">
@@ -4357,8 +4392,8 @@ const MadridDashboardV2: React.FC = () => {
                       </div>
                       <div className="v2-chart-wrap large"><canvas id={`v2-overlay-${p.id}`}></canvas></div>
                     </div>}
-                    {!comparisonAHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />)}
-                    {!comparisonBHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />)}
+                    {!isComparisonLoading && !comparisonAHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />)}
+                    {!isComparisonLoading && !comparisonBHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />)}
                     {comparisonAHasData && comparisonBHasData && p.id === 'alquiler' && (() => {
                       const priceA = Number(kpiDataA.precio_m2) || 0;
                       const priceB = Number(kpiDataB.precio_m2) || 0;
