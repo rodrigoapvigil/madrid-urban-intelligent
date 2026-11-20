@@ -113,6 +113,135 @@
   letter-spacing: .02em;
 }
 
+/* Columna derecha: Telemetría de la Capital (Desktop) */
+@media (min-width: 1024px) {
+  .dmiyc-ls__experience {
+    display: grid !important;
+    grid-template-columns: 1.15fr 0.85fr;
+    align-items: center;
+    gap: clamp(36px, 5.5vw, 84px);
+    max-width: 1380px !important;
+  }
+  .dmiyc-ls__telemetry {
+    display: block !important;
+  }
+}
+@media (max-width: 1023px) {
+  .dmiyc-ls__telemetry {
+    display: none !important;
+  }
+}
+
+.dmiyc-ls__telemetry {
+  width: 100%;
+  animation: dmiyc-ls-phrase-in .7s ease both;
+}
+.dmiyc-ls__telemetry-card {
+  padding: clamp(24px, 3.2vh, 36px) clamp(22px, 2.5vw, 32px);
+  border-radius: 20px;
+  background: radial-gradient(ellipse at top right, rgba(0, 229, 255, 0.09) 0%, rgba(6, 35, 59, 0.65) 60%, rgba(2, 13, 32, 0.9) 100%);
+  border: 1px solid rgba(0, 229, 255, 0.22);
+  box-shadow: 0 20px 60px rgba(0, 8, 20, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.dmiyc-ls__telemetry-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.15);
+  margin-bottom: 20px;
+}
+.dmiyc-ls__telemetry-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ls-cyan);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.dmiyc-ls__telemetry-badge i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ls-cyan);
+  box-shadow: 0 0 8px var(--ls-cyan);
+}
+.dmiyc-ls__telemetry-live {
+  color: #a4c2d4;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+.dmiyc-ls__telemetry-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+.dmiyc-ls__telemetry-item {
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: rgba(0, 229, 255, 0.04);
+  border: 1px solid rgba(0, 229, 255, 0.1);
+}
+.dmiyc-ls__telemetry-item strong {
+  display: block;
+  font-size: clamp(22px, 2.2vw, 28px);
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+.dmiyc-ls__telemetry-item span {
+  display: block;
+  margin-top: 4px;
+  color: var(--ls-cyan);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.dmiyc-ls__telemetry-item small {
+  display: block;
+  margin-top: 3px;
+  color: #799db2;
+  font-size: 10px;
+}
+.dmiyc-ls__telemetry-foot {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 229, 255, 0.12);
+}
+.dmiyc-ls__telemetry-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #c4d8e5;
+  font-size: 11px;
+  font-weight: 500;
+}
+.dmiyc-ls__pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #3ddc97;
+  box-shadow: 0 0 8px #3ddc97;
+  animation: dmiyc-ls-pulse 1.8s ease-in-out infinite;
+}
+@keyframes dmiyc-ls-pulse {
+  0%, 100% { opacity: 0.4; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+.dmiyc-ls__telemetry-source {
+  color: #6d8ea3;
+  font-size: 10px;
+}
+
 @media (max-width: 760px) {
   .dmiyc-ls { padding-inline: max(24px, env(safe-area-inset-left)) max(24px, env(safe-area-inset-right)); }
   .dmiyc-ls__brand > img { width: 40px; height: 40px; }

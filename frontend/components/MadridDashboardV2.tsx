@@ -824,7 +824,9 @@ const MadridDashboardV2: React.FC = () => {
   const [kpiDataB, setKpiDataB] = useState<any>({});
   const [seriesA, setSeriesA] = useState<any[]>([]);
   const [seriesB, setSeriesB] = useState<any[]>([]);
-  const [isComparisonLoading, setIsComparisonLoading] = useState(false);
+  const [isZoneALoading, setIsZoneALoading] = useState(false);
+  const [isZoneBLoading, setIsZoneBLoading] = useState(false);
+  const isComparisonLoading = isZoneALoading || isZoneBLoading;
   const [seriesMadrid, setSeriesMadrid] = useState<any[]>([]);
   const comparisonAHasData = seriesA.some(point => Number(point?.precio_m2) > 0);
   const comparisonBHasData = seriesB.some(point => Number(point?.precio_m2) > 0);
@@ -1161,30 +1163,27 @@ const MadridDashboardV2: React.FC = () => {
     };
   }, [isMobileFiltersOpen]);
 
+  const rejectInvalidRentalSeries = useCallback((rows: any[]) => {
+    const containsOutlier = Array.isArray(rows) && rows.some((row: any) => Number(row.precio_m2) > 100);
+    if (activeProfile.id === 'alquiler' && containsOutlier) {
+      setDashboardLoadError('La serie de alquiler contiene precios por m² fuera de escala. Se ha detenido su visualización para evitar mezclar datos de compra y alquiler.');
+      return true;
+    }
+    return false;
+  }, [activeProfile.id]);
+
   // Fetch KPIs and Series
   useEffect(() => {
     if (!filtersReady || !selectedYear || !selectedMonth) return;
     const op = activeProfile.op;
     const requestId = ++latestDashboardRequest.current;
     const isLatestRequest = () => requestId === latestDashboardRequest.current;
-    const rejectInvalidRentalSeries = (rows: any[]) => {
-      const containsOutlier = Array.isArray(rows) && rows.some((row: any) => Number(row.precio_m2) > 100);
-      if (activeProfile.id === 'alquiler' && containsOutlier) {
-        setDashboardLoadError('La serie de alquiler contiene precios por m² fuera de escala. Se ha detenido su visualización para evitar mezclar datos de compra y alquiler.');
-        return true;
-      }
-      return false;
-    };
+
     if (!hasLoadedPrimaryKpis.current) setIsDashboardLoading(true);
     setDashboardLoadError(null);
     // Never leave data from the previous operation visible while a new profile loads.
     setKpiData({});
-    setKpiDataA({});
-    setKpiDataB({});
     setSeriesMadrid([]);
-    setSeriesA([]);
-    setSeriesB([]);
-    setIsComparisonLoading(true);
     setMapData({ districts: [], neighborhoods: [] });
     setHeatmapData([]);
     setHeatmapDataSourceKey('');
@@ -1223,49 +1222,6 @@ const MadridDashboardV2: React.FC = () => {
     apiFetch(`/series?year=${selectedYear}&op=${op}`)
       .then(res => res.json())
       .then(data => { if (isLatestRequest() && !rejectInvalidRentalSeries(data)) setSeriesMadrid(data); });
-
-    // Series Zone A
-    const zoneSeriesUrl = (zone: ZoneSearchOption) => {
-      const type = zone.kind === 'district' ? 'distrito' : 'barrio';
-      const id = Number(zone.id.split(':')[1]);
-      return `/series?year=${selectedYear}&op=${op}&zona=${encodeURIComponent(zone.name)}&tipo_zona=${type}${Number.isFinite(id) ? `&zone_id=${id}` : ''}`;
-    };
-    const pSeriesA = apiFetch(zoneSeriesUrl(comparisonZoneA))
-      .then(res => res.json())
-      .then(data => { if (isLatestRequest() && !rejectInvalidRentalSeries(data)) setSeriesA(data); })
-      .catch(() => { if (isLatestRequest()) setSeriesA([]); });
-
-    // Series Zone B
-    const pSeriesB = apiFetch(zoneSeriesUrl(comparisonZoneB))
-      .then(res => res.json())
-      .then(data => { if (isLatestRequest() && !rejectInvalidRentalSeries(data)) setSeriesB(data); })
-      .catch(() => { if (isLatestRequest()) setSeriesB([]); });
-
-    // KPIs Zone A
-    const zoneAParam = comparisonZoneA.kind === 'district' ? `district=${encodeURIComponent(selectedZoneA)}` : `barrio=${encodeURIComponent(selectedZoneA)}`;
-    const pKpiA = apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneAParam}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!isLatestRequest()) return;
-        if (activeProfile.id === 'alquiler' && Number(data.precio_m2) > 100) return;
-        setKpiDataA({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra });
-      })
-      .catch(() => {});
-
-    // KPIs Zone B
-    const zoneBParam = comparisonZoneB.kind === 'district' ? `district=${encodeURIComponent(selectedZoneB)}` : `barrio=${encodeURIComponent(selectedZoneB)}`;
-    const pKpiB = apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneBParam}`)
-      .then(res => res.json())
-      .then(data => {
-        if (!isLatestRequest()) return;
-        if (activeProfile.id === 'alquiler' && Number(data.precio_m2) > 100) return;
-        setKpiDataB({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra });
-      })
-      .catch(() => {});
-
-    Promise.allSettled([pSeriesA, pSeriesB, pKpiA, pKpiB]).finally(() => {
-      if (isLatestRequest()) setIsComparisonLoading(false);
-    });
 
     // Map Data
     apiFetch(`/map?year=${selectedYear}&month=${selectedMonth}&interest=${activeProfile.id === 'alquiler' ? 'Alquiler' : activeProfile.id === 'compra' ? 'Compra-venta' : activeProfile.id === 'venta' ? 'Venta' : 'Inversión'}`)
@@ -1321,7 +1277,85 @@ const MadridDashboardV2: React.FC = () => {
       .then(data => { if (isLatestRequest()) setConnectivityData(data); })
       .catch(err => { console.error("Error loading connectivity:", err); if (isLatestRequest()) setConnectivityData(null); });
 
-  }, [selectedYear, selectedMonth, profileIdx, selectedDistrict, selectedBarrio, selectedZoneA, selectedZoneB, comparisonZoneA, comparisonZoneB, rankingLevel, filtersReady, loadAttempt, activeProfile.id, activeProfile.op]);
+  }, [selectedYear, selectedMonth, profileIdx, selectedDistrict, selectedBarrio, rankingLevel, filtersReady, loadAttempt, activeProfile.id, activeProfile.op, rejectInvalidRentalSeries]);
+
+  // Fetch Zone A comparison independently
+  useEffect(() => {
+    if (!filtersReady || !selectedYear || !selectedMonth || !comparisonZoneA?.name) return;
+    const op = activeProfile.op;
+    let isCurrent = true;
+    setIsZoneALoading(true);
+
+    const type = comparisonZoneA.kind === 'district' ? 'distrito' : 'barrio';
+    const id = Number(comparisonZoneA.id.split(':')[1]);
+    const seriesUrl = `/series?year=${selectedYear}&op=${op}&zona=${encodeURIComponent(comparisonZoneA.name)}&tipo_zona=${type}${Number.isFinite(id) ? `&zone_id=${id}` : ''}`;
+    const zoneAParam = comparisonZoneA.kind === 'district' ? `district=${encodeURIComponent(selectedZoneA)}` : `barrio=${encodeURIComponent(selectedZoneA)}`;
+    const kpiUrl = `/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneAParam}`;
+
+    const pSeries = apiFetch(seriesUrl)
+      .then(res => res.json())
+      .then(data => {
+        if (!isCurrent) return;
+        if (!rejectInvalidRentalSeries(data)) {
+          setSeriesA(Array.isArray(data) ? data : []);
+        }
+      })
+      .catch(() => { if (isCurrent) setSeriesA([]); });
+
+    const pKpi = apiFetch(kpiUrl)
+      .then(res => res.json())
+      .then(data => {
+        if (!isCurrent) return;
+        if (activeProfile.id === 'alquiler' && Number(data.precio_m2) > 100) return;
+        setKpiDataA({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra });
+      })
+      .catch(() => {});
+
+    Promise.allSettled([pSeries, pKpi]).finally(() => {
+      if (isCurrent) setIsZoneALoading(false);
+    });
+
+    return () => { isCurrent = false; };
+  }, [selectedYear, selectedMonth, activeProfile.op, activeProfile.id, selectedZoneA, comparisonZoneA, filtersReady, rejectInvalidRentalSeries]);
+
+  // Fetch Zone B comparison independently
+  useEffect(() => {
+    if (!filtersReady || !selectedYear || !selectedMonth || !comparisonZoneB?.name) return;
+    const op = activeProfile.op;
+    let isCurrent = true;
+    setIsZoneBLoading(true);
+
+    const type = comparisonZoneB.kind === 'district' ? 'distrito' : 'barrio';
+    const id = Number(comparisonZoneB.id.split(':')[1]);
+    const seriesUrl = `/series?year=${selectedYear}&op=${op}&zona=${encodeURIComponent(comparisonZoneB.name)}&tipo_zona=${type}${Number.isFinite(id) ? `&zone_id=${id}` : ''}`;
+    const zoneBParam = comparisonZoneB.kind === 'district' ? `district=${encodeURIComponent(selectedZoneB)}` : `barrio=${encodeURIComponent(selectedZoneB)}`;
+    const kpiUrl = `/kpis?year=${selectedYear}&month=${selectedMonth}&op=${op}&${zoneBParam}`;
+
+    const pSeries = apiFetch(seriesUrl)
+      .then(res => res.json())
+      .then(data => {
+        if (!isCurrent) return;
+        if (!rejectInvalidRentalSeries(data)) {
+          setSeriesB(Array.isArray(data) ? data : []);
+        }
+      })
+      .catch(() => { if (isCurrent) setSeriesB([]); });
+
+    const pKpi = apiFetch(kpiUrl)
+      .then(res => res.json())
+      .then(data => {
+        if (!isCurrent) return;
+        if (activeProfile.id === 'alquiler' && Number(data.precio_m2) > 100) return;
+        setKpiDataB({ ...data, esfuerzo_compra: data.esfuerzo_alquiler ?? data.esfuerzo_compra });
+      })
+      .catch(() => {});
+
+    Promise.allSettled([pSeries, pKpi]).finally(() => {
+      if (isCurrent) setIsZoneBLoading(false);
+    });
+
+    return () => { isCurrent = false; };
+  }, [selectedYear, selectedMonth, activeProfile.op, activeProfile.id, selectedZoneB, comparisonZoneB, filtersReady, rejectInvalidRentalSeries]);
 
   useEffect(() => {
     if (!filtersReady || !selectedYear || !selectedMonth) return;
@@ -1693,17 +1727,18 @@ const MadridDashboardV2: React.FC = () => {
                   enabled: true,
                   backgroundColor: 'color-mix(in srgb, var(--azul-noche) 95%, transparent)',
                   titleColor: 'var(--blanco-humo)',
-                  titleFont: { size: 14, weight: 'bold' },
+                  titleFont: { size: 13, weight: 'bold' },
                   bodyColor: 'var(--blanco-humo)',
-                  bodyFont: { size: 13, weight: 'normal' },
+                  bodyFont: { size: 12, weight: 'normal' },
                   bodySpacing: 4,
                   padding: 10,
                   cornerRadius: 10,
                   borderWidth: 0.5,
                   borderColor: 'color-mix(in srgb, var(--blanco-humo) 20%, transparent)',
                   displayColors: true,
-                  boxWidth: 10,
-                  boxHeight: 10,
+                  boxWidth: 8,
+                  boxHeight: 8,
+                  filter: (item: any) => item.parsed?.y !== null && item.parsed?.y !== undefined,
                   callbacks: {
                     labelColor: (context: any) => {
                       const color = context.dataset?.borderColor || '#E5F2F7';
@@ -1722,70 +1757,60 @@ const MadridDashboardV2: React.FC = () => {
                       const val = context.parsed.y;
                       const unit = comparisonMetric.tooltipUnit;
 
-                      if (val === null || val === undefined) {
-                        return 'Sin datos registrados por el Ayuntamiento de Madrid para este periodo';
-                      }
+                      if (val === null || val === undefined) return null;
 
-                      // La media es referencia estadística, no una cifra oficial proyectada.
+                      // La media es referencia estadística
                       if (context.datasetIndex === 0) {
                         const formatted = new Intl.NumberFormat('es-ES', {
                           minimumFractionDigits: comparisonMetric.decimals,
-                          maximumFractionDigits: 2
+                          maximumFractionDigits: comparisonMetric.decimals
                         }).format(val);
                         return `Media Madrid: ${formatted} ${unit}`;
                       }
 
                       // Línea principal de la zona
-                      const found = effectiveData.find(d => d.mes === idx + 1);
-                      const isPred = found ? Boolean(found.is_prediction) : false;
+                      const found = effectiveData.find(d => Number(d.mes) === idx + 1);
+                      const isPred = context.datasetIndex === 2 || Boolean(found?.is_prediction);
                       const tipoDato = isPred ? 'Estimación' : 'Dato real';
                       const valFormatted = new Intl.NumberFormat('es-ES', {
                         minimumFractionDigits: comparisonMetric.decimals,
-                        maximumFractionDigits: 2
+                        maximumFractionDigits: comparisonMetric.decimals
                       }).format(val);
 
                       const lines: string[] = [];
 
-                      // 1. Precio actual y tipo de dato
-                      lines.push(`Precio actual: ${valFormatted} ${unit} (${tipoDato})`);
+                      // 1. Precio y tipo de dato
+                      lines.push(`${tipoDato}: ${valFormatted} ${unit}`);
 
-                      // 2. Variación vs mes anterior
-                      if (idx > 0) {
-                        const prevVal = context.dataset.data[idx - 1];
-                        if (prevVal !== null && prevVal !== undefined && prevVal > 0) {
-                          const diffPrev = ((val - prevVal) / prevVal) * 100;
-                          const absDiff = Math.abs(diffPrev).toFixed(1);
-                          if (diffPrev > 0.08) {
-                            lines.push(`Variación mes anterior: Subida del ${absDiff}%`);
-                          } else if (diffPrev < -0.08) {
-                            lines.push(`Variación mes anterior: Bajada del ${absDiff}%`);
-                          } else {
-                            lines.push(`Variación mes anterior: Sin variación (0.0%)`);
-                          }
-                        }
-                      } else {
-                        lines.push(`Inicio del ejercicio ${selectedYear}`);
-                      }
-
-                      // 3. Comparativa vs Media de Madrid
-                      const madridItem = effectiveMadridSeries.find(d => d.mes === idx + 1);
+                      // 2. Comparativa vs Media de Madrid
+                      const madridItem = effectiveMadridSeries.find(d => Number(d.mes) === idx + 1);
                       const madridVal = madridItem ? madridItem.precio_m2 * multiplier : null;
                       if (madridVal !== null && madridVal !== undefined && madridVal > 0) {
                         const diffMadrid = ((val - madridVal) / madridVal) * 100;
                         const absDiffMadrid = Math.abs(diffMadrid).toFixed(1);
                         const madridFmt = new Intl.NumberFormat('es-ES', {
                           minimumFractionDigits: comparisonMetric.decimals,
-                          maximumFractionDigits: 1
+                          maximumFractionDigits: comparisonMetric.decimals
                         }).format(madridVal);
 
-                        if (Math.abs(diffMadrid) <= 2) {
-                          lines.push(`Comparativa Madrid: En la media de Madrid (${madridFmt} ${unit})`);
+                        if (Math.abs(diffMadrid) <= 0.5) {
+                          lines.push(`vs. Media Madrid: A la par (${madridFmt} ${unit})`);
                         } else if (diffMadrid > 0) {
-                          lines.push(`Comparativa Madrid: Un ${absDiffMadrid}% más caro que la media (${madridFmt} ${unit})`);
+                          lines.push(`vs. Media Madrid: +${absDiffMadrid}% (${madridFmt} ${unit})`);
                         } else {
-                          lines.push(`Comparativa Madrid: Un ${absDiffMadrid}% más barato que la media (${madridFmt} ${unit})`);
+                          lines.push(`vs. Media Madrid: -${absDiffMadrid}% (${madridFmt} ${unit})`);
                         }
+                      }
 
+                      // 3. Variación vs mes anterior
+                      if (idx > 0) {
+                        const prevPoint = effectiveData.find(d => Number(d.mes) === idx);
+                        const prevVal = prevPoint ? prevPoint.precio_m2 * multiplier : null;
+                        if (prevVal !== null && prevVal !== undefined && prevVal > 0) {
+                          const diffPrev = ((val - prevVal) / prevVal) * 100;
+                          const sign = diffPrev > 0 ? '+' : '';
+                          lines.push(`vs. Mes anterior: ${sign}${diffPrev.toFixed(1)}%`);
+                        }
                       }
 
                       return lines;
@@ -2530,7 +2555,7 @@ const MadridDashboardV2: React.FC = () => {
 
       <SiteHeader
         activePath="/madrid"
-        appearance={isMobile ? 'aurora' : 'default'}
+        appearance="aurora"
         desktopAction={!isMobile ? (
           <PeriodSelector
             year={selectedYear}
@@ -2839,8 +2864,8 @@ const MadridDashboardV2: React.FC = () => {
                     </div>
                     <div className="v2-val">
                       {activeProfile.id === 'inversion'
-                        ? (kpiData.p_m2 * 100).toFixed(2) + '%'
-                        : new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiData.p_m2 || 0) + ' €/m²'}
+                        ? (Number.isFinite(Number(kpiData.p_m2)) && Number(kpiData.p_m2) > 0 ? (Number(kpiData.p_m2) * 100).toFixed(2) + '%' : '—')
+                        : (Number.isFinite(Number(kpiData.p_m2)) && Number(kpiData.p_m2) > 0 ? new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(kpiData.p_m2)) + ' €/m²' : '—')}
                     </div>
                   </div>
 
@@ -2862,7 +2887,9 @@ const MadridDashboardV2: React.FC = () => {
                       {Number(kpiData.p_vivienda) > 0 && <EstadoBadge status={kpiData.is_prediction || isProjectionPeriod ? 'estimate' : 'real'} />}
                     </div>
                     <div className="v2-val">
-                      {new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiData.p_vivienda || 0)} {activeProfile.id === 'alquiler' ? '€/mes' : '€'}
+                      {Number.isFinite(Number(kpiData.p_vivienda)) && Number(kpiData.p_vivienda) > 0
+                        ? `${new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(kpiData.p_vivienda))} ${activeProfile.id === 'alquiler' ? '€/mes' : '€'}`
+                        : '—'}
                     </div>
                   </div>
 
@@ -3551,7 +3578,14 @@ const MadridDashboardV2: React.FC = () => {
                     <button type="button" className={mapLevel === 'districts' ? 'active' : ''} aria-pressed={mapLevel === 'districts'} onClick={() => { setMapLevel('districts'); clearSelection(); }}>Distritos</button>
                     <button type="button" className={mapLevel === 'neighborhoods' ? 'active' : ''} aria-pressed={mapLevel === 'neighborhoods'} onClick={() => setMapLevel('neighborhoods')}>Barrios</button>
                   </div>
-                  <div className="v2-dual-maps">
+                  <div className="v2-dual-maps" style={{ position: 'relative' }}>
+                    {mapData.districts.length === 0 && (
+                      <div className="v2-maps-loading-overlay">
+                        <div className="v2-comp-spinner" />
+                        <span>Sincronizando mapas vectoriales</span>
+                        <p>Cargando capas coropléticas de {activeProfile.label.toLowerCase()}…</p>
+                      </div>
+                    )}
                     <div className="v2-map-sub" data-map-level="districts">
                       <div className="v2-map-placeholder" style={{ border: 'none' }}>
                         <MadridMap
@@ -3910,7 +3944,7 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneA}
                       </div>
-                      <div className="v2-chart-wrap">{isComparisonLoading ? (
+                      <div className="v2-chart-wrap">{isZoneALoading ? (
                         <div className="v2-comparison-loading-notice">
                           <div className="v2-comp-spinner" />
                           <span>Consultando registros oficiales</span>
@@ -4140,7 +4174,7 @@ const MadridDashboardV2: React.FC = () => {
                       <div className="v2-chart-head">
                         Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneB}
                       </div>
-                      <div className="v2-chart-wrap">{isComparisonLoading ? (
+                      <div className="v2-chart-wrap">{isZoneBLoading ? (
                         <div className="v2-comparison-loading-notice">
                           <div className="v2-comp-spinner" />
                           <span>Consultando registros oficiales</span>

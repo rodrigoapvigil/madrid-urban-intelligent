@@ -122,6 +122,46 @@ export default function LoadingScreen({
               </div>
             )}
           </div>
+
+          <aside className="dmiyc-ls__telemetry" aria-label="Telemetría de la capital">
+            <div className="dmiyc-ls__telemetry-card">
+              <div className="dmiyc-ls__telemetry-head">
+                <span className="dmiyc-ls__telemetry-badge"><i /> Telemetría oficial · Madrid</span>
+                <span className="dmiyc-ls__telemetry-live">Q2 2026 · Calibrado</span>
+              </div>
+
+              <div className="dmiyc-ls__telemetry-grid">
+                <div className="dmiyc-ls__telemetry-item">
+                  <strong>21</strong>
+                  <span>Distritos capital</span>
+                  <small>Cobertura territorial 100%</small>
+                </div>
+                <div className="dmiyc-ls__telemetry-item">
+                  <strong>131</strong>
+                  <span>Barrios auditados</span>
+                  <small>Detalle micro-zona</small>
+                </div>
+                <div className="dmiyc-ls__telemetry-item">
+                  <strong>16.779</strong>
+                  <span>Registros analíticos</span>
+                  <small>Compraventas de cierre</small>
+                </div>
+                <div className="dmiyc-ls__telemetry-item">
+                  <strong>3,49M</strong>
+                  <span>Habitantes</span>
+                  <small>Padrón oficial INE</small>
+                </div>
+              </div>
+
+              <div className="dmiyc-ls__telemetry-foot">
+                <div className="dmiyc-ls__telemetry-status">
+                  <span className="dmiyc-ls__pulse-dot" />
+                  <span>Sincronizando capas geoespaciales vectoriales…</span>
+                </div>
+                <span className="dmiyc-ls__telemetry-source">Colegio de Registradores · Catastro · Ayto. de Madrid</span>
+              </div>
+            </div>
+          </aside>
         </section>
       </main>
     </div>

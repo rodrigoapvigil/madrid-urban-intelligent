@@ -12,9 +12,19 @@ function Sparkline({ values, color }: { values: number[]; color: string }) {
     const range = Math.max(...values) - min || 1;
     return `${(index / Math.max(1, values.length - 1)) * 80},${22 - ((value - min) / range) * 20}`;
   });
-  return <svg className="v2-ranking-sparkline" width="80" height="24" viewBox="0 0 80 24" role="img" aria-label="Tendencia de los últimos 12 meses">
-    <polyline points={points.join(' ')} fill="none" stroke={color} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>;
+  return (
+    <svg
+      className="v2-ranking-sparkline"
+      width="80"
+      height="24"
+      viewBox="0 0 80 24"
+      role="img"
+      aria-label="Tendencia mensual oficial Ene–Dic"
+    >
+      <title>Evolución mensual (Ene–Dic) · Registro oficial contrastado</title>
+      <polyline points={points.join(' ')} fill="none" stroke={color} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
 }
 
 export default function DashboardRankingTable({
