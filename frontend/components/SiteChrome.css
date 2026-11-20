@@ -342,7 +342,7 @@
   padding-top: 20px;
   border: none !important;
   border-top: none !important;
-  font-size: 11px;
+  font-size: 8px;
   font-weight: 500;
   letter-spacing: 0.08em;
   color: rgba(186, 204, 214, 0.65);
@@ -354,12 +354,14 @@
   max-width: min(72ch, 76%);
   color: #eaf5ff;
   line-height: 1.65;
+  font-size: 8px;
 }
 
 .auros-footer__copyright {
   flex: 0 0 auto;
   color: #eaf5ff;
   white-space: nowrap;
+  font-size: 8px;
 }
 
 @media (max-width: 900px) {

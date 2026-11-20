@@ -4321,7 +4321,8 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-period-month-grid button { min-height: 37px; border: 1px solid rgba(186,204,214,.15); border-radius: 8px; background: #0a2037; color: #d4e1eb; font-size: 12px; font-weight: 600; cursor: pointer; }
 .v2-root .v2-period-month-grid button.is-estimate { border-style: dashed; border-color: rgba(255,190,92,.75); color: #ffd27a; }
 .v2-root .v2-period-month-grid button.is-selected { border-style: solid; border-color: #00e5ff; background: #00d9eb; color: #03141c; }
-.v2-root .v2-period-shortcuts { display: flex; gap: 16px; margin-top: 10px; padding-top: 9px; border-top: 1px solid rgba(186,204,214,.12); }
+.v2-root .v2-period-shortcuts { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; padding-top: 9px; border-top: 1px solid rgba(186,204,214,.12); }
+.v2-root .v2-period-shortcuts-actions { display: flex; align-items: center; gap: 12px; }
 .v2-root .v2-period-shortcuts button { padding: 0; border: 0; background: transparent; color: #66eafa; font-size: 11px; font-weight: 650; cursor: pointer; }
 .v2-root .v2-map-period-slot { flex: 0 0 auto; }
 .v2-root .v2-period-selector { gap: 0; padding: 3px; border: 1px solid rgba(0,229,255,.25); border-radius: 14px; background: rgba(7,27,49,.88); }

@@ -41,7 +41,6 @@ export default function PeriodSelector({ year, month, years, latestReal, onChang
       }
     }}>
       <strong>{month} {year}</strong>
-      <EstadoBadge status={estimated ? 'estimate' : 'real'} />
       <ChevronDown className="v2-period-chevron" size={16} strokeWidth={2.25} aria-hidden="true" />
     </button>
     {!hideMonthArrows && <button type="button" className="v2-period-arrow" aria-label="Mes siguiente" onClick={() => move(1)}>›</button>}
@@ -57,8 +56,11 @@ export default function PeriodSelector({ year, month, years, latestReal, onChang
         return <button key={name} type="button" className={`${isEstimate ? 'is-estimate' : ''} ${selected ? 'is-selected' : ''}`} aria-label={`${name} ${calendarYear}${isEstimate ? ', estimación' : ', dato real'}`} aria-pressed={selected} onClick={() => { onChange(calendarYear, name); setOpen(false); }}>{name.slice(0, 3)}</button>;
       })}</div>
       <div className="v2-period-shortcuts">
-        <button type="button" onClick={() => { onChange(latestReal.year, latestReal.month); setOpen(false); }}>Último dato real</button>
-        {showYearShortcut && <button type="button" onClick={() => { const targetYear = String(Math.max(Number(availableYears[0]), Number(year) - 1)); onChange(targetYear, month); setOpen(false); }}>Hace 1 año</button>}
+        <div className="v2-period-shortcuts-actions">
+          <button type="button" onClick={() => { onChange(latestReal.year, latestReal.month); setOpen(false); }}>Último dato real</button>
+          {showYearShortcut && <button type="button" onClick={() => { const targetYear = String(Math.max(Number(availableYears[0]), Number(year) - 1)); onChange(targetYear, month); setOpen(false); }}>Hace 1 año</button>}
+        </div>
+        <EstadoBadge status={estimated ? 'estimate' : 'real'} />
       </div>
     </div>}
   </div>;
