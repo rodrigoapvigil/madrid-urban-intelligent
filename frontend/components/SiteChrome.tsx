@@ -120,8 +120,7 @@ export function SiteHeader({
           href={effectiveCtaHref}
           className={`mi-header__cta${effectiveCtaHref === '/contacto' ? ' mi-header__cta--secondary' : ''}`}
         >
-          {effectiveCtaText}{' '}
-          <ArrowUpRight size={14} aria-hidden="true" />
+          {effectiveCtaText}
         </Link>}
 
         {mobileAction && <div className="mi-header__mobile-action">{mobileAction}</div>}
@@ -260,7 +259,6 @@ export function SiteHeader({
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {effectiveCtaText}
-                <ArrowUpRight size={18} aria-hidden="true" />
               </Link>
             </div>
 
@@ -308,7 +306,7 @@ export function SiteFooter() {
           <div className="auros-footer__cta-wrap">
             <span className="auros-footer__cta-label">Conecta con el proyecto</span>
             <Link href="/contacto" className="auros-footer__cta-button">
-              CONTACTAR <ArrowUpRight size={16} aria-hidden="true" />
+              CONTACTAR
             </Link>
           </div>
         </div>

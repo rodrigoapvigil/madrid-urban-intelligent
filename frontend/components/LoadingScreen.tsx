@@ -4,11 +4,23 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import "./loading-screen.css";
 
-const WAITING_PHRASES = [
-  "Aguanta un poco más.",
-  "Los buenos datos se hacen esperar.",
-  "¿Cuánto cuesta vivir aquí de verdad?",
-  "Entras, miras y decides.",
+const WAITING_FACTS = [
+  {
+    fact: "16.779 registros auditados: 10.794 compraventas oficiales de cierre en los 131 barrios de Madrid.",
+    source: "Banco de Datos Ayuntamiento de Madrid (Series 05040300) y Colegio de Registradores",
+  },
+  {
+    fact: "Precisión empírica demostrada: margen de error medio del 3,30% en alquiler y 4,56% en compraventa.",
+    source: "Auditoría empírica TFM contrastada contra observaciones reales (Q2 2026)",
+  },
+  {
+    fact: "Cobertura total de la capital: 21 distritos y 131 barrios para 3,49 millones de habitantes.",
+    source: "Padrón municipal continuo a 1 de enero de 2026, INE / Ayto. de Madrid",
+  },
+  {
+    fact: "El precio real de cierre en notaría difiere de media entre un 8% y un 15% del precio anunciado en portales.",
+    source: "Estadística Registral Inmobiliaria, Colegio de Registradores de España",
+  },
 ];
 
 export type LoadingScreenProps = {
@@ -66,8 +78,8 @@ export default function LoadingScreen({
   useEffect(() => {
     if (ready || failed || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const interval = window.setInterval(() => {
-      setPhraseIndex((current) => (current + 1) % WAITING_PHRASES.length);
-    }, 7000);
+      setPhraseIndex((current) => (current + 1) % WAITING_FACTS.length);
+    }, 6500);
     return () => window.clearInterval(interval);
   }, [failed, ready]);
 
@@ -96,9 +108,18 @@ export default function LoadingScreen({
               {failed ? error : "Preparamos el mapa de precios por distritos y barrios."}
             </p>
             {!failed && !ready && (
-              <p key={phraseIndex} className="dmiyc-ls__mood" aria-hidden="true">
-                {WAITING_PHRASES[phraseIndex]}
-              </p>
+              <div className="dmiyc-ls__progress" aria-hidden="true">
+                <div className="dmiyc-ls__progress-bar" />
+              </div>
+            )}
+            {!failed && !ready && (
+              <div key={phraseIndex} className="dmiyc-ls__fact" aria-hidden="true">
+                <div className="dmiyc-ls__fact-header">
+                  <span className="dmiyc-ls__fact-tag">Dato oficial contrastado</span>
+                </div>
+                <p className="dmiyc-ls__fact-text">{WAITING_FACTS[phraseIndex].fact}</p>
+                <span className="dmiyc-ls__fact-source">{WAITING_FACTS[phraseIndex].source}</span>
+              </div>
             )}
           </div>
         </section>

@@ -38,7 +38,7 @@ export default function MadridLanding() {
             <p className="mi-hero__kicker">DMIYC</p>
             <h1 id="mi-title">No adivines.<br/><span>Decide con datos.</span></h1>
             <p className="mi-hero__lead">Precios de cierre oficiales para decidir en los 131 barrios de Madrid.</p>
-            <Link href="/madrid" className="mi-hero__cta-main">Explorar precios de Madrid <ArrowUpRight aria-hidden="true"/></Link>
+            <Link href="/madrid" className="mi-hero__cta-main">Explorar precios de Madrid</Link>
           </div>
           <MadridHeroArtwork />
           <div className="mi-hero__meta"><span>21 distritos</span><i/><span>131 barrios auditados</span><i/><span>Fuentes: Registradores · Catastro · Ayto. Madrid</span></div>
@@ -56,7 +56,7 @@ export default function MadridLanding() {
               <div className="mi-auros-frame__header">
                 <span className="mi-auros-frame__tag">MERCADO EN TIEMPO REAL</span>
                 <Link href="/madrid" className="mi-auros-frame__cta">
-                  Ver evolución completa <ArrowUpRight aria-hidden="true" />
+                  Ver evolución completa
                 </Link>
               </div>
 
@@ -287,7 +287,7 @@ export default function MadridLanding() {
             <p className="mi-kicker">Toma el control con Decide Madrid</p>
             <h2 id="mi-closing-title">Tu mayor decisión financiera<br/><span>merece datos comprobados.</span></h2>
             <p>Consulta las operaciones de cierre observadas en tu zona y compara precios con una referencia estadística informativa. No es una tasación ni asesoramiento inmobiliario.</p>
-            <Link href="/madrid" className="mi-button mi-button--aurora">Entrar al cuadro de mando <ArrowUpRight aria-hidden="true"/></Link>
+            <Link href="/madrid" className="mi-button mi-button--aurora">Entrar al cuadro de mando</Link>
           </div>
         </section>
       </main>

@@ -47,6 +47,72 @@
 .dmiyc-ls__mood { min-height: 1.5em; max-width: 48ch; margin: 10px 0 0; color: #91b6c9; font-size: clamp(13px, 1.05vw, 15px); line-height: 1.5; animation: dmiyc-ls-phrase-in .55s ease both; }
 @keyframes dmiyc-ls-phrase-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
+/* Barra de progreso de carga sutil e interactiva */
+.dmiyc-ls__progress {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  height: 3px;
+  margin: clamp(20px, 3vh, 30px) 0 0;
+  background: rgba(0, 229, 255, .12);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.dmiyc-ls__progress-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, var(--ls-cyan), #ffffff, var(--ls-cyan), transparent);
+  border-radius: 999px;
+  animation: dmiyc-ls-progress 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+@keyframes dmiyc-ls-progress {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+
+/* Ficha de datos contrastados oficiales en tiempo de espera */
+.dmiyc-ls__fact {
+  max-width: 620px;
+  margin: clamp(18px, 2.8vh, 26px) 0 0;
+  padding: 14px 18px;
+  background: rgba(0, 229, 255, .035);
+  border: 1px solid rgba(0, 229, 255, .16);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  animation: dmiyc-ls-phrase-in .55s ease both;
+}
+.dmiyc-ls__fact-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+.dmiyc-ls__fact-tag {
+  color: var(--ls-cyan);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.dmiyc-ls__fact-text {
+  margin: 0;
+  color: #eaf8ff;
+  font-size: clamp(13px, 1.1vw, 15px);
+  line-height: 1.5;
+  font-weight: 450;
+}
+.dmiyc-ls__fact-source {
+  display: block;
+  margin-top: 6px;
+  color: #799db2;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: .02em;
+}
+
 @media (max-width: 760px) {
   .dmiyc-ls { padding-inline: max(24px, env(safe-area-inset-left)) max(24px, env(safe-area-inset-right)); }
   .dmiyc-ls__brand > img { width: 40px; height: 40px; }
@@ -70,5 +136,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .dmiyc-ls { transition: none; }
-  .dmiyc-ls__mood { animation: none; }
+  .dmiyc-ls__mood,
+  .dmiyc-ls__fact,
+  .dmiyc-ls__progress-bar { animation: none; }
 }
