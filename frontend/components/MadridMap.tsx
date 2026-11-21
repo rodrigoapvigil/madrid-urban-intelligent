@@ -384,7 +384,7 @@ const MadridMap: React.FC<MapProps> = ({
       if (!map || !bounds?.isValid()) return false;
       const size = map.getSize();
       if (size.x <= 0 || size.y <= 0) return false;
-      const padding: [number, number] = [Math.max(14, Math.round(size.x * 0.035)), Math.max(14, Math.round(size.y * 0.035))];
+      const padding: [number, number] = [Math.max(10, Math.round(size.x * 0.02)), Math.max(10, Math.round(size.y * 0.02))];
       const hasSelectedContext = drillDownOnSelection && Boolean(selectedBarrio || selectedDistrict);
       map.fitBounds(bounds, {
         padding,
@@ -585,7 +585,7 @@ const MadridMap: React.FC<MapProps> = ({
     if (!map || !bounds?.isValid()) return;
     const size = map.getSize();
     map.fitBounds(bounds, {
-      padding: [Math.max(14, Math.round(size.x * 0.035)), Math.max(14, Math.round(size.y * 0.035))],
+      padding: [Math.max(10, Math.round(size.x * 0.02)), Math.max(10, Math.round(size.y * 0.02))],
       animate: false,
     });
   };

@@ -2440,15 +2440,29 @@ const MadridDashboardV2: React.FC = () => {
     // Solo inicializar cuando no estamos en medio de una transición de perfil
     if (isTransitioning) return;
 
-    const timer = setTimeout(initCharts, 150);
+    let retryTimer: NodeJS.Timeout | null = null;
+    const runInit = () => {
+      initCharts();
+      // Si Zona B o la superpuesta tienen datos pero su canvas aún no estaba en el DOM, reintentar tras un frame
+      const pId = activeProfile.id;
+      if (
+        (comparisonBHasData && !document.getElementById(`v2-chartB-${pId}`)) ||
+        (comparisonAHasData && comparisonBHasData && !document.getElementById(`v2-overlay-${pId}`))
+      ) {
+        retryTimer = setTimeout(initCharts, 80);
+      }
+    };
+
+    const timer = setTimeout(runInit, 120);
     const resizeTimer = setTimeout(() => {
       chartsRef.current.forEach((chart) => chart?.resize());
     }, 650);
     return () => {
       clearTimeout(timer);
+      if (retryTimer) clearTimeout(retryTimer);
       clearTimeout(resizeTimer);
     };
-  }, [profileIdx, isTransitioning, isMobile, comparisonZoneA, comparisonZoneB, activeProfile.color, seriesA, seriesB, seriesMadrid, activeProfile.id, scatterData, interestImpactData, riskReturnData, liquidityLevel, selectedDistrict, selectedBarrio, selectedYear, selectedZoneA, selectedZoneB]);
+  }, [profileIdx, isTransitioning, isMobile, isZoneALoading, isZoneBLoading, comparisonAHasData, comparisonBHasData, comparisonZoneA, comparisonZoneB, activeProfile.color, seriesA, seriesB, seriesMadrid, activeProfile.id, scatterData, interestImpactData, riskReturnData, liquidityLevel, selectedDistrict, selectedBarrio, selectedYear, selectedZoneA, selectedZoneB]);
 
   const handleProfileChange = (newIdx: number) => {
     if (newIdx === profileIdx || isTransitioning) return;

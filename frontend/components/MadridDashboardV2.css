@@ -4613,14 +4613,14 @@ body.v2-fullscreen-open footer { display: none !important; }
   line-height: 1.4;
 }
 @media (min-width: 769px) {
-  .v2-root .v2-heatmap-card:not(.v2-is-fullscreen) .v2-heatmap-scroll { flex-basis: 560px !important; height: 560px !important; min-height: 560px !important; max-height: 560px !important; }
+  .v2-root .v2-heatmap-card:not(.v2-is-fullscreen) .v2-heatmap-scroll { flex-basis: 556px !important; height: 556px !important; min-height: 556px !important; max-height: 556px !important; }
   .v2-root .v2-heatmap-table { border-collapse: separate !important; border-spacing: 0 !important; }
   .v2-root .v2-heatmap-table th,
-  .v2-root .v2-heatmap-table td { height: 46px !important; min-height: 46px; padding: 0 10px !important; border-radius: 0 !important; font-size: 13px !important; }
+  .v2-root .v2-heatmap-table td { height: 49px !important; min-height: 49px; padding: 0 6px !important; border-radius: 0 !important; font-size: 12.5px !important; }
   .v2-root .v2-heatmap-table .v2-heatmap-period-groups th { height: 26px !important; min-height: 26px; font-size: 11px !important; }
   .v2-root .v2-heatmap-table .v2-heatmap-month-head th { top: 26px !important; height: 38px !important; min-height: 38px; font-size: 13px !important; }
   .v2-root .v2-heatmap-table th:first-child,
-  .v2-root .v2-heatmap-table td:first-child { width: 140px; min-width: 140px; max-width: 140px; }
+  .v2-root .v2-heatmap-table td:first-child { width: 154px; min-width: 154px; max-width: 154px; }
   .v2-root .v2-heatmap-table td.is-selected-month { box-shadow: inset 1px 0 rgba(0,229,255,.28), inset -1px 0 rgba(0,229,255,.28); }
   .v2-root .v2-heatmap-table th.is-selected-month { box-shadow: inset 0 -3px #00e5ff; }
 }
@@ -4671,29 +4671,26 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-heatmap-table tbody td { border-bottom: 1px solid rgba(186,204,214,.12); }
 .v2-root .v2-heatmap-table .v2-heatmap-estimated-start { border-left: 2px solid rgba(255,255,255,.38) !important; }
 
-/* Keep Compra and Venta table footprint identical to Alquiler/Inversión */
-/* All profiles: same table-layout fixed is already set at line 4326 */
-
-/* Base cell size for all profiles */
+/* Keep table cell sizing consistent across all profiles (Alquiler, Compra, Venta, Inversión) */
 .v2-root .v2-heatmap-table th:not(.v2-heatmap-zone-head):not(.zona-name),
 .v2-root .v2-heatmap-table td:not(.zona-name) {
-  min-width: 56px;
-  padding: 0 5px !important;
-  font-size: 12.5px;
-  letter-spacing: 0;
+  min-width: 64px !important;
+  padding: 0 4px !important;
+  font-size: 12.5px !important;
+  letter-spacing: -0.01em;
   white-space: nowrap;
 }
 
-/* Compra and Venta have 4-5 digit numbers – reduce font and padding to match */
+/* Compra and Venta: same high legibility and large font as Alquiler/Inversión */
 @media (min-width: 769px) {
   .v2-root[data-profile="compra"] .v2-heatmap-table th:not(.v2-heatmap-zone-head),
   .v2-root[data-profile="compra"] .v2-heatmap-table td:not(.zona-name),
   .v2-root[data-profile="venta"] .v2-heatmap-table th:not(.v2-heatmap-zone-head),
   .v2-root[data-profile="venta"] .v2-heatmap-table td:not(.zona-name) {
-    padding: 0 3px !important;
-    font-size: 10.5px !important;
-    letter-spacing: -0.03em;
-    min-width: 56px !important;
+    padding: 0 4px !important;
+    font-size: 12.5px !important;
+    letter-spacing: -0.01em;
+    min-width: 64px !important;
   }
 }
 @media (max-width: 1000px) {
@@ -4926,20 +4923,41 @@ body.v2-fullscreen-open footer { display: none !important; }
   }
   .v2-root .v2-map-card {
     display: flex;
+    flex-direction: column;
     flex: 1 1 auto;
     width: 100%;
-    height: auto;
+    height: 100%;
     min-height: 0;
   }
   .v2-root .v2-dual-maps {
-    flex: 1 1 auto;
-    height: auto;
-    min-height: clamp(560px, 58vh, 760px);
+    display: flex;
+    flex: 1 1 100%;
+    height: 100%;
+    min-height: clamp(600px, 64vh, 800px);
+    gap: 20px;
   }
-  .v2-root .v2-map-sub,
-  .v2-root .v2-map-placeholder {
+  .v2-root .v2-map-sub {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-width: 0;
     min-height: 0;
-    height: auto;
+    height: 100%;
+  }
+  .v2-root .v2-map-placeholder {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    position: relative;
+  }
+  .v2-root .v2-leaflet-map {
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100% !important;
+    min-height: 520px;
   }
 }
 
