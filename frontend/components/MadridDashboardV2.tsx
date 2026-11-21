@@ -2810,8 +2810,12 @@ const MadridDashboardV2: React.FC = () => {
                             <span>€/m²</span>
                           </div>
                           <div className="v2-rent-chips">
-                            <span>{Number(kpiData.v_mes || 0) < 0 ? '↘' : '↗'} {kpiData.v_mes > 0 ? '+' : ''}{Number(kpiData.v_mes || 0).toFixed(1)}% mes</span>
-                            <span>{Number(kpiData.v_anual || 0) < 0 ? '↘' : '↗'} {kpiData.v_anual > 0 ? '+' : ''}{Number(kpiData.v_anual || 0).toFixed(1)}% año</span>
+                            {Number.isFinite(Number(kpiData.v_mes)) && kpiData.v_mes !== undefined
+                              ? <span>{Number(kpiData.v_mes) < 0 ? '↘' : '↗'} {Number(kpiData.v_mes) > 0 ? '+' : ''}{Number(kpiData.v_mes).toFixed(1)}% mes</span>
+                              : null}
+                            {Number.isFinite(Number(kpiData.v_anual)) && kpiData.v_anual !== undefined
+                              ? <span>{Number(kpiData.v_anual) < 0 ? '↘' : '↗'} {Number(kpiData.v_anual) > 0 ? '+' : ''}{Number(kpiData.v_anual).toFixed(1)}% año</span>
+                              : null}
                             <span className="v2-rent-market">{kpiData.estado_mercado || 'Mercado estable'}</span>
                           </div>
                         </section>
@@ -3050,8 +3054,10 @@ const MadridDashboardV2: React.FC = () => {
                           </div>
                           <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
                         </div>
-                        <div className={`v2-val accent ${kpiData.v_mes < 0 ? 'negative' : ''}`}>
-                          {kpiData.v_mes > 0 ? '+' : ''}{kpiData.v_mes?.toFixed(1)}%
+                        <div className={`v2-val accent ${Number(kpiData.v_mes) < 0 ? 'negative' : ''}`}>
+                          {Number.isFinite(Number(kpiData.v_mes)) && kpiData.v_mes !== undefined && kpiData.v_mes !== null
+                            ? `${Number(kpiData.v_mes) > 0 ? '+' : ''}${Number(kpiData.v_mes).toFixed(1)}%`
+                            : '—'}
                         </div>
                       </div>
 
@@ -3068,8 +3074,10 @@ const MadridDashboardV2: React.FC = () => {
                           </div>
                           <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
                         </div>
-                        <div className={`v2-val accent ${kpiData.v_anual < 0 ? 'negative' : ''}`}>
-                          {kpiData.v_anual > 0 ? '+' : ''}{kpiData.v_anual?.toFixed(1)}%
+                        <div className={`v2-val accent ${Number(kpiData.v_anual) < 0 ? 'negative' : ''}`}>
+                          {Number.isFinite(Number(kpiData.v_anual)) && kpiData.v_anual !== undefined && kpiData.v_anual !== null
+                            ? `${Number(kpiData.v_anual) > 0 ? '+' : ''}${Number(kpiData.v_anual).toFixed(1)}%`
+                            : '—'}
                         </div>
                       </div>
                     </>
@@ -3579,7 +3587,7 @@ const MadridDashboardV2: React.FC = () => {
                     <button type="button" className={mapLevel === 'neighborhoods' ? 'active' : ''} aria-pressed={mapLevel === 'neighborhoods'} onClick={() => setMapLevel('neighborhoods')}>Barrios</button>
                   </div>
                   <div className="v2-dual-maps" style={{ position: 'relative' }}>
-                    {mapData.districts.length === 0 && (
+                    {isDashboardLoading && mapData.districts.length === 0 && (
                       <div className="v2-maps-loading-overlay">
                         <div className="v2-comp-spinner" />
                         <span>Sincronizando mapas vectoriales</span>
