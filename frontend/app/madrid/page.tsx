@@ -1,5 +1,6 @@
 import React, { Suspense } from 'react';
 import MadridDashboardV2 from '../../components/MadridDashboardV2';
+import LoadingScreen from '../../components/LoadingScreen';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -10,7 +11,14 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div>Cargando dashboard...</div>}>
+    <Suspense
+      fallback={
+        <LoadingScreen
+          ready={false}
+          loadingMessage="Conectando con los datos de Madrid…"
+        />
+      }
+    >
       <MadridDashboardV2 />
     </Suspense>
   );
