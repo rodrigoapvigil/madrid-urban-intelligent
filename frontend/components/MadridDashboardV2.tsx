@@ -756,7 +756,7 @@ const getComparisonKpiInfo = (metric: string, zoneName: string) => {
   }
 };
 
-const NO_OFFICIAL_DATA_COPY = 'El Ayuntamiento de Madrid no publica datos de alquiler para esta zona. Preferimos no inventarlos.';
+const NO_OFFICIAL_DATA_COPY = 'El Ayuntamiento de Madrid no publica registros oficiales contrastados para esta zona. Preferimos no inventarlos.';
 const NO_PROJECTION_COPY = 'No hay base suficiente para proyectar esta zona, y no aproximamos valores sin datos.';
 
 function AvisoComparacionDesktop({ zone, projectionWithoutHistory }: { zone: string; projectionWithoutHistory: boolean }) {
@@ -3613,6 +3613,15 @@ const MadridDashboardV2: React.FC = () => {
                           onDistrictClick={handleMapDistrictClick}
                         />
                         {!isMobile && <div className="v2-map-panel-heading"><strong>Distritos · {mapMetricLabel}</strong></div>}
+                        <div className="v2-map-notice-badge">
+                          <div className="v2-map-notice-title">
+                            <span className="v2-map-notice-swatch" />
+                            <span>Zonas con tramado</span>
+                          </div>
+                          <p>
+                            Áreas sin datos oficiales publicados por baja densidad o uso militar/forestal. Por rigor, preferimos no inventar cifras sin registros reales.
+                          </p>
+                        </div>
                       </div>
                     </div>
                     <div className="v2-map-sub" data-map-level="neighborhoods">
@@ -3635,6 +3644,15 @@ const MadridDashboardV2: React.FC = () => {
                           onBarrioClick={handleMapBarrioClick}
                         />
                         {!isMobile && <div className="v2-map-panel-heading"><strong>Barrios · {mapMetricLabel}</strong></div>}
+                        <div className="v2-map-notice-badge">
+                          <div className="v2-map-notice-title">
+                            <span className="v2-map-notice-swatch" />
+                            <span>Zonas con tramado</span>
+                          </div>
+                          <p>
+                            Barrios sin muestra oficial de {activeProfile.label.toLowerCase()} (como El Pardo o El Goloso). Mantenemos rigor estadístico sin aproximar sin datos.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>

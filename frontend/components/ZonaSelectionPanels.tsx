@@ -30,11 +30,11 @@ type DesktopZonaPanelProps = ZonaPanelProps & {
 };
 
 function AvisoSinDatosDesktop({ projectionWithoutHistory }: { projectionWithoutHistory?: boolean }) {
-  return <div className="zona-panel-no-data"><h3>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</h3><p>El Ayuntamiento de Madrid no publica datos de alquiler para esta zona. Preferimos no inventarlos.</p>{projectionWithoutHistory && <p>No hay base suficiente para proyectar esta zona, y no aproximamos valores sin datos.</p>}</div>;
+  return <div className="zona-panel-no-data"><h3>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</h3><p>El Ayuntamiento de Madrid no publica registros oficiales contrastados para esta zona. Preferimos no inventarlos.</p>{projectionWithoutHistory && <p>No hay base suficiente para proyectar esta zona, y no aproximamos valores sin datos.</p>}</div>;
 }
 
 function AvisoSinDatosMovil({ zoneType = 'BARRIO', zone, projectionWithoutHistory }: { zoneType?: 'DISTRITO' | 'BARRIO'; zone: string; projectionWithoutHistory?: boolean }) {
-  return <div className="zona-panel-no-data"><span className="zona-panel-kind">{zoneType}</span><strong>{zone}</strong><h3>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</h3><p>El Ayuntamiento de Madrid no publica datos de alquiler para esta zona. Preferimos no inventarlos.</p>{projectionWithoutHistory && <p>No hay base suficiente para proyectar esta zona, y no aproximamos valores sin datos.</p>}</div>;
+  return <div className="zona-panel-no-data"><span className="zona-panel-kind">{zoneType}</span><strong>{zone}</strong><h3>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</h3><p>El Ayuntamiento de Madrid no publica registros oficiales contrastados para esta zona. Preferimos no inventarlos.</p>{projectionWithoutHistory && <p>No hay base suficiente para proyectar esta zona, y no aproximamos valores sin datos.</p>}</div>;
 }
 
 export function FichaZonaDesktop({ zone, rank, primaryLabel, primaryValue, secondaryLabel, secondaryValue, delta, onClose, zoneType, position, pinned, style, noData, projectionWithoutHistory }: DesktopZonaPanelProps & Pick<ZonaPanelProps, 'noData' | 'projectionWithoutHistory'>) {
