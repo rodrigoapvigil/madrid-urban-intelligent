@@ -408,7 +408,7 @@ const getComparisonMetric = (profileId: string) => profileId === 'inversion'
 
 const getMapLegendLabels = (profileId: string) => {
   if (profileId === 'inversion') return ['< 4,3 %', '4,3–5,0 %', '5,0–5,7 %', '5,7–6,5 %', '≥ 6,5 %'];
-  if (profileId === 'venta' || profileId === 'compra') return ['< 2.100 €/m²', '2.100–3.100 €/m²', '3.100–4.200 €/m²', '4.200–5.400 €/m²', '≥ 5.400 €/m²'];
+  if (profileId === 'venta' || profileId === 'compra') return ['< 3.000 €/m²', '3.000–4.200 €/m²', '4.200–5.600 €/m²', '5.600–7.200 €/m²', '≥ 7.200 €/m²'];
   return ['< 16 €/m²', '16–19 €/m²', '19–22 €/m²', '22–25 €/m²', '≥ 25 €/m²'];
 };
 

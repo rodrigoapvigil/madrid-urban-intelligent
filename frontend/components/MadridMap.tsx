@@ -58,10 +58,10 @@ const getChoroplethTier = (val: number, profile: string): number => {
   }
 
   if (p.includes('compra') || p.includes('venta')) {
-    if (val >= 5400) return 4;
-    if (val >= 4200) return 3;
-    if (val >= 3100) return 2;
-    if (val >= 2100) return 1;
+    if (val >= 7200) return 4;
+    if (val >= 5600) return 3;
+    if (val >= 4200) return 2;
+    if (val >= 3000) return 1;
     return 0;
   }
 
@@ -100,14 +100,14 @@ const TIER_CONFIGS: TierConfig[] = [
     r: 1.05,
     baseFill: {
       alquiler: '#08254a',
-      compra: '#3a2208',
-      venta: '#062817',
+      compra: '#261604',
+      venta: '#052415',
       inversion: '#33103d',
     },
     dotColor: {
       alquiler: '#023868',
-      compra: '#523108',
-      venta: '#093d22',
+      compra: '#422607',
+      venta: '#083821',
       inversion: '#481657',
     },
   },
@@ -116,14 +116,14 @@ const TIER_CONFIGS: TierConfig[] = [
     r: 1.25,
     baseFill: {
       alquiler: '#0a3b68',
-      compra: '#613909',
-      venta: '#0a4a2b',
+      compra: '#5e3305',
+      venta: '#0a4e2e',
       inversion: '#571c66',
     },
     dotColor: {
       alquiler: '#025894',
-      compra: '#7c490a',
-      venta: '#0e633a',
+      compra: '#7d4408',
+      venta: '#0f6b40',
       inversion: '#712485',
     },
   },
@@ -132,14 +132,14 @@ const TIER_CONFIGS: TierConfig[] = [
     r: 1.4,
     baseFill: {
       alquiler: '#075d86',
-      compra: '#94590b',
-      venta: '#127343',
+      compra: '#a35c07',
+      venta: '#0f7e4a',
       inversion: '#872b9d',
     },
     dotColor: {
       alquiler: '#0077b6',
-      compra: '#ab6b10',
-      venta: '#189155',
+      compra: '#bd6c0a',
+      venta: '#15a360',
       inversion: '#a436be',
     },
   },
@@ -148,14 +148,14 @@ const TIER_CONFIGS: TierConfig[] = [
     r: 1.55,
     baseFill: {
       alquiler: '#058caf',
-      compra: '#ca8014',
-      venta: '#1fa261',
+      compra: '#d98e11',
+      venta: '#1bb76c',
       inversion: '#be46dc',
     },
     dotColor: {
       alquiler: '#0099cc',
-      compra: '#e0951f',
-      venta: '#28bf75',
+      compra: '#f09f16',
+      venta: '#27d682',
       inversion: '#d254f1',
     },
   },
@@ -164,14 +164,14 @@ const TIER_CONFIGS: TierConfig[] = [
     r: 1.75,
     baseFill: {
       alquiler: '#00c8e6',
-      compra: '#ffc247',
+      compra: '#ffc83b',
       venta: '#3ddc97',
       inversion: '#e879f9',
     },
     dotColor: {
       alquiler: '#00c8e6',
-      compra: '#ffc247',
-      venta: '#3ddc97',
+      compra: '#ffd359',
+      venta: '#56e6a7',
       inversion: '#e879f9',
     },
   },
@@ -180,14 +180,14 @@ const TIER_CONFIGS: TierConfig[] = [
     r: 1.9,
     baseFill: {
       alquiler: '#00f0ff',
-      compra: '#ffe39d',
-      venta: '#8ef6c7',
+      compra: '#ffe58f',
+      venta: '#88ffca',
       inversion: '#f8baff',
     },
     dotColor: {
       alquiler: '#00f0ff',
-      compra: '#ffe8aa',
-      venta: '#a3fad1',
+      compra: '#ffedb3',
+      venta: '#aeffdc',
       inversion: '#fbcfff',
     },
     hasGlow: true,
@@ -312,19 +312,20 @@ const MadridMap: React.FC<MapProps> = ({
       pNorm.includes('inversion') ? 'inversion' : 'alquiler';
 
     const defaultStrokeColor =
-      profileKey === 'compra'
-        ? (type === 'districts' ? 'rgba(255, 194, 71, 0.50)' : 'rgba(215, 170, 85, 0.48)')
+      type === 'districts'
+        ? 'rgba(255, 255, 255, 0.85)'
+        : profileKey === 'compra'
+        ? 'rgba(255, 240, 205, 0.65)'
         : profileKey === 'venta'
-        ? (type === 'districts' ? 'rgba(61, 220, 151, 0.50)' : 'rgba(90, 195, 145, 0.48)')
+        ? 'rgba(210, 255, 235, 0.65)'
         : profileKey === 'inversion'
-        // Fucsia sobre azul marino: borde claro para no perderse en la rampa baja
-        ? (type === 'districts' ? 'rgba(232, 121, 249, 0.60)' : 'rgba(215, 140, 235, 0.55)')
-        : (type === 'districts' ? 'rgba(0, 240, 255, 0.45)' : 'rgba(111, 183, 203, 0.48)');
+        ? 'rgba(250, 210, 255, 0.65)'
+        : 'rgba(180, 240, 255, 0.65)';
 
     return {
       // Use five solid choropleth steps so the map reads as data, not texture.
       fillColor: !hasObservedValue ? `url(#no-data-pat-${containerId})` : TIER_CONFIGS[tier].baseFill[profileKey],
-      weight: isCompareA || isCompareB ? 2.5 : isSelected ? 3 : type === 'districts' ? 1.2 : 0.55,
+      weight: isCompareA || isCompareB ? 2.5 : isSelected ? 3 : type === 'districts' ? 1.6 : 0.85,
       opacity: isExcluded ? 0.20 : 0.95,
       color: isCompareA ? '#00E5FF' : isCompareB ? '#FFB86B' : isSelected ? '#FFFFFF' : defaultStrokeColor,
       fillOpacity: isExcluded ? 0.25 : 1.0,

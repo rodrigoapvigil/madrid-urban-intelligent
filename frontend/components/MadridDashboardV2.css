@@ -3015,18 +3015,18 @@
 .v2-map-legend-swatches .tier-4 { background: #058caf; }
 .v2-map-legend-swatches .tier-5 { background: #00c8e6; }
 
-/* Compra: Ámbar */
-.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-1 { background: #3a2208; }
-.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-2 { background: #613909; }
-.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-3 { background: #94590b; }
-.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-4 { background: #ca8014; }
-.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-5 { background: #ffc247; }
+/* Compra: Ámbar Dorado */
+.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-1 { background: #261604; }
+.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-2 { background: #5e3305; }
+.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-3 { background: #a35c07; }
+.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-4 { background: #d98e11; }
+.v2-map-legend[data-profile="compra"] .v2-map-legend-swatches .tier-5 { background: #ffc83b; }
 
-/* Venta: Esmeralda */
-.v2-map-legend[data-profile="venta"] .v2-map-legend-swatches .tier-1 { background: #062817; }
-.v2-map-legend[data-profile="venta"] .v2-map-legend-swatches .tier-2 { background: #0a4a2b; }
-.v2-map-legend[data-profile="venta"] .v2-map-legend-swatches .tier-3 { background: #127343; }
-.v2-map-legend[data-profile="venta"] .v2-map-legend-swatches .tier-4 { background: #1fa261; }
+/* Venta: Esmeralda Menta */
+.v2-map-legend[data-profile="venta"] .v2-map-legend-swatches .tier-1 { background: #052415; }
+.v2-map-legend[data-profile="venta"] .v2-map-legend-swatches .tier-2 { background: #0a4e2e; }
+.v2-map-legend[data-profile="venta"] .v2-map-legend-swatches .tier-3 { background: #0f7e4a; }
+.v2-map-legend[data-profile="venta"] .v2-map-legend-swatches .tier-4 { background: #1bb76c; }
 .v2-map-legend[data-profile="venta"] .v2-map-legend-swatches .tier-5 { background: #3ddc97; }
 
 /* Inversión: Fucsia */
