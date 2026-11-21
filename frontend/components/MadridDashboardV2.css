@@ -4323,7 +4323,7 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-heatmap-card:not(.v2-is-fullscreen) { overflow: hidden !important; border-radius: 16px !important; }
 .v2-root .v2-heatmap-search { display: block; box-sizing: border-box; width: 100% !important; max-width: none !important; margin: 0 0 8px !important; padding-inline: 12px; border-radius: 12px !important; }
 .v2-root .v2-heatmap-card:not(.v2-is-fullscreen) .v2-heatmap-scroll { flex: 0 0 502px !important; width: 100%; height: 502px !important; min-height: 502px !important; max-height: 502px !important; margin-inline: 0 !important; overflow: auto !important; border: 1px solid rgba(186,204,214,.14); border-radius: 12px; scrollbar-width: thin; scrollbar-color: #193954 #041226; }
-.v2-root .v2-heatmap-table { width: max-content; min-width: 100%; border-collapse: separate !important; border-spacing: 3px !important; table-layout: auto; }
+.v2-root .v2-heatmap-table { width: max-content; min-width: 100%; border-collapse: separate !important; border-spacing: 3px !important; table-layout: fixed !important; }
 .v2-root .v2-heatmap-table th,
 .v2-root .v2-heatmap-table td { box-sizing: border-box; height: 40px !important; min-height: 40px; padding: 0 7px !important; border-radius: 6px; text-align: center; }
 .v2-root .v2-heatmap-table th { background: #0b2a4a !important; }
@@ -4671,16 +4671,29 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-heatmap-table tbody td { border-bottom: 1px solid rgba(186,204,214,.12); }
 .v2-root .v2-heatmap-table .v2-heatmap-estimated-start { border-left: 2px solid rgba(255,255,255,.38) !important; }
 
-/* Keep Compra and Venta table footprint compact and identical to Alquiler */
+/* Keep Compra and Venta table footprint identical to Alquiler/Inversión */
+/* All profiles: same table-layout fixed is already set at line 4326 */
+
+/* Base cell size for all profiles */
+.v2-root .v2-heatmap-table th:not(.v2-heatmap-zone-head):not(.zona-name),
+.v2-root .v2-heatmap-table td:not(.zona-name) {
+  min-width: 56px;
+  padding: 0 5px !important;
+  font-size: 12.5px;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* Compra and Venta have 4-5 digit numbers – reduce font and padding to match */
 @media (min-width: 769px) {
   .v2-root[data-profile="compra"] .v2-heatmap-table th:not(.v2-heatmap-zone-head),
-  .v2-root[data-profile="compra"] .v2-heatmap-table td,
+  .v2-root[data-profile="compra"] .v2-heatmap-table td:not(.zona-name),
   .v2-root[data-profile="venta"] .v2-heatmap-table th:not(.v2-heatmap-zone-head),
-  .v2-root[data-profile="venta"] .v2-heatmap-table td {
-    padding: 0 4px !important;
-    font-size: 11.5px !important;
-    min-width: 44px !important;
-    letter-spacing: -0.02em;
+  .v2-root[data-profile="venta"] .v2-heatmap-table td:not(.zona-name) {
+    padding: 0 3px !important;
+    font-size: 10.5px !important;
+    letter-spacing: -0.03em;
+    min-width: 56px !important;
   }
 }
 @media (max-width: 1000px) {
