@@ -344,9 +344,31 @@ const ChartZoomControls = ({ chartId, mobilePlatform = true }: { chartId: string
   </div>
 );
 
-const ComparisonChartControls = ({ chartId, isMobile }: { chartId: string; isMobile: boolean }) => isMobile
+const ComparisonChartControls = ({
+  chartId,
+  isMobile,
+  onReload,
+  isReloading,
+}: {
+  chartId: string;
+  isMobile: boolean;
+  onReload?: () => void;
+  isReloading?: boolean;
+}) => isMobile
   ? <ChartZoomControls chartId={chartId} mobilePlatform={isMobile} />
   : <div className="v2-comparison-zoom-controls" role="group" aria-label="Controles de zoom de la gráfica">
+      {onReload && (
+        <button
+          type="button"
+          title="Volver a cargar datos"
+          aria-label="Volver a cargar datos de la gráfica"
+          onClick={onReload}
+          disabled={isReloading}
+          className={`v2-chart-reload-btn ${isReloading ? 'is-spinning' : ''}`}
+        >
+          <RotateCw size={13} className={isReloading ? 'v2-spin' : ''} />
+        </button>
+      )}
       <button type="button" title="Acercar" aria-label="Acercar gráfica" onClick={() => updateChartZoom(chartId, 'in')}><ZoomIn size={15} /></button>
       <button type="button" title="Alejar" aria-label="Alejar gráfica" onClick={() => updateChartZoom(chartId, 'out')}><ZoomOut size={15} /></button>
       <button type="button" title="Restablecer zoom" aria-label="Restablecer zoom de la gráfica" onClick={() => updateChartZoom(chartId, 'reset')}><RotateCcw size={14} /></button>
@@ -759,12 +781,38 @@ const getComparisonKpiInfo = (metric: string, zoneName: string) => {
 const NO_OFFICIAL_DATA_COPY = 'El Ayuntamiento de Madrid no publica registros oficiales contrastados para esta zona. Preferimos no inventarlos.';
 const NO_PROJECTION_COPY = 'No hay base suficiente para proyectar esta zona, y no aproximamos valores sin datos.';
 
-function AvisoComparacionDesktop({ zone, projectionWithoutHistory }: { zone: string; projectionWithoutHistory: boolean }) {
-  return <div className="v2-no-data-notice"><span>{zone}</span><strong>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</strong><p>{NO_OFFICIAL_DATA_COPY}</p>{projectionWithoutHistory && <p>{NO_PROJECTION_COPY}</p>}</div>;
+function AvisoComparacionDesktop({ zone, projectionWithoutHistory, onReload, isReloading }: { zone: string; projectionWithoutHistory: boolean; onReload?: () => void; isReloading?: boolean }) {
+  return (
+    <div className="v2-no-data-notice">
+      <span>{zone}</span>
+      <strong>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</strong>
+      <p>{NO_OFFICIAL_DATA_COPY}</p>
+      {projectionWithoutHistory && <p>{NO_PROJECTION_COPY}</p>}
+      {onReload && (
+        <button type="button" className={`v2-reload-action-btn ${isReloading ? 'is-spinning' : ''}`} onClick={onReload} disabled={isReloading}>
+          <RotateCw size={13} className={isReloading ? 'v2-spin' : ''} />
+          <span>{isReloading ? 'Consultando registros…' : `Volver a cargar ${zone}`}</span>
+        </button>
+      )}
+    </div>
+  );
 }
 
-function AvisoComparacionMovil({ zone, projectionWithoutHistory }: { zone: string; projectionWithoutHistory: boolean }) {
-  return <div className="v2-no-data-notice"><span>{zone}</span><strong>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</strong><p>{NO_OFFICIAL_DATA_COPY}</p>{projectionWithoutHistory && <p>{NO_PROJECTION_COPY}</p>}</div>;
+function AvisoComparacionMovil({ zone, projectionWithoutHistory, onReload, isReloading }: { zone: string; projectionWithoutHistory: boolean; onReload?: () => void; isReloading?: boolean }) {
+  return (
+    <div className="v2-no-data-notice">
+      <span>{zone}</span>
+      <strong>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</strong>
+      <p>{NO_OFFICIAL_DATA_COPY}</p>
+      {projectionWithoutHistory && <p>{NO_PROJECTION_COPY}</p>}
+      {onReload && (
+        <button type="button" className={`v2-reload-action-btn ${isReloading ? 'is-spinning' : ''}`} onClick={onReload} disabled={isReloading}>
+          <RotateCw size={13} className={isReloading ? 'v2-spin' : ''} />
+          <span>{isReloading ? 'Consultando…' : `Volver a cargar ${zone}`}</span>
+        </button>
+      )}
+    </div>
+  );
 }
 
 const MadridDashboardV2: React.FC = () => {
@@ -830,6 +878,28 @@ const MadridDashboardV2: React.FC = () => {
   const [seriesMadrid, setSeriesMadrid] = useState<any[]>([]);
   const comparisonAHasData = seriesA.some(point => Number(point?.precio_m2) > 0);
   const comparisonBHasData = seriesB.some(point => Number(point?.precio_m2) > 0);
+
+  const [reloadKeyA, setReloadKeyA] = useState(0);
+  const [reloadKeyB, setReloadKeyB] = useState(0);
+  const [isReloadingA, setIsReloadingA] = useState(false);
+  const [isReloadingB, setIsReloadingB] = useState(false);
+
+  const reloadZoneA = useCallback(() => {
+    setIsReloadingA(true);
+    setReloadKeyA(k => k + 1);
+    setTimeout(() => setIsReloadingA(false), 900);
+  }, []);
+
+  const reloadZoneB = useCallback(() => {
+    setIsReloadingB(true);
+    setReloadKeyB(k => k + 1);
+    setTimeout(() => setIsReloadingB(false), 900);
+  }, []);
+
+  const reloadComparison = useCallback(() => {
+    reloadZoneA();
+    reloadZoneB();
+  }, [reloadZoneA, reloadZoneB]);
 
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
   const [isDashboardLoading, setIsDashboardLoading] = useState(true);
@@ -1316,7 +1386,7 @@ const MadridDashboardV2: React.FC = () => {
     });
 
     return () => { isCurrent = false; };
-  }, [selectedYear, selectedMonth, activeProfile.op, activeProfile.id, selectedZoneA, comparisonZoneA, filtersReady, rejectInvalidRentalSeries]);
+  }, [selectedYear, selectedMonth, activeProfile.op, activeProfile.id, selectedZoneA, comparisonZoneA, filtersReady, rejectInvalidRentalSeries, reloadKeyA]);
 
   // Fetch Zone B comparison independently
   useEffect(() => {
@@ -1355,7 +1425,7 @@ const MadridDashboardV2: React.FC = () => {
     });
 
     return () => { isCurrent = false; };
-  }, [selectedYear, selectedMonth, activeProfile.op, activeProfile.id, selectedZoneB, comparisonZoneB, filtersReady, rejectInvalidRentalSeries]);
+  }, [selectedYear, selectedMonth, activeProfile.op, activeProfile.id, selectedZoneB, comparisonZoneB, filtersReady, rejectInvalidRentalSeries, reloadKeyB]);
 
   useEffect(() => {
     if (!filtersReady || !selectedYear || !selectedMonth) return;
@@ -3933,6 +4003,17 @@ const MadridDashboardV2: React.FC = () => {
                     <div className="v2-compare-heading-row">
                       <h2 style={{ margin: 0 }}>Comparar zonas</h2>
                       <button type="button" className="v2-compare-help-inline" aria-label="Cómo comparar zonas" title="Cómo comparar zonas" onClick={() => setShowCompareHelpModal(true)}><HelpCircle size={15} /></button>
+                      <button
+                        type="button"
+                        className={`v2-compare-reload-pill ${isReloadingA || isReloadingB ? 'is-syncing' : ''}`}
+                        title="Volver a sincronizar ambas zonas y las gráficas"
+                        aria-label="Recargar comparativa"
+                        onClick={reloadComparison}
+                        disabled={isReloadingA || isReloadingB}
+                      >
+                        <RotateCw size={12} className={isReloadingA || isReloadingB ? 'v2-spin' : ''} />
+                        <span>{isReloadingA || isReloadingB ? 'Sincronizando…' : 'Volver a cargar'}</span>
+                      </button>
                     </div>
                     <span>Elige dos zonas y mira cómo se diferencian</span>
                   </div>
@@ -3989,8 +4070,12 @@ const MadridDashboardV2: React.FC = () => {
                           <div className="v2-comp-spinner" />
                           <span>Consultando registros oficiales</span>
                           <p>Cargando evolución histórica y predicción de {selectedZoneA}…</p>
+                          <button type="button" className="v2-reload-action-btn" onClick={reloadZoneA} disabled={isReloadingA}>
+                            <RotateCw size={12} className={isReloadingA ? 'v2-spin' : ''} />
+                            <span>{isReloadingA ? 'Sincronizando…' : 'Volver a cargar'}</span>
+                          </button>
                         </div>
-                      ) : comparisonAHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartA-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />}</div>
+                      ) : comparisonAHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile onReload={reloadZoneA} isReloading={isReloadingA} /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={false} onReload={reloadZoneA} isReloading={isReloadingA} /></div>}<canvas id={`v2-chartA-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} />}</div>
                     </div>
                     {(() => {
                       if (!comparisonAHasData) return null;
@@ -4219,8 +4304,12 @@ const MadridDashboardV2: React.FC = () => {
                           <div className="v2-comp-spinner" />
                           <span>Consultando registros oficiales</span>
                           <p>Cargando evolución histórica y predicción de {selectedZoneB}…</p>
+                          <button type="button" className="v2-reload-action-btn" onClick={reloadZoneB} disabled={isReloadingB}>
+                            <RotateCw size={12} className={isReloadingB ? 'v2-spin' : ''} />
+                            <span>{isReloadingB ? 'Sincronizando…' : 'Volver a cargar'}</span>
+                          </button>
                         </div>
-                      ) : comparisonBHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={false} /></div>}<canvas id={`v2-chartB-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />}</div>
+                      ) : comparisonBHasData ? <>{isMobile ? <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile onReload={reloadZoneB} isReloading={isReloadingB} /> : <div className="v2-comparison-chart-meta"><ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' }]} /><ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={false} onReload={reloadZoneB} isReloading={isReloadingB} /></div>}<canvas id={`v2-chartB-${p.id}`}></canvas></> : isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} />}</div>
                     </div>
                     {(() => {
                       if (!comparisonBHasData) return null;
@@ -4450,10 +4539,14 @@ const MadridDashboardV2: React.FC = () => {
                           <div className="v2-comp-spinner" />
                           <span>Procesando serie comparativa</span>
                           <p>Generando trazado comparativo entre {selectedZoneA} y {selectedZoneB}…</p>
+                          <button type="button" className="v2-reload-action-btn" onClick={reloadComparison} disabled={isReloadingA || isReloadingB}>
+                            <RotateCw size={12} className={isReloadingA || isReloadingB ? 'v2-spin' : ''} />
+                            <span>{isReloadingA || isReloadingB ? 'Sincronizando…' : 'Volver a cargar'}</span>
+                          </button>
                         </div>
                       </div>
                     ) : isMobile ? <>
-                      <div className="v2-chart-wrap large"><ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile /><canvas id={`v2-overlay-${p.id}`}></canvas></div>
+                      <div className="v2-chart-wrap large"><ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile onReload={reloadComparison} isReloading={isReloadingA || isReloadingB} /><canvas id={`v2-overlay-${p.id}`}></canvas></div>
                       <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={comparisonAHasData ? formatZoneOption(selectedZoneA) : ''} zoneB={comparisonBHasData ? formatZoneOption(selectedZoneB) : ''} />
                     </> : <div className="v2-overlay-chart-stack">
                       <div className="v2-overlay-chart-toolbar">
@@ -4462,12 +4555,12 @@ const MadridDashboardV2: React.FC = () => {
                           ...(comparisonBHasData ? [{ index: 2, label: `${formatZoneOption(selectedZoneB)} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' as const }, { index: 3, label: `${formatZoneOption(selectedZoneB)} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' as const }] : []),
                           { index: 4, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' },
                         ]} />
-                        <ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile={false} />
+                        <ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile={false} onReload={reloadComparison} isReloading={isReloadingA || isReloadingB} />
                       </div>
                       <div className="v2-chart-wrap large"><canvas id={`v2-overlay-${p.id}`}></canvas></div>
                     </div>}
-                    {!isComparisonLoading && !comparisonAHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} />)}
-                    {!isComparisonLoading && !comparisonBHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} />)}
+                    {!isComparisonLoading && !comparisonAHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} />)}
+                    {!isComparisonLoading && !comparisonBHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} />)}
                     {comparisonAHasData && comparisonBHasData && p.id === 'alquiler' && (() => {
                       const priceA = Number(kpiDataA.precio_m2) || 0;
                       const priceB = Number(kpiDataB.precio_m2) || 0;
