@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { ReactNode } from 'react';
-import { ArrowUpRight, ChevronDown, Linkedin, X } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, Compass, Linkedin, X } from 'lucide-react';
+import './TrustArchitecture.css';
 import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
 
 type SiteHeaderProps = {
@@ -19,6 +20,7 @@ type SiteHeaderProps = {
   ctaHref?: string;
   appearance?: 'default' | 'aurora';
   compactBrand?: boolean;
+  onOpenMethodology?: () => void;
 };
 
 export function SiteHeader({
@@ -33,6 +35,7 @@ export function SiteHeader({
   ctaHref,
   appearance = 'default',
   compactBrand = false,
+  onOpenMethodology,
 }: SiteHeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -116,12 +119,34 @@ export function SiteHeader({
         )}
 
         {/* Header action slot; the dashboard can place its shared period control here. */}
-        {desktopAction ? <div className="mi-header__desktop-action">{desktopAction}</div> : <Link
-          href={effectiveCtaHref}
-          className={`mi-header__cta${effectiveCtaHref === '/contacto' ? ' mi-header__cta--secondary' : ''}`}
-        >
-          {effectiveCtaText}
-        </Link>}
+        <div className="mi-header__actions-wrap" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {onOpenMethodology ? (
+            <button
+              type="button"
+              className="mi-methodology-header-btn"
+              onClick={onOpenMethodology}
+              title="Ver metodología y trazabilidad del proyecto"
+            >
+              <Compass size={14} className="v2-compass-pulse-icon" aria-hidden="true" />
+              <span>Metodología</span>
+            </button>
+          ) : (
+            <Link
+              href="/metodologia"
+              className="mi-methodology-header-btn"
+              title="Ver metodología y trazabilidad del proyecto"
+            >
+              <Compass size={14} className="v2-compass-pulse-icon" aria-hidden="true" />
+              <span>Metodología</span>
+            </Link>
+          )}
+          {desktopAction ? <div className="mi-header__desktop-action">{desktopAction}</div> : <Link
+            href={effectiveCtaHref}
+            className={`mi-header__cta${effectiveCtaHref === '/contacto' ? ' mi-header__cta--secondary' : ''}`}
+          >
+            {effectiveCtaText}
+          </Link>}
+        </div>
 
         {mobileAction && <div className="mi-header__mobile-action">{mobileAction}</div>}
 
@@ -249,6 +274,29 @@ export function SiteHeader({
                 <span>CUADRO DE MANDO</span>
                 <ArrowUpRight size={18} className="mi-mobile-drawer__link-arrow" aria-hidden="true" />
               </Link>
+              {onOpenMethodology ? (
+                <button
+                  type="button"
+                  className="mi-mobile-drawer__link"
+                  style={{ width: '100%', textAlign: 'left', background: 'transparent', border: 'none', cursor: 'pointer' }}
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onOpenMethodology();
+                  }}
+                >
+                  <span style={{ color: '#00e5ff' }}>METODOLOGÍA Y FUENTES</span>
+                  <Compass size={18} className="mi-mobile-drawer__link-arrow" style={{ color: '#00e5ff' }} aria-hidden="true" />
+                </button>
+              ) : (
+                <Link
+                  href="/metodologia"
+                  className="mi-mobile-drawer__link"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <span style={{ color: '#00e5ff' }}>METODOLOGÍA Y FUENTES</span>
+                  <Compass size={18} className="mi-mobile-drawer__link-arrow" style={{ color: '#00e5ff' }} aria-hidden="true" />
+                </Link>
+              )}
             </nav>
 
             {/* Prominent CTA Button in Drawer */}
