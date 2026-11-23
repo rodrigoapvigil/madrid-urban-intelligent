@@ -948,7 +948,6 @@ const MadridDashboardV2: React.FC = () => {
   const [showMethodologyDrawer, setShowMethodologyDrawer] = useState(false);
   const [netYieldValue, setNetYieldValue] = useState<number | null>(null);
   const [isNetYieldActive, setIsNetYieldActive] = useState(false);
-  const [compareAnalysisMode, setCompareAnalysisMode] = useState<'zones' | 'dilemma'>('zones');
   const [mapData, setMapData] = useState<{districts: any[], neighborhoods: any[]}>({ districts: [], neighborhoods: [] });
   const zoneSearchOptions = useMemo<ZoneSearchOption[]>(() => {
     const districts = new Map<string, ZoneSearchOption>();
@@ -2689,7 +2688,27 @@ const MadridDashboardV2: React.FC = () => {
       <SiteHeader
         activePath="/madrid"
         appearance="aurora"
-        onOpenMethodology={() => setShowMethodologyDrawer(true)}
+        topBar={(
+          <>
+            <div className="v2-trust-editorial-source">
+              <span className="v2-telemetry-led" aria-hidden="true" />
+              <span>
+                Fuente oficial: <strong>Ayuntamiento de Madrid & Registradores de la Propiedad</strong>
+              </span>
+              <span className="v2-trust-editorial-dot" aria-hidden="true">·</span>
+              <span>
+                Actualizado: <strong style={{ color: '#00e676' }}>{selectedMonth.toUpperCase()} {selectedYear}</strong>
+              </span>
+            </div>
+
+            <div className="v2-trust-editorial-right">
+              <span className="v2-trust-editorial-clarification">
+                Estimaciones <strong>brutas</strong> de mercado {activeProfile.id === 'inversion' ? '(calibra costes reales con conmutador Neta)' : ''}
+              </span>
+              <TrustTelemetryBadge onOpenMethodology={() => setShowMethodologyDrawer(true)} variant="compact" />
+            </div>
+          </>
+        )}
         desktopAction={!isMobile ? (
           <PeriodSelector
             year={selectedYear}
@@ -2886,27 +2905,6 @@ const MadridDashboardV2: React.FC = () => {
       <main className="v2-viewport" style={{ height: containerHeight }}>
         {PROFILES.map((p, i) => (
           <div key={p.id} ref={i === profileIdx ? activePanelRef : null} className={`v2-panel ${getSlideClass(i)}`}>
-
-            {/* LÍNEA EDITORIAL DE PROCEDENCIA Y TRANSPARENCIA (OPCIÓN B) */}
-            <div className="v2-first-screen-trust-editorial">
-              <div className="v2-trust-editorial-source">
-                <span className="v2-telemetry-led" aria-hidden="true" />
-                <span>
-                  Fuente oficial: <strong>Ayuntamiento de Madrid & Registradores de la Propiedad</strong>
-                </span>
-                <span className="v2-trust-editorial-dot" aria-hidden="true">·</span>
-                <span>
-                  Actualizado: <strong style={{ color: '#00e676' }}>{selectedMonth.toUpperCase()} {selectedYear}</strong>
-                </span>
-              </div>
-
-              <div className="v2-trust-editorial-right">
-                <span className="v2-trust-editorial-clarification">
-                  Estimaciones <strong>brutas</strong> de mercado {p.id === 'inversion' ? '(calibra costes reales con conmutador Neta)' : ''}
-                </span>
-                <TrustTelemetryBadge onOpenMethodology={() => setShowMethodologyDrawer(true)} variant="compact" />
-              </div>
-            </div>
 
             {/* KPI & MAPA SECTION */}
             <div className="v2-grid-main" data-dashboard-section="summary">
@@ -3285,9 +3283,10 @@ const MadridDashboardV2: React.FC = () => {
                           <button
                             type="button"
                             onClick={() => {
-                              setCompareAnalysisMode('dilemma');
-                              const compEl = document.querySelector('[data-dashboard-section="compare"]');
-                              if (compEl) compEl.scrollIntoView({ behavior: 'smooth' });
+                              const dilemaEl = document.querySelector('[data-dashboard-section="dilemma"]');
+                              if (dilemaEl) {
+                                dilemaEl.scrollIntoView({ behavior: 'smooth' });
+                              }
                             }}
                             style={{
                               marginTop: '2px',
@@ -4133,65 +4132,21 @@ const MadridDashboardV2: React.FC = () => {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
                   <div className="v2-compare-title-block">
                     <div className="v2-compare-heading-row">
-                      <h2 style={{ margin: 0 }}>{compareAnalysisMode === 'dilemma' ? 'Dilema: ¿Vender o Alquilar?' : 'Comparar zonas'}</h2>
+                      <h2 style={{ margin: 0 }}>Comparar zonas</h2>
                       <button type="button" className="v2-compare-help-inline" aria-label="Cómo comparar zonas" title="Cómo comparar zonas" onClick={() => setShowCompareHelpModal(true)}><HelpCircle size={15} /></button>
-                      {compareAnalysisMode === 'zones' && (
-                        <button
-                          type="button"
-                          className={`v2-compare-reload-pill ${isReloadingA || isReloadingB ? 'is-syncing' : ''}`}
-                          title="Volver a sincronizar ambas zonas y las gráficas"
-                          aria-label="Recargar comparativa"
-                          onClick={reloadComparison}
-                          disabled={isReloadingA || isReloadingB}
-                        >
-                          <RotateCw size={12} className={isReloadingA || isReloadingB ? 'v2-spin' : ''} />
-                          <span>{isReloadingA || isReloadingB ? 'Sincronizando…' : 'Volver a cargar'}</span>
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        className={`v2-compare-reload-pill ${isReloadingA || isReloadingB ? 'is-syncing' : ''}`}
+                        title="Volver a sincronizar ambas zonas y las gráficas"
+                        aria-label="Recargar comparativa"
+                        onClick={reloadComparison}
+                        disabled={isReloadingA || isReloadingB}
+                      >
+                        <RotateCw size={12} className={isReloadingA || isReloadingB ? 'v2-spin' : ''} />
+                        <span>{isReloadingA || isReloadingB ? 'Sincronizando…' : 'Volver a cargar'}</span>
+                      </button>
                     </div>
-                    <span>{compareAnalysisMode === 'dilemma' ? 'Simulador financiero para propietarios de Madrid' : 'Elige dos zonas y mira cómo se diferencian'}</span>
-                  </div>
-
-                  {/* SELECTOR DE MODO: COMPARATIVA VS DILEMA PATRIMONIAL */}
-                  <div className="v2-compare-mode-switch" role="tablist" aria-label="Modo de análisis comparativo" style={{ display: 'inline-flex', padding: '3px', background: 'rgba(1, 14, 30, 0.88)', borderRadius: '10px', border: '1px solid rgba(186, 204, 214, 0.2)' }}>
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={compareAnalysisMode === 'zones'}
-                      style={{
-                        padding: '6px 14px',
-                        borderRadius: '8px',
-                        border: 'none',
-                        background: compareAnalysisMode === 'zones' ? '#00E5FF' : 'transparent',
-                        color: compareAnalysisMode === 'zones' ? '#011428' : '#A9BDCE',
-                        fontSize: '11.5px',
-                        fontWeight: '750',
-                        cursor: 'pointer',
-                        transition: 'all 0.18s ease',
-                      }}
-                      onClick={() => setCompareAnalysisMode('zones')}
-                    >
-                      Comparativa Zonas A / B
-                    </button>
-                    <button
-                      type="button"
-                      role="tab"
-                      aria-selected={compareAnalysisMode === 'dilemma'}
-                      style={{
-                        padding: '6px 14px',
-                        borderRadius: '8px',
-                        border: 'none',
-                        background: compareAnalysisMode === 'dilemma' ? '#FFD27A' : 'transparent',
-                        color: compareAnalysisMode === 'dilemma' ? '#011428' : '#A9BDCE',
-                        fontSize: '11.5px',
-                        fontWeight: '750',
-                        cursor: 'pointer',
-                        transition: 'all 0.18s ease',
-                      }}
-                      onClick={() => setCompareAnalysisMode('dilemma')}
-                    >
-                      Dilema: ¿Vender o Alquilar?
-                    </button>
+                    <span>Elige dos zonas y mira cómo se diferencian</span>
                   </div>
                 </div>
                 {!isMobile && <div className="v2-compare-desktop-toolbar">
@@ -4199,16 +4154,7 @@ const MadridDashboardV2: React.FC = () => {
                 </div>}
               </div>
 
-              {compareAnalysisMode === 'dilemma' ? (
-                <DilemaVenderAlquilar
-                  currentZoneName={selectedBarrio !== 'Todos' ? formatZoneOption(selectedBarrio) : selectedDistrict !== 'Todos' ? formatZoneOption(selectedDistrict) : 'Madrid Centro'}
-                  rentPriceM2={Number(kpiData.p_m2) || 21.6}
-                  salePriceM2={activeProfile.id === 'venta' || activeProfile.id === 'compra' ? Number(kpiData.p_m2) : 4350}
-                  annualYield={Number(kpiData.rentabilidad) || 0.058}
-                />
-              ) : (
-                <>
-                  <div className="v2-compare-zone-selectors v2-compare-selectors-sticky">
+              <div className="v2-compare-zone-selectors v2-compare-selectors-sticky">
                     <div className={`v2-dropdown-container v2-compare-zone-select zone-a ${activeComparePicker === 'a' ? 'v2-z-up' : ''}`}>
                       <span className="v2-filter-label zone-a-label"><i /> ZONA A</span>
                       <ZoneSearch options={zoneSearchOptions} district="Todos" barrio="Todos" onSelect={() => {}} formatName={formatZoneOption} compact picker={{ selected: comparisonZoneA, excludedId: comparisonZoneB.id, accent: 'a', onSelect: zone => { setComparisonZoneA(zone); setActiveComparePicker(null); }, onOpenChange: open => setActiveComparePicker(current => open ? 'a' : current === 'a' ? null : current) }} />
@@ -4852,10 +4798,20 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
                 </div>
               </div>
-              </>
-            )}
             </section>
             </ComparacionZonas>
+
+            {/* SECCIÓN DILEMA: ¿VENDER O ALQUILAR? (EXCLUSIVA DEL PERFIL VENTA / PROPIETARIO) */}
+            {p.id === 'venta' && (
+              <section className="v2-dilema-section" data-dashboard-section="dilemma" style={{ marginTop: '36px' }}>
+                <DilemaVenderAlquilar
+                  currentZoneName={selectedBarrio !== 'Todos' ? formatZoneOption(selectedBarrio) : selectedDistrict !== 'Todos' ? formatZoneOption(selectedDistrict) : 'Madrid'}
+                  rentPriceM2={Number(kpiData.p_m2) || 21.6}
+                  salePriceM2={Number(kpiData.p_m2) || 4350}
+                  annualYield={Number(kpiData.rentabilidad) || 0.058}
+                />
+              </section>
+            )}
             </div>
         ))}
       </main>

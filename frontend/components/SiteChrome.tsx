@@ -21,6 +21,7 @@ type SiteHeaderProps = {
   appearance?: 'default' | 'aurora';
   compactBrand?: boolean;
   onOpenMethodology?: () => void;
+  topBar?: ReactNode;
 };
 
 export function SiteHeader({
@@ -36,6 +37,7 @@ export function SiteHeader({
   appearance = 'default',
   compactBrand = false,
   onOpenMethodology,
+  topBar,
 }: SiteHeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -68,7 +70,13 @@ export function SiteHeader({
 
   return (
     <>
-      <header className={`mi-header site-header${appearance === 'aurora' ? ' site-header--aurora' : ''}${compactBrand ? ' site-header--compact-brand' : ''}`} role="banner">
+      <div className={`mi-header-container site-header-container${appearance === 'aurora' ? ' site-header-container--aurora' : ''}`}>
+        {topBar && (
+          <div className="mi-header-topbar">
+            {topBar}
+          </div>
+        )}
+        <header className={`mi-header site-header${appearance === 'aurora' ? ' site-header--aurora' : ''}${compactBrand ? ' site-header--compact-brand' : ''}`} role="banner">
         {/* Brand: Logo + Title */}
         <Link href="/" className="mi-brand site-brand" aria-label={compactBrand ? 'DMIYC, inicio' : 'DMIYC - Decide Madrid: Invierte Y Compra'}>
           <span className="mi-brand__mark">
@@ -150,6 +158,7 @@ export function SiteHeader({
           )}
         </button>
       </header>
+    </div>
 
       {/* Auros-Style Fullscreen Mobile Navigation Drawer */}
       {isMobileMenuOpen && (

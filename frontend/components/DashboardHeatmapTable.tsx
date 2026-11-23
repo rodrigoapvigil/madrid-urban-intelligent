@@ -43,8 +43,12 @@ export default function DashboardHeatmapTable({
       <table className="v2-heatmap-table">
         <thead>
           <tr className="v2-heatmap-period-groups">
-            <th rowSpan={2}>{level === 'Distritos' ? 'Distrito' : 'Barrio'}</th>
-            {realMonthCount > 0 && <th colSpan={realMonthCount} aria-hidden="true" />}
+            <th className="v2-heatmap-th-zone" rowSpan={2}>{level === 'Distritos' ? 'Distrito' : 'Barrio'}</th>
+            {realMonthCount > 0 && (
+              <th className="v2-heatmap-real-group" colSpan={realMonthCount}>
+                Datos Reales <span style={{ fontSize: '10px', opacity: 0.85, fontWeight: 700 }} aria-hidden="true">✓</span>
+              </th>
+            )}
             {estimateMonthCount > 0 && (
               <th
                 className="v2-heatmap-estimate-group"
@@ -56,7 +60,17 @@ export default function DashboardHeatmapTable({
               </th>
             )}
           </tr>
-          <tr className="v2-heatmap-month-head">{MONTHS.map((month, monthIndex) => <th key={month} className={`${hoveredMonth === monthIndex ? 'is-hovered-column ' : ''}${selectedMonthIndex === monthIndex ? 'is-selected-month ' : ''}${monthIndex === realMonthCount && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : ''}`} onMouseEnter={() => setHoveredMonth(monthIndex)}>{month.slice(0, 3)}</th>)}</tr>
+          <tr className="v2-heatmap-month-head">
+            {MONTHS.map((month, monthIndex) => (
+              <th
+                key={month}
+                className={`v2-heatmap-th-month ${hoveredMonth === monthIndex ? 'is-hovered-column ' : ''}${selectedMonthIndex === monthIndex ? 'is-selected-month ' : ''}${monthIndex === realMonthCount && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : ''}`}
+                onMouseEnter={() => setHoveredMonth(monthIndex)}
+              >
+                {month.slice(0, 3)}
+              </th>
+            ))}
+          </tr>
         </thead>
         <tbody>
           {rows.length > 0 ? rows.map((row, rowIndex) => (
@@ -65,8 +79,24 @@ export default function DashboardHeatmapTable({
               {MONTHS.map((_, monthIndex) => {
                 const value = Number(row[`m${monthIndex + 1}`]);
                 const opacity = value > 0 ? Math.max(.22, Math.min(1, .22 + ((value - min) / (max - min || 1)) * .78)) : 0;
-                const classes = [value > 0 ? '' : 'v2-heatmap-no-data', monthIndex === realMonthCount && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : '', selectedMonthIndex === monthIndex ? 'is-selected-month' : '', hoveredMonth === monthIndex ? 'is-hovered-column' : ''].filter(Boolean).join(' ');
-                return <td key={monthIndex} className={classes || undefined} onMouseEnter={() => setHoveredMonth(monthIndex)} title={value > 0 ? monthIndex >= realMonthCount ? 'Estimación' : undefined : 'Sin datos oficiales del Ayuntamiento'} style={{ backgroundColor: value > 0 ? colorWithAlpha(cellColor, opacity) : 'transparent', color: value > 0 ? textColorFor(opacity) : '#ffffff' }}>{value > 0 ? formatValue(value) : 'n/d'}</td>;
+                const classes = [
+                  'v2-heatmap-td-val',
+                  value > 0 ? '' : 'v2-heatmap-no-data',
+                  monthIndex === realMonthCount && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : '',
+                  selectedMonthIndex === monthIndex ? 'is-selected-month' : '',
+                  hoveredMonth === monthIndex ? 'is-hovered-column' : '',
+                ].filter(Boolean).join(' ');
+                return (
+                  <td
+                    key={monthIndex}
+                    className={classes || undefined}
+                    onMouseEnter={() => setHoveredMonth(monthIndex)}
+                    title={value > 0 ? monthIndex >= realMonthCount ? 'Estimación proyectada' : 'Dato oficial' : 'Sin datos oficiales del Ayuntamiento'}
+                    style={{ backgroundColor: value > 0 ? colorWithAlpha(cellColor, opacity) : 'transparent', color: value > 0 ? textColorFor(opacity) : '#ffffff' }}
+                  >
+                    {value > 0 ? formatValue(value) : 'n/d'}
+                  </td>
+                );
               })}
             </tr>
           )) : <tr><td colSpan={13} style={{ padding: '40px', textAlign: 'center', color: 'var(--azul-linea)' }}>No hay datos disponibles para el año {year}</td></tr>}

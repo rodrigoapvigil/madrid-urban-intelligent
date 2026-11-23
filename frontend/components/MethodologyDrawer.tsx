@@ -10,28 +10,67 @@ interface MethodologyDrawerProps {
 
 export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<'fuentes' | 'algoritmo' | 'metricas'>('fuentes');
+  const drawerBodyRef = React.useRef<HTMLDivElement>(null);
 
-  // Bloquear completamente el scroll tanto en html como en body para evitar el doble scroll en navegadores de escritorio
+  // Bloquear completamente el scroll tanto en html como en body y neutralizar eventos wheel/touch fuera del contenido del cajón
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
         onClose();
       }
     };
 
-    if (isOpen) {
-      const prevHtmlOverflow = document.documentElement.style.overflow;
-      const prevBodyOverflow = document.body.style.overflow;
-      document.documentElement.style.overflow = 'hidden';
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
+    const handleWheel = (e: WheelEvent) => {
+      const drawerBody = drawerBodyRef.current;
+      if (!drawerBody) {
+        e.preventDefault();
+        return;
+      }
 
-      return () => {
-        document.documentElement.style.overflow = prevHtmlOverflow;
-        document.body.style.overflow = prevBodyOverflow;
-        window.removeEventListener('keydown', handleKeyDown);
-      };
-    }
+      // Si el cursor está fuera del cuerpo deslizable del cajón (fondo desenfocado, cabecera, pie), anular completamente el scroll
+      const isInsideDrawerBody = drawerBody.contains(e.target as Node);
+      if (!isInsideDrawerBody) {
+        e.preventDefault();
+        return;
+      }
+
+      // Si está dentro, permitir el scroll interno pero evitar que se encadene a la página de fondo al llegar a los topes
+      const { scrollTop, scrollHeight, clientHeight } = drawerBody;
+      const isScrollingUp = e.deltaY < 0;
+      const isScrollingDown = e.deltaY > 0;
+
+      if (isScrollingUp && scrollTop <= 0) {
+        e.preventDefault();
+      } else if (isScrollingDown && scrollTop + clientHeight >= scrollHeight - 1) {
+        e.preventDefault();
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const drawerBody = drawerBodyRef.current;
+      if (!drawerBody || !drawerBody.contains(e.target as Node)) {
+        e.preventDefault();
+      }
+    };
+
+    const prevHtmlOverflow = document.documentElement.style.overflow;
+    const prevBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+
+    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    return () => {
+      document.documentElement.style.overflow = prevHtmlOverflow;
+      document.body.style.overflow = prevBodyOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
@@ -101,7 +140,7 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
         </div>
 
         {/* DRAWER BODY CONTENT */}
-        <div className="v2-drawer-body">
+        <div className="v2-drawer-body" ref={drawerBodyRef}>
           {/* TAB 1: FUENTES OFICIALES */}
           {activeTab === 'fuentes' && (
             <div className="v2-drawer-tab-content">
