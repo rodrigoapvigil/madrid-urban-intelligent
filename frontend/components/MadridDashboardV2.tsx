@@ -15,6 +15,7 @@ import { MethodologyDrawer } from './MethodologyDrawer';
 import { ConfidenceIntervalBadge } from './ConfidenceIntervalBadge';
 import { ExpenseYieldSimulator } from './ExpenseYieldSimulator';
 import { DilemaVenderAlquilar } from './DilemaVenderAlquilar';
+import { HeatmapDistritosMeses } from './HeatmapDistritosMeses';
 import { StructuralDisparityBadge } from './StructuralDisparityBadge';
 import { apiFetch } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
@@ -3987,6 +3988,19 @@ const MadridDashboardV2: React.FC = () => {
                   order={rankingOrder}
                   onOrderChange={setRankingOrder}
                   hasAnnualVariation={Object.keys(rankingPreviousValues).length > 0}
+                />
+              </div>
+
+              {/* COL 3: MAPA DE CALOR LIMPIO (DISTRITOS X MESES - OPCIÓN 1 CONTINUA) */}
+              <div className="v2-explorer-col v2-heatmap-col" data-dashboard-section="heatmap">
+                <HeatmapDistritosMeses
+                  rows={heatmapData}
+                  profileId={activeProfile.id}
+                  year={selectedYear}
+                  min={heatmapMin}
+                  max={heatmapMax}
+                  selectedMonth={selectedMonth}
+                  formatValue={value => formatNumber(value, 1)}
                 />
               </div>
             </div>

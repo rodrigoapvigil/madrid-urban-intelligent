@@ -1,0 +1,259 @@
+/* Scoped styles for HeatmapDistritosMeses (Zero conflict with legacy CSS) */
+.hdm-card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(1, 16, 36, 0.92);
+  border: 1px solid rgba(186, 204, 214, 0.16);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.hdm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.hdm-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.hdm-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+}
+
+.hdm-subtitle {
+  font-size: 11.5px;
+  color: #8fa6ba;
+}
+
+.hdm-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hdm-search-input {
+  box-sizing: border-box;
+  width: 180px;
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 1px solid rgba(186, 204, 214, 0.2);
+  border-radius: 8px;
+  background: rgba(2, 24, 52, 0.8);
+  color: #ffffff;
+  font-size: 11.5px;
+  outline: none;
+  transition: border-color 0.18s ease;
+}
+
+.hdm-search-input:focus {
+  border-color: #00e5ff;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.2);
+}
+
+.hdm-scale-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: #8fa6ba;
+}
+
+.hdm-scale-bar {
+  width: 70px;
+  height: 6px;
+  border-radius: 3px;
+}
+
+.hdm-table-scroll {
+  width: 100%;
+  max-height: 480px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid rgba(186, 204, 214, 0.12);
+  border-radius: 10px;
+  background: rgba(0, 10, 22, 0.4);
+  scrollbar-width: thin;
+  scrollbar-color: #193954 #041226;
+}
+
+.hdm-table-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.hdm-table-scroll::-webkit-scrollbar-track {
+  background: #041226;
+}
+
+.hdm-table-scroll::-webkit-scrollbar-thumb {
+  background: #193954;
+  border-radius: 4px;
+}
+
+.hdm-table {
+  width: 100% !important;
+  table-layout: fixed !important;
+  border-collapse: separate !important;
+  border-spacing: 2px !important;
+  font-size: 11.5px;
+  margin: 0;
+  padding: 0;
+}
+
+.hdm-th {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  background: #06192f;
+  color: #9bb3c7;
+  font-weight: 600;
+  font-size: 11px;
+  text-align: center;
+  padding: 8px 2px;
+  border-bottom: 1px solid rgba(186, 204, 214, 0.2);
+  user-select: none;
+}
+
+.hdm-th-district {
+  position: sticky;
+  left: 0;
+  top: 0;
+  z-index: 10;
+  width: 130px;
+  min-width: 130px;
+  max-width: 130px;
+  text-align: left;
+  padding-left: 10px;
+  background: #051426;
+}
+
+.hdm-th-month {
+  width: calc((100% - 130px) / 12);
+}
+
+.hdm-th-month.is-selected {
+  color: #00e5ff;
+  border-bottom: 2px solid #00e5ff;
+}
+
+.hdm-est-mark {
+  color: #00e676;
+  font-size: 9px;
+  font-weight: 700;
+  margin-left: 1px;
+  vertical-align: super;
+}
+
+.hdm-row {
+  transition: background-color 0.12s ease;
+}
+
+.hdm-row:hover .hdm-td-district {
+  color: #ffffff;
+}
+
+.hdm-td-district {
+  position: sticky;
+  left: 0;
+  z-index: 6;
+  width: 130px;
+  min-width: 130px;
+  max-width: 130px;
+  background: #061426;
+  color: #d1e2f0;
+  font-weight: 550;
+  font-size: 11.5px;
+  text-align: left;
+  padding: 6px 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.25);
+}
+
+.hdm-cell {
+  text-align: center;
+  padding: 6px 2px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  cursor: default;
+  transition: transform 0.1s ease, filter 0.1s ease;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hdm-cell:hover {
+  transform: scale(1.08);
+  filter: brightness(1.25);
+  z-index: 4;
+  position: relative;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+}
+
+.hdm-cell-no-data {
+  color: #61778c;
+  background: rgba(5, 20, 38, 0.5);
+  font-size: 10px;
+}
+
+.hdm-footer-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(0, 10, 22, 0.45);
+  border: 1px solid rgba(186, 204, 214, 0.1);
+  font-size: 11px;
+  color: #8fa6ba;
+  flex-wrap: wrap;
+}
+
+.hdm-footer-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.hdm-footer-left strong {
+  color: #cde4f7;
+}
+
+@media (max-width: 768px) {
+  .hdm-card {
+    padding: 14px 12px;
+  }
+  .hdm-table-scroll {
+    overflow-x: auto;
+  }
+  .hdm-table {
+    min-width: 600px;
+  }
+  .hdm-th-district,
+  .hdm-td-district {
+    width: 105px;
+    min-width: 105px;
+    max-width: 105px;
+  }
+}
