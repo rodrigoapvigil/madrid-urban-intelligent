@@ -79,13 +79,31 @@ export function DashboardMapLegend({
 }) {
   const countNote = `${dataCount} de ${totalCount} barrios tienen datos disponibles.`;
   const periodNote = `Datos observados hasta ${observedThrough.toLocaleLowerCase('es')}${estimatesFrom ? ` · Estimaciones desde ${estimatesFrom.toLocaleLowerCase('es')}` : ''}`;
-  const noDataNote = 'Rayado: la fuente oficial no publica datos para este periodo; no se estiman.';
+  const noDataNote = 'Zonas no residenciales / forestales protegidas (sin muestra de alquiler: ej. El Pardo, El Goloso). La fuente oficial no publica datos para este periodo por ausencia de mercado residencial; no se estiman.';
   return (
     <div className="v2-map-legend" data-profile={profileId} role="group" aria-label="Estado de datos y leyenda del mapa">
       <div className="v2-map-legend-desktop">
         <div className="v2-map-legend-status">
           <strong>{countNote}</strong>
           <small>{periodNote}</small>
+          <span
+            className="v2-map-protected-badge"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '2px 7px',
+              marginTop: '4px',
+              borderRadius: '4px',
+              background: 'rgba(113, 133, 154, 0.15)',
+              border: '1px solid rgba(113, 133, 154, 0.35)',
+              color: '#a7bccd',
+              fontSize: '10px',
+              fontWeight: 600,
+            }}
+          >
+            🛡️ Zonas no residenciales / forestales protegidas (sin muestra de alquiler)
+          </span>
         </div>
         <div className="v2-map-legend-visual">
           <div className="v2-map-legend-title">{title}</div>

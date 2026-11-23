@@ -49,6 +49,7 @@ export const DilemaVenderAlquilar: React.FC<DilemaVenderAlquilarProps> = ({
   const annualGainHolding = annualNetRent + (grossSalePrice * appreciationRate);
   const rawBreakeven = annualGainHolding > 0 ? (grossSalePrice - netSaleProceeds) / annualGainHolding + 4.8 : 6.4;
   const breakevenYears = Math.max(3.5, Math.min(12, Number(rawBreakeven.toFixed(1))));
+  const perGrossYears = annualGrossRent > 0 ? (grossSalePrice / annualGrossRent).toFixed(1) : '16.5';
 
   const formatEuro = (val: number) =>
     new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(val) + ' €';
@@ -105,6 +106,10 @@ export const DilemaVenderAlquilar: React.FC<DilemaVenderAlquilarProps> = ({
             <div className="v2-breakdown-row">
               <span>Valoración bruta ({flatSizeM2} m² · {formatEuro(effectiveSaleM2)}/m²)</span>
               <strong>{formatEuro(grossSalePrice)}</strong>
+            </div>
+            <div className="v2-breakdown-row">
+              <span>Años de alquiler para amortizar venta (PER)</span>
+              <strong style={{ color: '#ffd27a' }}>{perGrossYears} años</strong>
             </div>
             <div className="v2-breakdown-row v2-breakdown-row--deduction">
               <span>Plusvalía municipal estimada</span>

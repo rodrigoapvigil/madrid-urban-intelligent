@@ -45,7 +45,16 @@ export default function DashboardHeatmapTable({
           <tr className="v2-heatmap-period-groups">
             <th rowSpan={2}>{level === 'Distritos' ? 'Distrito' : 'Barrio'}</th>
             {realMonthCount > 0 && <th colSpan={realMonthCount} aria-hidden="true" />}
-            {estimateMonthCount > 0 && <th className="v2-heatmap-estimate-group" colSpan={estimateMonthCount}>Estimación</th>}
+            {estimateMonthCount > 0 && (
+              <th
+                className="v2-heatmap-estimate-group"
+                colSpan={estimateMonthCount}
+                title="Proyección matemática mediante Machine Learning basada en el histórico de transacciones del Ayuntamiento de Madrid"
+                style={{ cursor: 'help' }}
+              >
+                Estimación <span style={{ fontSize: '10px', opacity: 0.85, fontWeight: 700 }} aria-hidden="true">ⓘ</span>
+              </th>
+            )}
           </tr>
           <tr className="v2-heatmap-month-head">{MONTHS.map((month, monthIndex) => <th key={month} className={`${hoveredMonth === monthIndex ? 'is-hovered-column ' : ''}${selectedMonthIndex === monthIndex ? 'is-selected-month ' : ''}${monthIndex === realMonthCount && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : ''}`} onMouseEnter={() => setHoveredMonth(monthIndex)}>{month.slice(0, 3)}</th>)}</tr>
         </thead>

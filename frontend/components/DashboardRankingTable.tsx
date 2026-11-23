@@ -4,7 +4,7 @@ import React, { ReactNode, useMemo, useState } from 'react';
 import SegmentedControl from './SegmentedControl';
 
 type RankingRow = { name: string; value: number };
-type OrderMode = 'affordable' | 'expensive' | 'increase' | 'demand-high' | 'demand-low' | 'yield-high' | 'yield-low';
+type OrderMode = 'affordable' | 'expensive' | 'increase' | 'demand-high' | 'demand-low' | 'yield-high' | 'yield-low' | 'all';
 
 function Sparkline({ values, color }: { values: number[]; color: string }) {
   const points = values.map((value, index) => {
@@ -86,19 +86,23 @@ export default function DashboardRankingTable({
     });
   }, [rows, order, previousValues, isInvestment, minYieldThreshold]);
 
-  const title = isDemand
-    ? `Top 10 ${zoneLabel} con ${order === 'demand-low' ? 'menos' : 'más'} demanda`
-    : isInvestment
-      ? `Top 10 ${zoneLabel} con ${order === 'yield-low' ? 'menor' : 'mayor'} rentabilidad`
-      : order === 'expensive' ? `Top 10 ${zoneLabel} más caros` : order === 'increase' ? `Top 10 ${zoneLabel} con mayor subida anual` : `Top 10 ${zoneLabel} más asequibles`;
+  const isAll = order === 'all';
+  const title = isAll
+    ? `Ranking completo (${level === 'Distritos' ? '21 distritos' : `${sortedRows.length} barrios`})`
+    : isDemand
+      ? `Top 10 ${zoneLabel} con ${order === 'demand-low' ? 'menos' : 'más'} demanda`
+      : isInvestment
+        ? `Top 10 ${zoneLabel} con ${order === 'yield-low' ? 'menor' : 'mayor'} rentabilidad`
+        : order === 'expensive' ? `Top 10 ${zoneLabel} más caros` : order === 'increase' ? `Top 10 ${zoneLabel} con mayor subida anual` : `Top 10 ${zoneLabel} más asequibles`;
   const valueHeading = isDemand ? 'DEMANDA' : isInvestment ? 'RENTABILIDAD' : profileId === 'alquiler'
     ? (metric === 'total' ? 'ALQUILER €/MES' : 'ALQUILER €/M²')
     : (metric === 'total' ? 'PRECIO €' : 'PRECIO €/M²');
+  const allLabel = level === 'Distritos' ? 'Ver todos los 21 distritos' : 'Ver todos los barrios';
   const orderOptions: Array<{ value: OrderMode; label: string }> = isDemand
-    ? [{ value: 'demand-high', label: 'Más demanda' }, { value: 'demand-low', label: 'Menos demanda' }]
+    ? [{ value: 'demand-high', label: 'Más demanda' }, { value: 'demand-low', label: 'Menos demanda' }, { value: 'all', label: allLabel }]
     : isInvestment
-      ? [{ value: 'yield-high', label: 'Mayor rentabilidad' }, { value: 'yield-low', label: 'Menor rentabilidad' }]
-      : [{ value: 'affordable', label: 'Más asequibles' }, { value: 'expensive', label: 'Más caros' }, ...(hasAnnualVariation ? [{ value: 'increase' as const, label: 'Mayor subida' }] : [])];
+      ? [{ value: 'yield-high', label: 'Mayor rentabilidad' }, { value: 'yield-low', label: 'Menor rentabilidad' }, { value: 'all', label: allLabel }]
+      : [{ value: 'affordable', label: 'Más asequibles' }, { value: 'expensive', label: 'Más caros' }, ...(hasAnnualVariation ? [{ value: 'increase' as const, label: 'Mayor subida' }] : []), { value: 'all', label: allLabel }];
   const orderValue = orderOptions.some(option => option.value === order) ? order as OrderMode : orderOptions[0].value;
 
   return (
@@ -141,10 +145,17 @@ export default function DashboardRankingTable({
       <table className="v2-ranking-table v2-ranking-table-informative" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
         <thead><tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: accent }}><th style={{ paddingBottom: '8px', fontWeight: '600' }}>{level === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th><th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>{valueHeading}</th></tr></thead>
         <tbody>
-          {sortedRows.length === 0 && loading ? loadingRows : sortedRows.slice(0, 10).map((item, index) => {
+          {sortedRows.length === 0 && loading ? loadingRows : sortedRows.slice(0, isAll ? sortedRows.length : 10).map((item, index) => {
             const previous = previousValues[normalize(item.name)];
             const variation = Number.isFinite(previous) && previous > 0 ? ((item.value - previous) / previous) * 100 : null;
             const price = metric === 'unit' ? `${formatNumber(item.value, Number.isInteger(Number(item.value)) ? 0 : 1)} €/m²` : profileId === 'alquiler' ? `${formatEuro(item.value, 0)}/mes` : formatEuro(item.value, 0);
+            const prevPrice = Number.isFinite(previous) && previous > 0
+              ? metric === 'unit'
+                ? `${formatNumber(previous, Number.isInteger(Number(previous)) ? 0 : 1)} €/m²`
+                : profileId === 'alquiler'
+                  ? `${formatEuro(previous, 0)}/mes`
+                  : formatEuro(previous, 0)
+              : null;
             const rawVal = Number(item.value) || 0;
             const investmentPct = rawVal > 1 ? rawVal : rawVal * 100;
             const valueLabel = isDemand ? `${formatNumber(rawVal, 0)} trans.` : isInvestment ? `${formatNumber(investmentPct, 1)}%` : price;
@@ -159,7 +170,15 @@ export default function DashboardRankingTable({
               </td>
               <td className="v2-ranking-value" style={{ padding: '8px 0', textAlign: 'right', color: accent, fontWeight: '700' }}>
                 <div className="v2-ranking-value-line">{sparkline.length > 1 && <Sparkline values={sparkline} color={accent} />}<span>{valueLabel}</span></div>
-                {variation !== null && <small className="v2-ranking-annual-change">{variation >= 0 ? '▲' : '▼'} {Math.abs(variation).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}% año</small>}
+                {variation !== null && (
+                  <small
+                    className="v2-ranking-annual-change"
+                    title={prevPrice ? `De ${prevPrice} (2025) a ${valueLabel} (2026)` : undefined}
+                    style={{ cursor: prevPrice ? 'help' : 'default' }}
+                  >
+                    {variation >= 0 ? '▲' : '▼'} {Math.abs(variation).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}% año
+                  </small>
+                )}
               </td>
             </tr>;
           })}

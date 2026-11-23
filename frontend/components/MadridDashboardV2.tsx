@@ -382,18 +382,40 @@ type ComparisonLegendItem = { index: number; label: string; color: string; kind:
 
 const ComparisonSeriesLegend = ({ chartId, items }: { chartId: string; items: ComparisonLegendItem[] }) => {
   const [, setRevision] = useState(0);
-  return <div className="v2-comparison-line-legend" aria-label="Leyenda de la comparación">
-    {items.map(item => {
-      const chart = ChartJS.getChart(chartId) as any;
-      const visible = chart ? chart.isDatasetVisible(item.index) : true;
-      return <button key={item.index} type="button" aria-pressed={visible} onClick={() => {
-        if (!chart) return;
-        chart.setDatasetVisibility(item.index, !visible);
-        chart.update('none');
-        setRevision(value => value + 1);
-      }}><i className={`line-${item.kind}`} style={{ borderColor: item.color }} />{item.label}</button>;
-    })}
-  </div>;
+  return (
+    <div className="v2-comparison-line-legend" aria-label="Leyenda de la comparación">
+      {items.map(item => {
+        const chart = ChartJS.getChart(chartId) as any;
+        const visible = chart ? chart.isDatasetVisible(item.index) : true;
+        const displayLabel = item.kind === 'madrid' && !item.label.includes('Q2')
+          ? '···· Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)'
+          : item.label;
+        const tooltip = item.kind === 'estimated'
+          ? 'Estimación proyectada mediante modelo de Machine Learning considerando estacionalidad e inflación'
+          : item.kind === 'madrid'
+            ? 'Media de la ciudad de Madrid (Registro Ayto. Madrid Q2 2026)'
+            : 'Registro oficial contrastado del Ayuntamiento';
+        return (
+          <button
+            key={item.index}
+            type="button"
+            aria-pressed={visible}
+            title={tooltip}
+            style={{ cursor: 'pointer' }}
+            onClick={() => {
+              if (!chart) return;
+              chart.setDatasetVisibility(item.index, !visible);
+              chart.update('none');
+              setRevision(value => value + 1);
+            }}
+          >
+            <i className={`line-${item.kind}`} style={{ borderColor: item.color }} />
+            {displayLabel}
+          </button>
+        );
+      })}
+    </div>
+  );
 };
 
 const ComparisonSeriesChips = ({ chartId, zoneA, zoneB }: { chartId: string; zoneA: string; zoneB: string }) => {
@@ -401,7 +423,7 @@ const ComparisonSeriesChips = ({ chartId, zoneA, zoneB }: { chartId: string; zon
   const groups = [
     { key: 'A', label: zoneA, indexes: [0, 1], color: '#00e5ff' },
     { key: 'B', label: zoneB, indexes: [2, 3], color: '#ffb65c' },
-    { key: 'Madrid', label: 'Media Madrid', indexes: [4], color: '#dce8f2' },
+    { key: 'Madrid', label: 'Media Madrid (21,61 €/m² · Q2 2026)', indexes: [4], color: '#dce8f2' },
   ].filter(group => Boolean(group.label));
   return <div className="v2-compare-legend" aria-label="Series de la comparación">
     {groups.map(group => {
@@ -721,9 +743,9 @@ const getComparisonKpiInfo = (metric: string, zoneName: string) => {
     case 'esfuerzo':
       return {
         title: `Tasa de Esfuerzo · ${zoneName}`,
-        description: `Indica qué porcentaje del sueldo neto de las familias de ${zoneName} se va exclusivamente en pagar el alquiler o la hipoteca. Es el termómetro de si los vecinos viven con desahogo o con el agua al cuello.`,
+        description: `Porcentaje de los ingresos brutos del hogar en este distrito que se destinan al pago del alquiler (Dato INE + Ayto. Madrid).`,
         example: `Un 25% significa que de un sueldo de 2.000 €, 500 € van directos a la vivienda y quedan 1.500 € para los demás gastos.`,
-        ruleOfThumb: `El umbral saludable fijado por los expertos es no pasar del 30%-35%. Superar el 40% refleja tensión económica en la zona.`
+        ruleOfThumb: `El umbral saludable fijado por los expertos es no pasar del 30%-35%. Superar el 40% refleja tensión y sobreesfuerzo crítico.`
       };
     case 'precio_m2_compra':
       return {
@@ -2973,13 +2995,13 @@ const MadridDashboardV2: React.FC = () => {
                         </section>
                         <section className="v2-rent-secondary">
                           <div className="v2-rent-secondary-card">
-                            <span className="v2-rent-eyebrow">Alquiler medio</span>
+                            <span className="v2-rent-eyebrow" title="Calculado sobre vivienda tipo estándar de 70 m²">Alquiler medio (70 m²)</span>
                             <strong>{money(rent)} <small>€/mes</small></strong>
                           </div>
                           <div className="v2-rent-secondary-card v2-rent-effort">
                             <div className="v2-rent-effort-head"><span className="v2-rent-eyebrow">Esfuerzo de alquiler</span><strong style={{ color: effortColor }}>{effort > 0 ? `${effort.toFixed(0)}%` : '—'}</strong></div>
                             <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(effort, 100)}%`, background: effortColor }} /><b style={{ left: '30%' }} /></div>
-                            <span className="v2-rent-effort-caption">{money(rent)} € de alquiler · {money(incomeMonthly)} € de renta (INE)</span>
+                            <span className="v2-rent-effort-caption">{money(rent)} € de alquiler · {money(incomeMonthly)} € de renta media por hogar en Madrid (Fuente: INE)</span>
                             <button className="v2-rent-calc-toggle" type="button" onClick={() => setShowRentCalculator(value => !value)} aria-expanded={showRentCalculator}>
                               {showRentCalculator ? 'Cerrar cálculo' : 'Calcula con tu sueldo'} <span aria-hidden="true">{showRentCalculator ? '↑' : '→'}</span>
                             </button>
@@ -3251,6 +3273,52 @@ const MadridDashboardV2: React.FC = () => {
                             : '—'}
                         </div>
                       </div>
+
+                      {activeProfile.id === 'venta' && (
+                        <div
+                          className="v2-venta-dilema-banner"
+                          style={{
+                            background: 'rgba(255, 178, 107, 0.12)',
+                            border: '1px solid rgba(255, 178, 107, 0.38)',
+                            borderRadius: '14px',
+                            padding: '12px 14px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '8px',
+                            marginTop: '2px',
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ffb26b', fontWeight: 750, fontSize: '12px' }}>
+                            <span>⚖️ ¿Dudas entre vender o alquilar?</span>
+                          </div>
+                          <p style={{ margin: 0, fontSize: '11px', color: '#cde4f7', lineHeight: 1.45 }}>
+                            Evalúa si te compensa la plusvalía neta de venta inmediata frente al flujo acumulado por alquiler y revalorización en este barrio.
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCompareAnalysisMode('dilemma');
+                              const compEl = document.querySelector('[data-dashboard-section="compare"]');
+                              if (compEl) compEl.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            style={{
+                              marginTop: '2px',
+                              padding: '7px 12px',
+                              borderRadius: '8px',
+                              background: '#ffb26b',
+                              border: 'none',
+                              color: '#011428',
+                              fontWeight: 750,
+                              fontSize: '11.5px',
+                              cursor: 'pointer',
+                              alignSelf: 'flex-start',
+                              transition: 'all 0.18s ease',
+                            }}
+                          >
+                            Ver rentabilidad comparada en este barrio →
+                          </button>
+                        </div>
+                      )}
                     </>
                   ) : (() => {
                     const amortizacionAnios = kpiData.p_m2 > 0 ? (1 / kpiData.p_m2) : 0;
@@ -3947,6 +4015,12 @@ const MadridDashboardV2: React.FC = () => {
                     {isMobile && <FullscreenToggle targetSelector=".v2-heatmap-card" mobilePlatform />}
                   </div>
                   <input className="v2-heatmap-search" type="search" value={heatmapSearch} onChange={event => setHeatmapSearch(event.target.value)} placeholder={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'}…`} aria-label={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'} en el mapa de calor`} />
+                  <div className="v2-heatmap-gradient-scale" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '6px 0 10px', fontSize: '11px', color: '#8fa6ba', flexWrap: 'wrap' }}>
+                    <span style={{ fontWeight: 600, color: '#cde4f7' }}>Intensidad de precio por m²:</span>
+                    <span>Azul oscuro (&lt; 17 €/m²)</span>
+                    <div style={{ flex: '1', minWidth: '80px', maxWidth: '140px', height: '6px', borderRadius: '3px', background: 'linear-gradient(90deg, rgba(0, 221, 240, 0.22) 0%, rgba(0, 221, 240, 1) 100%)' }} />
+                    <span>Cian brillante (&gt; 26 €/m²)</span>
+                  </div>
                   <DashboardHeatmapTable
                     rows={filteredHeatmapRows}
                     profileId={activeProfile.id}
@@ -3960,7 +4034,7 @@ const MadridDashboardV2: React.FC = () => {
                   />
                   {Number(selectedYear) === 2026 && (
                     <div className="v2-heatmap-data-note">
-                      Datos reales hasta <strong>{latestRealMonth} de {latestRealYear}</strong>; desde <strong>{firstProjectionMonth}</strong>, estimaciones. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un precio €/m² más alto.'}
+                      Datos reales: Enero – Junio 2026 (Fuente: Portal de Datos Abiertos del Ayuntamiento de Madrid). Estimaciones: Julio – Diciembre 2026 (Modelos predictivos DMIYC). {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un precio €/m² más alto.'}
                     </div>
                   )}
                 </div>
@@ -4216,11 +4290,14 @@ const MadridDashboardV2: React.FC = () => {
                               <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile onReload={reloadZoneA} isReloading={isReloadingA} />
                             ) : (
                               <div className="v2-comparison-chart-meta">
-                                <ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' }]} />
+                                <ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: 'Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' }]} />
                                 <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={false} onReload={reloadZoneA} isReloading={isReloadingA} />
                               </div>
                             )}
                             <canvas id={`v2-chartA-${p.id}`}></canvas>
+                            <div style={{ fontSize: '10.5px', color: '#8fa6ba', marginTop: '6px', textAlign: 'center' }}>
+                              Estimación proyectada mediante modelo de Machine Learning considerando estacionalidad e inflación.
+                            </div>
                           </>
                         ) : !isZoneALoading ? (
                           isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} />
@@ -4312,6 +4389,9 @@ const MadridDashboardV2: React.FC = () => {
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 ALQUILER MEDIO (70 M²) {selectedZoneA.toUpperCase()}
                                 <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
+                              </div>
+                              <div style={{ fontSize: '10px', color: '#8fa6ba', textAlign: 'center', marginTop: '2px' }}>
+                                Calculado sobre vivienda tipo de 70 m²
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
@@ -4477,11 +4557,14 @@ const MadridDashboardV2: React.FC = () => {
                               <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile onReload={reloadZoneB} isReloading={isReloadingB} />
                             ) : (
                               <div className="v2-comparison-chart-meta">
-                                <ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' }]} />
+                                <ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: 'Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' }]} />
                                 <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={false} onReload={reloadZoneB} isReloading={isReloadingB} />
                               </div>
                             )}
                             <canvas id={`v2-chartB-${p.id}`}></canvas>
+                            <div style={{ fontSize: '10.5px', color: '#8fa6ba', marginTop: '6px', textAlign: 'center' }}>
+                              Estimación proyectada mediante modelo de Machine Learning considerando estacionalidad e inflación.
+                            </div>
                           </>
                         ) : !isZoneBLoading ? (
                           isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} />
@@ -4573,6 +4656,9 @@ const MadridDashboardV2: React.FC = () => {
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
                                 ALQUILER MEDIO (70 M²) {selectedZoneB.toUpperCase()}
                                 <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
+                              </div>
+                              <div style={{ fontSize: '10px', color: '#8fa6ba', textAlign: 'center', marginTop: '2px' }}>
+                                Calculado sobre vivienda tipo de 70 m²
                               </div>
                             </div>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
@@ -4740,11 +4826,14 @@ const MadridDashboardV2: React.FC = () => {
                         <ComparisonSeriesLegend chartId={`v2-overlay-${p.id}`} items={[
                           ...(comparisonAHasData ? [{ index: 0, label: `${formatZoneOption(selectedZoneA)} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' as const }, { index: 1, label: `${formatZoneOption(selectedZoneA)} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' as const }] : []),
                           ...(comparisonBHasData ? [{ index: 2, label: `${formatZoneOption(selectedZoneB)} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' as const }, { index: 3, label: `${formatZoneOption(selectedZoneB)} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' as const }] : []),
-                          { index: 4, label: 'Media Madrid', color: '#dce8f2', kind: 'madrid' },
+                          { index: 4, label: 'Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)', color: '#dce8f2', kind: 'madrid' },
                         ]} />
                         <ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile={false} onReload={reloadComparison} isReloading={isReloadingA || isReloadingB} />
                       </div>
                       <div className="v2-chart-wrap large"><canvas id={`v2-overlay-${p.id}`}></canvas></div>
+                      <div style={{ fontSize: '10.5px', color: '#8fa6ba', marginTop: '6px', textAlign: 'center' }}>
+                        Estimación proyectada mediante modelo de Machine Learning considerando estacionalidad e inflación. Vivienda tipo calculada sobre 70 m².
+                      </div>
                     </div>}
                     {!isComparisonLoading && !comparisonAHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} />)}
                     {!isComparisonLoading && !comparisonBHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} />)}
