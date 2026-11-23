@@ -54,6 +54,12 @@ export default function DashboardHeatmapTable({
       onMouseLeave={() => { setHoveredRow(null); setHoveredMonth(null); }}
     >
       <table className="v2-heatmap-table">
+        <colgroup>
+          <col className="v2-col-zone" style={{ width: '124px', minWidth: '124px' }} />
+          {MONTHS.map((m) => (
+            <col key={m} className="v2-col-month" style={{ minWidth: '44px' }} />
+          ))}
+        </colgroup>
         <caption className="v2-heatmap-sr-only">
           {profileId === 'inversion' ? 'Rentabilidad bruta' : profileId === 'alquiler' ? 'Precio medio de alquiler' : profileId === 'compra' ? 'Precio medio de compra' : 'Precio medio de venta'} por {level.toLocaleLowerCase('es')} de enero a diciembre de {year}, en {unit}.
         </caption>

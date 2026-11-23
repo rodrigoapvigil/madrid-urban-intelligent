@@ -108,7 +108,9 @@ export default function DashboardRankingTable({
             const previous = previousValues[normalize(item.name)];
             const variation = Number.isFinite(previous) && previous > 0 ? ((item.value - previous) / previous) * 100 : null;
             const price = metric === 'unit' ? `${formatNumber(item.value, Number.isInteger(Number(item.value)) ? 0 : 1)} €/m²` : profileId === 'alquiler' ? `${formatEuro(item.value, 0)}/mes` : formatEuro(item.value, 0);
-            const valueLabel = isDemand ? `${formatNumber(item.value, 0)} trans.` : isInvestment ? `${formatNumber(item.value * 100, 2)}%` : price;
+            const rawVal = Number(item.value) || 0;
+            const investmentPct = rawVal > 1 ? rawVal : rawVal * 100;
+            const valueLabel = isDemand ? `${formatNumber(rawVal, 0)} trans.` : isInvestment ? `${formatNumber(investmentPct, 1)}%` : price;
             const monthly = monthlyByZone.get(normalize(item.name));
             const sparkline = monthly ? Array.from({ length: 12 }, (_, monthIndex) => Number(monthly[`m${monthIndex + 1}`])).filter(value => Number.isFinite(value) && value > 0) : [];
             const district = level === 'Barrios' ? districtForZone?.(item.name) : undefined;
