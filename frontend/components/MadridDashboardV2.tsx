@@ -3830,19 +3830,6 @@ const MadridDashboardV2: React.FC = () => {
                       onChange={setRankingLevel}
                     />
                   </div>
-                  <div className="v2-heatmap-meta v2-heatmap-meta--desktop">
-                    <small className="v2-heatmap-period">{rankingLevel} · enero–diciembre de {selectedYear}</small>
-                    <div className="v2-heatmap-legend" data-profile={activeProfile.id}>
-                      <span>{activeProfile.id === 'inversion' ? 'Menor rentabilidad' : 'Menor precio'}</span>
-                      <span className="v2-heatmap-legend-scale" aria-hidden="true" />
-                      <span>{activeProfile.id === 'inversion' ? 'Mayor rentabilidad' : 'Mayor precio'}</span>
-                      <InfoTooltip
-                        title="Escala de color"
-                        description="El tono más intenso indica un valor mayor; la escala se ajusta a los datos cargados."
-                        align="right"
-                      />
-                    </div>
-                  </div>
                 </div>
               </div>
 
@@ -3878,27 +3865,14 @@ const MadridDashboardV2: React.FC = () => {
                 <div className="v2-heatmap-card">
                   <div className="v2-heatmap-head">
                     <div className="v2-heatmap-heading-copy">
-                      <h3>{activeProfile.id === 'inversion' ? 'Rentabilidad bruta' : activeProfile.id === 'alquiler' ? 'Precio medio de alquiler' : activeProfile.id === 'compra' ? 'Precio medio de compra' : 'Precio medio de venta'} · {activeProfile.id === 'inversion' ? '%' : '€/m²'}</h3>
-                      {isMobile && <FullscreenToggle targetSelector=".v2-heatmap-card" mobilePlatform />}
+                      <span>{activeProfile.id === 'inversion' ? 'Evolución de rentabilidad (%)' : activeProfile.id === 'alquiler' ? 'Evolución del alquiler (€/m²)' : activeProfile.id === 'compra' ? 'Evolución del precio de compra (€/m²)' : 'Evolución del precio de venta (€/m²)'}</span>
+                      <small>Pulsa un mes para actualizar el ranking</small>
                     </div>
-                    <div className="v2-heatmap-meta v2-heatmap-meta--stacked">
-                      <small className="v2-heatmap-period">{rankingLevel} · enero–diciembre de {selectedYear}</small>
-                      <div className="v2-heatmap-legend" data-profile={activeProfile.id}>
-                        <span>{activeProfile.id === 'inversion' ? 'Menor rentabilidad' : 'Menor precio'}</span>
-                        <span className="v2-heatmap-legend-scale" aria-hidden="true" />
-                        <span>{activeProfile.id === 'inversion' ? 'Mayor rentabilidad' : 'Mayor precio'}</span>
-                        <InfoTooltip
-                          title="Escala de color"
-                          description="El tono más intenso indica un valor mayor; la escala se ajusta a los datos cargados."
-                          align="right"
-                        />
-                      </div>
-                    </div>
+                    {isMobile && <FullscreenToggle targetSelector=".v2-heatmap-card" mobilePlatform />}
                   </div>
                   <input className="v2-heatmap-search" type="search" value={heatmapSearch} onChange={event => setHeatmapSearch(event.target.value)} placeholder={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'}…`} aria-label={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'} en el mapa de calor`} />
                   <DashboardHeatmapTable
                     rows={filteredHeatmapRows}
-                    loading={isHeatmapLoading}
                     profileId={activeProfile.id}
                     level={rankingLevel}
                     year={selectedYear}
@@ -3908,6 +3882,11 @@ const MadridDashboardV2: React.FC = () => {
                     selectedMonth={selectedMonth}
                     formatValue={value => formatNumber(activeProfile.id === 'inversion' ? value * 100 : value, 1)}
                   />
+                  {Number(selectedYear) === 2026 && (
+                    <div className="v2-heatmap-data-note">
+                      Datos reales hasta <strong>{latestRealMonth} de {latestRealYear}</strong>; desde <strong>{firstProjectionMonth}</strong>, estimaciones. {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un precio €/m² más alto.'}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
