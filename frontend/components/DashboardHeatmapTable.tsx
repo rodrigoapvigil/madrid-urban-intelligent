@@ -55,24 +55,33 @@ export default function DashboardHeatmapTable({
     >
       <table className="v2-heatmap-table">
         <colgroup>
-          <col className="v2-col-zone" style={{ width: '124px', minWidth: '124px' }} />
+          <col className="v2-col-zone" style={{ width: '124px' }} />
           {MONTHS.map((m) => (
-            <col key={m} className="v2-col-month" style={{ minWidth: '44px' }} />
+            <col key={m} className="v2-col-month" style={{ width: 'calc((100% - 124px) / 12)' }} />
           ))}
         </colgroup>
         <caption className="v2-heatmap-sr-only">
           {profileId === 'inversion' ? 'Rentabilidad bruta' : profileId === 'alquiler' ? 'Precio medio de alquiler' : profileId === 'compra' ? 'Precio medio de compra' : 'Precio medio de venta'} por {level.toLocaleLowerCase('es')} de enero a diciembre de {year}, en {unit}.
         </caption>
         <thead>
-          <tr className="v2-heatmap-period-groups">
-            <th scope="col" rowSpan={2} className="v2-heatmap-zone-head">{level === 'Distritos' ? 'Distrito' : 'Barrio'}</th>
-            {realMonthCount > 0 && <th scope="colgroup" className="v2-heatmap-real-group" colSpan={realMonthCount}>Dato real</th>}
-            {estimateMonthCount > 0 && <th scope="colgroup" className="v2-heatmap-estimate-group" colSpan={estimateMonthCount}>Estimación</th>}
+          <tr className="v2-heatmap-month-head">
+            <th scope="col" className="v2-heatmap-zone-head">{level === 'Distritos' ? 'Distrito' : 'Barrio'}</th>
+            {MONTHS.map((month, monthIndex) => {
+              const monthStatus = monthIndex < realMonthCount ? 'dato real' : 'estimación';
+              return (
+                <th
+                  key={month}
+                  scope="col"
+                  aria-label={`${month} ${year}, ${monthStatus}`}
+                  title={`${month} ${year} · ${monthStatus}`}
+                  className={`${hoveredMonth === monthIndex ? 'is-hovered-column ' : ''}${selectedMonthIndex === monthIndex ? 'is-selected-month ' : ''}${monthIndex === realMonthCount && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : ''}`}
+                  onMouseEnter={() => setHoveredMonth(monthIndex)}
+                >
+                  {month.slice(0, 3)}
+                </th>
+              );
+            })}
           </tr>
-          <tr className="v2-heatmap-month-head">{MONTHS.map((month, monthIndex) => {
-            const monthStatus = monthIndex < realMonthCount ? 'dato real' : 'estimación';
-            return <th key={month} scope="col" aria-label={`${month} ${year}, ${monthStatus}`} title={`${month} ${year} · ${monthStatus}`} className={`${hoveredMonth === monthIndex ? 'is-hovered-column ' : ''}${selectedMonthIndex === monthIndex ? 'is-selected-month ' : ''}${monthIndex === realMonthCount && realMonthCount > 0 ? 'v2-heatmap-estimated-start' : ''}`} onMouseEnter={() => setHoveredMonth(monthIndex)}>{month.slice(0, 3)}</th>;
-          })}</tr>
         </thead>
         <tbody>
           {loading ? (
