@@ -33,14 +33,7 @@ export default function DashboardHeatmapTable({
   const estimateMonthCount = 12 - realMonthCount;
   const selectedMonthIndex = MONTHS.findIndex(month => month.toLocaleLowerCase('es') === selectedMonth.toLocaleLowerCase('es'));
   const textColorFor = (opacity: number) => {
-    const base = [1 / 255, 16 / 255, 36 / 255];
-    const channels = cellColor.slice(1).match(/.{2}/g)?.map(channel => parseInt(channel, 16) / 255) || [0, 0, 0];
-    const linear = channels.map(channel => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
-    const baseLinear = base.map(channel => channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4);
-    const luminance = linear.reduce((sum, channel, index) => sum + (channel * opacity + baseLinear[index] * (1 - opacity)) * [0.2126, 0.7152, 0.0722][index], 0);
-    const darkContrast = (luminance + 0.05) / 0.05;
-    const lightContrast = 1.05 / (luminance + 0.05);
-    return darkContrast >= lightContrast ? '#031528' : '#ffffff';
+    return opacity >= 0.48 ? '#011024' : '#ffffff';
   };
 
   const unit = profileId === 'inversion' ? '%' : '€/m²';
@@ -55,17 +48,21 @@ export default function DashboardHeatmapTable({
     >
       <table className="v2-heatmap-table">
         <colgroup>
-          <col className="v2-col-zone" style={{ width: '124px' }} />
+          <col className="v2-col-zone" style={{ width: '16%', minWidth: '110px' }} />
           {MONTHS.map((m) => (
-            <col key={m} className="v2-col-month" style={{ width: 'calc((100% - 124px) / 12)' }} />
+            <col key={m} className="v2-col-month" style={{ width: '7%', minWidth: '44px' }} />
           ))}
         </colgroup>
         <caption className="v2-heatmap-sr-only">
           {profileId === 'inversion' ? 'Rentabilidad bruta' : profileId === 'alquiler' ? 'Precio medio de alquiler' : profileId === 'compra' ? 'Precio medio de compra' : 'Precio medio de venta'} por {level.toLocaleLowerCase('es')} de enero a diciembre de {year}, en {unit}.
         </caption>
         <thead>
+          <tr className="v2-heatmap-period-groups">
+            <th scope="col" rowSpan={2} className="v2-heatmap-zone-head">{level === 'Distritos' ? 'Distrito' : 'Barrio'}</th>
+            {realMonthCount > 0 && <th scope="colgroup" className="v2-heatmap-real-group" colSpan={realMonthCount}>Dato real</th>}
+            {estimateMonthCount > 0 && <th scope="colgroup" className="v2-heatmap-estimate-group" colSpan={estimateMonthCount}>Estimación</th>}
+          </tr>
           <tr className="v2-heatmap-month-head">
-            <th scope="col" className="v2-heatmap-zone-head">{level === 'Distritos' ? 'Distrito' : 'Barrio'}</th>
             {MONTHS.map((month, monthIndex) => {
               const monthStatus = monthIndex < realMonthCount ? 'dato real' : 'estimación';
               return (
