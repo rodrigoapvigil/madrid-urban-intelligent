@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { cssColorResolverPlugin, colorWithAlpha, resolveCssColor } from '../lib/colors';
-import { Activity, Building2, ChevronDown, HelpCircle, Home, Maximize2, RotateCcw, RotateCw, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Activity, Building2, ChevronDown, Compass, HelpCircle, Home, Info, Maximize2, RotateCcw, RotateCw, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
 import './MadridDashboardV2.css';
 import './TrustArchitecture.css';
 import { TrustTelemetryBadge } from './TrustTelemetryBadge';
@@ -2864,6 +2864,36 @@ const MadridDashboardV2: React.FC = () => {
       <main className="v2-viewport" style={{ height: containerHeight }}>
         {PROFILES.map((p, i) => (
           <div key={p.id} ref={i === profileIdx ? activePanelRef : null} className={`v2-panel ${getSlideClass(i)}`}>
+
+            {/* BANNER DE VERIFICABILIDAD OFICIAL Y TRANSPARENCIA (PRIMERA PANTALLA) */}
+            <div className="v2-first-screen-trust-banner">
+              <div className="v2-trust-banner-col v2-trust-banner-source">
+                <span className="v2-telemetry-led" aria-hidden="true" />
+                <span>
+                  <strong>Fuente:</strong> Portal de Datos Abiertos del Ayuntamiento de Madrid & Registradores
+                </span>
+                <span className="v2-trust-banner-badge">ACTUALIZADO A: {selectedMonth.toUpperCase()} {selectedYear}</span>
+              </div>
+
+              <div className="v2-trust-banner-col v2-trust-banner-links">
+                <button
+                  type="button"
+                  className="v2-trust-methodology-link"
+                  onClick={() => setShowMethodologyDrawer(true)}
+                  title="Abrir ficha técnica y metodología completa"
+                >
+                  <Compass size={14} className="v2-compass-pulse-icon" aria-hidden="true" />
+                  <span>Cómo calculamos las estimaciones y márgenes de error</span>
+                </button>
+              </div>
+
+              <div className="v2-trust-banner-col v2-trust-banner-clarification">
+                <Info size={13} aria-hidden="true" />
+                <span>
+                  Estimaciones <strong>brutas</strong> de mercado. {p.id === 'inversion' ? 'Usa el conmutador [ Neta ] para calibrar con costes reales.' : 'Activa costes netos en perfil Inversión.'}
+                </span>
+              </div>
+            </div>
 
             {/* KPI & MAPA SECTION */}
             <div className="v2-grid-main" data-dashboard-section="summary">

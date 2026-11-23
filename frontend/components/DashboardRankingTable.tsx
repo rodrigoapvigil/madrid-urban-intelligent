@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode, useMemo } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 import SegmentedControl from './SegmentedControl';
 
 type RankingRow = { name: string; value: number };
@@ -62,17 +62,29 @@ export default function DashboardRankingTable({
   const zoneLabel = level === 'Distritos' ? 'distritos' : 'barrios';
   const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').trim();
   const monthlyByZone = useMemo(() => new Map(monthlyRows.map(row => [normalize(String(row.zona || '')), row])), [monthlyRows]);
-  const sortedRows = useMemo(() => [...rows].sort((a, b) => {
-    if (order === 'increase') {
-      const delta = (row: RankingRow) => {
-        const previous = previousValues[normalize(row.name)];
-        return previous > 0 ? (row.value - previous) / previous : Number.NEGATIVE_INFINITY;
-      };
-      return delta(b) - delta(a);
+  const [minYieldThreshold, setMinYieldThreshold] = useState<number | null>(null);
+
+  const sortedRows = useMemo(() => {
+    let filtered = [...rows];
+    if (isInvestment && minYieldThreshold !== null) {
+      filtered = filtered.filter(row => {
+        const rawVal = Number(row.value) || 0;
+        const pct = rawVal > 1 ? rawVal : rawVal * 100;
+        return pct >= minYieldThreshold;
+      });
     }
-    if (order === 'expensive' || order === 'demand-high' || order === 'yield-high') return b.value - a.value;
-    return a.value - b.value;
-  }), [rows, order, previousValues]);
+    return filtered.sort((a, b) => {
+      if (order === 'increase') {
+        const delta = (row: RankingRow) => {
+          const previous = previousValues[normalize(row.name)];
+          return previous > 0 ? (row.value - previous) / previous : Number.NEGATIVE_INFINITY;
+        };
+        return delta(b) - delta(a);
+      }
+      if (order === 'expensive' || order === 'demand-high' || order === 'yield-high') return b.value - a.value;
+      return a.value - b.value;
+    });
+  }, [rows, order, previousValues, isInvestment, minYieldThreshold]);
 
   const title = isDemand
     ? `Top 10 ${zoneLabel} con ${order === 'demand-low' ? 'menos' : 'más'} demanda`
@@ -96,6 +108,31 @@ export default function DashboardRankingTable({
       </div>
       <div className="v2-ranking-controls">
         {isPriceProfile && <SegmentedControl<'total' | 'unit'> label="Unidad mostrada" size="sm" value={metric} options={[{ value: 'total', label: profileId === 'alquiler' ? '€/mes' : '€' }, { value: 'unit', label: '€/m²' }] as const} onChange={onMetricChange} />}
+        {isInvestment && (
+          <div className="v2-ranking-yield-filter" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <span style={{ fontSize: '10px', color: '#8ea5b7', fontWeight: '600', textTransform: 'uppercase' }}>Rent. mín:</span>
+            {[null, 5, 6, 7].map(thresh => (
+              <button
+                key={thresh === null ? 'all' : thresh}
+                type="button"
+                onClick={() => setMinYieldThreshold(thresh)}
+                style={{
+                  padding: '3px 7px',
+                  borderRadius: '6px',
+                  border: minYieldThreshold === thresh ? '1px solid #E879F9' : '1px solid rgba(186, 204, 214, 0.18)',
+                  background: minYieldThreshold === thresh ? 'rgba(232, 121, 249, 0.2)' : 'transparent',
+                  color: minYieldThreshold === thresh ? '#ffffff' : '#a9bed0',
+                  fontSize: '10.5px',
+                  fontWeight: minYieldThreshold === thresh ? '700' : '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.16s ease'
+                }}
+              >
+                {thresh === null ? 'Todas' : `> ${thresh}%`}
+              </button>
+            ))}
+          </div>
+        )}
         <select className="v2-ranking-order" aria-label="Orden del Top 10" value={orderValue} onChange={event => onOrderChange(event.target.value as OrderMode)}>
           {orderOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
