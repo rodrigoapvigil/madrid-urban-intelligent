@@ -5,11 +5,12 @@
   background: rgba(1, 16, 36, 0.92);
   border: 1px solid rgba(186, 204, 214, 0.16);
   border-radius: 16px;
-  padding: 18px 20px;
+  padding: 16px 18px;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   width: 100%;
+  height: 100%;
   box-sizing: border-box;
 }
 
@@ -18,14 +19,14 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
 }
 
 .hdm-title-group {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .hdm-title {
@@ -37,7 +38,7 @@
 }
 
 .hdm-subtitle {
-  font-size: 11.5px;
+  font-size: 11px;
   color: #8fa6ba;
 }
 
@@ -48,47 +49,32 @@
   flex-wrap: wrap;
 }
 
-.hdm-search-input {
-  box-sizing: border-box;
-  width: 180px;
-  min-height: 32px;
-  padding: 5px 10px;
-  border: 1px solid rgba(186, 204, 214, 0.2);
-  border-radius: 8px;
-  background: rgba(2, 24, 52, 0.8);
-  color: #ffffff;
-  font-size: 11.5px;
-  outline: none;
-  transition: border-color 0.18s ease;
-}
-
-.hdm-search-input:focus {
-  border-color: #00e5ff;
-  box-shadow: 0 0 8px rgba(0, 229, 255, 0.2);
-}
-
 .hdm-scale-legend {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   font-size: 11px;
   color: #8fa6ba;
 }
 
 .hdm-scale-bar {
-  width: 70px;
-  height: 6px;
-  border-radius: 3px;
+  width: 110px;
+  height: 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(186, 204, 214, 0.2);
 }
 
+/* Altura aumentada (+52px) para cerrar el hueco inferior y emparejar con el ranking */
 .hdm-table-scroll {
   width: 100%;
-  max-height: 480px;
+  flex: 1 1 auto;
+  max-height: 540px;
+  height: 540px;
   overflow-y: auto;
   overflow-x: hidden;
-  border: 1px solid rgba(186, 204, 214, 0.12);
+  border: 1px solid rgba(186, 204, 214, 0.14);
   border-radius: 10px;
-  background: rgba(0, 10, 22, 0.4);
+  background: rgba(0, 10, 22, 0.45);
   scrollbar-width: thin;
   scrollbar-color: #193954 #041226;
 }
@@ -112,7 +98,7 @@
   table-layout: fixed !important;
   border-collapse: separate !important;
   border-spacing: 2px !important;
-  font-size: 11.5px;
+  font-size: 11px;
   margin: 0;
   padding: 0;
 }
@@ -126,26 +112,84 @@
   font-weight: 600;
   font-size: 11px;
   text-align: center;
-  padding: 8px 2px;
+  padding: 7px 1px;
   border-bottom: 1px solid rgba(186, 204, 214, 0.2);
   user-select: none;
 }
 
+/* Buscador integrado en la esquina lateral superior izquierda (th de Distrito/Barrio) */
 .hdm-th-district {
   position: sticky;
   left: 0;
   top: 0;
   z-index: 10;
-  width: 130px;
-  min-width: 130px;
-  max-width: 130px;
+  width: 135px;
+  min-width: 135px;
+  max-width: 135px;
   text-align: left;
-  padding-left: 10px;
+  padding: 4px 6px;
   background: #051426;
 }
 
+.hdm-th-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.hdm-th-search-icon {
+  position: absolute;
+  left: 6px;
+  color: #00e5ff;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.hdm-th-search-input {
+  box-sizing: border-box;
+  width: 100%;
+  height: 26px;
+  padding: 2px 20px 2px 22px;
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 6px;
+  background: rgba(1, 20, 42, 0.95);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.hdm-th-search-input::placeholder {
+  color: #7d96aa;
+  font-weight: 500;
+}
+
+.hdm-th-search-input:focus {
+  border-color: #00e5ff;
+  background: rgba(2, 28, 58, 1);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.35);
+}
+
+.hdm-th-search-clear {
+  position: absolute;
+  right: 5px;
+  background: none;
+  border: none;
+  color: #8fa6ba;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.hdm-th-search-clear:hover {
+  color: #ffffff;
+}
+
 .hdm-th-month {
-  width: calc((100% - 130px) / 12);
+  width: calc((100% - 135px) / 12);
 }
 
 .hdm-th-month.is-selected {
@@ -155,7 +199,7 @@
 
 .hdm-est-mark {
   color: #00e676;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 700;
   margin-left: 1px;
   vertical-align: super;
@@ -173,26 +217,26 @@
   position: sticky;
   left: 0;
   z-index: 6;
-  width: 130px;
-  min-width: 130px;
-  max-width: 130px;
+  width: 135px;
+  min-width: 135px;
+  max-width: 135px;
   background: #061426;
   color: #d1e2f0;
   font-weight: 550;
   font-size: 11.5px;
   text-align: left;
-  padding: 6px 10px;
+  padding: 5px 8px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.25);
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.3);
 }
 
 .hdm-cell {
   text-align: center;
-  padding: 6px 2px;
+  padding: 5px 1px;
   border-radius: 4px;
-  font-size: 11px;
+  font-size: 10.5px;
   font-variant-numeric: tabular-nums;
   cursor: default;
   transition: transform 0.1s ease, filter 0.1s ease;
@@ -203,14 +247,14 @@
 
 .hdm-cell:hover {
   transform: scale(1.08);
-  filter: brightness(1.25);
+  filter: brightness(1.22);
   z-index: 4;
   position: relative;
-  box-shadow: 0 0 8px rgba(0, 229, 255, 0.4);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
 }
 
 .hdm-cell-no-data {
-  color: #61778c;
+  color: #586e80;
   background: rgba(5, 20, 38, 0.5);
   font-size: 10px;
 }
@@ -219,9 +263,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   margin-top: 10px;
-  padding: 8px 12px;
+  padding: 7px 10px;
   border-radius: 8px;
   background: rgba(0, 10, 22, 0.45);
   border: 1px solid rgba(186, 204, 214, 0.1);
@@ -234,26 +278,34 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
 .hdm-footer-left strong {
   color: #cde4f7;
 }
 
+.hdm-footer-sub {
+  font-size: 10.5px;
+  color: #688299;
+}
+
 @media (max-width: 768px) {
   .hdm-card {
-    padding: 14px 12px;
+    padding: 12px 10px;
   }
   .hdm-table-scroll {
     overflow-x: auto;
+    max-height: 480px;
+    height: auto;
   }
   .hdm-table {
-    min-width: 600px;
+    min-width: 640px;
   }
   .hdm-th-district,
   .hdm-td-district {
-    width: 105px;
-    min-width: 105px;
-    max-width: 105px;
+    width: 110px;
+    min-width: 110px;
+    max-width: 110px;
   }
 }

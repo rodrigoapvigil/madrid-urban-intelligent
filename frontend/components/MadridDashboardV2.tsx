@@ -3996,11 +3996,9 @@ const MadridDashboardV2: React.FC = () => {
                 <HeatmapDistritosMeses
                   rows={heatmapData}
                   profileId={activeProfile.id}
+                  level={rankingLevel}
                   year={selectedYear}
-                  min={heatmapMin}
-                  max={heatmapMax}
                   selectedMonth={selectedMonth}
-                  formatValue={value => formatNumber(value, 1)}
                 />
               </div>
             </div>
