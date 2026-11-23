@@ -120,26 +120,6 @@ export function SiteHeader({
 
         {/* Header action slot; the dashboard can place its shared period control here. */}
         <div className="mi-header__actions-wrap" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {onOpenMethodology ? (
-            <button
-              type="button"
-              className="mi-methodology-header-btn"
-              onClick={onOpenMethodology}
-              title="Ver metodología y trazabilidad del proyecto"
-            >
-              <Compass size={14} className="v2-compass-pulse-icon" aria-hidden="true" />
-              <span>Metodología</span>
-            </button>
-          ) : (
-            <Link
-              href="/metodologia"
-              className="mi-methodology-header-btn"
-              title="Ver metodología y trazabilidad del proyecto"
-            >
-              <Compass size={14} className="v2-compass-pulse-icon" aria-hidden="true" />
-              <span>Metodología</span>
-            </Link>
-          )}
           {desktopAction ? <div className="mi-header__desktop-action">{desktopAction}</div> : <Link
             href={effectiveCtaHref}
             className={`mi-header__cta${effectiveCtaHref === '/contacto' ? ' mi-header__cta--secondary' : ''}`}

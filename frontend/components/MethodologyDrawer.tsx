@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, BookOpen, Database, BarChart3, Binary, ShieldCheck, ExternalLink, Check, Layers, Cpu, Compass } from 'lucide-react';
+import { X, Database, BarChart3, Binary, ShieldCheck, Check, Compass, Layers, GitBranch, TrendingUp, Info } from 'lucide-react';
 
 interface MethodologyDrawerProps {
   isOpen: boolean;
@@ -11,7 +11,7 @@ interface MethodologyDrawerProps {
 export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, onClose }) => {
   const [activeTab, setActiveTab] = useState<'fuentes' | 'algoritmo' | 'metricas'>('fuentes');
 
-  // Close on Escape key and prevent background scroll
+  // Bloquear completamente el scroll tanto en html como en body para evitar el doble scroll en navegadores de escritorio
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
@@ -20,16 +20,18 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
     };
 
     if (isOpen) {
+      const prevHtmlOverflow = document.documentElement.style.overflow;
+      const prevBodyOverflow = document.body.style.overflow;
+      document.documentElement.style.overflow = 'hidden';
       document.body.style.overflow = 'hidden';
       window.addEventListener('keydown', handleKeyDown);
-    } else {
-      document.body.style.overflow = '';
-    }
 
-    return () => {
-      document.body.style.overflow = '';
-      window.removeEventListener('keydown', handleKeyDown);
-    };
+      return () => {
+        document.documentElement.style.overflow = prevHtmlOverflow;
+        document.body.style.overflow = prevBodyOverflow;
+        window.removeEventListener('keydown', handleKeyDown);
+      };
+    }
   }, [isOpen, onClose]);
 
   if (!isOpen) return null;
@@ -108,7 +110,7 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
                 <div>
                   <h4>Cero datos sintéticos ni inferencias no declaradas</h4>
                   <p>
-                    DMIYC no utiliza encuestas informales ni datos inflados de portales comerciales sin depuración. Cada precio nace de registros administrativos y bases de datos públicas auditadas.
+                    DMIYC no utiliza encuestas informales ni precios inflados de portales comerciales sin depuración. Cada precio nace de registros administrativos y bases de datos públicas auditadas.
                   </p>
                 </div>
               </div>
@@ -117,7 +119,7 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
                 <div className="v2-source-card">
                   <div className="v2-source-header">
                     <span className="v2-source-badge">DATOS MUNICIPALES</span>
-                    <span className="v2-source-freq">Actualización trimestral</span>
+                    <span className="v2-source-freq">Actualización periódica oficial</span>
                   </div>
                   <h3>Banco de Datos Abiertos del Ayuntamiento de Madrid</h3>
                   <p>
@@ -136,41 +138,56 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
                   </div>
                   <h3>Colegio de Registradores de la Propiedad de España</h3>
                   <p>
-                    Estadística Registral Inmobiliaria de precios reales de cierre en escritura pública notarial, excluyendo márgenes de negociación u ofertas desactualizadas.
+                    Estadística Registral Inmobiliaria de precios reales de cierre en escritura pública notarial, excluyendo márgenes de negociación u ofertas desactualizadas, junto con importes de hipoteca media y tipos de interés efectivos.
                   </p>
                   <div className="v2-source-meta">
-                    <span>Validez jurídica</span>
+                    <span>Validez jurídica de cierre</span>
                     <span>Transacciones de compra y venta</span>
                   </div>
                 </div>
 
                 <div className="v2-source-card">
                   <div className="v2-source-header">
-                    <span className="v2-source-badge">PARQUE EDIFICATORIO</span>
-                    <span className="v2-source-freq">Ministerio de Hacienda</span>
+                    <span className="v2-source-badge">INFRAESTRUCTURA URBANA</span>
+                    <span className="v2-source-freq">Red OpenStreetMap (OSMnx)</span>
                   </div>
-                  <h3>Dirección General del Catastro</h3>
+                  <h3>Dotación de Equipamientos y Servicios Esenciales</h3>
                   <p>
-                    Antigüedad del parque residencial, tipologías constructivas, superficies construidas catastrales y densidades edificatorias de cada manzana de Madrid.
+                    Cálculo geoespacial de distancias proyectadas a estaciones de Metro, cercanías, hospitales, colegios, universidades y parques, cuantificando el valor intrínseco de accesibilidad y bienestar residencial.
                   </p>
                   <div className="v2-source-meta">
-                    <span>Base física de inmuebles</span>
-                    <span>Normalización de superficies (€/m²)</span>
+                    <span>Accesibilidad urbana multimodal</span>
+                    <span>Proyección geoespacial UTM</span>
                   </div>
                 </div>
 
                 <div className="v2-source-card">
                   <div className="v2-source-header">
-                    <span className="v2-source-badge">DEMOGRAFÍA Y RENTA</span>
-                    <span className="v2-source-freq">INE Atlas</span>
+                    <span className="v2-source-badge">DEMOGRAFÍA Y MACROECONOMÍA</span>
+                    <span className="v2-source-freq">INE & Banco de España</span>
                   </div>
-                  <h3>Instituto Nacional de Estadística (INE)</h3>
+                  <h3>Instituto Nacional de Estadística (INE) & Banco de España</h3>
                   <p>
-                    Atlas de Distribución de Renta de los Hogares a nivel de sección censal, tasas de esfuerzo financiero real y ratios de poder adquisitivo por vecindario.
+                    Atlas de Distribución de Renta de los Hogares a nivel de sección censal, tasas de esfuerzo financiero real y series oficiales de tipos hipotecarios de referencia y Euribor.
                   </p>
                   <div className="v2-source-meta">
                     <span>Renta neta per cápita</span>
                     <span>Cálculo de esfuerzo de alquiler y compra</span>
+                  </div>
+                </div>
+
+                <div className="v2-source-card">
+                  <div className="v2-source-header">
+                    <span className="v2-source-badge">PARQUE EDIFICATORIO</span>
+                    <span className="v2-source-freq">Dirección General del Catastro</span>
+                  </div>
+                  <h3>Normalización Física y Catastral</h3>
+                  <p>
+                    Antigüedad del parque residencial, superficies construidas medias y densidades edificatorias por zona, empleadas para la normalización rigurosa de superficies y precios unitarios (€/m²).
+                  </p>
+                  <div className="v2-source-meta">
+                    <span>Base física del inmueble</span>
+                    <span>Homogeneización de tipologías</span>
                   </div>
                 </div>
               </div>
@@ -181,29 +198,46 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
           {activeTab === 'algoritmo' && (
             <div className="v2-drawer-tab-content">
               <div className="v2-math-block">
-                <h4>Arquitectura Econométrica del TFM</h4>
+                <h4>Arquitectura Predictiva Híbrida y Trazabilidad Algorítmica</h4>
                 <p>
-                  El motor predictivo de DMIYC combina un <strong>modelo hedónico multivariante</strong> con un ensamble de <strong>Gradient Boosting regularizado (LightGBM)</strong> y series temporales autorregresivas <strong>ARIMA/SARIMAX</strong>.
+                  El motor predictivo de DMIYC combina un <strong>modelo jerárquico híbrido</strong> con algoritmos de Gradient Boosting diferenciados por mercado (<strong>LightGBM para Alquiler</strong> y <strong>XGBoost para Venta</strong>), un router de fallback por densidad muestral y un modelo hedónico multivariante con dinámica temporal.
                 </p>
 
                 <div className="v2-formula-card">
-                  <div className="v2-formula-badge">FORMULACIÓN HEDÓNICA BASE</div>
+                  <div className="v2-formula-badge">FORMULACIÓN HEDÓNICA Y DINÁMICA TEMPORAL</div>
                   <div className="v2-formula-code">
-                    <code>{"P(i,t) = α_i + Σ [β_k · X(k,i,t)] + Σ [γ_m · Lag_m(P)] + δ_t + ε(i,t)"}</code>
+                    <code>{"P(i,t) = α_i + Σ [β_k · X(k,i,t)] + Σ [γ_m · Lag_m(P)] + w(t) · Shock_2025 + ε(i,t)"}</code>
                   </div>
                   <ul className="v2-formula-legend">
                     <li><strong>P(i,t)</strong>: Precio estimado por m² en la zona <em>i</em> y mes <em>t</em>.</li>
-                    <li><strong>X(k,i,t)</strong>: Variables explicativas (renta del hogar, antigüedad media, transacciones, proximidad al centro).</li>
-                    <li><strong>Lag_m</strong>: Inercia histórica de precios con desfases de hasta 12 meses.</li>
-                    <li><strong>δ_t</strong>: Efectos temporales fijos y estacionalidad trimestral.</li>
-                    <li><strong>{"ε(i,t) ~ N(0, σ_i²)"}</strong>: Término de error estocástico con heterocedasticidad controlada.</li>
+                    <li><strong>X(k,i,t)</strong>: Variables explicativas (distancias a transporte público/POIs, renta media censal, tipo de interés hipotecario, superficie media).</li>
+                    <li><strong>Lag_m</strong>: Inercia histórica con retardos autorregresivos (1, 3 y 12 meses) y media móvil semestral (<em>rolling mean</em>).</li>
+                    <li><strong>w(t) · Shock_2025</strong>: Ponderador de madurez temporal (<em>shock_weight</em>) con rampa lineal durante 2025 (de 0,083 a 1,0) y anclaje unitario para 2026, modelando la aceleración progresiva de precios.</li>
+                    <li><strong>{"ε(i,t)"}</strong>: Término de error estocástico con regularización L1/L2 para blindar la generalización.</li>
+                  </ul>
+                </div>
+
+                <div className="v2-sub-section">
+                  <h5>Lógica Jerárquica Híbrida con Router de Fallback</h5>
+                  <p>
+                    Para resolver la heterogeneidad de volumen muestral entre zonas consolidadas y vecindarios periféricos, el sistema implementa un enrutador inteligente de dos niveles:
+                  </p>
+                  <ul className="v2-benchmarks-list" style={{ marginTop: '10px' }}>
+                    <li>
+                      <Check size={14} className="v2-check-icon" />
+                      <span><strong>Modelo Granular de Barrio</strong> (para zonas con ≥ 20 observaciones de entrenamiento): Activo en el <strong>91% de los barrios</strong> de Madrid, capturando identidades de precio hiperlocales (MAE de 111,99 €/m² en venta y 0,49 €/m² en alquiler).</span>
+                    </li>
+                    <li>
+                      <Check size={14} className="v2-check-icon" />
+                      <span><strong>Modelo Generalista de Distrito (Fallback Robusto)</strong>: Si un barrio tiene &lt; 20 observaciones históricas (zonas de baja rotación o periferia), el router deriva automáticamente al modelo de distrito, evitando sobreajustes y garantizando una base estadística sólida.</span>
+                    </li>
                   </ul>
                 </div>
 
                 <div className="v2-sub-section">
                   <h5>Validación Temporal Estricta (Time-Series Split)</h5>
                   <p>
-                    Para garantizar la honestidad intelectual y evitar cualquier tipo de fuga de información (<em>data leakage</em>), el modelo se entrena exclusivamente con datos pasados mediante ventanas temporales deslizantes (<em>expanding window</em>). Nunca una observación futura influye en las proyecciones pasadas.
+                    Para garantizar rigor científico y evitar fuga de información (<em>data leakage</em>), el modelo se evalúa exclusivamente en orden cronológico hacia adelante (<em>walk-forward validation</em>). Jamás una observación futura interviene en las proyecciones pasadas o presentes.
                   </p>
                 </div>
 
@@ -211,10 +245,10 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
                   <h5>Cálculo del Intervalo de Confianza (IC 95%)</h5>
                   <div className="v2-formula-card v2-formula-card--secondary">
                     <div className="v2-formula-code">
-                      <code>{"IC(95%) = P̂(i,t) ± 1,96 · σ̂_i · √(1 + h/12)"}</code>
+                      <code>{"IC(95%) = P̂(i,t) ± 1,96 · σ̂_zona · √(1 + h/12)"}</code>
                     </div>
                     <p className="v2-formula-note">
-                      El margen de incertidumbre se expande de forma realista a medida que el horizonte de predicción <em>h</em> se aleja en el tiempo, reflejando el incremento natural de entropía en proyecciones futuras.
+                      El margen de incertidumbre se escala proporcionalmente a la volatilidad histórica de la zona y al horizonte temporal de predicción <em>h</em>, reflejando el incremento natural de entropía a futuro.
                     </p>
                   </div>
                 </div>
@@ -228,70 +262,88 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
               <div className="v2-metrics-summary">
                 <h4>Validación Estadística del Modelo en Banco de Pruebas</h4>
                 <p>
-                  Métricas calculadas sobre el conjunto de test out-of-sample (meses no vistos durante el entrenamiento).
+                  Métricas empíricas reales obtenidas sobre el conjunto de test fuera de muestra (<em>out-of-sample</em>) evaluando estimaciones frente a datos reales de transacciones:
                 </p>
 
                 <div className="v2-metric-bars">
-                  {/* METRIC 1 */}
+                  {/* METRIC 1: R2 */}
                   <div className="v2-metric-bar-item">
                     <div className="v2-metric-bar-header">
                       <div>
-                        <strong>R² (Coeficiente de Determinación)</strong>
-                        <span>Capacidad explicativa de la varianza territorial</span>
+                        <strong>R² Venta · Modelo Granular Barrio (XGBoost)</strong>
+                        <span>Capacidad explicativa de la varianza territorial en compraventa</span>
                       </div>
-                      <span className="v2-metric-value v2-metric-value--cyan">0.912</span>
+                      <span className="v2-metric-value v2-metric-value--cyan">0.994 (99.4%)</span>
                     </div>
                     <div className="v2-metric-track">
-                      <div className="v2-metric-fill v2-metric-fill--cyan" style={{ width: '91.2%' }} />
+                      <div className="v2-metric-fill v2-metric-fill--cyan" style={{ width: '99.4%' }} />
                     </div>
-                    <small>Excelente: el modelo explica el 91,2% de la dispersión de precios en Madrid.</small>
+                    <small>Excelente: el modelo granular de venta explica el 99,44% de la varianza de precios por barrio.</small>
                   </div>
 
-                  {/* METRIC 2 */}
+                  {/* METRIC 2: R2 ALQUILER */}
                   <div className="v2-metric-bar-item">
                     <div className="v2-metric-bar-header">
                       <div>
-                        <strong>MAPE (Error Porcentual Absoluto Medio)</strong>
-                        <span>Desviación media relativa sobre precio real</span>
+                        <strong>R² Alquiler · Modelo Granular Barrio (LightGBM)</strong>
+                        <span>Capacidad explicativa de la dispersión mensual de rentas</span>
                       </div>
-                      <span className="v2-metric-value v2-metric-value--emerald">4.82%</span>
+                      <span className="v2-metric-value v2-metric-value--cyan">0.973 (97.3%)</span>
                     </div>
                     <div className="v2-metric-track">
-                      <div className="v2-metric-fill v2-metric-fill--emerald" style={{ width: '95.18%' }} />
+                      <div className="v2-metric-fill v2-metric-fill--cyan" style={{ width: '97.3%' }} />
                     </div>
-                    <small>Grado de precisión: error inferior al 5% en la mediana de zonas urbanas.</small>
+                    <small>Excelente: el modelo granular de alquiler explica el 97,33% de la varianza de rentas por m².</small>
                   </div>
 
-                  {/* METRIC 3 */}
+                  {/* METRIC 3: MAE / MAPE ALQUILER */}
                   <div className="v2-metric-bar-item">
                     <div className="v2-metric-bar-header">
                       <div>
-                        <strong>RMSE (Raíz del Error Cuadrático Medio)</strong>
-                        <span>Desviación estándar de los residuales</span>
+                        <strong>MAE y MAPE en Alquiler Granular</strong>
+                        <span>Error absoluto y relativo medio en el 91% del municipio</span>
                       </div>
-                      <span className="v2-metric-value v2-metric-value--blue">1.18 €/m²</span>
+                      <span className="v2-metric-value v2-metric-value--emerald">0,49 €/m² (MAPE 2.38%)</span>
                     </div>
                     <div className="v2-metric-track">
-                      <div className="v2-metric-fill v2-metric-fill--blue" style={{ width: '88.2%' }} />
+                      <div className="v2-metric-fill v2-metric-fill--emerald" style={{ width: '97.62%' }} />
                     </div>
-                    <small>En un alquiler de 20 €/m², la horquilla típica se sitúa en ±1,18 €/m².</small>
+                    <small>Precisión del 100% en la horquilla de control de ±20% (RMSE: 0,63 €/m²).</small>
+                  </div>
+
+                  {/* METRIC 4: MAE / MAPE VENTA */}
+                  <div className="v2-metric-bar-item">
+                    <div className="v2-metric-bar-header">
+                      <div>
+                        <strong>MAE y MAPE en Venta Granular</strong>
+                        <span>Error absoluto y relativo medio en el 91% del municipio</span>
+                      </div>
+                      <span className="v2-metric-value v2-metric-value--emerald">111,99 €/m² (MAPE 2.09%)</span>
+                    </div>
+                    <div className="v2-metric-track">
+                      <div className="v2-metric-fill v2-metric-fill--emerald" style={{ width: '97.91%' }} />
+                    </div>
+                    <small>Precisión del 100% en la horquilla de control de ±20% (RMSE: 155,15 €/m²).</small>
                   </div>
                 </div>
 
                 <div className="v2-benchmarks-card">
-                  <h5>Gobernanza de Calibración Continua</h5>
+                  <h5>Transparencia en Zonas de Fallback (9% Periferia / Baja Rotación)</h5>
+                  <p style={{ margin: '0 0 10px 0', fontSize: '12px', color: '#9cb2c4', lineHeight: '1.45' }}>
+                    En barrios con menos de 20 transacciones históricas (como Barajas o tramos específicos de chalets en El Viso), el sistema activa el fallback generalista de distrito:
+                  </p>
                   <ul className="v2-benchmarks-list">
                     <li>
                       <Check size={14} className="v2-check-icon" />
-                      <span><strong>Reentrenamiento programado</strong>: Se recalibra con cada publicación trimestral del Ayuntamiento.</span>
+                      <span><strong>Fallback Alquiler Distrito</strong>: MAE de 2,86 €/m² y MAPE de 12,56% (85,1% de precisión en rango ±20%).</span>
                     </li>
                     <li>
                       <Check size={14} className="v2-check-icon" />
-                      <span><strong>Detección de valores atípicos</strong>: Filtro automático de transacciones especulativas o no residenciales.</span>
+                      <span><strong>Fallback Venta Distrito</strong>: MAE de 1.277 €/m² y MAPE de 21,68% (protección estadística frente a muestras vacías).</span>
                     </li>
                     <li>
                       <Check size={14} className="v2-check-icon" />
-                      <span><strong>Cobertura total</strong>: Validación continua en los 131 barrios censales de la capital.</span>
+                      <span><strong>Diagnóstico de limitaciones</strong>: Efecto <em>Cold Start</em> en barrios incorporados a partir de 2024 (lags de 12 meses inactivos el primer año) y ausencia de mercado residencial en áreas logísticas.</span>
                     </li>
                   </ul>
                 </div>
@@ -303,16 +355,9 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
         {/* DRAWER FOOTER */}
         <div className="v2-drawer-footer">
           <div className="v2-drawer-footer__copy">
-            <span>Proyecto de Investigación Universitaria TFM · Madrid Urban Intelligent</span>
-            <small>Auditoría de Datos Abiertos bajo licencia pública Creative Commons BY-4.0</small>
+            <strong>DMIYC · Sistema de Inteligencia Urbana de Madrid</strong>
+            <small>Auditoría de Datos Abiertos y Trazabilidad Algorítmica bajo licencia Creative Commons BY-4.0</small>
           </div>
-          <button
-            type="button"
-            className="v2-drawer-footer__action"
-            onClick={onClose}
-          >
-            Entendido
-          </button>
         </div>
       </div>
     </div>
