@@ -2887,32 +2887,22 @@ const MadridDashboardV2: React.FC = () => {
         {PROFILES.map((p, i) => (
           <div key={p.id} ref={i === profileIdx ? activePanelRef : null} className={`v2-panel ${getSlideClass(i)}`}>
 
-            {/* BANNER DE VERIFICABILIDAD OFICIAL Y TRANSPARENCIA (PRIMERA PANTALLA) */}
-            <div className="v2-first-screen-trust-banner">
-              <div className="v2-trust-banner-col v2-trust-banner-source">
+            {/* LÍNEA EDITORIAL DE PROCEDENCIA Y TRANSPARENCIA (OPCIÓN B) */}
+            <div className="v2-first-screen-trust-editorial">
+              <div className="v2-trust-editorial-source">
                 <span className="v2-telemetry-led" aria-hidden="true" />
                 <span>
-                  <strong>Fuente:</strong> Portal de Datos Abiertos del Ayuntamiento de Madrid & Registradores
+                  Fuente oficial: <strong>Ayuntamiento de Madrid & Registradores de la Propiedad</strong>
                 </span>
-                <span className="v2-trust-banner-badge">ACTUALIZADO A: {selectedMonth.toUpperCase()} {selectedYear}</span>
-              </div>
-
-              <div className="v2-trust-banner-col v2-trust-banner-links">
-                <button
-                  type="button"
-                  className="v2-trust-methodology-link"
-                  onClick={() => setShowMethodologyDrawer(true)}
-                  title="Abrir ficha técnica y metodología completa"
-                >
-                  <Compass size={14} className="v2-compass-pulse-icon" aria-hidden="true" />
-                  <span>Cómo calculamos las estimaciones y márgenes de error</span>
-                </button>
-              </div>
-
-              <div className="v2-trust-banner-col v2-trust-banner-clarification">
-                <Info size={13} aria-hidden="true" />
+                <span className="v2-trust-editorial-dot" aria-hidden="true">·</span>
                 <span>
-                  Estimaciones <strong>brutas</strong> de mercado. {p.id === 'inversion' ? 'Usa el conmutador [ Neta ] para calibrar con costes reales.' : 'Activa costes netos en perfil Inversión.'}
+                  Actualizado: <strong style={{ color: '#00e676' }}>{selectedMonth.toUpperCase()} {selectedYear}</strong>
+                </span>
+              </div>
+
+              <div className="v2-trust-editorial-clarification">
+                <span>
+                  Estimaciones <strong>brutas</strong> de mercado {p.id === 'inversion' ? '(calibra costes reales con conmutador Neta)' : ''}
                 </span>
               </div>
             </div>
