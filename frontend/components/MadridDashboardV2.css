@@ -5110,3 +5110,20 @@ body.v2-fullscreen-open footer { display: none !important; }
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+.v2-root .v2-comp-kpis-wrapper {
+  margin-top: 14px;
+}
+
+.v2-root .v2-comp-kpis-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #8fa3b8;
+}

@@ -356,8 +356,8 @@ const ComparisonChartControls = ({
   isReloading?: boolean;
 }) => isMobile
   ? <ChartZoomControls chartId={chartId} mobilePlatform={isMobile} />
-  : <div className="v2-comparison-zoom-controls" role="group" aria-label="Controles de zoom de la gráfica">
-      {onReload && (
+  : onReload ? (
+      <div className="v2-comparison-zoom-controls" role="group" aria-label="Controles de la gráfica">
         <button
           type="button"
           title="Volver a cargar datos"
@@ -368,11 +368,8 @@ const ComparisonChartControls = ({
         >
           <RotateCw size={13} className={isReloading ? 'v2-spin' : ''} />
         </button>
-      )}
-      <button type="button" title="Acercar" aria-label="Acercar gráfica" onClick={() => updateChartZoom(chartId, 'in')}><ZoomIn size={15} /></button>
-      <button type="button" title="Alejar" aria-label="Alejar gráfica" onClick={() => updateChartZoom(chartId, 'out')}><ZoomOut size={15} /></button>
-      <button type="button" title="Restablecer zoom" aria-label="Restablecer zoom de la gráfica" onClick={() => updateChartZoom(chartId, 'reset')}><RotateCcw size={14} /></button>
-    </div>;
+      </div>
+    ) : null;
 
 type ComparisonLegendItem = { index: number; label: string; color: string; kind: 'real' | 'estimated' | 'madrid' };
 
@@ -699,6 +696,13 @@ const getComparisonKpiInfo = (metric: string, zoneName: string) => {
         description: `Indica cuánto cuesta de media cada metro cuadrado de alquiler aquí. Te permite comparar de forma directa si ${zoneName} es más cara o más barata que otras zonas, sin importar los metros que tenga cada piso.`,
         example: `Para una casa tipo de 80 m², si el precio es 23 €/m², el alquiler mensual rondará los 1.840 €.`,
         ruleOfThumb: `Es la cifra base para comparar el esfuerzo inicial que requiere mudarse a esta zona.`
+      };
+    case 'alquiler_medio':
+      return {
+        title: `Alquiler Medio Estimado (70 m²) · ${zoneName}`,
+        description: `Cálculo representativo del coste mensual total para una vivienda estándar de 70 m² en ${zoneName}, obtenido a partir del precio por metro cuadrado de la zona.`,
+        example: `Para un piso de 70 m² a 20 €/m², la mensualidad estimada de referencia se sitúa en torno a 1.400 €/mes.`,
+        ruleOfThumb: `Es la cifra más tangible para planificar tu presupuesto mensual real de vivienda frente a tus ingresos netos.`
       };
     case 'roi_alquiler':
       return {
@@ -1809,6 +1813,13 @@ const MadridDashboardV2: React.FC = () => {
                   boxWidth: 8,
                   boxHeight: 8,
                   filter: (item: any) => item.parsed?.y !== null && item.parsed?.y !== undefined,
+                  itemSort: (a: any, b: any) => {
+                    const aIsMadrid = a.datasetIndex === 0;
+                    const bIsMadrid = b.datasetIndex === 0;
+                    if (aIsMadrid && !bIsMadrid) return 1;
+                    if (!aIsMadrid && bIsMadrid) return -1;
+                    return 0;
+                  },
                   callbacks: {
                     labelColor: (context: any) => {
                       const color = context.dataset?.borderColor || '#E5F2F7';
@@ -1829,7 +1840,7 @@ const MadridDashboardV2: React.FC = () => {
 
                       if (val === null || val === undefined) return null;
 
-                      // La media es referencia estadística
+                      // La media es referencia estadística secundaria
                       if (context.datasetIndex === 0) {
                         const formatted = new Intl.NumberFormat('es-ES', {
                           minimumFractionDigits: comparisonMetric.decimals,
@@ -1852,23 +1863,28 @@ const MadridDashboardV2: React.FC = () => {
                       // 1. Precio y tipo de dato
                       lines.push(`${tipoDato}: ${valFormatted} ${unit}`);
 
-                      // 2. Comparativa vs Media de Madrid
+                      // 1.1 Valor mensual o total tangible estimado
+                      if (profileId === 'alquiler') {
+                        const estRent = Math.round(val * 70);
+                        lines.push(`~${new Intl.NumberFormat('es-ES').format(estRent)} €/mes · 70 m²`);
+                      } else if (profileId === 'compra' || profileId === 'venta') {
+                        const estTotal = Math.round(val * 80);
+                        lines.push(`~${new Intl.NumberFormat('es-ES').format(estTotal)} € · 80 m²`);
+                      }
+
+                      // 2. Comparativa vs Media de Madrid (sin repetición de cifra redundante)
                       const madridItem = effectiveMadridSeries.find(d => Number(d.mes) === idx + 1);
                       const madridVal = madridItem ? madridItem.precio_m2 * multiplier : null;
                       if (madridVal !== null && madridVal !== undefined && madridVal > 0) {
                         const diffMadrid = ((val - madridVal) / madridVal) * 100;
                         const absDiffMadrid = Math.abs(diffMadrid).toFixed(1);
-                        const madridFmt = new Intl.NumberFormat('es-ES', {
-                          minimumFractionDigits: comparisonMetric.decimals,
-                          maximumFractionDigits: comparisonMetric.decimals
-                        }).format(madridVal);
 
                         if (Math.abs(diffMadrid) <= 0.5) {
-                          lines.push(`vs. Media Madrid: A la par (${madridFmt} ${unit})`);
+                          lines.push('vs. Media Madrid: A la par');
                         } else if (diffMadrid > 0) {
-                          lines.push(`vs. Media Madrid: +${absDiffMadrid}% (${madridFmt} ${unit})`);
+                          lines.push(`vs. Media Madrid: +${absDiffMadrid}%`);
                         } else {
-                          lines.push(`vs. Media Madrid: -${absDiffMadrid}% (${madridFmt} ${unit})`);
+                          lines.push(`vs. Media Madrid: -${absDiffMadrid}%`);
                         }
                       }
 
@@ -4063,7 +4079,7 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-comp-col zone-a">
                     <div className="v2-chart-card">
                       <div className="v2-chart-head">
-                        Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneA}
+                        Evolución {p.id === 'inversion' ? 'Rentabilidad' : `Precio ${p.label}`} ({selectedYear}) · {selectedZoneA}
                       </div>
                       <div className="v2-chart-wrap" style={{ position: 'relative' }}>
                         {isZoneALoading && (
@@ -4096,8 +4112,9 @@ const MadridDashboardV2: React.FC = () => {
                     </div>
                     {(() => {
                       if (!comparisonAHasData) return null;
+                      let kpiRow = null;
                       if (p.id === 'inversion') {
-                        return (
+                        kpiRow = (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
                               <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
@@ -4146,7 +4163,9 @@ const MadridDashboardV2: React.FC = () => {
                           </div>
                         );
                       } else if (p.id === 'alquiler') {
-                        return (
+                        const rentPriceA = kpiDataA.p_vivienda || (kpiDataA.precio_m2 ? Math.round(kpiDataA.precio_m2 * 70) : null);
+                        const rentDisplayA = rentPriceA ? new Intl.NumberFormat('es-ES').format(rentPriceA) + ' €/mes' : '-';
+                        kpiRow = (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
                               <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
@@ -4166,15 +4185,15 @@ const MadridDashboardV2: React.FC = () => {
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
                               <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
                                 <InfoTooltip
-                                  {...getComparisonKpiInfo('roi_alquiler', selectedZoneA)}
+                                  {...getComparisonKpiInfo('alquiler_medio', selectedZoneA)}
                                   align="right"
                                 />
                               </div>
                               <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataA.rentabilidad ? (kpiDataA.rentabilidad * 100).toFixed(2) + '%' : '-'}
+                                {rentDisplayA}
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                RENTABILIDAD BRUTA {selectedZoneA.toUpperCase()}
+                                ALQUILER MEDIO (70 M²) {selectedZoneA.toUpperCase()}
                                 <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
                               </div>
                             </div>
@@ -4195,7 +4214,7 @@ const MadridDashboardV2: React.FC = () => {
                           </div>
                         );
                       } else if (p.id === 'compra') {
-                        return (
+                        kpiRow = (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
                               <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
@@ -4255,7 +4274,7 @@ const MadridDashboardV2: React.FC = () => {
                         const velocityA_formatted = velocityA_num > 0 ? (velocityA_num % 1 === 0 ? velocityA_num.toFixed(0) : velocityA_num.toFixed(1)) : '';
                         const velocityA_suffix = velocityA_num === 1 ? ' mes' : ' meses';
                         const velocityA_text = velocityA_num > 0 ? `${velocityA_formatted}${velocityA_suffix}${velocityA_label}` : '-';
-                        return (
+                        kpiRow = (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
                               <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
@@ -4304,9 +4323,16 @@ const MadridDashboardV2: React.FC = () => {
                             </div>
                           </div>
                         );
-                      } else {
-                        return null;
                       }
+                      if (!kpiRow) return null;
+                      return (
+                        <div className="v2-comp-kpis-wrapper">
+                          <div className="v2-comp-kpis-header">
+                            <span>Métricas a {selectedMonth} {selectedYear}</span>
+                          </div>
+                          {kpiRow}
+                        </div>
+                      );
                     })()}
                   </div>
 
@@ -4314,7 +4340,7 @@ const MadridDashboardV2: React.FC = () => {
                   <div className="v2-comp-col zone-b">
                     <div className="v2-chart-card">
                       <div className="v2-chart-head">
-                        Evolución {getComparisonMetric(p.id).label} ({p.label}) - {selectedZoneB}
+                        Evolución {p.id === 'inversion' ? 'Rentabilidad' : `Precio ${p.label}`} ({selectedYear}) · {selectedZoneB}
                       </div>
                       <div className="v2-chart-wrap" style={{ position: 'relative' }}>
                         {isZoneBLoading && (
@@ -4347,8 +4373,9 @@ const MadridDashboardV2: React.FC = () => {
                     </div>
                     {(() => {
                       if (!comparisonBHasData) return null;
+                      let kpiRow = null;
                       if (p.id === 'inversion') {
-                        return (
+                        kpiRow = (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
                               <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
@@ -4397,7 +4424,9 @@ const MadridDashboardV2: React.FC = () => {
                           </div>
                         );
                       } else if (p.id === 'alquiler') {
-                        return (
+                        const rentPriceB = kpiDataB.p_vivienda || (kpiDataB.precio_m2 ? Math.round(kpiDataB.precio_m2 * 70) : null);
+                        const rentDisplayB = rentPriceB ? new Intl.NumberFormat('es-ES').format(rentPriceB) + ' €/mes' : '-';
+                        kpiRow = (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
                               <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
@@ -4417,15 +4446,15 @@ const MadridDashboardV2: React.FC = () => {
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
                               <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
                                 <InfoTooltip
-                                  {...getComparisonKpiInfo('roi_alquiler', selectedZoneB)}
+                                  {...getComparisonKpiInfo('alquiler_medio', selectedZoneB)}
                                   align="right"
                                 />
                               </div>
                               <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataB.rentabilidad ? (kpiDataB.rentabilidad * 100).toFixed(2) + '%' : '-'}
+                                {rentDisplayB}
                               </div>
                               <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                RENTABILIDAD BRUTA {selectedZoneB.toUpperCase()}
+                                ALQUILER MEDIO (70 M²) {selectedZoneB.toUpperCase()}
                                 <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
                               </div>
                             </div>
@@ -4446,7 +4475,7 @@ const MadridDashboardV2: React.FC = () => {
                           </div>
                         );
                       } else if (p.id === 'compra') {
-                        return (
+                        kpiRow = (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
                               <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
@@ -4506,7 +4535,7 @@ const MadridDashboardV2: React.FC = () => {
                         const velocityB_formatted = velocityB_num > 0 ? (velocityB_num % 1 === 0 ? velocityB_num.toFixed(0) : velocityB_num.toFixed(1)) : '';
                         const velocityB_suffix = velocityB_num === 1 ? ' mes' : ' meses';
                         const velocityB_text = velocityB_num > 0 ? `${velocityB_formatted}${velocityB_suffix}${velocityB_label}` : '-';
-                        return (
+                        kpiRow = (
                           <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
                             <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
                               <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
@@ -4555,9 +4584,16 @@ const MadridDashboardV2: React.FC = () => {
                             </div>
                           </div>
                         );
-                      } else {
-                        return null;
                       }
+                      if (!kpiRow) return null;
+                      return (
+                        <div className="v2-comp-kpis-wrapper">
+                          <div className="v2-comp-kpis-header">
+                            <span>Métricas a {selectedMonth} {selectedYear}</span>
+                          </div>
+                          {kpiRow}
+                        </div>
+                      );
                     })()}
                   </div>
                 </div>
