@@ -31,7 +31,7 @@ export const ConfidenceIntervalBadge: React.FC<ConfidenceIntervalBadgeProps> = (
 
   return (
     <div
-      className={`v2-confidence-badge-wrap ${className}`}
+      className={`v2-confidence-badge-wrap ${showTooltip ? 'is-active' : ''} ${className}`.trim()}
       ref={containerRef}
       onMouseEnter={() => setShowTooltip(true)}
       onMouseLeave={() => setShowTooltip(false)}

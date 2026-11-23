@@ -767,6 +767,13 @@
   position: relative;
   display: inline-flex;
   margin-top: 4px;
+  z-index: 50;
+}
+
+.v2-confidence-badge-wrap:hover,
+.v2-confidence-badge-wrap.is-active,
+.v2-confidence-badge-wrap:focus-within {
+  z-index: 100000;
 }
 
 .v2-confidence-badge {
@@ -816,18 +823,19 @@
 /* Gaussian Curve Tooltip */
 .v2-confidence-tooltip {
   position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  width: 260px;
+  top: calc(100% + 8px);
+  bottom: auto;
+  left: 0;
+  transform: none;
+  width: 275px;
   padding: 12px 14px;
   border-radius: 12px;
-  background: rgba(2, 18, 38, 0.96);
-  border: 1px solid rgba(0, 229, 255, 0.35);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.65), 0 0 16px rgba(0, 229, 255, 0.15);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  z-index: 1000;
+  background: rgba(2, 18, 38, 0.98);
+  border: 1px solid rgba(0, 229, 255, 0.45);
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 229, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 100000;
   pointer-events: none;
   animation: v2PopoverFade 0.16s ease;
 }
@@ -1579,7 +1587,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
   flex-wrap: wrap;
   padding: 4px 6px 12px 6px;
   margin: 0 0 10px 0;
@@ -1587,6 +1595,8 @@
   font-size: 11.5px;
   color: #8fa6ba;
   line-height: 1.4;
+  position: relative;
+  z-index: 50;
 }
 
 .v2-trust-editorial-source {
@@ -1605,6 +1615,13 @@
 .v2-trust-editorial-dot {
   color: rgba(186, 204, 214, 0.35);
   font-weight: bold;
+}
+
+.v2-trust-editorial-right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 
 .v2-trust-editorial-clarification {

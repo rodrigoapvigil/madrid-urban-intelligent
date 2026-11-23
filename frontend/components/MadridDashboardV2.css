@@ -358,6 +358,13 @@
   z-index: 1000;
 }
 
+.v2-kpi-card:has(.v2-confidence-badge-wrap.is-active),
+.v2-kpi-card:has(.v2-confidence-badge-wrap:hover),
+.v2-kpi-card:has(.v2-confidence-badge-wrap:focus-within) {
+  position: relative;
+  z-index: 100000 !important;
+}
+
 .v2-info-tooltip {
   z-index: 10001 !important;
 }

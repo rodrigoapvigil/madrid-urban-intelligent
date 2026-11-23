@@ -2900,10 +2900,11 @@ const MadridDashboardV2: React.FC = () => {
                 </span>
               </div>
 
-              <div className="v2-trust-editorial-clarification">
-                <span>
+              <div className="v2-trust-editorial-right">
+                <span className="v2-trust-editorial-clarification">
                   Estimaciones <strong>brutas</strong> de mercado {p.id === 'inversion' ? '(calibra costes reales con conmutador Neta)' : ''}
                 </span>
+                <TrustTelemetryBadge onOpenMethodology={() => setShowMethodologyDrawer(true)} variant="compact" />
               </div>
             </div>
 
@@ -2933,10 +2934,7 @@ const MadridDashboardV2: React.FC = () => {
                       <strong>{selectedBarrio !== 'Todos' ? formatZoneOption(selectedBarrio) : selectedDistrict !== 'Todos' ? formatZoneOption(selectedDistrict) : 'Madrid'}</strong>
                       {!isMobile && selectedDistrict !== 'Todos' && <small>{selectedBarrio !== 'Todos' ? `${formatZoneOption(selectedDistrict)} › ${formatZoneOption(selectedBarrio)}` : `Distrito · ${formatZoneOption(selectedDistrict)}`}</small>}
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <TrustTelemetryBadge onOpenMethodology={() => setShowMethodologyDrawer(true)} variant="compact" />
-                      <span>{selectedMonth} {selectedYear}</span>
-                    </div>
+                    <span>{selectedMonth} {selectedYear}</span>
                   </div>
 
                   {activeProfile.id === 'alquiler' && (() => {
@@ -3804,7 +3802,6 @@ const MadridDashboardV2: React.FC = () => {
                     {isMobile && <FullscreenToggle targetSelector=".v2-map-card" mobileOnly mobilePlatform />}
                     {!isMobile && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <TrustTelemetryBadge onOpenMethodology={() => setShowMethodologyDrawer(true)} variant="map" />
                         <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} hideMonthArrows keyboardMonthNavigation showYearShortcut={false} />
                       </div>
                     )}
