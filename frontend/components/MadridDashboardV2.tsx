@@ -355,8 +355,6 @@ const ChartZoomControls = ({ chartId, mobilePlatform = true }: { chartId: string
 const ComparisonChartControls = ({
   chartId,
   isMobile,
-  onReload,
-  isReloading,
 }: {
   chartId: string;
   isMobile: boolean;
@@ -364,20 +362,7 @@ const ComparisonChartControls = ({
   isReloading?: boolean;
 }) => isMobile
   ? <ChartZoomControls chartId={chartId} mobilePlatform={isMobile} />
-  : onReload ? (
-      <div className="v2-comparison-zoom-controls" role="group" aria-label="Controles de la gráfica">
-        <button
-          type="button"
-          title="Volver a cargar datos"
-          aria-label="Volver a cargar datos de la gráfica"
-          onClick={onReload}
-          disabled={isReloading}
-          className={`v2-chart-reload-btn ${isReloading ? 'is-spinning' : ''}`}
-        >
-          <RotateCw size={13} className={isReloading ? 'v2-spin' : ''} />
-        </button>
-      </div>
-    ) : null;
+  : null;
 
 type ComparisonLegendItem = { index: number; label: string; color: string; kind: 'real' | 'estimated' | 'madrid' };
 
@@ -2879,6 +2864,46 @@ const MadridDashboardV2: React.FC = () => {
               <span style={{ color: '#FFFFFF', fontWeight: '700' }}>¿Cómo entender estos precios?</span>
             </button>
 
+            {activeProfile.id === 'venta' && (
+              <button
+                type="button"
+                onClick={() => {
+                  const dilemaEl = document.querySelector('[data-dashboard-section="dilemma"]');
+                  if (dilemaEl) {
+                    dilemaEl.scrollIntoView({ behavior: 'smooth' });
+                  }
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'rgba(255, 178, 107, 0.12)',
+                  border: '1.5px solid rgba(255, 178, 107, 0.55)',
+                  borderRadius: '20px',
+                  padding: '6px 14px',
+                  fontSize: '11px',
+                  fontWeight: '700',
+                  color: '#ffb26b',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  boxShadow: '0 2px 10px rgba(0, 0, 0, 0.5)',
+                  whiteSpace: 'nowrap'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 178, 107, 0.22)';
+                  e.currentTarget.style.boxShadow = '0 0 14px rgba(255, 178, 107, 0.45)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(255, 178, 107, 0.12)';
+                  e.currentTarget.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.5)';
+                }}
+                title="Compara la plusvalía de venta frente al rendimiento por alquiler en esta localidad"
+              >
+                <span>⚖️</span>
+                <span>¿Vender o alquilar en {selectedBarrio !== 'Todos' ? formatZoneOption(selectedBarrio) : selectedDistrict !== 'Todos' ? formatZoneOption(selectedDistrict) : 'Madrid'}?</span>
+              </button>
+            )}
+
             {isMobile && <div className="v2-mobile-filter-commit">
               <button type="button" className="v2-mobile-filter-apply" onClick={applyMobileFilters}>Aplicar ({Number(draftFilters.district !== 'Todos') + Number(draftFilters.barrio !== 'Todos') + Number(draftFilters.year !== latestAvailablePeriod.year || draftFilters.month !== latestAvailablePeriod.month)})</button>
               <button type="button" className="v2-mobile-filter-reset" onClick={resetMobileFilters}>Restablecer al último dato real</button>
@@ -3260,53 +3285,6 @@ const MadridDashboardV2: React.FC = () => {
                             : '—'}
                         </div>
                       </div>
-
-                      {activeProfile.id === 'venta' && (
-                        <div
-                          className="v2-venta-dilema-banner"
-                          style={{
-                            background: 'rgba(255, 178, 107, 0.12)',
-                            border: '1px solid rgba(255, 178, 107, 0.38)',
-                            borderRadius: '14px',
-                            padding: '12px 14px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '8px',
-                            marginTop: '2px',
-                          }}
-                        >
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#ffb26b', fontWeight: 750, fontSize: '12px' }}>
-                            <span>⚖️ ¿Dudas entre vender o alquilar?</span>
-                          </div>
-                          <p style={{ margin: 0, fontSize: '11px', color: '#cde4f7', lineHeight: 1.45 }}>
-                            Evalúa si te compensa la plusvalía neta de venta inmediata frente al flujo acumulado por alquiler y revalorización en este barrio.
-                          </p>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const dilemaEl = document.querySelector('[data-dashboard-section="dilemma"]');
-                              if (dilemaEl) {
-                                dilemaEl.scrollIntoView({ behavior: 'smooth' });
-                              }
-                            }}
-                            style={{
-                              marginTop: '2px',
-                              padding: '7px 12px',
-                              borderRadius: '8px',
-                              background: '#ffb26b',
-                              border: 'none',
-                              color: '#011428',
-                              fontWeight: 750,
-                              fontSize: '11.5px',
-                              cursor: 'pointer',
-                              alignSelf: 'flex-start',
-                              transition: 'all 0.18s ease',
-                            }}
-                          >
-                            Ver rentabilidad comparada en este barrio →
-                          </button>
-                        </div>
-                      )}
                     </>
                   ) : (() => {
                     const amortizacionAnios = kpiData.p_m2 > 0 ? (1 / kpiData.p_m2) : 0;
