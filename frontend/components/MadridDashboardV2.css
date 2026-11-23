@@ -3932,6 +3932,13 @@ body.v2-fullscreen-open footer { display: none !important; }
   max-width: 100%;
   box-sizing: border-box;
 }
+.v2-root .v2-explorer-grid:not(:has(.v2-heatmap-area)) {
+  grid-template-columns: minmax(0, 1fr) !important;
+  grid-template-rows: auto auto !important;
+  grid-template-areas: "header" "ranking" !important;
+  max-width: 680px;
+  margin-inline: auto;
+}
 .v2-root .v2-explorer-header {
   grid-area: header;
   display: flex;

@@ -3989,42 +3989,6 @@ const MadridDashboardV2: React.FC = () => {
                   hasAnnualVariation={Object.keys(rankingPreviousValues).length > 0}
                 />
               </div>
-
-              {/* COL 3: HEATMAP */}
-              <div className="v2-explorer-col v2-heatmap-area" data-dashboard-section="heatmap">
-                <div className="v2-heatmap-card">
-                  <div className="v2-heatmap-head">
-                    <div className="v2-heatmap-heading-copy">
-                      <span>{activeProfile.id === 'inversion' ? 'Evolución de rentabilidad (%)' : activeProfile.id === 'alquiler' ? 'Evolución del alquiler (€/m²)' : activeProfile.id === 'compra' ? 'Evolución del precio de compra (€/m²)' : 'Evolución del precio de venta (€/m²)'}</span>
-                      <small>Pulsa un mes para actualizar el ranking</small>
-                    </div>
-                    {isMobile && <FullscreenToggle targetSelector=".v2-heatmap-card" mobilePlatform />}
-                  </div>
-                  <input className="v2-heatmap-search" type="search" value={heatmapSearch} onChange={event => setHeatmapSearch(event.target.value)} placeholder={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'}…`} aria-label={`Buscar ${rankingLevel === 'Distritos' ? 'distrito' : 'barrio'} en el mapa de calor`} />
-                  <div className="v2-heatmap-gradient-scale" style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '6px 0 10px', fontSize: '11px', color: '#8fa6ba', flexWrap: 'wrap' }}>
-                    <span style={{ fontWeight: 600, color: '#cde4f7' }}>Intensidad de precio por m²:</span>
-                    <span>Azul oscuro (&lt; 17 €/m²)</span>
-                    <div style={{ flex: '1', minWidth: '80px', maxWidth: '140px', height: '6px', borderRadius: '3px', background: 'linear-gradient(90deg, rgba(0, 221, 240, 0.22) 0%, rgba(0, 221, 240, 1) 100%)' }} />
-                    <span>Cian brillante (&gt; 26 €/m²)</span>
-                  </div>
-                  <DashboardHeatmapTable
-                    rows={filteredHeatmapRows}
-                    profileId={activeProfile.id}
-                    level={rankingLevel}
-                    year={selectedYear}
-                    min={heatmapMin}
-                    max={heatmapMax}
-                    latestReal={latestAvailablePeriod}
-                    selectedMonth={selectedMonth}
-                    formatValue={value => formatNumber(activeProfile.id === 'inversion' ? value * 100 : value, 1)}
-                  />
-                  {Number(selectedYear) === 2026 && (
-                    <div className="v2-heatmap-data-note">
-                      Datos reales: Enero – Junio 2026 (Fuente: Portal de Datos Abiertos del Ayuntamiento de Madrid). Estimaciones: Julio – Diciembre 2026 (Modelos predictivos DMIYC). {activeProfile.id === 'inversion' ? 'El color más brillante indica mayor rentabilidad.' : 'El color más brillante indica un precio €/m² más alto.'}
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
 
             {p.id === 'inversion' && (
