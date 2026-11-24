@@ -270,8 +270,15 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
               ))
             ) : (
               <tr>
-                <td colSpan={13} style={{ padding: '30px', textAlign: 'center', color: '#8fa6ba' }}>
-                  No se encontraron {zoneLabel}s que coincidan con &quot;{search}&quot;
+                <td colSpan={13} style={{ padding: '36px 20px', textAlign: 'center', color: '#8fa6ba' }}>
+                  {search.trim() ? (
+                    `No se encontraron ${zoneLabel}s que coincidan con "${search}"`
+                  ) : (
+                    <div style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+                      <span className="cyber-spinner" style={{ width: '18px', height: '18px', borderWidth: '2px' }} aria-hidden="true" />
+                      <span style={{ fontSize: '13px', fontWeight: 500, color: '#e2e8f0' }}>Calibrando telemetría y algoritmos de mercado…</span>
+                    </div>
+                  )}
                 </td>
               </tr>
             )}

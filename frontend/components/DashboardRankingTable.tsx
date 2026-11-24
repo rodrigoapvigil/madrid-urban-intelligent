@@ -102,7 +102,7 @@ export default function DashboardRankingTable({
   const isTotalPrice = metric === 'total' && profileId === 'compra';
   const valueHeading = isDemand ? 'DEMANDA' : isInvestment ? 'RENTABILIDAD' : profileId === 'alquiler'
     ? (metric === 'total' ? 'ALQUILER €/MES' : 'ALQUILER €/M²')
-    : (metric === 'total' ? 'PRECIO €' : 'PRECIO €/M²');
+    : (metric === 'total' ? 'PRECIO COMPRA €' : 'COMPRA €/M²');
   const allLabel = level === 'Distritos' ? 'Ver todos los 21 distritos' : 'Ver todos los barrios';
   const orderOptions: Array<{ value: OrderMode; label: string }> = isDemand
     ? [{ value: 'demand-high', label: 'Más demanda' }, { value: 'demand-low', label: 'Menos demanda' }, { value: 'all', label: allLabel }]
@@ -151,7 +151,7 @@ export default function DashboardRankingTable({
                 label="Unidad mostrada"
                 size="sm"
                 value={metric}
-                options={[{ value: 'total', label: profileId === 'alquiler' ? '€/mes (70m²)' : '€ (70m²)' }, { value: 'unit', label: '€/m²' }] as const}
+                options={[{ value: 'total', label: profileId === 'alquiler' ? '€/mes (70m²)' : 'Total Compra (70m²)' }, { value: 'unit', label: '€/m²' }] as const}
                 onChange={onMetricChange}
               />
             </div>
@@ -232,7 +232,41 @@ export default function DashboardRankingTable({
             {sortedRows.length === 0 && loading ? loadingRows : sortedRows.slice(0, isAll ? sortedRows.length : 10).map((item, index) => {
               const previous = previousValues[normalize(item.name)];
               const variation = Number.isFinite(previous) && previous > 0 ? ((item.value - previous) / previous) * 100 : null;
-              const price = metric === 'unit' ? `${formatNumber(item.value, Number.isInteger(Number(item.value)) ? 0 : 1)} €/m²` : profileId === 'alquiler' ? `${formatEuro(item.value, 0)}/mes` : formatEuro(item.value, 0);
+              const monthly = monthlyByZone.get(normalize(item.name));
+              const sparkline = monthly ? Array.from({ length: 12 }, (_, monthIndex) => Number(monthly[`m${monthIndex + 1}`])).filter(value => Number.isFinite(value) && value > 0) : [];
+              const rawVal = Number(item.value) || 0;
+              const latestM2FromMonthly = sparkline.length > 0 ? sparkline[sparkline.length - 1] : null;
+
+              // Calibración rigurosa de Compra vs Alquiler
+              let effectiveValue = rawVal;
+              let companionM2: number | null = null;
+              let companionTotal: number | null = null;
+
+              if (profileId === 'compra') {
+                if (metric === 'total') {
+                  // Salvaguarda: si por desfase o caché residual llegara un valor < 10.000 €, se calibra con el precio m² oficial del Catastro (70 m²)
+                  if (effectiveValue < 10000 && latestM2FromMonthly && latestM2FromMonthly > 100) {
+                    effectiveValue = Math.round(latestM2FromMonthly * 70);
+                  }
+                  companionM2 = latestM2FromMonthly || (effectiveValue > 0 ? Math.round(effectiveValue / 70) : null);
+                } else {
+                  // metric === 'unit'
+                  companionTotal = effectiveValue > 0 ? Math.round(effectiveValue * 70) : null;
+                }
+              } else if (profileId === 'alquiler') {
+                if (metric === 'total') {
+                  companionM2 = latestM2FromMonthly || (effectiveValue > 0 ? Number((effectiveValue / 70).toFixed(1)) : null);
+                } else {
+                  companionTotal = effectiveValue > 0 ? Math.round(effectiveValue * 70) : null;
+                }
+              }
+
+              const price = metric === 'unit'
+                ? `${formatNumber(effectiveValue, Number.isInteger(Number(effectiveValue)) ? 0 : 1)} €/m²`
+                : profileId === 'alquiler'
+                  ? `${formatEuro(effectiveValue, 0)}/mes`
+                  : formatEuro(effectiveValue, 0);
+
               const prevPrice = Number.isFinite(previous) && previous > 0
                 ? metric === 'unit'
                   ? `${formatNumber(previous, Number.isInteger(Number(previous)) ? 0 : 1)} €/m²`
@@ -240,11 +274,8 @@ export default function DashboardRankingTable({
                     ? `${formatEuro(previous, 0)}/mes`
                     : formatEuro(previous, 0)
                 : null;
-              const rawVal = Number(item.value) || 0;
               const investmentPct = rawVal > 1 ? rawVal : rawVal * 100;
               const valueLabel = isDemand ? `${formatNumber(rawVal, 0)} trans.` : isInvestment ? `${formatNumber(investmentPct, 1)}%` : price;
-              const monthly = monthlyByZone.get(normalize(item.name));
-              const sparkline = monthly ? Array.from({ length: 12 }, (_, monthIndex) => Number(monthly[`m${monthIndex + 1}`])).filter(value => Number.isFinite(value) && value > 0) : [];
               const district = level === 'Barrios' ? districtForZone?.(item.name) : undefined;
               const selected = Boolean(highlightedZone && normalize(highlightedZone) === normalize(item.name));
               return (
@@ -292,19 +323,34 @@ export default function DashboardRankingTable({
                       {sparkline.length > 1 && <Sparkline values={sparkline} color={accent} />}
                       <span style={{ fontSize: '13px' }}>{valueLabel}</span>
                     </div>
-                    {metric === 'total' && isPriceProfile && (
+                    {isPriceProfile && metric === 'total' && companionM2 && (
                       <div
                         style={{
-                          fontSize: '10px',
+                          fontSize: '10.5px',
                           color: '#8fa6b9',
-                          fontWeight: '500',
-                          marginTop: '1px',
+                          fontWeight: '550',
+                          marginTop: '2px',
                           letterSpacing: '0.01em',
                           cursor: 'help'
                         }}
-                        title="Cálculo obtenido multiplicando el precio medio por metro cuadrado de la zona por el tamaño residencial medio oficial del Catastro (70 m²)"
+                        title={profileId === 'compra' ? `Precio medio de venta: ${formatNumber(companionM2, 0)} €/m² (Notarías y Registradores)` : `Precio medio de alquiler: ${formatNumber(companionM2, 1)} €/m²`}
                       >
-                        Vivienda tipo 70 m²
+                        · {formatNumber(companionM2, profileId === 'alquiler' ? 1 : 0)} €/m²
+                      </div>
+                    )}
+                    {isPriceProfile && metric === 'unit' && companionTotal && (
+                      <div
+                        style={{
+                          fontSize: '10.5px',
+                          color: '#8fa6b9',
+                          fontWeight: '550',
+                          marginTop: '2px',
+                          letterSpacing: '0.01em',
+                          cursor: 'help'
+                        }}
+                        title="Vivienda tipo estándar oficial Catastro (70 m²)"
+                      >
+                        · Vivienda 70 m²: {profileId === 'alquiler' ? `${formatEuro(companionTotal, 0)}/mes` : formatEuro(companionTotal, 0)}
                       </div>
                     )}
                     {variation !== null && (

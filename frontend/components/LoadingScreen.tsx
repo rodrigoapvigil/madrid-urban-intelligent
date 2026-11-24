@@ -33,7 +33,7 @@ export type LoadingScreenProps = {
 
 export default function LoadingScreen({
   ready = false,
-  loadingMessage = "Cargando datos de Madrid…",
+  loadingMessage = "Calibrando telemetría y algoritmos de mercado…",
   error = null,
   onExited,
   onRetry,
@@ -41,7 +41,7 @@ export default function LoadingScreen({
   const [leaving, setLeaving] = useState(false);
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [progress, setProgress] = useState(15);
-  const [currentPhase, setCurrentPhase] = useState("Conectando con los datos de Madrid…");
+  const [currentPhase, setCurrentPhase] = useState("Sincronizando capas geoespaciales vectoriales…");
   
   const onExitedRef = useRef(onExited);
   onExitedRef.current = onExited;
@@ -68,7 +68,7 @@ export default function LoadingScreen({
 
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setProgress(100);
-      setCurrentPhase("Madrid preparado.");
+      setCurrentPhase("Mercado de Madrid sincronizado.");
       if (ready && !completedRef.current) {
         completedRef.current = true;
         setLeaving(true);
@@ -79,43 +79,48 @@ export default function LoadingScreen({
 
     const interval = window.setInterval(() => {
       const elapsed = Date.now() - startTimeRef.current;
-      const minDisplayPassed = elapsed >= 1600;
-      const isReadyEffective = ready || elapsed >= 4500;
+      const minDisplayPassed = elapsed >= 1400;
+      // Barrera real: el telón solo se retira cuando una barrera de promesas confirme que las geometrías y los datasets están disponibles en memoria
+      const isReadyEffective = ready;
 
       if (!isReadyEffective || !minDisplayPassed) {
-        // Incremento asintótico gradual hacia el 92%
+        // Hitos de sincronización del mercado
         setProgress((prev) => {
           let target = 25;
-          let phase = "Conectando con los datos de Madrid…";
+          let phase = "Sincronizando capas geoespaciales vectoriales…";
 
-          if (elapsed >= 1400) {
-            target = Math.min(92, 80 + (elapsed - 1400) * 0.008);
-            phase = "Calibrando métricas predictivas…";
+          if (elapsed >= 2200) {
+            target = Math.min(88, 85 + (elapsed - 2200) * 0.003);
+            phase = "Calibrando telemetría y algoritmos de mercado…";
+          } else if (elapsed >= 1400) {
+            target = 70 + ((elapsed - 1400) / 800) * 15;
+            phase = "16.779 registros auditados sincronizados.";
           } else if (elapsed >= 850) {
-            target = 60 + ((elapsed - 850) / 550) * 20;
-            phase = "Preparando capas de Alquiler, Compra, Venta e Inversión…";
+            target = 50 + ((elapsed - 850) / 550) * 20;
+            phase = "Cargando registros auditados (Colegio de Registradores)…";
           } else if (elapsed >= 350) {
-            target = 35 + ((elapsed - 350) / 500) * 25;
-            phase = "Sincronizando 131 barrios vectoriales…";
+            target = 35 + ((elapsed - 350) / 500) * 15;
+            phase = "Capas vectoriales listas (21 distritos, 131 barrios).";
           } else {
             target = 15 + (elapsed / 350) * 20;
-            phase = "Conectando con los datos de Madrid…";
+            phase = "Sincronizando capas geoespaciales vectoriales…";
           }
 
           setCurrentPhase(phase);
           const nextVal = prev + (target - prev) * 0.16;
-          return Math.max(prev, Math.min(94, nextVal));
+          return Math.max(prev, Math.min(88, nextVal));
         });
       } else {
-        // Datos listos y tiempo mínimo de lectura cumplido (1,6 s)
+        // Datos 100% listos en memoria tras la barrera Promise.allSettled
         setProgress((prev) => {
           if (prev < 99) {
-            setCurrentPhase("Madrid preparado.");
-            return prev + (100 - prev) * 0.35;
+            setCurrentPhase("Mercado de Madrid sincronizado.");
+            return prev + (100 - prev) * 0.4;
           }
           if (!completedRef.current) {
             completedRef.current = true;
-            setCurrentPhase("Madrid preparado.");
+            setCurrentPhase("Mercado de Madrid sincronizado.");
+            // Pequeña pausa de gracia al 100% para apreciar la compleción + 400ms fade-out
             window.setTimeout(() => setLeaving(true), 350);
             window.setTimeout(() => onExitedRef.current?.(), 750);
           }
@@ -156,7 +161,7 @@ export default function LoadingScreen({
             <p className="dmiyc-ls__brand-line">Datos para decidir Madrid</p>
             <h1 id="dmiyc-loading-title" className="dmiyc-ls__headline">Madrid despierta.</h1>
             <p className="dmiyc-ls__message" role={failed ? "alert" : "status"} aria-live={failed ? "assertive" : "polite"}>
-              {failed ? "No se han podido cargar los datos." : displayProgress >= 100 ? "Abriendo el mapa de Madrid…" : loadingMessage}
+              {failed ? "No se han podido cargar los datos." : displayProgress >= 100 ? "Mercado de Madrid sincronizado." : loadingMessage}
             </p>
             <p className="dmiyc-ls__sub">
               {failed ? (

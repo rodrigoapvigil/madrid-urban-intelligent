@@ -1,0 +1,77 @@
+.loading-container-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.content-layer {
+  transition: filter 0.28s ease, opacity 0.28s ease;
+  width: 100%;
+  height: 100%;
+}
+
+.content-layer.is-blur-dimmed {
+  filter: blur(4px) brightness(0.65);
+  pointer-events: none; /* Evita clics en datos viejos mientras carga */
+  user-select: none;
+}
+
+.glass-loading-backdrop {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(5, 14, 28, 0.45); /* Azul noche translúcido */
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 50;
+  animation: glassFadeIn 0.25s ease-out;
+}
+
+.glass-loading-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px;
+  background: rgba(10, 25, 47, 0.85);
+  border: 1px solid rgba(0, 229, 255, 0.28); /* Borde cian sutil DMIYC */
+  border-radius: 12px;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
+  max-width: 90%;
+  text-align: center;
+}
+
+.cyber-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(0, 229, 255, 0.15);
+  border-top: 3px solid #00e5ff; /* Cian DMIYC */
+  border-radius: 50%;
+  animation: cyberSpin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+.glass-loading-text {
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  font-weight: 550;
+  letter-spacing: 0.02em;
+  text-align: center;
+  line-height: 1.4;
+}
+
+@keyframes cyberSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes glassFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
