@@ -2613,8 +2613,8 @@ const MadridDashboardV2: React.FC = () => {
       // Si Zona B o la superpuesta tienen datos pero su canvas aún no estaba en el DOM, reintentar tras un frame
       const pId = activeProfile.id;
       if (
-        (comparisonBHasData && !document.getElementById(`v2-chartB-${pId}`)) ||
-        (comparisonAHasData && comparisonBHasData && !document.getElementById(`v2-overlay-${pId}`))
+        (comparisonBHasData && compareGraphView === 'paralela' && !document.getElementById(`v2-chartB-${pId}`)) ||
+        (comparisonAHasData && comparisonBHasData && compareGraphView === 'superpuesta' && !document.getElementById(`v2-overlay-${pId}`))
       ) {
         retryTimer = setTimeout(initCharts, 80);
       }
@@ -4157,588 +4157,10 @@ const MadridDashboardV2: React.FC = () => {
                     incomeB={Number(kpiDataB.renta_media) || undefined}
                   />
 
-              <div className="v2-compare-viewport" data-compare-view={isMobile ? 'overlay' : 'desktop'}>
-                {isMobile && <div className="v2-compare-map-panel">
-                  <div className="v2-compare-map-heading">Toca dos zonas para asignar A y B</div>
-                  <div className="v2-compare-map-canvas">
-                    <MadridMap
-                      type={(compareMapTarget === 'A' ? comparisonZoneA : comparisonZoneB).kind === 'district' ? 'districts' : 'neighborhoods'}
-                      data={(compareMapTarget === 'A' ? comparisonZoneA : comparisonZoneB).kind === 'district' ? mapData.districts : mapData.neighborhoods}
-                      selectedYear={Number(selectedYear)} selectedMonth={selectedMonth} selectedProfile={activeProfile.label}
-                      selectedDistrict={null} selectedBarrio={null}
-                      compareZoneA={comparisonZoneA.name} compareZoneB={comparisonZoneB.name}
-                      onDistrictClick={(zone) => {
-                        if (!zone) return;
-                        const option = zoneSearchOptions.find(item => item.kind === 'district' && item.name === zone);
-                        if (option && option.id !== (compareMapTarget === 'A' ? comparisonZoneB.id : comparisonZoneA.id)) { if (compareMapTarget === 'A') setComparisonZoneA(option); else setComparisonZoneB(option); setCompareMapTarget(compareMapTarget === 'A' ? 'B' : 'A'); }
-                      }}
-                      onBarrioClick={(zone) => {
-                        if (!zone) return;
-                        const option = zoneSearchOptions.find(item => item.kind === 'barrio' && item.name === zone);
-                        if (option && option.id !== (compareMapTarget === 'A' ? comparisonZoneB.id : comparisonZoneA.id)) { if (compareMapTarget === 'A') setComparisonZoneA(option); else setComparisonZoneB(option); setCompareMapTarget(compareMapTarget === 'A' ? 'B' : 'A'); }
-                      }}
-                    />
-                  </div>
-                </div>}
-                <div className="v2-compare-grid">
-                  {/* ZONA A (IZQ) */}
-                  <div className="v2-comp-col zone-a">
-                    {compareGraphView === 'paralela' && (
-                      <div className="v2-chart-card">
-                        <div className="v2-chart-head">
-                          Evolución {p.id === 'inversion' ? 'Rentabilidad' : `Precio ${p.label}`} ({selectedYear}) · {selectedZoneA}
-                        </div>
-                        <div className="v2-chart-wrap" style={{ position: 'relative' }}>
-                          {isZoneALoading && (
-                            <div className="v2-comparison-loading-notice" style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(1, 16, 36, 0.92)' }}>
-                              <div className="v2-comp-spinner" />
-                              <span>Consultando registros oficiales</span>
-                              <p>Cargando evolución histórica y predicción de {selectedZoneA}…</p>
-                              <button type="button" className="v2-reload-action-btn" onClick={reloadZoneA} disabled={isReloadingA}>
-                                <RotateCw size={12} className={isReloadingA ? 'v2-spin' : ''} />
-                                <span>{isReloadingA ? 'Sincronizando…' : 'Volver a cargar'}</span>
-                              </button>
-                            </div>
-                          )}
-                          {comparisonAHasData ? (
-                            <>
-                              {isMobile ? (
-                                <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile onReload={reloadZoneA} isReloading={isReloadingA} />
-                              ) : (
-                                <div className="v2-comparison-chart-meta">
-                                  <ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: 'Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' }]} />
-                                  <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={false} onReload={reloadZoneA} isReloading={isReloadingA} />
-                                </div>
-                              )}
-                              <canvas id={`v2-chartA-${p.id}`}></canvas>
-                              <div style={{ fontSize: '10.5px', color: '#8fa6ba', marginTop: '6px', textAlign: 'center' }}>
-                                Estimación proyectada mediante modelo de Machine Learning considerando estacionalidad e inflación.
-                              </div>
-                            </>
-                          ) : !isZoneALoading ? (
-                            isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} />
-                          ) : null}
-                        </div>
-                      </div>
-                    )}
-                    {(() => {
-                      if (!comparisonAHasData) return null;
-                      let kpiRow = null;
-                      if (p.id === 'inversion') {
-                        kpiRow = (
-                          <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('roi_neto', selectedZoneA)}
-                                  align="left"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataA.rentabilidad ? (kpiDataA.rentabilidad * 100 * 0.85).toFixed(2) + '%' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                RENTABILIDAD NETA {selectedZoneA.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('grm', selectedZoneA)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataA.rentabilidad > 0 ? (1 / kpiDataA.rentabilidad).toFixed(1) + ' años' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                GRM {selectedZoneA.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('volatilidad', selectedZoneA)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {volatilityZoneA || 'N/A'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                VOLATILIDAD {selectedZoneA.toUpperCase()}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      } else if (p.id === 'alquiler') {
-                        const rentPriceA = kpiDataA.p_vivienda || (kpiDataA.precio_m2 ? Math.round(kpiDataA.precio_m2 * 70) : null);
-                        const rentDisplayA = rentPriceA ? new Intl.NumberFormat('es-ES').format(rentPriceA) + ' €/mes' : '-';
-                        kpiRow = (
-                          <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('precio_m2_alquiler', selectedZoneA)}
-                                  align="left"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataA.precio_m2 ? new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiDataA.precio_m2) + ' €/m²' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                PRECIO M² {selectedZoneA.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('alquiler_medio', selectedZoneA)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {rentDisplayA}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                ALQUILER MEDIO (70 M²) {selectedZoneA.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                              <div style={{ fontSize: '10px', color: '#8fa6ba', textAlign: 'center', marginTop: '2px' }}>
-                                Calculado sobre vivienda tipo de 70 m²
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('esfuerzo', selectedZoneA)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataA.esfuerzo_compra ? kpiDataA.esfuerzo_compra.toFixed(1) + '%' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                ESFUERZO % {selectedZoneA.toUpperCase()}
-                              </div>
-                              <div
-                                className="v2-compare-salary-note"
-                                title={kpiDataA.renta_media ? `Renta media censal del distrito: ${Math.round(kpiDataA.renta_media).toLocaleString('es-ES')} €/año (~${Math.round(kpiDataA.renta_media / 12).toLocaleString('es-ES')} €/mes netos). Fuente: INE Series 2026.` : 'Calculado sobre la renta neta censal del distrito (INE Series 2026)'}
-                              >
-                                <span className="v2-compare-salary-dot" />
-                                <span>Sobre renta censal (INE 2026){kpiDataA.renta_media ? `: ${Math.round(kpiDataA.renta_media / 12).toLocaleString('es-ES')} €/mes` : ''}</span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      } else if (p.id === 'compra') {
-                        kpiRow = (
-                          <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('precio_m2_compra', selectedZoneA)}
-                                  align="left"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataA.precio_m2 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(kpiDataA.precio_m2)) + ' €/m²' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                PRECIO M² {selectedZoneA.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('poder_adquisitivo', selectedZoneA)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataA.renta_media ? new Intl.NumberFormat('es-ES').format(Math.round(kpiDataA.renta_media)) + ' €' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                PODER ADQUISITIVO {selectedZoneA.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('variacion_anual', selectedZoneA)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataA.variacion_anual !== undefined ? (kpiDataA.variacion_anual > 0 ? '+' : '') + kpiDataA.variacion_anual.toFixed(1) + '%' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                VARIACIÓN ANUAL {selectedZoneA.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      } else if (p.id === 'venta') {
-                        const velocityA_num = kpiDataA.transacciones ? Math.max(1.0, 933.8 / kpiDataA.transacciones) : 0;
-                        let velocityA_label = '';
-                        if (velocityA_num > 0) {
-                          if (velocityA_num < 2.0) velocityA_label = ' (Rápido)';
-                          else if (velocityA_num < 3.0) velocityA_label = ' (Moderado)';
-                          else velocityA_label = ' (Lento)';
-                        }
-                        const velocityA_formatted = velocityA_num > 0 ? (velocityA_num % 1 === 0 ? velocityA_num.toFixed(0) : velocityA_num.toFixed(1)) : '';
-                        const velocityA_suffix = velocityA_num === 1 ? ' mes' : ' meses';
-                        const velocityA_text = velocityA_num > 0 ? `${velocityA_formatted}${velocityA_suffix}${velocityA_label}` : '-';
-                        kpiRow = (
-                          <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('precio_m2_venta', selectedZoneA)}
-                                  align="left"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataA.precio_m2 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(kpiDataA.precio_m2)) + ' €/m²' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                PRECIO M² {selectedZoneA.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('velocidad_venta', selectedZoneA)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {velocityA_text}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                VELOCIDAD DE VENTA {selectedZoneA.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: `5px solid ${activeProfile.color}`, position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('variacion_anual', selectedZoneA)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataA.variacion_anual !== undefined ? (kpiDataA.variacion_anual > 0 ? '+' : '') + kpiDataA.variacion_anual.toFixed(1) + '%' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                VARIACIÓN ANUAL {selectedZoneA.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      }
-                      if (!kpiRow) return null;
-                      return (
-                        <div className="v2-comp-kpis-wrapper">
-                          <div className="v2-comp-kpis-header">
-                            <span>Métricas a {selectedMonth} {selectedYear}</span>
-                          </div>
-                          {kpiRow}
-                        </div>
-                      );
-                    })()}
-                  </div>
-
-                  {/* ZONA B (DER) */}
-                  <div className="v2-comp-col zone-b">
-                    {compareGraphView === 'paralela' && (
-                      <div className="v2-chart-card">
-                        <div className="v2-chart-head">
-                          Evolución {p.id === 'inversion' ? 'Rentabilidad' : `Precio ${p.label}`} ({selectedYear}) · {selectedZoneB}
-                        </div>
-                        <div className="v2-chart-wrap" style={{ position: 'relative' }}>
-                          {isZoneBLoading && (
-                            <div className="v2-comparison-loading-notice" style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(1, 16, 36, 0.92)' }}>
-                              <div className="v2-comp-spinner" />
-                              <span>Consultando registros oficiales</span>
-                              <p>Cargando evolución histórica y predicción de {selectedZoneB}…</p>
-                              <button type="button" className="v2-reload-action-btn" onClick={reloadZoneB} disabled={isReloadingB}>
-                                <RotateCw size={12} className={isReloadingB ? 'v2-spin' : ''} />
-                                <span>{isReloadingB ? 'Sincronizando…' : 'Volver a cargar'}</span>
-                              </button>
-                            </div>
-                          )}
-                          {comparisonBHasData ? (
-                            <>
-                              {isMobile ? (
-                                <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile onReload={reloadZoneB} isReloading={isReloadingB} />
-                              ) : (
-                                <div className="v2-comparison-chart-meta">
-                                  <ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: 'Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' }]} />
-                                  <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={false} onReload={reloadZoneB} isReloading={isReloadingB} />
-                                </div>
-                              )}
-                              <canvas id={`v2-chartB-${p.id}`}></canvas>
-                              <div style={{ fontSize: '10.5px', color: '#8fa6ba', marginTop: '6px', textAlign: 'center' }}>
-                                Estimación proyectada mediante modelo de Machine Learning considerando estacionalidad e inflación.
-                              </div>
-                            </>
-                          ) : !isZoneBLoading ? (
-                            isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} />
-                          ) : null}
-                        </div>
-                      </div>
-                    )}
-                    {(() => {
-                      if (!comparisonBHasData) return null;
-                      let kpiRow = null;
-                      if (p.id === 'inversion') {
-                        kpiRow = (
-                          <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('roi_neto', selectedZoneB)}
-                                  align="left"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataB.rentabilidad ? (kpiDataB.rentabilidad * 100 * 0.85).toFixed(2) + '%' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                RENTABILIDAD NETA {selectedZoneB.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('grm', selectedZoneB)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataB.rentabilidad > 0 ? (1 / kpiDataB.rentabilidad).toFixed(1) + ' años' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                GRM {selectedZoneB.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('volatilidad', selectedZoneB)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {volatilityZoneB || 'N/A'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                VOLATILIDAD {selectedZoneB.toUpperCase()}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      } else if (p.id === 'alquiler') {
-                        const rentPriceB = kpiDataB.p_vivienda || (kpiDataB.precio_m2 ? Math.round(kpiDataB.precio_m2 * 70) : null);
-                        const rentDisplayB = rentPriceB ? new Intl.NumberFormat('es-ES').format(rentPriceB) + ' €/mes' : '-';
-                        kpiRow = (
-                          <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('precio_m2_alquiler', selectedZoneB)}
-                                  align="left"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataB.precio_m2 ? new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiDataB.precio_m2) + ' €/m²' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                PRECIO M² {selectedZoneB.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('alquiler_medio', selectedZoneB)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {rentDisplayB}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                ALQUILER MEDIO (70 M²) {selectedZoneB.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                              <div style={{ fontSize: '10px', color: '#8fa6ba', textAlign: 'center', marginTop: '2px' }}>
-                                Calculado sobre vivienda tipo de 70 m²
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('esfuerzo', selectedZoneB)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataB.esfuerzo_compra ? kpiDataB.esfuerzo_compra.toFixed(1) + '%' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                ESFUERZO % {selectedZoneB.toUpperCase()}
-                              </div>
-                              <div
-                                className="v2-compare-salary-note"
-                                title={kpiDataB.renta_media ? `Renta media censal del distrito: ${Math.round(kpiDataB.renta_media).toLocaleString('es-ES')} €/año (~${Math.round(kpiDataB.renta_media / 12).toLocaleString('es-ES')} €/mes netos). Fuente: INE Series 2026.` : 'Calculado sobre la renta neta censal del distrito (INE Series 2026)'}
-                              >
-                                <span className="v2-compare-salary-dot" />
-                                <span>Sobre renta censal (INE 2026){kpiDataB.renta_media ? `: ${Math.round(kpiDataB.renta_media / 12).toLocaleString('es-ES')} €/mes` : ''}</span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      } else if (p.id === 'compra') {
-                        kpiRow = (
-                          <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('precio_m2_compra', selectedZoneB)}
-                                  align="left"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataB.precio_m2 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(kpiDataB.precio_m2)) + ' €/m²' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                PRECIO M² {selectedZoneB.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('poder_adquisitivo', selectedZoneB)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataB.renta_media ? new Intl.NumberFormat('es-ES').format(Math.round(kpiDataB.renta_media)) + ' €' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                PODER ADQUISITIVO {selectedZoneB.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('variacion_anual', selectedZoneB)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataB.variacion_anual !== undefined ? (kpiDataB.variacion_anual > 0 ? '+' : '') + kpiDataB.variacion_anual.toFixed(1) + '%' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                VARIACIÓN ANUAL {selectedZoneB.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      } else if (p.id === 'venta') {
-                        const velocityB_num = kpiDataB.transacciones ? Math.max(1.0, 933.8 / kpiDataB.transacciones) : 0;
-                        let velocityB_label = '';
-                        if (velocityB_num > 0) {
-                          if (velocityB_num < 2.0) velocityB_label = ' (Rápido)';
-                          else if (velocityB_num < 3.0) velocityB_label = ' (Moderado)';
-                          else velocityB_label = ' (Lento)';
-                        }
-                        const velocityB_formatted = velocityB_num > 0 ? (velocityB_num % 1 === 0 ? velocityB_num.toFixed(0) : velocityB_num.toFixed(1)) : '';
-                        const velocityB_suffix = velocityB_num === 1 ? ' mes' : ' meses';
-                        const velocityB_text = velocityB_num > 0 ? `${velocityB_formatted}${velocityB_suffix}${velocityB_label}` : '-';
-                        kpiRow = (
-                          <div className="v2-comp-kpis-row" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('precio_m2_venta', selectedZoneB)}
-                                  align="left"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataB.precio_m2 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(kpiDataB.precio_m2)) + ' €/m²' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                PRECIO M² {selectedZoneB.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('velocidad_venta', selectedZoneB)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {velocityB_text}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                VELOCIDAD DE VENTA {selectedZoneB.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                            <div className="v2-mini-kpi-card" style={{ borderTop: '5px solid var(--azul-noche)', position: 'relative', overflow: 'visible' }}>
-                              <div style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 10 }}>
-                                <InfoTooltip
-                                  {...getComparisonKpiInfo('variacion_anual', selectedZoneB)}
-                                  align="right"
-                                />
-                              </div>
-                              <div className="v" style={{ fontSize: '20px' }}>
-                                {kpiDataB.variacion_anual !== undefined ? (kpiDataB.variacion_anual > 0 ? '+' : '') + kpiDataB.variacion_anual.toFixed(1) + '%' : '-'}
-                              </div>
-                              <div className="l" style={{ display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center' }}>
-                                VARIACIÓN ANUAL {selectedZoneB.toUpperCase()}
-                                <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      }
-                      if (!kpiRow) return null;
-                      return (
-                        <div className="v2-comp-kpis-wrapper">
-                          <div className="v2-comp-kpis-header">
-                            <span>Métricas a {selectedMonth} {selectedYear}</span>
-                          </div>
-                          {kpiRow}
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </div>
-
-                <div className="v2-overlay-wrapper">
-                  <div className="v2-overlay-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
-                    <span style={{ fontWeight: 600 }}>Comparativa superpuesta · {getComparisonMetric(p.id).label}</span>
-                    <div className="v2-compare-view-switch-wrap" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span className="v2-compare-view-label" style={{ fontSize: '11px', color: '#8fa6ba' }}>Vista:</span>
+                  {/* Switch de visualización (Superpuesta vs Lado a Lado) fijado arriba */}
+                  <div className="v2-compare-view-switch-row">
+                    <div className="v2-compare-view-switch-wrap">
+                      <span className="v2-compare-view-label">Vista:</span>
                       <div className="v2-compare-view-switch" role="group" aria-label="Modo de visualización de gráficos">
                         <button
                           type="button"
@@ -4757,45 +4179,373 @@ const MadridDashboardV2: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="v2-overlay-body">
-                    {isComparisonLoading ? (
-                      <div className="v2-chart-wrap large" style={{ display: 'grid', placeContent: 'center', height: '420px' }}>
-                        <div className="v2-comparison-loading-notice" style={{ width: '100%', maxWidth: '520px', margin: '0 auto' }}>
-                          <div className="v2-comp-spinner" />
-                          <span>Procesando serie comparativa</span>
-                          <p>Generando trazado comparativo entre {selectedZoneA} y {selectedZoneB}…</p>
-                          <button type="button" className="v2-reload-action-btn" onClick={reloadComparison} disabled={isReloadingA || isReloadingB}>
-                            <RotateCw size={12} className={isReloadingA || isReloadingB ? 'v2-spin' : ''} />
-                            <span>{isReloadingA || isReloadingB ? 'Sincronizando…' : 'Volver a cargar'}</span>
-                          </button>
+
+              {(() => {
+                const renderZoneKpiCard = (target: 'A' | 'B') => {
+                  const isA = target === 'A';
+                  const zoneName = isA ? formatZoneOption(selectedZoneA) : formatZoneOption(selectedZoneB);
+                  const otherZoneName = isA ? formatZoneOption(selectedZoneB) : formatZoneOption(selectedZoneA);
+                  const kpi = isA ? kpiDataA : kpiDataB;
+                  const otherKpi = isA ? kpiDataB : kpiDataA;
+                  const hasData = isA ? comparisonAHasData : comparisonBHasData;
+                  if (!hasData) return null;
+
+                  const price = Number(kpi.precio_m2) || 0;
+                  const otherPrice = Number(otherKpi.precio_m2) || 0;
+                  const diffPct = otherPrice ? ((price - otherPrice) / otherPrice) * 100 : 0;
+                  const formattedDiff = `${diffPct >= 0 ? '+' : '\u2212'}${Math.abs(diffPct).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
+
+                  const statusLabel = isProjectionPeriod ? 'Proyección' : 'Dato oficial';
+                  const statusDotClass = isProjectionPeriod ? 'is-projection' : 'is-official';
+
+                  let col1 = null;
+                  let col2 = null;
+
+                  if (p.id === 'alquiler') {
+                    const rentPrice70 = Math.round(price * 70);
+                    const rentDisplay = price > 0 ? `${new Intl.NumberFormat('es-ES').format(rentPrice70)} €/mes` : '—';
+                    const priceM2Display = price > 0 ? `${new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price)} €/m²` : '—';
+                    const annualIncome = Number(kpi.renta_media) || 0;
+                    const monthlyIncome = annualIncome > 0 ? Math.round(annualIncome / 12) : 0;
+                    const effort70 = (rentPrice70 > 0 && monthlyIncome > 0) ? (rentPrice70 / monthlyIncome) * 100 : (Number(kpi.esfuerzo_compra) || 0);
+                    const effortDisplay = effort70 > 0 ? `${effort70.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %` : '—';
+                    const isHighEffort = effort70 > 30;
+                    const clampedEffort = Math.min(100, Math.max(0, effort70));
+
+                    col1 = (
+                      <div className="v2-zone-kpi-col v2-zone-kpi-col--left">
+                        <div className="v2-zone-kpi-label-row">
+                          <span className="v2-zone-kpi-label">ALQUILER MEDIO · 70 M²</span>
+                          <InfoTooltip {...getComparisonKpiInfo('alquiler_medio', zoneName)} align="left" />
+                        </div>
+                        <div className="v2-zone-kpi-value">{rentDisplay}</div>
+                        <div className="v2-zone-kpi-sub">
+                          {priceM2Display} · {formattedDiff} frente a {otherZoneName}
                         </div>
                       </div>
-                    ) : isMobile ? <>
-                      <div className="v2-chart-wrap large"><ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile onReload={reloadComparison} isReloading={isReloadingA || isReloadingB} /><canvas id={`v2-overlay-${p.id}`}></canvas></div>
-                      <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={comparisonAHasData ? formatZoneOption(selectedZoneA) : ''} zoneB={comparisonBHasData ? formatZoneOption(selectedZoneB) : ''} />
-                    </> : <div className="v2-overlay-chart-stack">
-                      <div className="v2-overlay-chart-toolbar">
-                        <ComparisonSeriesLegend chartId={`v2-overlay-${p.id}`} items={[
-                          ...(comparisonAHasData ? [{ index: 0, label: `${formatZoneOption(selectedZoneA)} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' as const }, { index: 1, label: `${formatZoneOption(selectedZoneA)} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' as const }] : []),
-                          ...(comparisonBHasData ? [{ index: 2, label: `${formatZoneOption(selectedZoneB)} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' as const }, { index: 3, label: `${formatZoneOption(selectedZoneB)} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' as const }] : []),
-                          { index: 4, label: 'Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)', color: '#dce8f2', kind: 'madrid' },
-                        ]} />
-                        <ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile={false} onReload={reloadComparison} isReloading={isReloadingA || isReloadingB} />
+                    );
+
+                    col2 = (
+                      <div className="v2-zone-kpi-col v2-zone-kpi-col--right">
+                        <div className="v2-zone-kpi-label-row">
+                          <span className="v2-zone-kpi-label">ESFUERZO DE ALQUILER</span>
+                          <InfoTooltip {...getComparisonKpiInfo('esfuerzo', zoneName)} align="right" />
+                        </div>
+                        <div className="v2-zone-kpi-value">{effortDisplay}</div>
+                        <div className="v2-effort-bar-track" aria-hidden="true">
+                          <div
+                            className={`v2-effort-bar-fill ${isHighEffort ? 'is-warning' : 'is-normal'}`}
+                            style={{ width: `${clampedEffort}%` }}
+                          />
+                          <div className="v2-effort-bar-mark" title="Límite recomendado de esfuerzo: 30 %" />
+                        </div>
+                        <div className="v2-zone-kpi-sub">
+                          Sobre renta censal (INE · Proyección): {monthlyIncome > 0 ? `${new Intl.NumberFormat('es-ES').format(monthlyIncome)} €/mes` : '—'}
+                        </div>
                       </div>
-                      <div className="v2-chart-wrap large"><canvas id={`v2-overlay-${p.id}`}></canvas></div>
-                      <div style={{ fontSize: '10.5px', color: '#8fa6ba', marginTop: '6px', textAlign: 'center' }}>
-                        Estimación proyectada mediante modelo de Machine Learning considerando estacionalidad e inflación. Vivienda tipo calculada sobre 70 m².
+                    );
+                  } else if (p.id === 'compra') {
+                    const totalPrice70 = Math.round(price * 70);
+                    const totalDisplay = price > 0 ? `${new Intl.NumberFormat('es-ES').format(totalPrice70)} €` : '—';
+                    const priceM2Display = price > 0 ? `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(price))} €/m²` : '—';
+                    const annualIncome = Number(kpi.renta_media) || 0;
+                    const monthlyIncome = annualIncome > 0 ? Math.round(annualIncome / 12) : 0;
+
+                    col1 = (
+                      <div className="v2-zone-kpi-col v2-zone-kpi-col--left">
+                        <div className="v2-zone-kpi-label-row">
+                          <span className="v2-zone-kpi-label">PRECIO ESTIMADO · 70 M²</span>
+                          <InfoTooltip {...getComparisonKpiInfo('precio_m2_compra', zoneName)} align="left" />
+                        </div>
+                        <div className="v2-zone-kpi-value">{totalDisplay}</div>
+                        <div className="v2-zone-kpi-sub">
+                          {priceM2Display} · {formattedDiff} frente a {otherZoneName}
+                        </div>
+                      </div>
+                    );
+
+                    col2 = (
+                      <div className="v2-zone-kpi-col v2-zone-kpi-col--right">
+                        <div className="v2-zone-kpi-label-row">
+                          <span className="v2-zone-kpi-label">PODER ADQUISITIVO (INE)</span>
+                          <InfoTooltip {...getComparisonKpiInfo('poder_adquisitivo', zoneName)} align="right" />
+                        </div>
+                        <div className="v2-zone-kpi-value">
+                          {annualIncome > 0 ? `${new Intl.NumberFormat('es-ES').format(Math.round(annualIncome))} €` : '—'}
+                        </div>
+                        <div className="v2-zone-kpi-sub" style={{ marginTop: '14px' }}>
+                          Sobre renta censal (INE · Proyección): {monthlyIncome > 0 ? `${new Intl.NumberFormat('es-ES').format(monthlyIncome)} €/mes` : '—'}
+                        </div>
+                      </div>
+                    );
+                  } else if (p.id === 'venta') {
+                    const totalPrice70 = Math.round(price * 70);
+                    const totalDisplay = price > 0 ? `${new Intl.NumberFormat('es-ES').format(totalPrice70)} €` : '—';
+                    const priceM2Display = price > 0 ? `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(price))} €/m²` : '—';
+                    const velocityNum = kpi.transacciones ? Math.max(1.0, 933.8 / kpi.transacciones) : 0;
+                    let velocityLabel = '';
+                    if (velocityNum > 0) {
+                      if (velocityNum < 2.0) velocityLabel = ' (Rápido)';
+                      else if (velocityNum < 3.0) velocityLabel = ' (Moderado)';
+                      else velocityLabel = ' (Lento)';
+                    }
+                    const velocityFormatted = velocityNum > 0 ? (velocityNum % 1 === 0 ? velocityNum.toFixed(0) : velocityNum.toFixed(1)) : '';
+                    const velocitySuffix = velocityNum === 1 ? ' mes' : ' meses';
+                    const velocityText = velocityNum > 0 ? `${velocityFormatted}${velocitySuffix}${velocityLabel}` : '—';
+                    const varAnualText = kpi.variacion_anual !== undefined ? `${kpi.variacion_anual > 0 ? '+' : ''}${kpi.variacion_anual.toFixed(1)} %` : '—';
+
+                    col1 = (
+                      <div className="v2-zone-kpi-col v2-zone-kpi-col--left">
+                        <div className="v2-zone-kpi-label-row">
+                          <span className="v2-zone-kpi-label">PRECIO ESTIMADO · 70 M²</span>
+                          <InfoTooltip {...getComparisonKpiInfo('precio_m2_venta', zoneName)} align="left" />
+                        </div>
+                        <div className="v2-zone-kpi-value">{totalDisplay}</div>
+                        <div className="v2-zone-kpi-sub">
+                          {priceM2Display} · {formattedDiff} frente a {otherZoneName}
+                        </div>
+                      </div>
+                    );
+
+                    col2 = (
+                      <div className="v2-zone-kpi-col v2-zone-kpi-col--right">
+                        <div className="v2-zone-kpi-label-row">
+                          <span className="v2-zone-kpi-label">VELOCIDAD DE VENTA</span>
+                          <InfoTooltip {...getComparisonKpiInfo('velocidad_venta', zoneName)} align="right" />
+                        </div>
+                        <div className="v2-zone-kpi-value">{velocityText}</div>
+                        <div className="v2-zone-kpi-sub" style={{ marginTop: '14px' }}>
+                          Variación anual: {varAnualText}
+                        </div>
+                      </div>
+                    );
+                  } else if (p.id === 'inversion') {
+                    const yieldNet = kpi.rentabilidad ? (kpi.rentabilidad * 100 * 0.85).toFixed(2) + ' %' : '—';
+                    const grm = kpi.rentabilidad > 0 ? (1 / kpi.rentabilidad).toFixed(1) + ' años' : '—';
+                    const volatilityVal = isA ? (volatilityZoneA || 'N/A') : (volatilityZoneB || 'N/A');
+
+                    col1 = (
+                      <div className="v2-zone-kpi-col v2-zone-kpi-col--left">
+                        <div className="v2-zone-kpi-label-row">
+                          <span className="v2-zone-kpi-label">RENTABILIDAD NETA</span>
+                          <InfoTooltip {...getComparisonKpiInfo('roi_neto', zoneName)} align="left" />
+                        </div>
+                        <div className="v2-zone-kpi-value">{yieldNet}</div>
+                        <div className="v2-zone-kpi-sub">
+                          GRM: {grm} · Rent. Bruta: {kpi.rentabilidad ? (kpi.rentabilidad * 100).toFixed(2) + ' %' : '—'}
+                        </div>
+                      </div>
+                    );
+
+                    col2 = (
+                      <div className="v2-zone-kpi-col v2-zone-kpi-col--right">
+                        <div className="v2-zone-kpi-label-row">
+                          <span className="v2-zone-kpi-label">VOLATILIDAD Y RIESGO</span>
+                          <InfoTooltip {...getComparisonKpiInfo('volatilidad', zoneName)} align="right" />
+                        </div>
+                        <div className="v2-zone-kpi-value">{volatilityVal}</div>
+                        <div className="v2-zone-kpi-sub" style={{ marginTop: '14px' }}>
+                          Rango de estabilidad inmobiliaria proyectada
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <div className={`v2-zone-kpi-block zone-${target.toLowerCase()}`} key={target}>
+                      <div className="v2-zone-kpi-header">
+                        <span className="v2-zone-kpi-title">{zoneName}</span>
+                        <span className="v2-zone-kpi-meta">
+                          <span className={`v2-zone-kpi-dot ${statusDotClass}`} />
+                          <span>Métricas a {selectedMonth ? selectedMonth.toLowerCase() : ''} {selectedYear} · {statusLabel}</span>
+                        </span>
+                      </div>
+                      <div className="v2-zone-kpi-card">
+                        <div className="v2-zone-kpi-columns">
+                          {col1}
+                          {col2}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                };
+
+                return (
+                  <div className="v2-compare-viewport" data-compare-view={isMobile ? 'overlay' : 'desktop'}>
+                    {isMobile && <div className="v2-compare-map-panel">
+                      <div className="v2-compare-map-heading">Toca dos zonas para asignar A y B</div>
+                      <div className="v2-compare-map-canvas">
+                        <MadridMap
+                          type={(compareMapTarget === 'A' ? comparisonZoneA : comparisonZoneB).kind === 'district' ? 'districts' : 'neighborhoods'}
+                          data={(compareMapTarget === 'A' ? comparisonZoneA : comparisonZoneB).kind === 'district' ? mapData.districts : mapData.neighborhoods}
+                          selectedYear={Number(selectedYear)} selectedMonth={selectedMonth} selectedProfile={activeProfile.label}
+                          selectedDistrict={null} selectedBarrio={null}
+                          compareZoneA={comparisonZoneA.name} compareZoneB={comparisonZoneB.name}
+                          onDistrictClick={(zone) => {
+                            if (!zone) return;
+                            const option = zoneSearchOptions.find(item => item.kind === 'district' && item.name === zone);
+                            if (option && option.id !== (compareMapTarget === 'A' ? comparisonZoneB.id : comparisonZoneA.id)) { if (compareMapTarget === 'A') setComparisonZoneA(option); else setComparisonZoneB(option); setCompareMapTarget(compareMapTarget === 'A' ? 'B' : 'A'); }
+                          }}
+                          onBarrioClick={(zone) => {
+                            if (!zone) return;
+                            const option = zoneSearchOptions.find(item => item.kind === 'barrio' && item.name === zone);
+                            if (option && option.id !== (compareMapTarget === 'A' ? comparisonZoneB.id : comparisonZoneA.id)) { if (compareMapTarget === 'A') setComparisonZoneA(option); else setComparisonZoneB(option); setCompareMapTarget(compareMapTarget === 'A' ? 'B' : 'A'); }
+                          }}
+                        />
                       </div>
                     </div>}
-                    {!isComparisonLoading && !comparisonAHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} />)}
-                    {!isComparisonLoading && !comparisonBHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} />)}
+
+                    {compareGraphView === 'superpuesta' ? (
+                      <div className="v2-compare-view-superpuesta">
+                        <div className="v2-overlay-wrapper">
+                          <div className="v2-overlay-header">
+                            <span style={{ fontWeight: 600 }}>Comparativa superpuesta · {getComparisonMetric(p.id).label}</span>
+                          </div>
+                          <div className="v2-overlay-body">
+                            {isComparisonLoading ? (
+                              <div className="v2-chart-wrap large" style={{ display: 'grid', placeContent: 'center', height: '420px' }}>
+                                <div className="v2-comparison-loading-notice" style={{ width: '100%', maxWidth: '520px', margin: '0 auto' }}>
+                                  <div className="v2-comp-spinner" />
+                                  <span>Procesando serie comparativa</span>
+                                  <p>Generando trazado comparativo entre {selectedZoneA} y {selectedZoneB}…</p>
+                                  <button type="button" className="v2-reload-action-btn" onClick={reloadComparison} disabled={isReloadingA || isReloadingB}>
+                                    <RotateCw size={12} className={isReloadingA || isReloadingB ? 'v2-spin' : ''} />
+                                    <span>{isReloadingA || isReloadingB ? 'Sincronizando…' : 'Volver a cargar'}</span>
+                                  </button>
+                                </div>
+                              </div>
+                            ) : isMobile ? (
+                              <>
+                                <div className="v2-chart-wrap large"><ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile onReload={reloadComparison} isReloading={isReloadingA || isReloadingB} /><canvas id={`v2-overlay-${p.id}`}></canvas></div>
+                                <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={comparisonAHasData ? formatZoneOption(selectedZoneA) : ''} zoneB={comparisonBHasData ? formatZoneOption(selectedZoneB) : ''} />
+                              </>
+                            ) : (
+                              <div className="v2-overlay-chart-stack">
+                                <div className="v2-overlay-chart-toolbar">
+                                  <ComparisonSeriesLegend chartId={`v2-overlay-${p.id}`} items={[
+                                    ...(comparisonAHasData ? [{ index: 0, label: `${formatZoneOption(selectedZoneA)} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' as const }, { index: 1, label: `${formatZoneOption(selectedZoneA)} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' as const }] : []),
+                                    ...(comparisonBHasData ? [{ index: 2, label: `${formatZoneOption(selectedZoneB)} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' as const }, { index: 3, label: `${formatZoneOption(selectedZoneB)} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' as const }] : []),
+                                    { index: 4, label: 'Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)', color: '#dce8f2', kind: 'madrid' },
+                                  ]} />
+                                  <ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile={false} onReload={reloadComparison} isReloading={isReloadingA || isReloadingB} />
+                                </div>
+                                <div className="v2-chart-wrap large"><canvas id={`v2-overlay-${p.id}`}></canvas></div>
+                                <div style={{ fontSize: '10.5px', color: '#8fa6ba', marginTop: '6px', textAlign: 'center' }}>
+                                  Estimación proyectada mediante modelo de Machine Learning considerando estacionalidad e inflación. Vivienda tipo calculada sobre 70 m².
+                                </div>
+                              </div>
+                            )}
+                            {!isComparisonLoading && !comparisonAHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} />)}
+                            {!isComparisonLoading && !comparisonBHasData && (isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} />)}
+                          </div>
+                        </div>
+
+                        {/* Tarjetas de métricas en 2 columnas inmediatamente debajo del gráfico superpuesto */}
+                        <div className="v2-compare-dual-kpis-grid">
+                          {renderZoneKpiCard('A')}
+                          {renderZoneKpiCard('B')}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="v2-compare-view-paralela">
+                        <div className="v2-compare-grid">
+                          {/* ZONA A (IZQ) */}
+                          <div className="v2-comp-col zone-a">
+                            <div className="v2-chart-card">
+                              <div className="v2-chart-head">
+                                Evolución {p.id === 'inversion' ? 'Rentabilidad' : `Precio ${p.label}`} ({selectedYear}) · {selectedZoneA}
+                              </div>
+                              <div className="v2-chart-wrap" style={{ position: 'relative' }}>
+                                {isZoneALoading && (
+                                  <div className="v2-comparison-loading-notice" style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(1, 16, 36, 0.92)' }}>
+                                    <div className="v2-comp-spinner" />
+                                    <span>Consultando registros oficiales</span>
+                                    <p>Cargando evolución histórica y predicción de {selectedZoneA}…</p>
+                                    <button type="button" className="v2-reload-action-btn" onClick={reloadZoneA} disabled={isReloadingA}>
+                                      <RotateCw size={12} className={isReloadingA ? 'v2-spin' : ''} />
+                                      <span>{isReloadingA ? 'Sincronizando…' : 'Volver a cargar'}</span>
+                                    </button>
+                                  </div>
+                                )}
+                                {comparisonAHasData ? (
+                                  <>
+                                    {isMobile ? (
+                                      <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile onReload={reloadZoneA} isReloading={isReloadingA} />
+                                    ) : (
+                                      <div className="v2-comparison-chart-meta">
+                                        <ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: 'Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' }]} />
+                                        <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={false} onReload={reloadZoneA} isReloading={isReloadingA} />
+                                      </div>
+                                    )}
+                                    <canvas id={`v2-chartA-${p.id}`}></canvas>
+                                    <div style={{ fontSize: '10.5px', color: '#8fa6ba', marginTop: '6px', textAlign: 'center' }}>
+                                      Estimación proyectada mediante modelo de Machine Learning considerando estacionalidad e inflación.
+                                    </div>
+                                  </>
+                                ) : !isZoneALoading ? (
+                                  isMobile ? <AvisoComparacionMovil zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} /> : <AvisoComparacionDesktop zone={selectedZoneA} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneA} isReloading={isReloadingA} />
+                                ) : null}
+                              </div>
+                            </div>
+                            {renderZoneKpiCard('A')}
+                          </div>
+
+                          {/* ZONA B (DER) */}
+                          <div className="v2-comp-col zone-b">
+                            <div className="v2-chart-card">
+                              <div className="v2-chart-head">
+                                Evolución {p.id === 'inversion' ? 'Rentabilidad' : `Precio ${p.label}`} ({selectedYear}) · {selectedZoneB}
+                              </div>
+                              <div className="v2-chart-wrap" style={{ position: 'relative' }}>
+                                {isZoneBLoading && (
+                                  <div className="v2-comparison-loading-notice" style={{ position: 'absolute', inset: 0, zIndex: 10, background: 'rgba(1, 16, 36, 0.92)' }}>
+                                    <div className="v2-comp-spinner" />
+                                    <span>Consultando registros oficiales</span>
+                                    <p>Cargando evolución histórica y predicción de {selectedZoneB}…</p>
+                                    <button type="button" className="v2-reload-action-btn" onClick={reloadZoneB} disabled={isReloadingB}>
+                                      <RotateCw size={12} className={isReloadingB ? 'v2-spin' : ''} />
+                                      <span>{isReloadingB ? 'Sincronizando…' : 'Volver a cargar'}</span>
+                                    </button>
+                                  </div>
+                                )}
+                                {comparisonBHasData ? (
+                                  <>
+                                    {isMobile ? (
+                                      <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile onReload={reloadZoneB} isReloading={isReloadingB} />
+                                    ) : (
+                                      <div className="v2-comparison-chart-meta">
+                                        <ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: 'Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' }]} />
+                                        <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={false} onReload={reloadZoneB} isReloading={isReloadingB} />
+                                      </div>
+                                    )}
+                                    <canvas id={`v2-chartB-${p.id}`}></canvas>
+                                    <div style={{ fontSize: '10.5px', color: '#8fa6ba', marginTop: '6px', textAlign: 'center' }}>
+                                      Estimación proyectada mediante modelo de Machine Learning considerando estacionalidad e inflación.
+                                    </div>
+                                  </>
+                                ) : !isZoneBLoading ? (
+                                  isMobile ? <AvisoComparacionMovil zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} /> : <AvisoComparacionDesktop zone={selectedZoneB} projectionWithoutHistory={isProjectionPeriod} onReload={reloadZoneB} isReloading={isReloadingB} />
+                                ) : null}
+                              </div>
+                            </div>
+                            {renderZoneKpiCard('B')}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Resumen y balance de la comparativa (accesible en ambas vistas) */}
                     {comparisonAHasData && comparisonBHasData && p.id === 'alquiler' && (() => {
                       const priceA = Number(kpiDataA.precio_m2) || 0;
                       const priceB = Number(kpiDataB.precio_m2) || 0;
                       const yieldA = Number(kpiDataA.rentabilidad) || 0;
                       const yieldB = Number(kpiDataB.rentabilidad) || 0;
-                      const effortA = Number(kpiDataA.esfuerzo_compra) || 0;
-                      const effortB = Number(kpiDataB.esfuerzo_compra) || 0;
+                      const rentA = Math.round(priceA * 70);
+                      const rentB = Math.round(priceB * 70);
+                      const incomeA = Number(kpiDataA.renta_media) ? Math.round(kpiDataA.renta_media / 12) : 0;
+                      const incomeB = Number(kpiDataB.renta_media) ? Math.round(kpiDataB.renta_media / 12) : 0;
+                      const effortA = (rentA > 0 && incomeA > 0) ? (rentA / incomeA) * 100 : (Number(kpiDataA.esfuerzo_compra) || 0);
+                      const effortB = (rentB > 0 && incomeB > 0) ? (rentB / incomeB) * 100 : (Number(kpiDataB.esfuerzo_compra) || 0);
                       const percentDifference = (a: number, b: number) => b ? `${a > b ? '+' : ''}${((a - b) / b * 100).toFixed(1)}%` : '—';
                       const pointDifference = (a: number, b: number) => `${a > b ? '+' : ''}${((a - b) * 100).toFixed(1)} pt`;
                       const effortDifference = (a: number, b: number) => `${a > b ? '+' : ''}${(a - b).toFixed(1)} pt`;
@@ -4807,8 +4557,6 @@ const MadridDashboardV2: React.FC = () => {
                       const pricePct = priceB ? Math.abs((priceA - priceB) / priceB * 100).toFixed(1) : null;
                       const cheaper = priceA <= priceB ? selectedZoneA : selectedZoneB;
                       const lessEffort = effortA <= effortB ? selectedZoneA : selectedZoneB;
-                      const rentA = Number(kpiDataA.p_vivienda) || (priceA ? Math.round(priceA * 70) : 0);
-                      const rentB = Number(kpiDataB.p_vivienda) || (priceB ? Math.round(priceB * 70) : 0);
                       const monthlySaving = Math.abs(rentA - rentB);
                       const effortDiff = Math.abs(effortA - effortB).toFixed(1);
 
@@ -4895,8 +4643,8 @@ const MadridDashboardV2: React.FC = () => {
                       );
                     })()}
                   </div>
-                </div>
-              </div>
+                );
+              })()}
             </section>
             </ComparacionZonas>
 
