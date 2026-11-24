@@ -11,6 +11,7 @@ import { Activity, Building2, ChevronDown, Compass, HelpCircle, Home, Info, Maxi
 import './MadridDashboardV2.css';
 import './TrustArchitecture.css';
 import { TrustTelemetryBadge } from './TrustTelemetryBadge';
+import { HeaderMethodologyLink } from './HeaderMethodologyLink';
 import { MethodologyDrawer } from './MethodologyDrawer';
 import { ConfidenceIntervalBadge } from './ConfidenceIntervalBadge';
 import { ExpenseYieldSimulator } from './ExpenseYieldSimulator';
@@ -857,7 +858,7 @@ const MadridDashboardV2: React.FC = () => {
   const [activeComparePicker, setActiveComparePicker] = useState<'a' | 'b' | null>(null);
   const selectedZoneA = comparisonZoneA.name;
   const selectedZoneB = comparisonZoneB.name;
-  const [latestAvailablePeriod, setLatestAvailablePeriod] = useState({ year: '2026', month: 'Julio' });
+  const [latestAvailablePeriod, setLatestAvailablePeriod] = useState({ year: '2026', month: 'Junio' });
   const [selectedDistrict, setSelectedDistrict] = useState('Todos');
   const [selectedBarrio, setSelectedBarrio] = useState('Todos');
   const [compareMapTarget, setCompareMapTarget] = useState<'A' | 'B'>('A');
@@ -1189,8 +1190,7 @@ const MadridDashboardV2: React.FC = () => {
         const currentPeriod = getCurrentMadridPeriod();
         const observedPeriod = data.latest_observed_period;
         if (observedPeriod?.year && observedPeriod?.month) {
-          const month = Number(observedPeriod.year) === 2026 && observedPeriod.month === 'Junio' ? 'Julio' : String(observedPeriod.month);
-          setLatestAvailablePeriod({ year: String(observedPeriod.year), month });
+          setLatestAvailablePeriod({ year: String(observedPeriod.year), month: String(observedPeriod.month) });
         }
         if (!allYears.includes(currentPeriod.year)) allYears.push(currentPeriod.year);
         allYears.sort((a, b) => Number(a) - Number(b));
@@ -2675,41 +2675,34 @@ const MadridDashboardV2: React.FC = () => {
       <SiteHeader
         activePath="/madrid"
         appearance="aurora"
-        topBar={(
-          <>
-            <div className="v2-trust-editorial-source">
-              <span className="v2-telemetry-led" aria-hidden="true" />
-              <span className="v2-trust-source-text">
-                Fuente: <strong>Ayuntamiento de Madrid</strong> y <strong>Registradores de la Propiedad</strong>
-              </span>
-              <span className="v2-trust-editorial-dot" aria-hidden="true">·</span>
-              <span className="v2-trust-date-text">
-                Datos al 15/11/2026
-              </span>
-            </div>
-
-            <div className="v2-trust-editorial-right">
-              <TrustTelemetryBadge onOpenMethodology={() => setShowMethodologyDrawer(true)} variant="compact" />
-            </div>
-          </>
-        )}
         desktopAction={!isMobile ? (
-          <PeriodSelector
-            year={selectedYear}
-            month={selectedMonth}
-            years={availableYears}
-            latestReal={latestAvailablePeriod}
-            onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }}
-            hideMonthArrows
-            keyboardMonthNavigation
-            showYearShortcut={false}
-          />
+          <div className="v2-header-desktop-actions">
+            <HeaderMethodologyLink onOpenFullMethodology={() => setShowMethodologyDrawer(true)} />
+            <PeriodSelector
+              year={selectedYear}
+              month={selectedMonth}
+              years={availableYears}
+              latestReal={latestAvailablePeriod}
+              onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }}
+              hideMonthArrows
+              keyboardMonthNavigation
+              showYearShortcut={false}
+              showStatusPill
+            />
+          </div>
         ) : undefined}
         mobileAction={isMobile ? (
-          <button type="button" className="v2-mobile-filter-trigger" aria-expanded={isMobileFiltersOpen} aria-controls="v2-filter-panel" onClick={openMobileFilters}>
-            <SlidersHorizontal size={17} aria-hidden="true" />
-            <span>Filtros</span><b>{Number(selectedDistrict !== 'Todos') + Number(selectedBarrio !== 'Todos') + Number(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month)}</b>
-          </button>
+          <div className="v2-header-mobile-actions">
+            <HeaderMethodologyLink onOpenFullMethodology={() => setShowMethodologyDrawer(true)} isMobile />
+            <span className={`v2-header-status-pill ${isProjectionPeriod ? 'is-projection' : 'is-official'}`}>
+              <span className="v2-header-status-dot" aria-hidden="true" />
+              <span>{isProjectionPeriod ? 'Proyección' : 'Oficial'}</span>
+            </span>
+            <button type="button" className="v2-mobile-filter-trigger" aria-expanded={isMobileFiltersOpen} aria-controls="v2-filter-panel" onClick={openMobileFilters}>
+              <SlidersHorizontal size={17} aria-hidden="true" />
+              <span>Filtros</span><b>{Number(selectedDistrict !== 'Todos') + Number(selectedBarrio !== 'Todos') + Number(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month)}</b>
+            </button>
+          </div>
         ) : undefined}
         profileTabs={PROFILES.map(p => ({ id: p.id, label: p.label }))}
         activeProfileId={activeProfile.id}

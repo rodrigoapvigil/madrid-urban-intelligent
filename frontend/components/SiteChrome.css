@@ -13,31 +13,14 @@
   top: 0;
   z-index: 1200;
   width: 100%;
+  background: linear-gradient(180deg, rgba(2, 20, 43, 0.88) 0%, rgba(2, 20, 43, 0.68) 100%);
+  border-bottom: 1px solid rgba(186, 204, 214, 0.10);
+  backdrop-filter: blur(22px) saturate(145%);
+  -webkit-backdrop-filter: blur(22px) saturate(145%);
 }
 
 .mi-header-topbar {
-  width: 100%;
-  min-height: 38px;
-  padding: 6px max(48px, calc((100vw - 1600px)/2 + 64px));
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  background: rgba(1, 10, 22, 0.94);
-  border-bottom: 1px solid rgba(186, 204, 214, 0.12);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  font-size: 11.5px;
-  color: #8fa6ba;
-  box-sizing: border-box;
-}
-
-@media (max-width: 768px) {
-  .mi-header-topbar {
-    padding: 6px 16px;
-    font-size: 10.5px;
-    gap: 8px;
-  }
+  display: none !important;
 }
 
 .site-header,
@@ -45,18 +28,17 @@
   position: relative;
   z-index: 1;
   width: 100%;
-  min-height: 88px;
-  padding-inline: max(48px, calc((100vw - 1600px)/2 + 64px));
-  display: grid;
-  grid-template-columns: minmax(260px, 1fr) minmax(480px, 1.6fr) minmax(210px, 1fr);
+  max-width: var(--page-max);
+  margin-inline: auto;
+  min-height: 76px;
+  padding-inline: var(--page-gutter) !important;
+  display: flex !important;
   align-items: center;
-  gap: 32px;
-  /* Shared translucent chrome: the dashboard should feel continuous with the landing page. */
-  background: linear-gradient(180deg, rgba(2, 20, 43, 0.78) 0%, rgba(2, 20, 43, 0.58) 100%);
+  justify-content: space-between;
+  gap: 20px;
+  box-sizing: border-box;
+  background: transparent !important;
   border: none !important;
-  border-bottom: 1px solid rgba(186, 204, 214, 0.10) !important;
-  backdrop-filter: blur(22px) saturate(145%);
-  -webkit-backdrop-filter: blur(22px) saturate(145%);
 }
 
 .site-brand,
@@ -1068,5 +1050,316 @@ main.editorial-page:not(.editorial-page--methodology) { padding-bottom: 40px !im
   .veredicto-root .auros-footer__inner,
   .editorial-page ~ .auros-footer .auros-footer__inner {
     width: min(1440px, calc(100% - 112px));
+  }
+}
+
+/* ==========================================================================
+   Paso 1: Cabecera, Pastilla de Estado y Fuentes & Metodología
+   ========================================================================== */
+
+/* Alineación exacta de cabecera con el contenido (panel lateral y mapas) */
+.v2-root .site-header,
+.v2-root .mi-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  max-width: var(--page-max) !important;
+  margin-inline: auto !important;
+  padding-inline: var(--page-gutter) !important;
+  box-sizing: border-box !important;
+}
+
+.v2-root .site-header .site-brand,
+.v2-root .mi-header .mi-brand {
+  margin-right: auto;
+  flex: 0 0 auto;
+}
+
+.v2-root .site-header .mi-nav--profiles,
+.v2-root .mi-header .mi-nav--profiles {
+  margin-inline: auto;
+  flex: 0 0 auto;
+}
+
+.v2-root .site-header .mi-header__actions-wrap,
+.v2-root .mi-header .mi-header__actions-wrap {
+  margin-left: auto;
+  flex: 0 0 auto;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.v2-header-desktop-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.v2-header-mobile-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Pastilla de estado junto al selector de mes */
+.v2-period-with-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.v2-header-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  user-select: none;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.v2-header-status-pill.is-projection {
+  background: rgba(255, 178, 66, 0.12);
+  border: 1px solid rgba(255, 190, 92, 0.45);
+  color: #ffd27a;
+}
+
+.v2-header-status-pill.is-official {
+  background: rgba(0, 230, 118, 0.10);
+  border: 1px solid rgba(0, 230, 118, 0.35);
+  color: #00e676;
+}
+
+.v2-header-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.v2-header-status-pill.is-projection .v2-header-status-dot {
+  background: #ffd27a;
+  box-shadow: 0 0 6px rgba(255, 190, 92, 0.7);
+}
+
+.v2-header-status-pill.is-official .v2-header-status-dot {
+  background: #00e676;
+  box-shadow: 0 0 6px rgba(0, 230, 118, 0.7);
+}
+
+/* Enlace a Fuentes y metodología en cabecera */
+.v2-header-methodology-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.v2-header-methodology-link {
+  background: transparent;
+  border: none;
+  color: #8fa6ba;
+  font-size: 12px;
+  font-weight: 550;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.v2-header-methodology-link:hover,
+.v2-header-methodology-link.is-active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.v2-header-methodology-icon {
+  color: #00e5ff;
+  opacity: 0.85;
+}
+
+/* Popover de Fuentes y Metodología */
+.v2-methodology-popover {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 340px;
+  max-width: 90vw;
+  padding: 16px;
+  border-radius: 14px;
+  background: rgba(4, 20, 42, 0.96);
+  border: 1px solid rgba(0, 229, 255, 0.28);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.65), 0 0 20px rgba(0, 229, 255, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  z-index: 2500;
+  animation: v2PopoverFade 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.v2-methodology-popover-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(186, 204, 214, 0.12);
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.v2-methodology-popover-close {
+  background: transparent;
+  border: none;
+  color: #8fa6ba;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  padding: 2px;
+  border-radius: 6px;
+  transition: color 0.18s ease;
+}
+
+.v2-methodology-popover-close:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.v2-methodology-popover-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 12px;
+  color: #c0d3e2;
+  line-height: 1.45;
+}
+
+.v2-methodology-point {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.v2-methodology-bullet {
+  color: #00e5ff;
+  font-size: 8px;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.v2-methodology-term {
+  color: #ffffff;
+  font-weight: 650;
+}
+
+.v2-methodology-desc {
+  color: #b3c8d8;
+}
+
+.v2-methodology-popover-footer {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(186, 204, 214, 0.10);
+}
+
+.v2-methodology-full-btn {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(0, 229, 255, 0.12);
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  color: #00e5ff;
+  font-size: 11.5px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.v2-methodology-full-btn:hover {
+  background: rgba(0, 229, 255, 0.22);
+  border-color: #00e5ff;
+  color: #ffffff;
+}
+
+/* Desplegable de mes: etiqueta pequeña proyección */
+.v2-period-month-grid button {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 1px !important;
+  padding: 3px 2px !important;
+  min-height: 38px !important;
+}
+
+.v2-period-month-name {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.v2-period-month-tag {
+  display: block;
+  font-size: 7.5px;
+  line-height: 1;
+  text-transform: lowercase;
+  opacity: 0.85;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.v2-period-month-grid button.is-selected .v2-period-month-tag {
+  color: #03141c;
+  opacity: 0.95;
+  font-weight: 700;
+}
+
+/* Mobile Bottom Sheet */
+@media (max-width: 768px) {
+  .v2-methodology-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 2999;
+  }
+
+  .v2-methodology-popover.is-mobile-sheet {
+    position: fixed;
+    inset: auto 0 0 0;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 18px calc(24px + env(safe-area-inset-bottom));
+    z-index: 3000;
+    animation: v2BottomSheetSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes v2BottomSheetSlide {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+
+  .v2-header-mobile-actions .v2-header-methodology-link {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  .v2-header-mobile-actions .v2-header-status-pill {
+    padding: 4px 8px;
+    font-size: 10.5px;
   }
 }
