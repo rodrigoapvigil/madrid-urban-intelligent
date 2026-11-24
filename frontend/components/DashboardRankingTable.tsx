@@ -5,7 +5,7 @@ import { Scale } from 'lucide-react';
 import SegmentedControl from './SegmentedControl';
 
 type RankingRow = { name: string; value: number };
-type OrderMode = 'affordable' | 'expensive' | 'increase' | 'demand-high' | 'demand-low' | 'yield-high' | 'yield-low' | 'all';
+type OrderMode = 'affordable' | 'expensive' | 'increase' | 'demand-high' | 'demand-low' | 'yield-high' | 'yield-low';
 
 function Sparkline({ values, color }: { values: number[]; color: string }) {
   const points = values.map((value, index) => {
@@ -89,26 +89,26 @@ export default function DashboardRankingTable({
     });
   }, [rows, order, previousValues, isInvestment, minYieldThreshold]);
 
-  const isAll = order === 'all';
-  const title = isAll
-    ? `Ranking completo (${level === 'Distritos' ? '21 distritos' : `${sortedRows.length} barrios`})`
-    : isDemand
-      ? `Top 10 ${zoneLabel} con ${order === 'demand-low' ? 'menos' : 'más'} demanda`
-      : isInvestment
-        ? `Top 10 ${zoneLabel} con ${order === 'yield-low' ? 'menor' : 'mayor'} rentabilidad`
-        : order === 'expensive' ? `Top 10 ${zoneLabel} más caros` : order === 'increase' ? `Top 10 ${zoneLabel} con mayor subida anual` : `Top 10 ${zoneLabel} más asequibles`;
+  const title = isDemand
+    ? `Top 10 ${zoneLabel} con ${order === 'demand-low' ? 'menos' : 'más'} demanda`
+    : isInvestment
+      ? `Top 10 ${zoneLabel} con ${order === 'yield-low' ? 'menor' : 'mayor'} rentabilidad`
+      : order === 'expensive'
+        ? `Top 10 ${zoneLabel} más caros`
+        : order === 'increase'
+          ? `Top 10 ${zoneLabel} con mayor subida anual`
+          : `Top 10 ${zoneLabel} más asequibles`;
   
   const isPerMonth = metric === 'total' && profileId === 'alquiler';
   const isTotalPrice = metric === 'total' && profileId === 'compra';
   const valueHeading = isDemand ? 'DEMANDA' : isInvestment ? 'RENTABILIDAD' : profileId === 'alquiler'
     ? (metric === 'total' ? 'ALQUILER €/MES' : 'ALQUILER €/M²')
     : (metric === 'total' ? 'PRECIO COMPRA €' : 'COMPRA €/M²');
-  const allLabel = level === 'Distritos' ? 'Ver todos los 21 distritos' : 'Ver todos los barrios';
   const orderOptions: Array<{ value: OrderMode; label: string }> = isDemand
-    ? [{ value: 'demand-high', label: 'Más demanda' }, { value: 'demand-low', label: 'Menos demanda' }, { value: 'all', label: allLabel }]
+    ? [{ value: 'demand-high', label: 'Más demanda' }, { value: 'demand-low', label: 'Menos demanda' }]
     : isInvestment
-      ? [{ value: 'yield-high', label: 'Mayor rentabilidad' }, { value: 'yield-low', label: 'Menor rentabilidad' }, { value: 'all', label: allLabel }]
-      : [{ value: 'affordable', label: 'Más asequibles' }, { value: 'expensive', label: 'Más caros' }, ...(hasAnnualVariation ? [{ value: 'increase' as const, label: 'Mayor subida' }] : []), { value: 'all', label: allLabel }];
+      ? [{ value: 'yield-high', label: 'Mayor rentabilidad' }, { value: 'yield-low', label: 'Menor rentabilidad' }]
+      : [{ value: 'affordable', label: 'Más asequibles' }, { value: 'expensive', label: 'Más caros' }, ...(hasAnnualVariation ? [{ value: 'increase' as const, label: 'Mayor subida' }] : [])];
   const orderValue = orderOptions.some(option => option.value === order) ? order as OrderMode : orderOptions[0].value;
 
   return (
@@ -229,7 +229,7 @@ export default function DashboardRankingTable({
             </tr>
           </thead>
           <tbody>
-            {sortedRows.length === 0 && loading ? loadingRows : sortedRows.slice(0, isAll ? sortedRows.length : 10).map((item, index) => {
+            {sortedRows.length === 0 && loading ? loadingRows : sortedRows.slice(0, 10).map((item, index) => {
               const previous = previousValues[normalize(item.name)];
               const variation = Number.isFinite(previous) && previous > 0 ? ((item.value - previous) / previous) * 100 : null;
               const monthly = monthlyByZone.get(normalize(item.name));
