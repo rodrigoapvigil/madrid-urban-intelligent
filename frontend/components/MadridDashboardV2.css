@@ -3004,12 +3004,9 @@
 
 /* Crystal navigation: keep the dashboard header visually continuous with the landing page. */
 .v2-root .site-header {
-  /* Match the exact landing page chrome surface (#0a2a4f glassmorphism) */
-  background: rgba(10, 42, 79, 0.85) !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
-  box-shadow: none;
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  background: transparent !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
 }
 
 .v2-root .site-header .mi-nav__profile-pill-group {
