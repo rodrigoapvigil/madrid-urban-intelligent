@@ -3832,7 +3832,6 @@ const MadridDashboardV2: React.FC = () => {
                         {!isMobile && <div className="v2-map-panel-heading"><strong>Distritos · {mapMetricLabel}</strong></div>}
                         <div className="v2-map-notice-badge">
                           <div className="v2-map-notice-title">
-                            <span className="v2-map-notice-swatch" />
                             <span>Zonas con tramado</span>
                           </div>
                           <p>
@@ -3863,7 +3862,6 @@ const MadridDashboardV2: React.FC = () => {
                         {!isMobile && <div className="v2-map-panel-heading"><strong>Barrios · {mapMetricLabel}</strong></div>}
                         <div className="v2-map-notice-badge">
                           <div className="v2-map-notice-title">
-                            <span className="v2-map-notice-swatch" />
                             <span>Zonas con tramado</span>
                           </div>
                           <p>

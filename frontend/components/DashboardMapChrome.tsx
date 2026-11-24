@@ -102,7 +102,7 @@ export function DashboardMapLegend({
               fontWeight: 600,
             }}
           >
-            🛡️ Zonas no residenciales / forestales protegidas (sin muestra de alquiler)
+            Zonas no residenciales / forestales protegidas (sin muestra de alquiler)
           </span>
         </div>
         <div className="v2-map-legend-visual">
