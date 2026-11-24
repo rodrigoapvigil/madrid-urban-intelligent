@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Search, Compass } from 'lucide-react';
+import { Search } from 'lucide-react';
 import './HeatmapDistritosMeses.css';
 
 interface HeatmapDistritosMesesProps {
@@ -148,18 +148,6 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
             />
             <span>{profileId === 'alquiler' ? '> 27 €/m²' : `> ${effectiveMax.toLocaleString('es-ES', { maximumFractionDigits: 0 })} ${unitLabel}`}</span>
           </div>
-
-          {onOpenMethodology && (
-            <button
-              type="button"
-              onClick={onOpenMethodology}
-              className="hdm-methodology-btn"
-              title="Abrir Ficha Técnica y Códice Metodológico"
-            >
-              <Compass size={12} aria-hidden="true" />
-              <span>Metodología y Fuentes ↗</span>
-            </button>
-          )}
         </div>
       </div>
 
