@@ -258,23 +258,158 @@
 .v2-dropdown-search::placeholder { color: #8ea8c3; }
 .v2-dropdown-search:focus { border-color: #00e5ff; box-shadow: 0 0 0 2px rgba(0, 229, 255, 0.14); }
 
+/* Guide Modals (Help, Map, Heatmap, Compare) */
+.v2-guide-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(1, 11, 25, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(12px, 3vh, 24px);
+  overscroll-behavior: contain;
+  touch-action: none;
+}
+
 .v2-guide-modal {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100%;
+  max-width: 580px;
+  max-height: calc(100dvh - 40px) !important;
+  height: auto !important;
+  overflow: hidden !important;
+  padding: 0 !important;
   background: linear-gradient(145deg, #062744, #011024) !important;
   border: 1px solid rgba(0, 229, 255, 0.28) !important;
+  border-radius: 24px !important;
   color: #f4fbff;
-  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.48) !important;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55) !important;
+  position: relative;
+  animation: v2FadeIn 0.2s ease-out;
+  overscroll-behavior: contain;
 }
+
+.v2-guide-modal-header {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.12);
+  gap: 16px;
+}
+
+.v2-guide-modal-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 229, 255, 0.28) rgba(1, 16, 36, 0.45);
+}
+
+.v2-guide-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+.v2-guide-modal-body::-webkit-scrollbar-thumb {
+  background: rgba(0, 229, 255, 0.28);
+  border-radius: 99px;
+}
+.v2-guide-modal-body::-webkit-scrollbar-track {
+  background: rgba(1, 16, 36, 0.45);
+}
+
+.v2-guide-modal-footer {
+  flex-shrink: 0;
+  padding: 16px 28px 24px;
+  border-top: 1px solid rgba(0, 229, 255, 0.12);
+  background: rgba(1, 16, 36, 0.35);
+}
+
+.v2-guide-modal-footer button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--precio-subida);
+  color: #03141c;
+  border: none;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.2s, background-color 0.2s;
+}
+
+.v2-guide-modal-footer button:hover {
+  opacity: 0.92;
+}
+
 .v2-guide-modal h3,
 .v2-guide-modal [style*="color: var(--azul-noche)"],
 .v2-guide-modal [style*="color:var(--azul-noche)"] { color: #f4fbff !important; }
 .v2-guide-modal p,
 .v2-guide-modal [style*="color: var(--azul-linea)"],
 .v2-guide-modal [style*="color:var(--azul-linea)"] { color: #baccd6 !important; }
-.v2-guide-modal > div > div > div:not(:first-child),
+
+/* Solo la tarjeta del paso tiene fondo; los textos internos son transparentes sin rectángulos duplicados */
+.v2-guide-step-card {
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(186, 204, 214, 0.18);
+  border-radius: 16px;
+  align-items: flex-start;
+}
+
+.v2-guide-step-text {
+  flex: 1 1 auto;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.v2-guide-step-text > div {
+  background: transparent !important;
+  border: none !important;
+}
+
 .v2-guide-modal [style*="background-color: var(--blanco-humo)"],
 .v2-guide-modal [style*="backgroundColor: var(--blanco-humo)"] {
   background: rgba(255, 255, 255, 0.055) !important;
   border-color: rgba(186, 204, 214, 0.18) !important;
+}
+
+.v2-guide-modal [style*="background-color: var(--blanco-humo)"] > div,
+.v2-guide-modal [style*="backgroundColor: var(--blanco-humo)"] > div,
+.v2-guide-modal [style*="background-color: var(--blanco-humo)"] > div > div,
+.v2-guide-modal [style*="backgroundColor: var(--blanco-humo)"] > div > div {
+  background: transparent !important;
+  border: none !important;
+}
+
+@media (max-width: 640px) {
+  .v2-guide-modal {
+    max-height: calc(100dvh - 20px) !important;
+    border-radius: 18px !important;
+  }
+  .v2-guide-modal-header {
+    padding: 18px 20px 12px;
+  }
+  .v2-guide-modal-body {
+    padding: 16px 20px;
+    gap: 12px;
+  }
+  .v2-guide-modal-footer {
+    padding: 12px 20px 18px;
+  }
 }
 
 @keyframes v2FadeIn {

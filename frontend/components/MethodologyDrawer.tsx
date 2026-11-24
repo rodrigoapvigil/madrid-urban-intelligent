@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { X, Database, BarChart3, Binary, ShieldCheck, Check, Compass } from 'lucide-react';
+import { lockScroll, unlockScroll } from '../lib/scrollLock';
 
 export interface MethodologySource {
   id: string;
@@ -125,18 +126,14 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({
       }
     };
 
-    const prevHtmlOverflow = document.documentElement.style.overflow;
-    const prevBodyOverflow = document.body.style.overflow;
-    document.documentElement.style.overflow = 'hidden';
-    document.body.style.overflow = 'hidden';
+    lockScroll();
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('wheel', handleWheel, { passive: false });
     window.addEventListener('touchmove', handleTouchMove, { passive: false });
 
     return () => {
-      document.documentElement.style.overflow = prevHtmlOverflow;
-      document.body.style.overflow = prevBodyOverflow;
+      unlockScroll();
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('wheel', handleWheel);
       window.removeEventListener('touchmove', handleTouchMove);

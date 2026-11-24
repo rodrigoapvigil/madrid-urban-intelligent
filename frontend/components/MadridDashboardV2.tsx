@@ -37,6 +37,7 @@ import EstadoBadge from './EstadoBadge';
 import PeriodSelector from './PeriodSelector';
 import ZoneSearch, { ZoneSearchOption } from './ZoneSearch';
 import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
+import { lockScroll, unlockScroll } from '../lib/scrollLock';
 import type { MapZoneHoverContext } from './MadridMap';
 
 ChartJS.register(ChartDataLabels, cssColorResolverPlugin);
@@ -1047,6 +1048,7 @@ const MadridDashboardV2: React.FC = () => {
 
   useEffect(() => {
     if (!showHelpModal && !showMapHelpModal && !showHeatmapHelpModal && !showCompareHelpModal) return;
+    lockScroll();
     const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const closeButton = document.querySelector<HTMLElement>('.v2-help-modal-close');
     closeButton?.focus();
@@ -1074,6 +1076,7 @@ const MadridDashboardV2: React.FC = () => {
     };
     document.addEventListener('keydown', handleHelpKeyDown);
     return () => {
+      unlockScroll();
       document.removeEventListener('keydown', handleHelpKeyDown);
       previousFocus?.focus();
     };
@@ -1297,12 +1300,11 @@ const MadridDashboardV2: React.FC = () => {
     };
     window.addEventListener('popstate', handleBack);
     window.addEventListener('keydown', handleKeyDown);
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    lockScroll();
     return () => {
       window.removeEventListener('popstate', handleBack);
       window.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = previousOverflow;
+      unlockScroll();
     };
   }, [isMobileFiltersOpen]);
 
@@ -4761,46 +4763,23 @@ const MadridDashboardV2: React.FC = () => {
       {/* MODAL EXPLICATIVO: ¿CÓMO ENTENDER ESTOS PRECIOS? (LENGUAJE SENCILLO PARA EL CIUDADANO) */}
       {showHelpModal && (
         <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'color-mix(in srgb, var(--azul-noche) 45%, transparent)',
-            backdropFilter: 'blur(10px)',
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px'
-          }}
+          className="v2-guide-modal-overlay"
           onClick={() => setShowHelpModal(false)}
+          onWheel={(e) => { if (e.target === e.currentTarget) e.preventDefault(); }}
         >
           <div
             className="v2-guide-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="v2-prices-help-title"
-            style={{
-              backgroundColor: 'var(--blanco-humo)',
-              borderRadius: '24px',
-              maxWidth: '560px',
-              width: '100%',
-              padding: '32px',
-              boxShadow: '0 20px 40px color-mix(in srgb, var(--azul-noche) 15%, transparent)',
-              border: '0.5px solid color-mix(in srgb, var(--azul-noche) 8%, transparent)',
-              position: 'relative',
-              animation: 'fadeIn 0.2s ease-out'
-            }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+            <div className="v2-guide-modal-header">
               <div>
-                <h3 id="v2-prices-help-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--azul-noche)' }}>
+                <h3 id="v2-prices-help-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>
                   ¿Cómo entender estos precios?
                 </h3>
-                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--azul-linea)' }}>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px' }}>
                   Guía rápida para interpretar las cifras sin rodeos matemáticos.
                 </p>
               </div>
@@ -4810,8 +4789,8 @@ const MadridDashboardV2: React.FC = () => {
                 aria-label="Cerrar ayuda de precios"
                 onClick={() => setShowHelpModal(false)}
                 style={{
-                  background: 'var(--blanco-humo)',
-                  border: 'none',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(186, 204, 214, 0.2)',
                   borderRadius: '50%',
                   width: '32px',
                   height: '32px',
@@ -4820,59 +4799,58 @@ const MadridDashboardV2: React.FC = () => {
                   justifyContent: 'center',
                   cursor: 'pointer',
                   fontSize: '14px',
-                  color: 'var(--azul-linea)',
-                  transition: 'background 0.2s'
+                  color: '#b0c4d4',
+                  transition: 'background 0.2s',
+                  flexShrink: 0
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--humo-2)')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--blanco-humo)')}
               >
                 ✕
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div className="v2-guide-modal-body">
               {/* Bloque 1: Real */}
-              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: 'var(--blanco-humo)', borderRadius: '16px', border: '0.5px solid color-mix(in srgb, var(--azul-noche) 4%, transparent)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: 'var(--blanco-humo)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+              <div className="v2-guide-step-card">
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: '#03141c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
                   1
                 </div>
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--azul-noche)', marginBottom: '2px' }}>
+                <div className="v2-guide-step-text">
+                  <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>
                     Datos reales hasta {latestRealMonth} de {latestRealYear}
                   </div>
-                  <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
+                  <div style={{ fontSize: '12px', lineHeight: 1.45 }}>
                     Son precios observados extraídos del Banco de Datos del Ayuntamiento de Madrid. La etiqueta <strong style={{ color: 'var(--precio-subida)' }}>✓ DATO REAL</strong> identifica un registro histórico; las estimaciones del modelo se muestran separadas.
                   </div>
                 </div>
               </div>
 
               {/* Bloque 2: Futuro */}
-              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: 'var(--blanco-humo)', borderRadius: '16px', border: '0.5px solid color-mix(in srgb, var(--azul-noche) 4%, transparent)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--azul-linea)', color: 'var(--blanco-humo)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+              <div className="v2-guide-step-card">
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--azul-linea)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
                   2
                 </div>
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--azul-noche)', marginBottom: '2px' }}>
+                <div className="v2-guide-step-text">
+                  <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>
                     Proyecciones desde {firstProjectionMonth}
                   </div>
-                  <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
+                  <div style={{ fontSize: '12px', lineHeight: 1.45 }}>
                     Nuestros modelos estadísticos y predictivos analizan el histórico de más de 10.000 operaciones y viviendas, los tipos de interés y la demanda de cada barrio para proyectar qué precio cabe esperar en los próximos meses y años.
                   </div>
                 </div>
               </div>
 
               {/* Bloque 3: Semáforo de Zonas */}
-              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: 'var(--blanco-humo)', borderRadius: '16px', border: '0.5px solid color-mix(in srgb, var(--azul-noche) 4%, transparent)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--coral)', color: 'var(--blanco-humo)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+              <div className="v2-guide-step-card">
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--coral)', color: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
                   3
                 </div>
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--azul-noche)', marginBottom: '4px' }}>
+                <div className="v2-guide-step-text">
+                  <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '4px' }}>
                     Semáforo de Fiabilidad por Zonas
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.4 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '12px', lineHeight: 1.4 }}>
                     <div>
-                      <strong style={{ color: 'var(--azul-linea)' }}>Zonas Muy Estables</strong> (ej. Retiro, Salamanca, Chamberí): Precios firmes y continuos. La estimación del modelo presenta una tendencia estable.
+                      <strong style={{ color: '#00e5ff' }}>Zonas Muy Estables</strong> (ej. Retiro, Salamanca, Chamberí): Precios firmes y continuos. La estimación del modelo presenta una tendencia estable.
                     </div>
                     <div>
                       <strong style={{ color: 'var(--coral-texto)' }}>Zonas Rápidas o en Auge</strong> (ej. Centro, Usera, Moncloa, Villaverde): Barrios con gran rotación turística o familias mudándose desde el centro. Los precios reales se mueven con mayor dinamismo.
@@ -4882,26 +4860,14 @@ const MadridDashboardV2: React.FC = () => {
               </div>
             </div>
 
-            <button
-              onClick={() => setShowHelpModal(false)}
-              style={{
-                marginTop: '20px',
-                width: '100%',
-                padding: '12px',
-                backgroundColor: 'var(--precio-subida)',
-                color: 'var(--blanco-humo)',
-                border: 'none',
-                borderRadius: '14px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'background 0.2s'
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--precio-subida)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--precio-subida)')}
-            >
-              Entendido
-            </button>
+            <div className="v2-guide-modal-footer">
+              <button
+                type="button"
+                onClick={() => setShowHelpModal(false)}
+              >
+                ¡Entendido, gracias!
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -4909,46 +4875,23 @@ const MadridDashboardV2: React.FC = () => {
       {/* MODAL: ¿CÓMO USAR EL MAPA? */}
       {showMapHelpModal && (
         <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'color-mix(in srgb, var(--azul-noche) 45%, transparent)',
-            backdropFilter: 'blur(10px)',
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px'
-          }}
+          className="v2-guide-modal-overlay"
           onClick={() => setShowMapHelpModal(false)}
+          onWheel={(e) => { if (e.target === e.currentTarget) e.preventDefault(); }}
         >
           <div
             className="v2-guide-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="v2-map-help-title"
-            style={{
-              backgroundColor: 'var(--blanco-humo)',
-              borderRadius: '24px',
-              maxWidth: '560px',
-              width: '100%',
-              padding: '32px',
-              boxShadow: '0 20px 40px color-mix(in srgb, var(--azul-noche) 15%, transparent)',
-              border: '0.5px solid color-mix(in srgb, var(--azul-noche) 8%, transparent)',
-              position: 'relative',
-              animation: 'fadeIn 0.2s ease-out'
-            }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+            <div className="v2-guide-modal-header">
               <div>
-                <h3 id="v2-map-help-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--azul-noche)' }}>
+                <h3 id="v2-map-help-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>
                   ¿Cómo usar los mapas interactivos?
                 </h3>
-                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--azul-linea)' }}>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px' }}>
                   Guía para explorar distritos y barrios de Madrid sin perderte.
                 </p>
               </div>
@@ -4958,8 +4901,8 @@ const MadridDashboardV2: React.FC = () => {
                 aria-label="Cerrar ayuda del mapa"
                 onClick={() => setShowMapHelpModal(false)}
                 style={{
-                  background: 'var(--blanco-humo)',
-                  border: 'none',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(186, 204, 214, 0.2)',
                   borderRadius: '50%',
                   width: '32px',
                   height: '32px',
@@ -4968,85 +4911,70 @@ const MadridDashboardV2: React.FC = () => {
                   justifyContent: 'center',
                   cursor: 'pointer',
                   fontSize: '14px',
-                  color: 'var(--azul-linea)',
-                  transition: 'background 0.2s'
+                  color: '#b0c4d4',
+                  transition: 'background 0.2s',
+                  flexShrink: 0
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--humo-2)')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--blanco-humo)')}
               >
                 ✕
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div className="v2-guide-modal-body">
               {/* Paso 1: Colores */}
-              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: 'var(--blanco-humo)', borderRadius: '16px', border: '0.5px solid color-mix(in srgb, var(--azul-noche) 4%, transparent)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: 'var(--blanco-humo)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+              <div className="v2-guide-step-card">
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: '#03141c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
                   1
                 </div>
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--azul-noche)', marginBottom: '2px' }}>
+                <div className="v2-guide-step-text">
+                  <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>
                     Escala de Colores
                   </div>
-                  <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
+                  <div style={{ fontSize: '12px', lineHeight: 1.45 }}>
                     Los <strong>tonos más brillantes y cian</strong> representan valores más altos según la métrica activa. Los <strong>tonos oscuros</strong> representan valores más bajos; el patrón rayado identifica zonas sin dato.
                   </div>
                 </div>
               </div>
 
               {/* Paso 2: Clic para profundizar */}
-              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: 'var(--blanco-humo)', borderRadius: '16px', border: '0.5px solid color-mix(in srgb, var(--azul-noche) 4%, transparent)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: 'var(--blanco-humo)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+              <div className="v2-guide-step-card">
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: '#03141c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
                   2
                 </div>
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--azul-noche)', marginBottom: '2px' }}>
+                <div className="v2-guide-step-text">
+                  <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>
                     Haz clic en un distrito para ver sus barrios
                   </div>
-                  <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
+                  <div style={{ fontSize: '12px', lineHeight: 1.45 }}>
                     Al seleccionar un distrito, se filtran sus barrios en el mapa derecho y se actualizan las métricas de la zona. Selecciónalo de nuevo para quitar el filtro.
                   </div>
                 </div>
               </div>
 
               {/* Paso 3: Pasar el cursor */}
-              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: 'var(--blanco-humo)', borderRadius: '16px', border: '0.5px solid color-mix(in srgb, var(--azul-noche) 4%, transparent)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: 'var(--blanco-humo)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+              <div className="v2-guide-step-card">
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: '#03141c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
                   3
                 </div>
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--azul-noche)', marginBottom: '2px' }}>
+                <div className="v2-guide-step-text">
+                  <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>
                     Selecciona una zona para ver su ficha
                   </div>
-                  <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
+                  <div style={{ fontSize: '12px', lineHeight: 1.45 }}>
                     Al seleccionar un distrito o barrio, la ficha muestra las métricas disponibles para esa zona y el periodo elegido. Usa Tab para entrar en el mapa, las flechas para recorrer zonas e Intro o Espacio para seleccionar.
                   </div>
                 </div>
               </div>
-
             </div>
 
-            <button
-              type="button"
-              onClick={() => setShowMapHelpModal(false)}
-              style={{
-                marginTop: '20px',
-                width: '100%',
-                padding: '12px',
-                backgroundColor: 'var(--precio-subida)',
-                color: '#03141c',
-                border: 'none',
-                borderRadius: '14px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'background 0.2s'
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--precio-subida)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--precio-subida)')}
-            >
-              Entendido
-            </button>
+            <div className="v2-guide-modal-footer">
+              <button
+                type="button"
+                onClick={() => setShowMapHelpModal(false)}
+              >
+                ¡Entendido, gracias!
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -5054,48 +4982,23 @@ const MadridDashboardV2: React.FC = () => {
       {/* MODAL: ¿CÓMO USAR EL MAPA DE CALOR? */}
       {showHeatmapHelpModal && (
         <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'color-mix(in srgb, var(--azul-noche) 45%, transparent)',
-            backdropFilter: 'blur(10px)',
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px'
-          }}
+          className="v2-guide-modal-overlay"
           onClick={() => setShowHeatmapHelpModal(false)}
+          onWheel={(e) => { if (e.target === e.currentTarget) e.preventDefault(); }}
         >
           <div
             className="v2-guide-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="v2-heatmap-help-title"
-            style={{
-              backgroundColor: 'var(--blanco-humo)',
-              borderRadius: '24px',
-              maxWidth: '580px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              width: '100%',
-              padding: '32px',
-              boxShadow: '0 20px 40px color-mix(in srgb, var(--azul-noche) 15%, transparent)',
-              border: '0.5px solid color-mix(in srgb, var(--azul-noche) 8%, transparent)',
-              position: 'relative',
-              animation: 'fadeIn 0.2s ease-out'
-            }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+            <div className="v2-guide-modal-header">
               <div>
-                <h3 id="v2-heatmap-help-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--azul-noche)' }}>
+                <h3 id="v2-heatmap-help-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>
                   ¿Cómo usar el mapa de calor?
                 </h3>
-                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--azul-linea)' }}>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px' }}>
                   Guía para interpretar la estacionalidad y los precios mes a mes.
                 </p>
               </div>
@@ -5105,8 +5008,8 @@ const MadridDashboardV2: React.FC = () => {
                 aria-label="Cerrar ayuda de la tabla"
                 onClick={() => setShowHeatmapHelpModal(false)}
                 style={{
-                  background: 'var(--blanco-humo)',
-                  border: 'none',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(186, 204, 214, 0.2)',
                   borderRadius: '50%',
                   width: '32px',
                   height: '32px',
@@ -5115,102 +5018,89 @@ const MadridDashboardV2: React.FC = () => {
                   justifyContent: 'center',
                   cursor: 'pointer',
                   fontSize: '14px',
-                  color: 'var(--azul-linea)',
-                  transition: 'background 0.2s'
+                  color: '#b0c4d4',
+                  transition: 'background 0.2s',
+                  flexShrink: 0
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--humo-2)')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--blanco-humo)')}
               >
                 ✕
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+            <div className="v2-guide-modal-body">
               {/* Paso 1: Estructura */}
-              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: 'var(--blanco-humo)', borderRadius: '16px', border: '0.5px solid color-mix(in srgb, var(--azul-noche) 4%, transparent)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: 'var(--blanco-humo)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+              <div className="v2-guide-step-card">
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: '#03141c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
                   1
                 </div>
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--azul-noche)', marginBottom: '2px' }}>
+                <div className="v2-guide-step-text">
+                  <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>
                     Filas y Columnas Mensuales
                   </div>
-                  <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
-                    Cada fila de la matriz corresponde a un distrito o barrio de Madrid (puedes alternar la vista entre Distritos y Barrios con los botones de la parte superior del explorador). Las columnas numeradas del <strong>1 al 12</strong> representan los doce meses del año seleccionado, desde enero hasta diciembre.
+                  <div style={{ fontSize: '12px', lineHeight: 1.45 }}>
+                    Cada fila de la matriz corresponde a un distrito o barrio de Madrid (puedes alternar la vista entre Distritos y Barrios con los botones de la parte superior del explorador). Las columnas mensuales (<strong>Ene, Feb, Mar…</strong>) representan los doce meses del año seleccionado, de enero a diciembre.
                   </div>
                 </div>
               </div>
 
               {/* Paso 2: Escala de Color */}
-              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: 'var(--blanco-humo)', borderRadius: '16px', border: '0.5px solid color-mix(in srgb, var(--azul-noche) 4%, transparent)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: 'var(--blanco-humo)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+              <div className="v2-guide-step-card">
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: '#03141c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
                   2
                 </div>
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--azul-noche)', marginBottom: '2px' }}>
+                <div className="v2-guide-step-text">
+                  <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>
                     Intensidad del Color
                   </div>
-                  <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
-                    Cuanto más <strong>brillante y cian</strong> es el fondo de la casilla, mayor es el valor (precio por m² más alto o rentabilidad más elevada). Los <strong>tonos oscuros</strong> señalan los meses o zonas más asequibles o con menor presión de precios.
+                  <div style={{ fontSize: '12px', lineHeight: 1.45 }}>
+                    Cuanto más <strong>brillante y cian</strong> es el fondo de la casilla, mayor es el valor {activeProfile.id === 'inversion' ? '(precio por m² más alto o rentabilidad más elevada)' : '(precio por m² más alto)'}. Los <strong>tonos oscuros</strong> señalan los meses o zonas más asequibles o con menor presión de precios.
                   </div>
                 </div>
               </div>
 
               {/* Paso 3: Datos Oficiales vs Previsiones */}
-              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: 'var(--blanco-humo)', borderRadius: '16px', border: '0.5px solid color-mix(in srgb, var(--azul-noche) 4%, transparent)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: 'var(--blanco-humo)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+              <div className="v2-guide-step-card">
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: '#03141c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
                   3
                 </div>
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--azul-noche)', marginBottom: '2px' }}>
+                <div className="v2-guide-step-text">
+                  <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>
                     Datos Reales y Estimaciones
                   </div>
-                  <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
+                  <div style={{ fontSize: '12px', lineHeight: 1.45 }}>
                     {Number(selectedYear) === latestRealYear ? (
-                      <>En <strong>{latestRealYear}</strong>, los datos observados llegan hasta <strong>{latestRealMonth}</strong>. Desde <strong>{firstProjectionMonth}</strong>, los valores se muestran como <strong>estimaciones</strong> calculadas mediante modelos predictivos. La fecha de última carga se indica arriba y no equivale a la fecha del último dato observado.</>
+                      <>En <strong>{latestRealYear}</strong>, los datos observados llegan hasta <strong>{latestRealMonth}</strong>. Desde <strong>{firstProjectionMonth}</strong>, los valores corresponden a <strong>proyecciones del modelo DMIYC</strong>. La pastilla <em>Dato oficial / Proyección</em> junto al selector de mes indica cuál es cuál.</>
                     ) : (
-                      <>Para <strong>{selectedYear}</strong>, los meses sin observación histórica se muestran como <strong>estimaciones</strong> calculadas mediante modelos predictivos. Los datos observados llegan hasta <strong>{latestRealMonth} de {latestRealYear}</strong>.</>
+                      <>Para <strong>{selectedYear}</strong>, los meses sin observación histórica corresponden a <strong>proyecciones del modelo DMIYC</strong>. Los datos observados llegan hasta <strong>{latestRealMonth} de {latestRealYear}</strong>. La pastilla <em>Dato oficial / Proyección</em> junto al selector de mes indica cuál es cuál.</>
                     )}
                   </div>
                 </div>
               </div>
 
               {/* Paso 4: Estacionalidad */}
-              <div style={{ display: 'flex', gap: '14px', padding: '14px', backgroundColor: 'var(--blanco-humo)', borderRadius: '16px', border: '0.5px solid color-mix(in srgb, var(--azul-noche) 4%, transparent)' }}>
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: 'var(--blanco-humo)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
+              <div className="v2-guide-step-card">
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: '#03141c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '13px', fontWeight: '700', flexShrink: 0 }}>
                   4
                 </div>
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--azul-noche)', marginBottom: '2px' }}>
+                <div className="v2-guide-step-text">
+                  <div style={{ fontSize: '14px', fontWeight: '600', marginBottom: '2px' }}>
                     Detectar Estacionalidad
                   </div>
-                  <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.45 }}>
+                  <div style={{ fontSize: '12px', lineHeight: 1.45 }}>
                     Al observar una fila de izquierda a derecha puedes ver si una zona se encarece en primavera o después de verano (ej. inicio de curso universitario o mayor demanda de alquiler), lo que te ayuda a planificar compras o contrataciones en los meses más ventajosos.
                   </div>
                 </div>
               </div>
             </div>
 
-            <button
-              onClick={() => setShowHeatmapHelpModal(false)}
-              style={{
-                marginTop: '20px',
-                width: '100%',
-                padding: '12px',
-                backgroundColor: 'var(--precio-subida)',
-                color: 'var(--blanco-humo)',
-                border: 'none',
-                borderRadius: '14px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'background 0.2s'
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--precio-subida)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--precio-subida)')}
-            >
-              ¡Entendido, gracias!
-            </button>
+            <div className="v2-guide-modal-footer">
+              <button
+                type="button"
+                onClick={() => setShowHeatmapHelpModal(false)}
+              >
+                ¡Entendido, gracias!
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -5218,48 +5108,23 @@ const MadridDashboardV2: React.FC = () => {
       {/* MODAL: ¿CÓMO USAR LA COMPARACIÓN DE ZONAS? */}
       {showCompareHelpModal && (
         <div
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'color-mix(in srgb, var(--azul-noche) 45%, transparent)',
-            backdropFilter: 'blur(10px)',
-            zIndex: 9999,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px'
-          }}
+          className="v2-guide-modal-overlay"
           onClick={() => setShowCompareHelpModal(false)}
+          onWheel={(e) => { if (e.target === e.currentTarget) e.preventDefault(); }}
         >
           <div
             className="v2-guide-modal"
             role="dialog"
             aria-modal="true"
             aria-labelledby="v2-compare-help-title"
-            style={{
-              backgroundColor: 'var(--blanco-humo)',
-              borderRadius: '24px',
-              maxWidth: '640px',
-              maxHeight: '90vh',
-              overflowY: 'auto',
-              width: '100%',
-              padding: '32px',
-              boxShadow: '0 20px 40px color-mix(in srgb, var(--azul-noche) 15%, transparent)',
-              border: '0.5px solid color-mix(in srgb, var(--azul-noche) 8%, transparent)',
-              position: 'relative',
-              animation: 'fadeIn 0.2s ease-out'
-            }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
+            <div className="v2-guide-modal-header">
               <div>
-                <h3 id="v2-compare-help-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700', color: 'var(--azul-noche)' }}>
+                <h3 id="v2-compare-help-title" style={{ margin: 0, fontSize: '20px', fontWeight: '700' }}>
                   ¿Cómo usar la comparación de zonas?
                 </h3>
-                <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'var(--azul-linea)' }}>
+                <p style={{ margin: '4px 0 0 0', fontSize: '13px' }}>
                   Aprende a contrastar dos áreas y a interpretar sus tendencias paso a paso.
                 </p>
               </div>
@@ -5269,8 +5134,8 @@ const MadridDashboardV2: React.FC = () => {
                 aria-label="Cerrar ayuda de comparación"
                 onClick={() => setShowCompareHelpModal(false)}
                 style={{
-                  background: 'var(--blanco-humo)',
-                  border: 'none',
+                  background: 'rgba(255, 255, 255, 0.06)',
+                  border: '1px solid rgba(186, 204, 214, 0.2)',
                   borderRadius: '50%',
                   width: '32px',
                   height: '32px',
@@ -5279,91 +5144,72 @@ const MadridDashboardV2: React.FC = () => {
                   justifyContent: 'center',
                   cursor: 'pointer',
                   fontSize: '14px',
-                  color: 'var(--azul-linea)',
-                  transition: 'background 0.2s'
+                  color: '#b0c4d4',
+                  transition: 'background 0.2s',
+                  flexShrink: 0
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--humo-2)')}
-                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--blanco-humo)')}
               >
                 ✕
               </button>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-
+            <div className="v2-guide-modal-body">
               {/* Sección: Modos de uso */}
-              <div>
-                <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--precio-subida)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
-                  Modos de Uso y Navegación
+              <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--precio-subida)', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Modos de Uso y Navegación
+              </div>
+
+              <div className="v2-guide-step-card">
+                <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: '#03141c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
+                  A
                 </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  <div style={{ display: 'flex', gap: '12px', padding: '12px', backgroundColor: 'var(--blanco-humo)', borderRadius: '14px', border: '0.5px solid color-mix(in srgb, var(--azul-noche) 4%, transparent)' }}>
-                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: 'var(--blanco-humo)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
-                      A
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--azul-noche)' }}>
-                        Selección independiente de zonas
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.4, marginTop: '2px' }}>
-                        Busca en cada campo para comparar dos distritos, dos barrios o una combinación de ambos niveles. Las etiquetas indican el tipo de cada zona.
-                      </div>
-                    </div>
+                <div className="v2-guide-step-text">
+                  <div style={{ fontSize: '13px', fontWeight: '600' }}>
+                    Selección independiente de zonas
                   </div>
-
-                  <div style={{ display: 'flex', gap: '12px', padding: '12px', backgroundColor: 'var(--blanco-humo)', borderRadius: '14px', border: '0.5px solid color-mix(in srgb, var(--azul-noche) 4%, transparent)' }}>
-                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: 'var(--blanco-humo)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
-                      B
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--azul-noche)' }}>
-                        Comparativa Individual (Lado a Lado)
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.4, marginTop: '2px' }}>
-                        Muestra la curva histórica independiente de cada zona junto con sus tarjetas de resumen. <strong>Pasa el cursor sobre cualquier punto</strong> de la gráfica para ver el precio exacto, la variación porcentual frente al mes anterior y la comparación directa con la media de todo Madrid. Además, cada tarjeta de métrica cuenta con su propio botón <strong>(i)</strong> para consultar su explicación detallada.
-                      </div>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '12px', padding: '12px', backgroundColor: 'var(--blanco-humo)', borderRadius: '14px', border: '0.5px solid color-mix(in srgb, var(--azul-noche) 4%, transparent)' }}>
-                    <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: 'var(--blanco-humo)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
-                      C
-                    </div>
-                    <div>
-                      <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--azul-noche)' }}>
-                        Comparativa Superpuesta (Gráfico Conjunto)
-                      </div>
-                      <div style={{ fontSize: '12px', color: 'var(--azul-linea)', lineHeight: 1.4, marginTop: '2px' }}>
-                        Al abrir la sección <em>&ldquo;Ver comparativa superpuesta&rdquo;</em>, ambas zonas se cruzan en un único gráfico bajo la misma escala junto a la media de Madrid. Te permite verificar inmediatamente cuál es más cara, cuál crece más deprisa y si hay cruces de tendencia a lo largo del año.
-                      </div>
-                    </div>
+                  <div style={{ fontSize: '12px', lineHeight: 1.4, marginTop: '2px' }}>
+                    Busca en cada campo para comparar dos distritos, dos barrios o una combinación de ambos niveles. Las etiquetas indican el tipo de cada zona.
                   </div>
                 </div>
               </div>
 
+              <div className="v2-guide-step-card">
+                <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: '#03141c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
+                  B
+                </div>
+                <div className="v2-guide-step-text">
+                  <div style={{ fontSize: '13px', fontWeight: '600' }}>
+                    Comparativa Individual (Lado a Lado)
+                  </div>
+                  <div style={{ fontSize: '12px', lineHeight: 1.4, marginTop: '2px' }}>
+                    Muestra la curva histórica independiente de cada zona junto con sus tarjetas de resumen. <strong>Pasa el cursor sobre cualquier punto</strong> de la gráfica para ver el precio exacto, la variación porcentual frente al mes anterior y la comparación directa con la media de todo Madrid. Además, cada tarjeta de métrica cuenta con su propio botón <strong>(i)</strong> para consultar su explicación detallada.
+                  </div>
+                </div>
+              </div>
+
+              <div className="v2-guide-step-card">
+                <div style={{ width: '22px', height: '22px', borderRadius: '50%', backgroundColor: 'var(--precio-subida)', color: '#03141c', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', flexShrink: 0 }}>
+                  C
+                </div>
+                <div className="v2-guide-step-text">
+                  <div style={{ fontSize: '13px', fontWeight: '600' }}>
+                    Comparativa Superpuesta (Gráfico Conjunto)
+                  </div>
+                  <div style={{ fontSize: '12px', lineHeight: 1.4, marginTop: '2px' }}>
+                    Al abrir la sección <em>&ldquo;Ver comparativa superpuesta&rdquo;</em>, ambas zonas se cruzan en un único gráfico bajo la misma escala junto a la media de Madrid. Te permite verificar inmediatamente cuál es más cara, cuál crece más deprisa y si hay cruces de tendencia a lo largo del año.
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <button
-              onClick={() => setShowCompareHelpModal(false)}
-              style={{
-                marginTop: '20px',
-                width: '100%',
-                padding: '12px',
-                backgroundColor: 'var(--precio-subida)',
-                color: 'var(--blanco-humo)',
-                border: 'none',
-                borderRadius: '14px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'background 0.2s'
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--precio-subida)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--precio-subida)')}
-            >
-              ¡Entendido, gracias!
-            </button>
+            <div className="v2-guide-modal-footer">
+              <button
+                type="button"
+                onClick={() => setShowCompareHelpModal(false)}
+              >
+                ¡Entendido, gracias!
+              </button>
+            </div>
           </div>
         </div>
       )}

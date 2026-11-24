@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, ChevronRight, HelpCircle } from 'lucide-react';
 import { METHODOLOGY_SOURCES } from './MethodologyDrawer';
+import { lockScroll, unlockScroll } from '../lib/scrollLock';
 
 interface HeaderMethodologyLinkProps {
   onOpenFullMethodology?: () => void;
@@ -33,13 +34,11 @@ export const HeaderMethodologyLink: React.FC<HeaderMethodologyLinkProps> = ({
   // Lock body scroll when mobile bottom sheet is open
   useEffect(() => {
     if (isMobile && isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
+      lockScroll();
+      return () => {
+        unlockScroll();
+      };
     }
-    return () => {
-      document.body.style.overflow = '';
-    };
   }, [isMobile, isOpen]);
 
   return (
