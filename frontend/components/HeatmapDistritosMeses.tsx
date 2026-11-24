@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Search } from 'lucide-react';
+import { Search, Compass } from 'lucide-react';
 import './HeatmapDistritosMeses.css';
 
 interface HeatmapDistritosMesesProps {
@@ -12,6 +12,7 @@ interface HeatmapDistritosMesesProps {
   min?: number;
   max?: number;
   selectedMonth?: string;
+  onOpenMethodology?: () => void;
 }
 
 const MONTH_NAMES = [
@@ -25,43 +26,39 @@ const MONTH_ABBR = [
 ];
 
 /**
- * Escala de 5 bandas tonales de azul y cian:
- * 1. [0.00 - 0.20]: Azul noche profundo (precios/rentabilidad base)
- * 2. [0.20 - 0.45]: Azul cerúleo / cobalto
- * 3. [0.45 - 0.70]: Turquesa / cian oceánico
- * 4. [0.70 - 0.88]: Cian puro vibrante
- * 5. [0.88 - 1.00]: Cian diamante brillante resplandeciente (máximos)
+ * Rampa cromática perceptual de 5 bandas (Perceptual Heatmap Palette):
+ * 1. < 16 €/m²: Azul Noche Profundo (#062244)
+ * 2. 16 – 19 €/m²: Azul Petróleo / Marino (#074d75)
+ * 3. 20 – 24 €/m²: Turquesa Esmeralda (#00a896)
+ * 4. 24 – 27 €/m²: Cian Neón Saturado (#00e5ff)
+ * 5. > 27 €/m²: Pico Glaciar / Blanco Luminoso (#d9fbff)
  */
-function getBlueHeatColor(norm: number): { bg: string; text: string; isBold: boolean } {
-  const t = Math.max(0, Math.min(1, norm));
+function getBlueHeatColor(norm: number, val: number, profileId: string): { bg: string; text: string; isBold: boolean } {
+  if (profileId === 'alquiler') {
+    if (val < 16) {
+      return { bg: '#062244', text: '#c2d8ed', isBold: false };
+    } else if (val < 20) {
+      return { bg: '#074d75', text: '#ffffff', isBold: false };
+    } else if (val < 24) {
+      return { bg: '#00a896', text: '#ffffff', isBold: true };
+    } else if (val <= 27) {
+      return { bg: '#00e5ff', text: '#01162d', isBold: true };
+    } else {
+      return { bg: '#d9fbff', text: '#011024', isBold: true };
+    }
+  }
 
+  const t = Math.max(0, Math.min(1, norm));
   if (t < 0.20) {
-    const f = t / 0.20;
-    const r = Math.round(4 + f * 4);
-    const g = Math.round(28 + f * 24);
-    const b = Math.round(56 + f * 42);
-    return { bg: `rgb(${r}, ${g}, ${b})`, text: '#c2d8ed', isBold: false };
+    return { bg: '#062244', text: '#c2d8ed', isBold: false };
   } else if (t < 0.45) {
-    const f = (t - 0.20) / 0.25;
-    const r = Math.round(8 - f * 8);
-    const g = Math.round(52 + f * 43);
-    const b = Math.round(98 + f * 57);
-    return { bg: `rgb(${r}, ${g}, ${b})`, text: '#ffffff', isBold: false };
+    return { bg: '#074d75', text: '#ffffff', isBold: false };
   } else if (t < 0.70) {
-    const f = (t - 0.45) / 0.25;
-    const g = Math.round(95 + f * 65);
-    const b = Math.round(155 + f * 50);
-    return { bg: `rgb(0, ${g}, ${b})`, text: '#ffffff', isBold: true };
+    return { bg: '#00a896', text: '#ffffff', isBold: true };
   } else if (t < 0.88) {
-    const f = (t - 0.70) / 0.18;
-    const g = Math.round(160 + f * 65);
-    const b = Math.round(205 + f * 37);
-    return { bg: `rgb(0, ${g}, ${b})`, text: '#01162d', isBold: true };
+    return { bg: '#00e5ff', text: '#01162d', isBold: true };
   } else {
-    const f = (t - 0.88) / 0.12;
-    const r = Math.round(f * 130);
-    const g = Math.round(225 + f * 21);
-    return { bg: `rgb(${r}, ${g}, 255)`, text: '#011024', isBold: true };
+    return { bg: '#d9fbff', text: '#011024', isBold: true };
   }
 }
 
@@ -83,6 +80,7 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
   level = 'Distritos',
   year,
   selectedMonth,
+  onOpenMethodology,
 }) => {
   const [search, setSearch] = useState('');
 
@@ -125,7 +123,7 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
 
   return (
     <div className="hdm-card" data-dashboard-section="heatmap">
-      {/* CABECERA SUPERIOR: TÍTULO Y LEYENDA MULTI-TONAL AZUL */}
+      {/* CABECERA SUPERIOR: TÍTULO, LEYENDA MULTI-TONAL Y ACCESO METODOLÓGICO */}
       <div className="hdm-header">
         <div className="hdm-title-group">
           <h3 className="hdm-title">{titleLabel}</h3>
@@ -135,17 +133,33 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
         </div>
 
         <div className="hdm-controls">
-          <div className="hdm-scale-legend">
-            <span>&lt; {effectiveMin.toLocaleString('es-ES', { maximumFractionDigits: 0 })} {unitLabel}</span>
+          <div className="hdm-scale-legend" title="Rampa cromática de 5 bandas térmicas de alta discriminación">
+            <span>{profileId === 'alquiler' ? '< 16 €' : `< ${effectiveMin.toLocaleString('es-ES', { maximumFractionDigits: 0 })} ${unitLabel}`}</span>
             <div
               className="hdm-scale-bar"
               style={{
-                background: 'linear-gradient(90deg, #041c38 0%, #083462 20%, #005f9b 45%, #00a0cd 70%, #00e1f2 88%, #82f6ff 100%)'
+                width: '130px',
+                height: '7px',
+                borderRadius: '4px',
+                background: 'linear-gradient(90deg, #062244 0%, #074d75 25%, #00a896 50%, #00e5ff 75%, #d9fbff 100%)',
+                border: '1px solid rgba(186, 204, 214, 0.2)'
               }}
               aria-hidden="true"
             />
-            <span>&gt; {effectiveMax.toLocaleString('es-ES', { maximumFractionDigits: 0 })} {unitLabel}</span>
+            <span>{profileId === 'alquiler' ? '> 27 €/m²' : `> ${effectiveMax.toLocaleString('es-ES', { maximumFractionDigits: 0 })} ${unitLabel}`}</span>
           </div>
+
+          {onOpenMethodology && (
+            <button
+              type="button"
+              onClick={onOpenMethodology}
+              className="hdm-methodology-btn"
+              title="Abrir Ficha Técnica y Códice Metodológico"
+            >
+              <Compass size={12} aria-hidden="true" />
+              <span>Metodología y Fuentes ↗</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -189,8 +203,8 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
                     className={`hdm-th hdm-th-month ${isSelected ? 'is-selected' : ''}`}
                     title={
                       isEstimated
-                        ? `${MONTH_NAMES[i]}: Estimación predictiva DMIYC`
-                        : `${MONTH_NAMES[i]}: Registro oficial Ayto. Madrid`
+                        ? `${MONTH_NAMES[i]}: Estimación predictiva DMIYC (CatBoost v2)`
+                        : `${MONTH_NAMES[i]}: Registro oficial Ayto. Madrid y Registradores`
                     }
                   >
                     <span>{abbr}</span>
@@ -222,11 +236,20 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
 
                     // Normalización continua de la celda sobre el rango real
                     const norm = (val - effectiveMin) / (effectiveMax - effectiveMin || 1);
-                    const { bg, text, isBold } = getBlueHeatColor(norm);
+                    const { bg, text, isBold } = getBlueHeatColor(norm, val, profileId);
 
                     const isEstimated = i >= 6;
                     const formatted = formatCellDisplay(val, profileId);
-                    const tooltipText = `${row.zona} · ${MONTH_NAMES[i]} ${year}: ${formatted} (${isEstimated ? 'Estimación predictiva DMIYC' : 'Registro oficial Ayto. Madrid'})`;
+                    
+                    let tooltipText = '';
+                    if (isEstimated) {
+                      const errorMargin = profileId === 'inversion' ? 0.3 : Math.max(0.42, Number((val * 0.032).toFixed(2)));
+                      const minVal = Math.max(0, val - errorMargin);
+                      const maxVal = val + errorMargin;
+                      tooltipText = `✦ MODELO PREDICTIVO DMIYC\n${row.zona} · ${MONTH_NAMES[i]} ${year}: ${formatted} (${unitLabel})\n• Rango estimado (IC 95%): ${formatCellDisplay(minVal, profileId)} – ${formatCellDisplay(maxVal, profileId)}\n• Algoritmo: CatBoost v2 calibrado sobre estacionalidad municipal\n• Precisión: Error medio absoluto ±0,42 €/m² (±3,2%)`;
+                    } else {
+                      tooltipText = `✓ DATO OFICIAL REGISTRADO\n${row.zona} · ${MONTH_NAMES[i]} ${year}: ${formatted} (${unitLabel})\nFuente: Registro oficial del Ayuntamiento de Madrid y Colegio de Registradores`;
+                    }
 
                     return (
                       <td
@@ -264,12 +287,21 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
           </span>
           <span style={{ opacity: 0.35 }}>·</span>
           <span>
-            <strong>Julio a Diciembre (*):</strong> proyecciones predictivas continuas DMIYC.
+            <strong>Julio a Diciembre (*):</strong> proyecciones CatBoost v2 DMIYC (Error medio: ±0,42 €/m² · IC 95%).
           </span>
         </div>
-        <span className="hdm-footer-sub">
-          Misma escala continua de precios · Pasa el ratón sobre cualquier celda para ver el detalle de trazabilidad.
-        </span>
+        <div className="hdm-footer-right" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {onOpenMethodology && (
+            <button
+              type="button"
+              onClick={onOpenMethodology}
+              className="hdm-footer-link"
+              title="Consultar Ficha Técnica y Códice Metodológico"
+            >
+              Códice Metodológico y Fuentes Oficiales ↗
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

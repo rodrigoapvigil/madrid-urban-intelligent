@@ -1,6 +1,7 @@
 'use client';
 
 import React, { ReactNode, useMemo, useState } from 'react';
+import { Scale } from 'lucide-react';
 import SegmentedControl from './SegmentedControl';
 
 type RankingRow = { name: string; value: number };
@@ -31,6 +32,7 @@ export default function DashboardRankingTable({
   profileId, level, rows, loading, loadingRows, highlightedZone, isMobile,
   metric, onMetricChange, formatName, formatNumber, formatEuro, monthlyRows,
   previousValues, districtForZone, order, onOrderChange, hasAnnualVariation,
+  onCompareZone,
 }: {
   profileId: string;
   level: 'Distritos' | 'Barrios';
@@ -50,6 +52,7 @@ export default function DashboardRankingTable({
   order: string;
   onOrderChange: (value: OrderMode) => void;
   hasAnnualVariation: boolean;
+  onCompareZone?: (zoneName: string) => void;
 }) {
   const isDemand = profileId === 'venta';
   const isInvestment = profileId === 'inversion';
@@ -94,6 +97,9 @@ export default function DashboardRankingTable({
       : isInvestment
         ? `Top 10 ${zoneLabel} con ${order === 'yield-low' ? 'menor' : 'mayor'} rentabilidad`
         : order === 'expensive' ? `Top 10 ${zoneLabel} más caros` : order === 'increase' ? `Top 10 ${zoneLabel} con mayor subida anual` : `Top 10 ${zoneLabel} más asequibles`;
+  
+  const isPerMonth = metric === 'total' && profileId === 'alquiler';
+  const isTotalPrice = metric === 'total' && profileId === 'compra';
   const valueHeading = isDemand ? 'DEMANDA' : isInvestment ? 'RENTABILIDAD' : profileId === 'alquiler'
     ? (metric === 'total' ? 'ALQUILER €/MES' : 'ALQUILER €/M²')
     : (metric === 'total' ? 'PRECIO €' : 'PRECIO €/M²');
@@ -106,84 +112,222 @@ export default function DashboardRankingTable({
   const orderValue = orderOptions.some(option => option.value === order) ? order as OrderMode : orderOptions[0].value;
 
   return (
-    <div className="v2-rank-mini-card" style={{ background: '#011024', padding: '16px', borderRadius: '16px', border: '1px solid rgba(186, 204, 214, 0.16)', width: '100%' }}>
-      <div className="v2-rank-head">
-        <span>{title}</span>
-      </div>
-      <div className="v2-ranking-controls">
-        {isPriceProfile && <SegmentedControl<'total' | 'unit'> label="Unidad mostrada" size="sm" value={metric} options={[{ value: 'total', label: profileId === 'alquiler' ? '€/mes' : '€' }, { value: 'unit', label: '€/m²' }] as const} onChange={onMetricChange} />}
-        {isInvestment && (
-          <div className="v2-ranking-yield-filter" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <span style={{ fontSize: '10px', color: '#8ea5b7', fontWeight: '600', textTransform: 'uppercase' }}>Rent. mín:</span>
-            {[null, 5, 6, 7].map(thresh => (
-              <button
-                key={thresh === null ? 'all' : thresh}
-                type="button"
-                onClick={() => setMinYieldThreshold(thresh)}
-                style={{
-                  padding: '3px 7px',
-                  borderRadius: '6px',
-                  border: minYieldThreshold === thresh ? '1px solid #E879F9' : '1px solid rgba(186, 204, 214, 0.18)',
-                  background: minYieldThreshold === thresh ? 'rgba(232, 121, 249, 0.2)' : 'transparent',
-                  color: minYieldThreshold === thresh ? '#ffffff' : '#a9bed0',
-                  fontSize: '10.5px',
-                  fontWeight: minYieldThreshold === thresh ? '700' : '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.16s ease'
-                }}
-              >
-                {thresh === null ? 'Todas' : `> ${thresh}%`}
-              </button>
-            ))}
-          </div>
-        )}
-        <select className="v2-ranking-order" aria-label="Orden del Top 10" value={orderValue} onChange={event => onOrderChange(event.target.value as OrderMode)}>
-          {orderOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-        </select>
+    <div
+      className="v2-rank-mini-card"
+      style={{
+        background: 'rgba(1, 16, 36, 0.92)',
+        padding: '16px 18px',
+        borderRadius: '16px',
+        border: '1px solid rgba(186, 204, 214, 0.16)',
+        borderTop: '1px solid rgba(0, 229, 255, 0.28)',
+        boxShadow: '0 12px 32px rgba(0, 0, 0, 0.25)',
+        backdropFilter: 'blur(16px)',
+        width: '100%',
+        height: '100%',
+        boxSizing: 'border-box',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
+      <div className="v2-rank-head" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <h3 style={{ margin: 0, fontSize: '15px', fontWeight: '700', color: '#ffffff', letterSpacing: '-0.01em' }}>
+            {title}
+          </h3>
+          <span style={{ fontSize: '11px', color: '#8fa6ba' }}>
+            {isDemand
+              ? 'Volumen y presión de compraventas notariales'
+              : isInvestment
+                ? 'Rendimiento bruto y neto de mercado'
+                : profileId === 'alquiler'
+                  ? 'Precios oficiales y evolución temporal'
+                  : 'Precios de transacción contrastados'}
+          </span>
+        </div>
+        <div className="v2-ranking-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {isPriceProfile && (
+            <div title="Cálculo obtenido multiplicando el precio medio por metro cuadrado de la zona por el tamaño residencial medio oficial del Catastro (70 m²)">
+              <SegmentedControl<'total' | 'unit'>
+                label="Unidad mostrada"
+                size="sm"
+                value={metric}
+                options={[{ value: 'total', label: profileId === 'alquiler' ? '€/mes (70m²)' : '€ (70m²)' }, { value: 'unit', label: '€/m²' }] as const}
+                onChange={onMetricChange}
+              />
+            </div>
+          )}
+          {isInvestment && (
+            <div className="v2-ranking-yield-filter" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <span style={{ fontSize: '10px', color: '#8ea5b7', fontWeight: '600', textTransform: 'uppercase' }}>Rent. mín:</span>
+              {[null, 5, 6, 7].map(thresh => (
+                <button
+                  key={thresh === null ? 'all' : thresh}
+                  type="button"
+                  onClick={() => setMinYieldThreshold(thresh)}
+                  style={{
+                    padding: '3px 7px',
+                    borderRadius: '6px',
+                    border: minYieldThreshold === thresh ? '1px solid #E879F9' : '1px solid rgba(186, 204, 214, 0.18)',
+                    background: minYieldThreshold === thresh ? 'rgba(232, 121, 249, 0.2)' : 'transparent',
+                    color: minYieldThreshold === thresh ? '#ffffff' : '#a9bed0',
+                    fontSize: '10.5px',
+                    fontWeight: minYieldThreshold === thresh ? '700' : '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.16s ease'
+                  }}
+                >
+                  {thresh === null ? 'Todas' : `> ${thresh}%`}
+                </button>
+              ))}
+            </div>
+          )}
+          <select className="v2-ranking-order" aria-label="Orden del Top 10" value={orderValue} onChange={event => onOrderChange(event.target.value as OrderMode)}>
+            {orderOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+          </select>
+        </div>
       </div>
       {loading && rows.length > 0 && <div className="v2-ranking-loading">Actualizando…</div>}
-      <table className="v2-ranking-table v2-ranking-table-informative" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-        <thead><tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: accent }}><th style={{ paddingBottom: '8px', fontWeight: '600' }}>{level === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th><th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>{valueHeading}</th></tr></thead>
-        <tbody>
-          {sortedRows.length === 0 && loading ? loadingRows : sortedRows.slice(0, isAll ? sortedRows.length : 10).map((item, index) => {
-            const previous = previousValues[normalize(item.name)];
-            const variation = Number.isFinite(previous) && previous > 0 ? ((item.value - previous) / previous) * 100 : null;
-            const price = metric === 'unit' ? `${formatNumber(item.value, Number.isInteger(Number(item.value)) ? 0 : 1)} €/m²` : profileId === 'alquiler' ? `${formatEuro(item.value, 0)}/mes` : formatEuro(item.value, 0);
-            const prevPrice = Number.isFinite(previous) && previous > 0
-              ? metric === 'unit'
-                ? `${formatNumber(previous, Number.isInteger(Number(previous)) ? 0 : 1)} €/m²`
-                : profileId === 'alquiler'
-                  ? `${formatEuro(previous, 0)}/mes`
-                  : formatEuro(previous, 0)
-              : null;
-            const rawVal = Number(item.value) || 0;
-            const investmentPct = rawVal > 1 ? rawVal : rawVal * 100;
-            const valueLabel = isDemand ? `${formatNumber(rawVal, 0)} trans.` : isInvestment ? `${formatNumber(investmentPct, 1)}%` : price;
-            const monthly = monthlyByZone.get(normalize(item.name));
-            const sparkline = monthly ? Array.from({ length: 12 }, (_, monthIndex) => Number(monthly[`m${monthIndex + 1}`])).filter(value => Number.isFinite(value) && value > 0) : [];
-            const district = level === 'Barrios' ? districtForZone?.(item.name) : undefined;
-            const selected = Boolean(highlightedZone && normalize(highlightedZone) === normalize(item.name));
-            return <tr key={item.name || index} className={selected ? 'is-filtered' : undefined} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
-              <td className="v2-ranking-zone" style={{ padding: '8px 0', color: '#FFFFFF', fontWeight: '600' }}>
-                <span className="v2-ranking-position">{index + 1}.</span>
-                <span className="v2-ranking-label"><span className="v2-ranking-name" title={formatName(item.name)}>{formatName(item.name)}</span>{district && <small className="v2-ranking-district">{formatName(district)}</small>}</span>
-              </td>
-              <td className="v2-ranking-value" style={{ padding: '8px 0', textAlign: 'right', color: accent, fontWeight: '700' }}>
-                <div className="v2-ranking-value-line">{sparkline.length > 1 && <Sparkline values={sparkline} color={accent} />}<span>{valueLabel}</span></div>
-                {variation !== null && (
-                  <small
-                    className="v2-ranking-annual-change"
-                    title={prevPrice ? `De ${prevPrice} (2025) a ${valueLabel} (2026)` : undefined}
-                    style={{ cursor: prevPrice ? 'help' : 'default' }}
+      <div
+        className="v2-ranking-table-scroll"
+        style={{
+          width: '100%',
+          flex: '1 1 auto',
+          maxHeight: '540px',
+          height: '540px',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          border: '1px solid rgba(186, 204, 214, 0.14)',
+          borderRadius: '10px',
+          background: 'rgba(0, 10, 22, 0.45)',
+          scrollbarWidth: 'thin'
+        }}
+      >
+        <table className="v2-ranking-table v2-ranking-table-informative" style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+          <thead style={{ position: 'sticky', top: 0, zIndex: 8, background: '#06192f' }}>
+            <tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: accent }}>
+              <th style={{ padding: '8px 10px', fontWeight: '600' }}>{level === 'Distritos' ? 'DISTRITO' : 'BARRIO'}</th>
+              <th style={{ padding: '8px 10px', fontWeight: '600', textAlign: 'right' }}>
+                <span>{valueHeading}</span>
+                {(isPerMonth || isTotalPrice) && (
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      padding: '1px 5px',
+                      borderRadius: '4px',
+                      background: 'rgba(0, 229, 255, 0.12)',
+                      color: '#00e5ff',
+                      marginLeft: '5px',
+                      fontWeight: '600',
+                      letterSpacing: '0'
+                    }}
+                    title="Superficie estándar oficial INE / Catastro"
                   >
-                    {variation >= 0 ? '▲' : '▼'} {Math.abs(variation).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}% año
-                  </small>
+                    (70 m²)
+                  </span>
                 )}
-              </td>
-            </tr>;
-          })}
-        </tbody>
-      </table>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {sortedRows.length === 0 && loading ? loadingRows : sortedRows.slice(0, isAll ? sortedRows.length : 10).map((item, index) => {
+              const previous = previousValues[normalize(item.name)];
+              const variation = Number.isFinite(previous) && previous > 0 ? ((item.value - previous) / previous) * 100 : null;
+              const price = metric === 'unit' ? `${formatNumber(item.value, Number.isInteger(Number(item.value)) ? 0 : 1)} €/m²` : profileId === 'alquiler' ? `${formatEuro(item.value, 0)}/mes` : formatEuro(item.value, 0);
+              const prevPrice = Number.isFinite(previous) && previous > 0
+                ? metric === 'unit'
+                  ? `${formatNumber(previous, Number.isInteger(Number(previous)) ? 0 : 1)} €/m²`
+                  : profileId === 'alquiler'
+                    ? `${formatEuro(previous, 0)}/mes`
+                    : formatEuro(previous, 0)
+                : null;
+              const rawVal = Number(item.value) || 0;
+              const investmentPct = rawVal > 1 ? rawVal : rawVal * 100;
+              const valueLabel = isDemand ? `${formatNumber(rawVal, 0)} trans.` : isInvestment ? `${formatNumber(investmentPct, 1)}%` : price;
+              const monthly = monthlyByZone.get(normalize(item.name));
+              const sparkline = monthly ? Array.from({ length: 12 }, (_, monthIndex) => Number(monthly[`m${monthIndex + 1}`])).filter(value => Number.isFinite(value) && value > 0) : [];
+              const district = level === 'Barrios' ? districtForZone?.(item.name) : undefined;
+              const selected = Boolean(highlightedZone && normalize(highlightedZone) === normalize(item.name));
+              return (
+                <tr
+                  key={item.name || index}
+                  className={`v2-ranking-row ${selected ? 'is-filtered' : ''}`}
+                  style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}
+                >
+                  <td className="v2-ranking-zone" style={{ padding: '8px 10px', color: '#FFFFFF', fontWeight: '600' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', minWidth: 0 }}>
+                        <span className="v2-ranking-position" style={{ color: '#8fa6ba', fontSize: '11px', width: '18px', flexShrink: 0 }}>
+                          {index + 1}.
+                        </span>
+                        <span className="v2-ranking-label" style={{ minWidth: 0 }}>
+                          <span className="v2-ranking-name" title={formatName(item.name)} style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {formatName(item.name)}
+                          </span>
+                          {district && (
+                            <small className="v2-ranking-district" style={{ display: 'block', fontSize: '10px', color: '#8fa6ba' }}>
+                              {formatName(district)}
+                            </small>
+                          )}
+                        </span>
+                      </div>
+                      {onCompareZone && (
+                        <button
+                          type="button"
+                          className="v2-ranking-compare-btn"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onCompareZone(item.name);
+                          }}
+                          title={`Comparar ${formatName(item.name)} con mi zona en el módulo comparador`}
+                          aria-label={`Comparar ${formatName(item.name)} con mi zona`}
+                        >
+                          <Scale size={11} aria-hidden="true" />
+                          <span>Comparar</span>
+                        </button>
+                      )}
+                    </div>
+                  </td>
+                  <td className="v2-ranking-value" style={{ padding: '8px 10px', textAlign: 'right', color: accent, fontWeight: '700' }}>
+                    <div className="v2-ranking-value-line" style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '8px' }}>
+                      {sparkline.length > 1 && <Sparkline values={sparkline} color={accent} />}
+                      <span style={{ fontSize: '13px' }}>{valueLabel}</span>
+                    </div>
+                    {metric === 'total' && isPriceProfile && (
+                      <div
+                        style={{
+                          fontSize: '10px',
+                          color: '#8fa6b9',
+                          fontWeight: '500',
+                          marginTop: '1px',
+                          letterSpacing: '0.01em',
+                          cursor: 'help'
+                        }}
+                        title="Cálculo obtenido multiplicando el precio medio por metro cuadrado de la zona por el tamaño residencial medio oficial del Catastro (70 m²)"
+                      >
+                        Vivienda tipo 70 m²
+                      </div>
+                    )}
+                    {variation !== null && (
+                      <small
+                        className="v2-ranking-annual-change"
+                        title={prevPrice ? `De ${prevPrice} (2025) a ${valueLabel} (2026)` : undefined}
+                        style={{
+                          cursor: prevPrice ? 'help' : 'default',
+                          display: 'block',
+                          fontSize: '10px',
+                          color: variation >= 0 ? '#3ddc97' : '#ff6b6b'
+                        }}
+                      >
+                        {variation >= 0 ? '▲' : '▼'} {Math.abs(variation).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}% año
+                      </small>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }

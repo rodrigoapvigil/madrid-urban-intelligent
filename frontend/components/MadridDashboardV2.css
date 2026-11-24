@@ -4098,6 +4098,46 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root .v2-ranking-table tbody { height: 100%; }
 .v2-root .v2-ranking-table tbody tr { height: 10%; }
 .v2-root .v2-ranking-table td { vertical-align: middle; }
+
+/* Micro-botón de acción directa [Comparar] en filas del ranking (JTBD) */
+.v2-ranking-compare-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(0, 229, 255, 0.28);
+  background: rgba(0, 229, 255, 0.08);
+  color: #00e5ff;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.18s ease;
+  opacity: 0.82;
+}
+
+.v2-ranking-compare-btn:hover {
+  background: rgba(0, 229, 255, 0.22);
+  border-color: #00e5ff;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 229, 255, 0.25);
+  opacity: 1;
+}
+
+.v2-ranking-table-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.v2-ranking-table-scroll::-webkit-scrollbar-track {
+  background: #041226;
+}
+.v2-ranking-table-scroll::-webkit-scrollbar-thumb {
+  background: #193954;
+  border-radius: 4px;
+}
 @media (min-width: 769px) and (pointer: fine) {
   .v2-root .v2-ranking-table tbody td:first-child {
     display: grid;

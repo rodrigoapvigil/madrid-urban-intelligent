@@ -2665,6 +2665,19 @@ const MadridDashboardV2: React.FC = () => {
     activePanelRef.current?.querySelector<HTMLElement>(`[data-dashboard-section="${section}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  const handleCompareZone = useCallback((zoneName: string) => {
+    const norm = normalizeZoneLabel(zoneName);
+    const kind = rankingLevel === 'Barrios' ? 'barrio' : 'district';
+    const match = zoneSearchOptions.find(option => option.kind === kind && normalizeZoneLabel(option.name) === norm) || {
+      id: `${kind}:name:${zoneName}`,
+      name: zoneName,
+      kind,
+      label: zoneName
+    };
+    setComparisonZoneB(match);
+    scrollToDashboardSection('compare');
+  }, [zoneSearchOptions, rankingLevel]);
+
   const getSlideClass = (idx: number) => {
     if (idx === profileIdx) return 'v2-active';
     if (idx === prevIdx && isTransitioning) return profileIdx > prevIdx ? 'v2-out-left' : 'v2-out-right';
@@ -3956,6 +3969,7 @@ const MadridDashboardV2: React.FC = () => {
                   order={rankingOrder}
                   onOrderChange={setRankingOrder}
                   hasAnnualVariation={Object.keys(rankingPreviousValues).length > 0}
+                  onCompareZone={handleCompareZone}
                 />
               </div>
 
@@ -3967,6 +3981,7 @@ const MadridDashboardV2: React.FC = () => {
                   level={rankingLevel}
                   year={selectedYear}
                   selectedMonth={selectedMonth}
+                  onOpenMethodology={() => setShowMethodologyDrawer(true)}
                 />
               </div>
             </div>
