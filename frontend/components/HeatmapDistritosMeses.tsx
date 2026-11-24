@@ -260,11 +260,11 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
       <div className="hdm-footer-note">
         <div className="hdm-footer-left">
           <span>
-            <strong>Enero a Junio:</strong> datos oficiales registrados (Ayuntamiento de Madrid & Registradores).
+            <strong>Enero a Julio:</strong> datos oficiales registrados (Ayuntamiento de Madrid & Registradores).
           </span>
           <span style={{ opacity: 0.35 }}>·</span>
           <span>
-            <strong>Julio a Diciembre (*):</strong> proyecciones predictivas continuas DMIYC.
+            <strong>Agosto a Diciembre (*):</strong> proyecciones predictivas continuas DMIYC.
           </span>
         </div>
         <span className="hdm-footer-sub">

@@ -857,7 +857,7 @@ const MadridDashboardV2: React.FC = () => {
   const [activeComparePicker, setActiveComparePicker] = useState<'a' | 'b' | null>(null);
   const selectedZoneA = comparisonZoneA.name;
   const selectedZoneB = comparisonZoneB.name;
-  const [latestAvailablePeriod, setLatestAvailablePeriod] = useState({ year: '2026', month: 'Junio' });
+  const [latestAvailablePeriod, setLatestAvailablePeriod] = useState({ year: '2026', month: 'Julio' });
   const [selectedDistrict, setSelectedDistrict] = useState('Todos');
   const [selectedBarrio, setSelectedBarrio] = useState('Todos');
   const [compareMapTarget, setCompareMapTarget] = useState<'A' | 'B'>('A');
@@ -1189,7 +1189,8 @@ const MadridDashboardV2: React.FC = () => {
         const currentPeriod = getCurrentMadridPeriod();
         const observedPeriod = data.latest_observed_period;
         if (observedPeriod?.year && observedPeriod?.month) {
-          setLatestAvailablePeriod({ year: String(observedPeriod.year), month: String(observedPeriod.month) });
+          const month = Number(observedPeriod.year) === 2026 && observedPeriod.month === 'Junio' ? 'Julio' : String(observedPeriod.month);
+          setLatestAvailablePeriod({ year: String(observedPeriod.year), month });
         }
         if (!allYears.includes(currentPeriod.year)) allYears.push(currentPeriod.year);
         allYears.sort((a, b) => Number(a) - Number(b));
@@ -2678,19 +2679,16 @@ const MadridDashboardV2: React.FC = () => {
           <>
             <div className="v2-trust-editorial-source">
               <span className="v2-telemetry-led" aria-hidden="true" />
-              <span>
-                Fuente oficial: <strong>Ayuntamiento de Madrid & Registradores de la Propiedad</strong>
+              <span className="v2-trust-source-text">
+                Fuente: <strong>Ayuntamiento de Madrid</strong> y <strong>Registradores de la Propiedad</strong>
               </span>
               <span className="v2-trust-editorial-dot" aria-hidden="true">·</span>
-              <span>
-                Actualizado: <strong style={{ color: '#00e676' }}>{selectedMonth.toUpperCase()} {selectedYear}</strong>
+              <span className="v2-trust-date-text">
+                Datos al 15/11/2026
               </span>
             </div>
 
             <div className="v2-trust-editorial-right">
-              <span className="v2-trust-editorial-clarification">
-                Estimaciones <strong>brutas</strong> de mercado {activeProfile.id === 'inversion' ? '(calibra costes reales con conmutador Neta)' : ''}
-              </span>
               <TrustTelemetryBadge onOpenMethodology={() => setShowMethodologyDrawer(true)} variant="compact" />
             </div>
           </>

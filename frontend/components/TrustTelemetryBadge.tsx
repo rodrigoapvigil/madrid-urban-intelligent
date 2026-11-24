@@ -33,36 +33,44 @@ export const TrustTelemetryBadge: React.FC<TrustTelemetryBadgeProps> = ({
   }, [isOpen]);
 
   return (
-    <div className={`v2-trust-telemetry-container ${className}`} ref={containerRef}>
+    <div className={`v2-trust-telemetry-container ${isOpen ? 'is-active' : ''} ${className}`} ref={containerRef}>
       <button
         type="button"
-        className={`v2-telemetry-pill v2-telemetry-pill--${variant} ${isOpen ? 'is-active' : ''}`}
+        className="v2-topbar-estimate-chip"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-haspopup="dialog"
-        title="Ver auditoría y trazabilidad oficial de datos"
+        title="Valores calculados mediante modelos predictivos contrastados con el Ayuntamiento de Madrid. Clic para ver trazabilidad o metodología."
       >
-        <span className="v2-telemetry-led" aria-hidden="true" />
-        <span className="v2-telemetry-text">
-          <strong>SISTEMA AUDITADO</strong>
-          <span className="v2-telemetry-sep">·</span>
-          <span>AYTO. MADRID Q3 2026</span>
+        <span className="v2-topbar-chip-status">Valores estimados</span>
+        <span className="v2-topbar-chip-sep" aria-hidden="true">·</span>
+        <span
+          className="v2-topbar-chip-action"
+          onClick={(e) => {
+            if (onOpenMethodology) {
+              e.stopPropagation();
+              setIsOpen(false);
+              onOpenMethodology();
+            }
+          }}
+          title="Abrir Ficha Técnica y Metodología"
+        >
+          Ver metodología <span className="v2-topbar-chip-info" aria-hidden="true">ⓘ</span>
         </span>
-        <ShieldCheck size={13} className="v2-telemetry-icon" aria-hidden="true" />
       </button>
 
       {isOpen && (
-        <div className="v2-telemetry-popover" role="dialog" aria-label="Trazabilidad y auditoría de datos oficiales">
+        <div className="v2-telemetry-popover" role="dialog" aria-label="Trazabilidad y contraste de datos oficiales">
           <div className="v2-telemetry-popover__header">
             <div className="v2-telemetry-popover__title-wrap">
               <span className="v2-telemetry-led v2-telemetry-led--static" aria-hidden="true" />
-              <strong>Trazabilidad y Auditoría Oficial</strong>
+              <strong>Contrastado con datos del Ayto. de Madrid</strong>
             </div>
-            <span className="v2-telemetry-badge-status">VALIDADO</span>
+            <span className="v2-telemetry-badge-status">3T 2026</span>
           </div>
 
           <p className="v2-telemetry-popover__desc">
-            Datos depurados e integrados sin intermediarios a partir de fuentes públicas oficiales y registros de transacciones reales.
+            Precios y métricas calculados mediante modelos predictivos contrastados frente a los registros públicos oficiales del Ayuntamiento de Madrid y el Colegio de Registradores de la Propiedad.
           </p>
 
           <div className="v2-telemetry-grid">
@@ -75,9 +83,9 @@ export const TrustTelemetryBadge: React.FC<TrustTelemetryBadgeProps> = ({
 
             <div className="v2-telemetry-item">
               <span className="v2-telemetry-item__label">
-                <Calendar size={11} aria-hidden="true" /> Última sincronización
+                <Calendar size={11} aria-hidden="true" /> Última actualización
               </span>
-              <strong className="v2-telemetry-item__val">14 / 11 / 2026</strong>
+              <strong className="v2-telemetry-item__val">15 / 11 / 2026</strong>
             </div>
 
             <div className="v2-telemetry-item">
@@ -89,9 +97,9 @@ export const TrustTelemetryBadge: React.FC<TrustTelemetryBadgeProps> = ({
 
             <div className="v2-telemetry-item">
               <span className="v2-telemetry-item__label">
-                <Activity size={11} aria-hidden="true" /> Próxima calibración
+                <Activity size={11} aria-hidden="true" /> Datos reales registrados
               </span>
-              <strong className="v2-telemetry-item__val">Diciembre 2026 (Q4)</strong>
+              <strong className="v2-telemetry-item__val">Hasta Julio 2026 (3T)</strong>
             </div>
           </div>
 
