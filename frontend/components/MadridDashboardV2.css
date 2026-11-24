@@ -3013,17 +3013,17 @@
 }
 
 .v2-root .site-header .mi-nav__profile-pill-group {
-  background: rgba(1, 16, 36, 0.48);
-  border-color: rgba(186, 204, 214, 0.24);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(16px) saturate(140%);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 /* Keep the selected period visible while the dashboard is explored. */
 .v2-root .v2-filters {
   position: sticky;
-  top: 88px;
+  top: var(--header-h, 96px);
   z-index: 1100;
   background: rgba(2, 20, 43, 0.72) !important;
   border-bottom: 1px solid rgba(186, 204, 214, 0.16) !important;
@@ -3240,12 +3240,12 @@
 }
 
 @media (max-width: 900px) {
-  .v2-root .v2-filters { top: 76px; }
+  .v2-root .v2-filters { top: var(--header-h, 76px); }
   .v2-data-status { max-width: none; flex: 1 1 100%; }
 }
 
 @media (max-width: 600px) {
-  .v2-root .v2-filters { top: 68px; }
+  .v2-root .v2-filters { top: var(--header-h, 68px); }
   .v2-data-status { font-size: 10px; }
 }
 
@@ -4043,12 +4043,12 @@ body.v2-fullscreen-open footer { display: none !important; }
   .v2-root .v2-mobile-section-nav { position: relative !important; inset-block-start: auto !important; z-index: auto !important; }
   .v2-root .v2-mobile-filter-bar {
     position: sticky !important;
-    inset-block-start: 68px !important;
+    inset-block-start: var(--header-h, 68px) !important;
     z-index: 1450 !important;
     background: rgba(2, 20, 43, .97) !important;
     box-shadow: 0 10px 24px rgba(0, 0, 0, .2);
   }
-  .v2-root [data-dashboard-section] { scroll-margin-top: 140px; }
+  .v2-root [data-dashboard-section] { scroll-margin-top: calc(var(--header-h, 96px) + 32px); }
 }
 
 @media (max-width: 680px) {
@@ -4295,7 +4295,7 @@ body.v2-fullscreen-open footer { display: none !important; }
 @media (max-width: 768px) and (orientation: landscape) {
   .v2-root .v2-fullscreen-chart-readout { top: max(92px,calc(env(safe-area-inset-top) + 86px)); max-height: 30px; padding-block: 4px; }
   .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper .v2-chart-wrap.large { height: calc(100% - 138px) !important; margin-top: 138px !important; }
-  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper .v2-compare-legend::after { top: max(70px,calc(env(safe-area-inset-top) + 64px)); font-size: 8px; }
+  .v2-root .v2-in-dialog.v2-is-fullscreen.v2-overlay-wrapper .v2-compare-legend::after { top: max(var(--header-h, 70px),calc(env(safe-area-inset-top) + 64px)); font-size: 8px; }
 }
 
 /* Paso 8: one desktop content grid shared by chrome, filters and dashboard sections. */

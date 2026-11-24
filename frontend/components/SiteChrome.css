@@ -2,6 +2,7 @@
    SITE HEADER UNIFICADO (Idéntico a MadridLanding en todas las páginas)
    ========================================================================== */
 :root {
+  --header-h: 96px;
   --page-max: 1600px;
   --page-gutter: 24px;
   --page-content-max: calc(var(--page-max) - 2 * var(--page-gutter));
@@ -13,10 +14,19 @@
   top: 0;
   z-index: 1200;
   width: 100%;
-  background: linear-gradient(180deg, rgba(2, 20, 43, 0.88) 0%, rgba(2, 20, 43, 0.68) 100%);
-  border-bottom: 1px solid rgba(186, 204, 214, 0.10);
-  backdrop-filter: blur(22px) saturate(145%);
-  -webkit-backdrop-filter: blur(22px) saturate(145%);
+  height: var(--header-h);
+  min-height: var(--header-h);
+  background: #02142B !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow: none !important;
+  transition: height 200ms ease, min-height 200ms ease;
+}
+
+.site-header-container--aurora,
+.site-header--aurora {
+  background: #02142B !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow: none !important;
 }
 
 .mi-header-topbar {
@@ -30,8 +40,8 @@
   width: 100%;
   max-width: var(--page-max);
   margin-inline: auto;
-  min-height: 56px;
-  height: 56px;
+  min-height: var(--header-h);
+  height: var(--header-h);
   padding-inline: var(--page-gutter) !important;
   display: flex !important;
   align-items: center;
@@ -40,6 +50,12 @@
   box-sizing: border-box;
   background: transparent !important;
   border: none !important;
+  transition: height 200ms ease, min-height 200ms ease;
+}
+
+.site-header-container.is-scrolled .mi-brand__subtitle,
+.site-header.is-scrolled .mi-brand__subtitle {
+  display: none !important;
 }
 
 .site-brand,
@@ -463,59 +479,79 @@
 .mi-nav__profile-pill-group {
   display: inline-flex;
   align-items: center;
-  background: rgba(1, 16, 36, 0.85);
-  border: 1px solid rgba(186, 204, 214, 0.18);
-  border-radius: 9999px;
-  padding: 4px;
-  gap: 4px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  gap: 40px !important;
+  box-shadow: none !important;
 }
 
 .mi-nav__profile-pill {
+  position: relative;
   border: none;
-  background: transparent;
-  padding: 8px 20px;
-  font-size: 13px;
-  font-weight: 550;
-  letter-spacing: -0.01em;
+  background: transparent !important;
+  padding: 0 0 8px 0 !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
   color: #BACCD6;
-  border-radius: 9999px;
+  border-radius: 0 !important;
+  box-shadow: none !important;
   cursor: pointer;
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 0.18s ease, border-color 0.18s ease;
   white-space: nowrap;
   outline: none;
+  border-bottom: 2px solid transparent !important;
 }
 
 .mi-nav__profile-pill:hover {
   color: #FFFFFF;
-  background: rgba(255, 255, 255, 0.08);
+  background: transparent !important;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.35) !important;
+}
+
+.mi-nav__profile-pill:focus-visible {
+  outline: 2px solid #00e5ff;
+  outline-offset: 4px;
+  border-radius: 2px;
 }
 
 .mi-nav__profile-pill.active {
-  color: #011024 !important;
-  background: #00F0FF !important;
-  font-weight: 750 !important;
-  box-shadow: 0 2px 14px rgba(0, 240, 255, 0.55) !important;
+  color: #00e5ff !important;
+  font-weight: 500 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-bottom: 2px solid #00e5ff !important;
 }
 
 .mi-nav__profile-pill.active[data-profile-tab="alquiler"] {
-  background: #00E5FF !important;
-  box-shadow: 0 2px 14px rgba(0, 229, 255, 0.55) !important;
+  color: #00e5ff !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-bottom: 2px solid #00e5ff !important;
 }
 
 .mi-nav__profile-pill.active[data-profile-tab="compra"] {
-  background: #FFC247 !important;
-  box-shadow: 0 2px 14px rgba(255, 194, 71, 0.55) !important;
+  color: #ffc247 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-bottom: 2px solid #ffc247 !important;
 }
 
 .mi-nav__profile-pill.active[data-profile-tab="venta"] {
-  background: #3DDC97 !important;
-  box-shadow: 0 2px 14px rgba(61, 220, 151, 0.55) !important;
+  color: #3ddc97 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-bottom: 2px solid #3ddc97 !important;
 }
 
 .mi-nav__profile-pill.active[data-profile-tab="inversion"] {
-  background: #E879F9 !important;
-  box-shadow: 0 2px 14px rgba(232, 121, 249, 0.55) !important;
+  color: #e879f9 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-bottom: 2px solid #e879f9 !important;
 }
 
 .privacy-notice {
@@ -1095,6 +1131,186 @@ main.editorial-page:not(.editorial-page--methodology) { padding-bottom: 40px !im
   display: flex;
   align-items: center;
   gap: 14px;
+}
+
+.v2-header-desktop-actions .v2-period-selector {
+  border: none !important;
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+}
+
+/* ==========================================================================
+   BOTÓN SELECTOR DE MES CON ESTADO INTEGRADO (Paso 1c - Corporate Minimal)
+   ========================================================================== */
+.v2-root .v2-period-trigger,
+.v2-period-trigger {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  height: 56px !important;
+  min-height: 56px !important;
+  padding: 8px 18px !important;
+  border: 1px solid rgba(186, 204, 214, 0.22) !important;
+  border-radius: 12px !important;
+  background: #011024 !important;
+  color: #FFFFFF !important;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  min-width: 175px;
+}
+
+.v2-root .v2-period-trigger:hover,
+.v2-period-trigger:hover {
+  border-color: rgba(0, 229, 255, 0.45) !important;
+  background: #06182B !important;
+}
+
+.v2-root .v2-period-trigger.is-open,
+.v2-period-trigger.is-open {
+  border-color: #00e5ff !important;
+  background: #06182B !important;
+  box-shadow: 0 0 16px rgba(0, 229, 255, 0.2) !important;
+}
+
+/* Modo compacto: scrollY > 8px -> alto 40px, fila única */
+.v2-root .v2-period-trigger.is-compact,
+.v2-period-trigger.is-compact {
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 14px !important;
+  min-width: auto !important;
+}
+
+.v2-period-trigger-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 3px;
+  width: 100%;
+}
+
+.v2-period-trigger-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.v2-period-trigger-month {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #FFFFFF;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.v2-period-trigger.is-compact .v2-period-trigger-month {
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.v2-period-trigger-row-bottom {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+}
+
+.v2-period-trigger-compact-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.v2-period-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.v2-period-dot.is-projection {
+  background-color: #ffaa00;
+  box-shadow: 0 0 6px rgba(255, 170, 0, 0.7);
+}
+
+.v2-period-dot.is-official {
+  background-color: #3ddc97;
+  box-shadow: 0 0 6px rgba(61, 220, 151, 0.7);
+}
+
+.v2-period-status-text {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.v2-period-status-text.is-projection {
+  color: #ffaa00;
+}
+
+.v2-period-status-text.is-official {
+  color: #3ddc97;
+}
+
+.v2-period-chevron {
+  flex-shrink: 0;
+  color: #8fa6ba;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.v2-period-trigger:hover .v2-period-chevron,
+.v2-period-trigger.is-open .v2-period-chevron {
+  color: #00e5ff;
+}
+
+.v2-period-trigger.is-open .v2-period-chevron {
+  transform: rotate(180deg);
+}
+
+.v2-period-methodology-btn {
+  background: transparent;
+  border: none;
+  color: #00e5ff;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  transition: color 0.16s ease, background 0.16s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.v2-period-methodology-btn:hover {
+  color: #ffffff;
+  background: rgba(0, 229, 255, 0.12);
+  text-decoration: none;
+}
+
+.v2-period-methodology-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 20050;
+  width: 330px;
+  max-width: 90vw;
+  background: #06182b;
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  border-radius: 14px;
+  padding: 16px;
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.6);
+  color: #edf5fa;
 }
 
 .v2-header-mobile-actions {

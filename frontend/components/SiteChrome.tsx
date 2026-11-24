@@ -40,6 +40,19 @@ export function SiteHeader({
   topBar,
 }: SiteHeaderProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  // Sync scroll state (> 8px) to set --header-h (96px at rest, 64px compact)
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrolled = window.scrollY > 8;
+      setIsScrolled(scrolled);
+      document.documentElement.style.setProperty('--header-h', scrolled ? '64px' : '96px');
+    };
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -70,13 +83,13 @@ export function SiteHeader({
 
   return (
     <>
-      <div className={`mi-header-container site-header-container${appearance === 'aurora' ? ' site-header-container--aurora' : ''}`}>
+      <div className={`mi-header-container site-header-container${appearance === 'aurora' ? ' site-header-container--aurora' : ''}${isScrolled ? ' is-scrolled' : ''}`}>
         {topBar && (
           <div className="mi-header-topbar">
             {topBar}
           </div>
         )}
-        <header className={`mi-header site-header${appearance === 'aurora' ? ' site-header--aurora' : ''}${compactBrand ? ' site-header--compact-brand' : ''}`} role="banner">
+        <header className={`mi-header site-header${appearance === 'aurora' ? ' site-header--aurora' : ''}${compactBrand ? ' site-header--compact-brand' : ''}${isScrolled ? ' is-scrolled' : ''}`} role="banner">
         {/* Brand: Logo + Title */}
         <Link href="/" className="mi-brand site-brand" aria-label={compactBrand ? 'DMIYC, inicio' : 'DMIYC - Decide Madrid: Invierte Y Compra'}>
           <span className="mi-brand__mark">
@@ -84,7 +97,7 @@ export function SiteHeader({
           </span>
           <span className="mi-brand__text">
             <strong className="mi-brand__acronym">DMIYC</strong>
-            {!compactBrand && <small className="mi-brand__subtitle">DECIDE MADRID: INVIERTE Y COMPRA</small>}
+            {!compactBrand && !isScrolled && <small className="mi-brand__subtitle">DECIDE MADRID: INVIERTE Y COMPRA</small>}
           </span>
         </Link>
 

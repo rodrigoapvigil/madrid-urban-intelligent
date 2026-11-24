@@ -1782,19 +1782,19 @@ footer.auros-footer,
 }
 
 .mi-home > main {
-  padding-top: 88px;
+  padding-top: var(--header-h, 96px);
 }
 
 /* Native desktop compaction; keep the artwork full-bleed and the page unscaled. */
 @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
   .mi-home { width: 100%; overflow-x: clip; }
   .mi-home > .mi-header {
-    min-height: 72px;
+    min-height: var(--header-h, 96px);
     padding-inline: max(40px, calc((100% - 1600px) / 2 + 52px));
     gap: clamp(16px, 2vw, 28px);
   }
-  .mi-home > main { padding-top: 72px; }
-  .mi-home .mi-hero { min-height: max(640px, calc(100svh - 72px)); }
+  .mi-home > main { padding-top: var(--header-h, 96px); }
+  .mi-home .mi-hero { min-height: max(640px, calc(100svh - var(--header-h, 96px))); }
   .mi-home .mi-hero__content { padding-top: clamp(42px, 5.5vh, 68px); }
   .mi-home .mi-hero h1 { font-size: clamp(48px, 5vw, 68px); }
   .mi-home .mi-hero__lead { margin-top: 18px; font-size: clamp(16px, 1.35vw, 19px); }
@@ -1805,7 +1805,7 @@ footer.auros-footer,
 }
 
 @media (max-width: 650px) {
-  .mi-home > main { padding-top: 68px; }
+  .mi-home > main { padding-top: var(--header-h, 68px); }
 
   .mi-home .mi-hero h1 {
     font-size: clamp(41.4px, 10.58vw, 57.5px);

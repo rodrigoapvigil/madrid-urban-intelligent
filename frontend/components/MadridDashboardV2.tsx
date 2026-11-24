@@ -11,7 +11,6 @@ import { Activity, Building2, ChevronDown, Compass, HelpCircle, Home, Info, Maxi
 import './MadridDashboardV2.css';
 import './TrustArchitecture.css';
 import { TrustTelemetryBadge } from './TrustTelemetryBadge';
-import { HeaderMethodologyLink } from './HeaderMethodologyLink';
 import { MethodologyDrawer } from './MethodologyDrawer';
 import { ConfidenceIntervalBadge } from './ConfidenceIntervalBadge';
 import { ExpenseYieldSimulator } from './ExpenseYieldSimulator';
@@ -2742,7 +2741,6 @@ const MadridDashboardV2: React.FC = () => {
         appearance="aurora"
         desktopAction={!isMobile ? (
           <div className="v2-header-desktop-actions">
-            <HeaderMethodologyLink onOpenFullMethodology={() => setShowMethodologyDrawer(true)} />
             <PeriodSelector
               year={selectedYear}
               month={selectedMonth}
@@ -2752,17 +2750,12 @@ const MadridDashboardV2: React.FC = () => {
               hideMonthArrows
               keyboardMonthNavigation
               showYearShortcut={false}
-              showStatusPill
+              onOpenMethodology={() => setShowMethodologyDrawer(true)}
             />
           </div>
         ) : undefined}
         mobileAction={isMobile ? (
           <div className="v2-header-mobile-actions">
-            <HeaderMethodologyLink onOpenFullMethodology={() => setShowMethodologyDrawer(true)} isMobile />
-            <span className={`v2-header-status-pill ${isProjectionPeriod ? 'is-projection' : 'is-official'}`}>
-              <span className="v2-header-status-dot" aria-hidden="true" />
-              <span>{isProjectionPeriod ? 'Proyección' : 'Oficial'}</span>
-            </span>
             <button type="button" className="v2-mobile-filter-trigger" aria-expanded={isMobileFiltersOpen} aria-controls="v2-filter-panel" onClick={openMobileFilters}>
               <SlidersHorizontal size={17} aria-hidden="true" />
               <span>Filtros</span><b>{Number(selectedDistrict !== 'Todos') + Number(selectedBarrio !== 'Todos') + Number(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month)}</b>
