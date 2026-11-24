@@ -2390,14 +2390,16 @@ const MadridDashboardV2: React.FC = () => {
               },
               scales: {
                 x: {
-                  title: { display: true, text: 'Distancia a Transporte Público (metros)', font: { size: 11, weight: 'bold', family: '-apple-system' } },
-                  grid: { color: 'var(--blanco-humo)' },
-                  ticks: { callback: (v) => `${v}m` }
+                  title: { display: true, text: 'Distancia a Transporte Público (metros)', color: 'rgba(230, 242, 248, 0.86)', font: { size: 11, weight: 'bold', family: '-apple-system' } },
+                  grid: { color: 'rgba(255, 255, 255, 0.10)', lineWidth: 1 },
+                  border: { color: 'rgba(255, 255, 255, 0.15)' },
+                  ticks: { color: 'rgba(230, 242, 248, 0.86)', callback: (v) => `${v}m` }
                 },
                 y: {
-                  title: { display: true, text: 'Precio por m²', font: { size: 11, weight: 'bold', family: '-apple-system' } },
-                  grid: { color: 'var(--blanco-humo)' },
-                  ticks: { callback: (v) => `${v}€/m²` }
+                  title: { display: true, text: 'Precio por m²', color: 'rgba(230, 242, 248, 0.86)', font: { size: 11, weight: 'bold', family: '-apple-system' } },
+                  grid: { color: 'rgba(255, 255, 255, 0.10)', lineWidth: 1 },
+                  border: { color: 'rgba(255, 255, 255, 0.15)' },
+                  ticks: { color: 'rgba(230, 242, 248, 0.86)', callback: (v) => `${v}€/m²` }
                 }
               }
             }
@@ -2444,6 +2446,7 @@ const MadridDashboardV2: React.FC = () => {
               legend: {
                 position: 'top',
                 labels: {
+                  color: 'rgba(230, 242, 248, 0.9)',
                   font: { size: 10, weight: 'bold' },
                   boxWidth: 8,
                   padding: 8
@@ -2471,23 +2474,26 @@ const MadridDashboardV2: React.FC = () => {
             scales: {
               x: {
                 grid: { display: false },
-                ticks: { color: 'var(--azul-linea)', font: { size: 10, weight: 'bold' } }
+                border: { color: 'rgba(255, 255, 255, 0.15)' },
+                ticks: { color: 'rgba(230, 242, 248, 0.86)', font: { size: 10, weight: 'bold' } }
               },
               yInteres: {
                 type: 'linear',
                 position: 'left',
+                border: { color: 'rgba(255, 255, 255, 0.15)' },
                 ticks: {
-                  color: 'var(--azul-linea)',
+                  color: 'rgba(230, 242, 248, 0.86)',
                   callback: (val) => val + '%',
                   font: { size: 9 }
                 },
-                grid: { color: 'color-mix(in srgb, var(--azul-noche) 5%, transparent)' }
+                grid: { color: 'rgba(255, 255, 255, 0.12)', lineWidth: 1 }
               },
               yPrecio: {
                 type: 'linear',
                 position: 'right',
+                border: { color: 'rgba(255, 255, 255, 0.15)' },
                 ticks: {
-                  color: 'var(--azul-linea)',
+                  color: 'rgba(230, 242, 248, 0.86)',
                   callback: (val) => val + '€',
                   font: { size: 9 }
                 },
@@ -2556,6 +2562,7 @@ const MadridDashboardV2: React.FC = () => {
                 display: true,
                 position: 'top',
                 labels: {
+                  color: 'rgba(230, 242, 248, 0.9)',
                   font: { size: 9, weight: 'bold' },
                   boxWidth: 8,
                   padding: 8
@@ -2582,22 +2589,26 @@ const MadridDashboardV2: React.FC = () => {
             },
             scales: {
               x: {
-                title: { display: true, text: 'Índice de riesgo histórico (10–90)', font: { size: 10, weight: 'bold' } },
+                title: { display: true, text: 'Índice de riesgo histórico (10–90)', color: 'rgba(230, 242, 248, 0.86)', font: { size: 10, weight: 'bold' } },
                 min: 0,
                 max: 100,
+                border: { color: 'rgba(255, 255, 255, 0.15)' },
                 ticks: {
-                  color: 'var(--azul-linea)',
+                  color: 'rgba(230, 242, 248, 0.86)',
                   font: { size: 9, weight: 'bold' }
-                }
+                },
+                grid: { color: 'rgba(255, 255, 255, 0.08)', lineWidth: 1 }
               },
               y: {
                 type: 'linear',
-                title: { display: true, text: 'Rentabilidad bruta observada (%)', font: { size: 10, weight: 'bold' } },
+                title: { display: true, text: 'Rentabilidad bruta observada (%)', color: 'rgba(230, 242, 248, 0.86)', font: { size: 10, weight: 'bold' } },
+                border: { color: 'rgba(255, 255, 255, 0.15)' },
                 ticks: {
+                  color: 'rgba(230, 242, 248, 0.86)',
                   callback: (val) => val + '%',
                   font: { size: 9 }
                 },
-                grid: { color: 'color-mix(in srgb, var(--azul-noche) 5%, transparent)' }
+                grid: { color: 'rgba(255, 255, 255, 0.12)', lineWidth: 1 }
               }
             }
           }
