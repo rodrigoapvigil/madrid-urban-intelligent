@@ -4103,10 +4103,27 @@ const MadridDashboardV2: React.FC = () => {
                   <h2 style={{ margin: 0 }}>Comparar zonas</h2>
                   <span className="v2-compare-subtitle" style={{ color: '#8fa6ba', fontSize: '13px' }}>Elige dos zonas y mira cómo se diferencian</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   {!isMobile && <div className="v2-compare-desktop-toolbar">
                     <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />
                   </div>}
+                  <button
+                    type="button"
+                    className="v2-compare-reset-btn"
+                    title="Restablecer selección a las zonas por defecto"
+                    aria-label="Restablecer selección"
+                    onClick={() => {
+                      const defA = zoneSearchOptions.find(o => o.kind === 'district' && normalizeZoneLabel(o.name).includes('fuencarral')) || zoneSearchOptions.find(o => o.kind === 'district') || comparisonZoneA;
+                      const defB = zoneSearchOptions.find(o => o.kind === 'barrio' && normalizeZoneLabel(o.name).includes('fuente del berro')) || zoneSearchOptions.find(o => o.kind === 'district' && o.id !== defA.id) || comparisonZoneB;
+                      setComparisonZoneA(defA);
+                      setComparisonZoneB(defB);
+                      reloadComparison();
+                    }}
+                    disabled={isReloadingA || isReloadingB}
+                  >
+                    <RotateCw size={11} className={isReloadingA || isReloadingB ? 'v2-spin' : ''} />
+                    <span>{isReloadingA || isReloadingB ? 'Sincronizando…' : 'Restablecer'}</span>
+                  </button>
                   <button
                     type="button"
                     className="v2-compare-help-corner"
@@ -4114,7 +4131,7 @@ const MadridDashboardV2: React.FC = () => {
                     title="Cómo comparar zonas"
                     onClick={() => setShowCompareHelpModal(true)}
                   >
-                    <HelpCircle size={16} />
+                    <HelpCircle size={15} />
                   </button>
                 </div>
               </div>
@@ -4129,23 +4146,6 @@ const MadridDashboardV2: React.FC = () => {
                   <span className="v2-filter-label zone-b-label"><i /> ZONA B</span>
                   <ZoneSearch options={zoneSearchOptions} district="Todos" barrio="Todos" onSelect={() => {}} formatName={formatZoneOption} compact picker={{ selected: comparisonZoneB, excludedId: comparisonZoneA.id, accent: 'b', onSelect: zone => { setComparisonZoneB(zone); setActiveComparePicker(null); }, onOpenChange: open => setActiveComparePicker(current => open ? 'b' : current === 'b' ? null : current) }} />
                 </div>
-                <button
-                  type="button"
-                  className="v2-compare-reset-btn"
-                  title="Restablecer selección a las zonas por defecto"
-                  aria-label="Restablecer selección"
-                  onClick={() => {
-                    const defA = zoneSearchOptions.find(o => o.kind === 'district' && normalizeZoneLabel(o.name).includes('fuencarral')) || zoneSearchOptions.find(o => o.kind === 'district') || comparisonZoneA;
-                    const defB = zoneSearchOptions.find(o => o.kind === 'barrio' && normalizeZoneLabel(o.name).includes('fuente del berro')) || zoneSearchOptions.find(o => o.kind === 'district' && o.id !== defA.id) || comparisonZoneB;
-                    setComparisonZoneA(defA);
-                    setComparisonZoneB(defB);
-                    reloadComparison();
-                  }}
-                  disabled={isReloadingA || isReloadingB}
-                >
-                  <RotateCw size={12} className={isReloadingA || isReloadingB ? 'v2-spin' : ''} />
-                  <span>{isReloadingA || isReloadingB ? 'Sincronizando…' : 'Restablecer'}</span>
-                </button>
               </div>
 
                   <StructuralDisparityBadge
