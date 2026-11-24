@@ -197,11 +197,12 @@
 .dmiyc-ls__telemetry-head {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding-bottom: 16px;
   border-bottom: 1px solid rgba(0, 229, 255, 0.14);
   margin-bottom: 26px;
-  gap: 12px;
+  gap: 14px;
+  flex-wrap: wrap;
 }
 .dmiyc-ls__telemetry-badge {
   display: inline-flex;

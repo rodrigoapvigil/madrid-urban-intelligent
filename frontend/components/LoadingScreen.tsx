@@ -216,9 +216,9 @@ export default function LoadingScreen({
               <div className="dmiyc-ls__telemetry-head">
                 <span className="dmiyc-ls__telemetry-badge"><i /> Telemetría oficial · Madrid</span>
                 <div className="dmiyc-ls__telemetry-live">
-                  <span>🏛️ Datos Notaría: Hasta Jun 2026</span>
+                  <span>Datos Notaría: Hasta Jun 2026</span>
                   <span className="dmiyc-ls__telemetry-dot">·</span>
-                  <span>✦ Algoritmo: Nov 2026</span>
+                  <span>Algoritmo: Nov 2026</span>
                 </div>
               </div>
 
@@ -265,7 +265,6 @@ export default function LoadingScreen({
       </main>
 
       <footer className="dmiyc-ls__footer-note" aria-label="Compromiso de privacidad">
-        <span className="dmiyc-ls__privacy-shield">🛡️</span>
         <span>DMIYC no utiliza cookies de seguimiento ni publicidad de terceros · 100% privado y transparente</span>
       </footer>
     </div>
