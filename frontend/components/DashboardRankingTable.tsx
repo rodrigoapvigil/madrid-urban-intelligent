@@ -41,8 +41,8 @@ export default function DashboardRankingTable({
   loadingRows: ReactNode;
   highlightedZone: string;
   isMobile: boolean;
-  metric: 'total' | 'unit';
-  onMetricChange: (value: 'total' | 'unit') => void;
+  metric: 'demand' | 'total' | 'unit';
+  onMetricChange: (value: 'demand' | 'total' | 'unit') => void;
   formatName: (name: string) => string;
   formatNumber: (value: number, digits: number) => string;
   formatEuro: (value: number, digits: number) => string;
@@ -54,7 +54,8 @@ export default function DashboardRankingTable({
   hasAnnualVariation: boolean;
   onCompareZone?: (zoneName: string) => void;
 }) {
-  const isDemand = profileId === 'venta';
+  const isVenta = profileId === 'venta';
+  const isDemand = isVenta && metric === 'demand';
   const isInvestment = profileId === 'inversion';
   const isPriceProfile = !isDemand && !isInvestment;
   const accent =
@@ -66,6 +67,16 @@ export default function DashboardRankingTable({
   const normalize = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').trim();
   const monthlyByZone = useMemo(() => new Map(monthlyRows.map(row => [normalize(String(row.zona || '')), row])), [monthlyRows]);
   const [minYieldThreshold, setMinYieldThreshold] = useState<number | null>(null);
+
+  const yieldCounts = useMemo(() => {
+    const getPct = (val: number) => (val > 1 ? val : val * 100);
+    return {
+      all: rows.length,
+      gte5: rows.filter(r => getPct(Number(r.value) || 0) >= 5).length,
+      gte6: rows.filter(r => getPct(Number(r.value) || 0) >= 6).length,
+      gte7: rows.filter(r => getPct(Number(r.value) || 0) >= 7).length,
+    };
+  }, [rows]);
 
   const sortedRows = useMemo(() => {
     let filtered = [...rows];
@@ -92,7 +103,13 @@ export default function DashboardRankingTable({
   const title = isDemand
     ? `Top 10 ${zoneLabel} con ${order === 'demand-low' ? 'menos' : 'más'} demanda`
     : isInvestment
-      ? `Top 10 ${zoneLabel} con ${order === 'yield-low' ? 'menor' : 'mayor'} rentabilidad`
+      ? minYieldThreshold !== null
+        ? sortedRows.length === 1
+          ? `Distrito con rentabilidad > ${minYieldThreshold}% (1 encontrado: ${formatName(sortedRows[0]?.name || '')})`
+          : sortedRows.length < 10
+            ? `Distritos con rentabilidad > ${minYieldThreshold}% (${sortedRows.length} encontrados)`
+            : `Top 10 ${zoneLabel} con mayor rentabilidad (> ${minYieldThreshold}%)`
+        : `Top 10 ${zoneLabel} con ${order === 'yield-low' ? 'menor' : 'mayor'} rentabilidad`
       : order === 'expensive'
         ? `Top 10 ${zoneLabel} más caros`
         : order === 'increase'
@@ -100,7 +117,7 @@ export default function DashboardRankingTable({
           : `Top 10 ${zoneLabel} más asequibles`;
   
   const isPerMonth = metric === 'total' && profileId === 'alquiler';
-  const isTotalPrice = metric === 'total' && profileId === 'compra';
+  const isTotalPrice = metric === 'total' && (profileId === 'compra' || profileId === 'venta');
   const valueHeading = isDemand ? 'DEMANDA' : isInvestment ? 'RENTABILIDAD' : profileId === 'alquiler'
     ? (metric === 'total' ? 'ALQUILER €/MES' : 'ALQUILER €/M²')
     : (metric === 'total' ? 'PRECIO COMPRA €' : 'COMPRA €/M²');
@@ -145,12 +162,27 @@ export default function DashboardRankingTable({
           </span>
         </div>
         <div className="v2-ranking-controls" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          {isPriceProfile && (
+          {isVenta && (
+            <div title="Elige entre volumen de demanda notarial, precio medio de venta o precio por m²">
+              <SegmentedControl<'demand' | 'total' | 'unit'>
+                label="Métrica mostrada"
+                size="sm"
+                value={metric}
+                options={[
+                  { value: 'demand', label: '⚡ Demanda' },
+                  { value: 'total', label: 'Total Venta (70m²)' },
+                  { value: 'unit', label: '€/m²' }
+                ] as const}
+                onChange={onMetricChange}
+              />
+            </div>
+          )}
+          {isPriceProfile && !isVenta && (
             <div title="Cálculo obtenido multiplicando el precio medio por metro cuadrado de la zona por el tamaño residencial medio oficial del Catastro (70 m²)">
               <SegmentedControl<'total' | 'unit'>
                 label="Unidad mostrada"
                 size="sm"
-                value={metric}
+                value={metric === 'demand' ? 'total' : metric}
                 options={[{ value: 'total', label: profileId === 'alquiler' ? '€/mes (70m²)' : 'Total Compra (70m²)' }, { value: 'unit', label: '€/m²' }] as const}
                 onChange={onMetricChange}
               />
@@ -159,24 +191,43 @@ export default function DashboardRankingTable({
           {isInvestment && (
             <div className="v2-ranking-yield-filter" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span style={{ fontSize: '10px', color: '#8ea5b7', fontWeight: '600', textTransform: 'uppercase' }}>Rent. mín:</span>
-              {[null, 5, 6, 7].map(thresh => (
+              {[
+                { thresh: null, label: 'Todas', count: yieldCounts.all },
+                { thresh: 5, label: '> 5%', count: yieldCounts.gte5 },
+                { thresh: 6, label: '> 6%', count: yieldCounts.gte6 },
+                { thresh: 7, label: '> 7%', count: yieldCounts.gte7 }
+              ].map(item => (
                 <button
-                  key={thresh === null ? 'all' : thresh}
+                  key={item.thresh === null ? 'all' : item.thresh}
                   type="button"
-                  onClick={() => setMinYieldThreshold(thresh)}
+                  onClick={() => setMinYieldThreshold(item.thresh)}
                   style={{
-                    padding: '3px 7px',
+                    padding: '3px 8px',
                     borderRadius: '6px',
-                    border: minYieldThreshold === thresh ? '1px solid #E879F9' : '1px solid rgba(186, 204, 214, 0.18)',
-                    background: minYieldThreshold === thresh ? 'rgba(232, 121, 249, 0.2)' : 'transparent',
-                    color: minYieldThreshold === thresh ? '#ffffff' : '#a9bed0',
+                    border: minYieldThreshold === item.thresh ? '1px solid #E879F9' : '1px solid rgba(186, 204, 214, 0.18)',
+                    background: minYieldThreshold === item.thresh ? 'rgba(232, 121, 249, 0.2)' : 'transparent',
+                    color: minYieldThreshold === item.thresh ? '#ffffff' : '#a9bed0',
                     fontSize: '10.5px',
-                    fontWeight: minYieldThreshold === thresh ? '700' : '500',
+                    fontWeight: minYieldThreshold === item.thresh ? '700' : '500',
                     cursor: 'pointer',
-                    transition: 'all 0.16s ease'
+                    transition: 'all 0.16s ease',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px'
                   }}
                 >
-                  {thresh === null ? 'Todas' : `> ${thresh}%`}
+                  <span>{item.label}</span>
+                  <span
+                    style={{
+                      background: minYieldThreshold === item.thresh ? 'rgba(232, 121, 249, 0.35)' : 'rgba(186, 204, 214, 0.14)',
+                      padding: '0 4px',
+                      borderRadius: '3px',
+                      fontSize: '9.5px',
+                      fontWeight: '700'
+                    }}
+                  >
+                    {item.count}
+                  </span>
                 </button>
               ))}
             </div>
@@ -242,7 +293,7 @@ export default function DashboardRankingTable({
               let companionM2: number | null = null;
               let companionTotal: number | null = null;
 
-              if (profileId === 'compra') {
+              if (profileId === 'compra' || (profileId === 'venta' && metric !== 'demand')) {
                 if (metric === 'total') {
                   // Salvaguarda: si por desfase o caché residual llegara un valor < 10.000 €, se calibra con el precio m² oficial del Catastro (70 m²)
                   if (effectiveValue < 10000 && latestM2FromMonthly && latestM2FromMonthly > 100) {
@@ -323,7 +374,7 @@ export default function DashboardRankingTable({
                       {sparkline.length > 1 && <Sparkline values={sparkline} color={accent} />}
                       <span style={{ fontSize: '13px' }}>{valueLabel}</span>
                     </div>
-                    {isPriceProfile && metric === 'total' && companionM2 && (
+                    {(isPriceProfile || (profileId === 'venta' && metric !== 'demand')) && metric === 'total' && companionM2 && (
                       <div
                         style={{
                           fontSize: '10.5px',
@@ -333,12 +384,12 @@ export default function DashboardRankingTable({
                           letterSpacing: '0.01em',
                           cursor: 'help'
                         }}
-                        title={profileId === 'compra' ? `Precio medio de venta: ${formatNumber(companionM2, 0)} €/m² (Notarías y Registradores)` : `Precio medio de alquiler: ${formatNumber(companionM2, 1)} €/m²`}
+                        title={profileId === 'compra' || profileId === 'venta' ? `Precio medio de venta: ${formatNumber(companionM2, 0)} €/m² (Notarías y Registradores)` : `Precio medio de alquiler: ${formatNumber(companionM2, 1)} €/m²`}
                       >
                         · {formatNumber(companionM2, profileId === 'alquiler' ? 1 : 0)} €/m²
                       </div>
                     )}
-                    {isPriceProfile && metric === 'unit' && companionTotal && (
+                    {(isPriceProfile || (profileId === 'venta' && metric !== 'demand')) && metric === 'unit' && companionTotal && (
                       <div
                         style={{
                           fontSize: '10.5px',
@@ -373,6 +424,29 @@ export default function DashboardRankingTable({
             })}
           </tbody>
         </table>
+        {isInvestment && sortedRows.length < 4 && minYieldThreshold !== null && (
+          <div
+            style={{
+              margin: '12px',
+              padding: '14px 16px',
+              borderRadius: '10px',
+              background: 'rgba(232, 121, 249, 0.06)',
+              border: '1px solid rgba(232, 121, 249, 0.28)',
+              color: '#e2e8f0',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '7px', color: '#E879F9', fontSize: '11px', fontWeight: '800', letterSpacing: '0.04em' }}>
+              <span>💡 TELEMETRÍA OFICIAL · COMPRESIÓN DE YIELDS EN MADRID CAPITAL</span>
+            </div>
+            <p style={{ margin: 0, fontSize: '11.5px', lineHeight: '1.45', color: '#c5d5e6' }}>
+              Actualmente, solo {sortedRows.map(r => formatName(r.name)).join(', ') || 'determinadas zonas'} alcanza{sortedRows.length === 1 ? '' : 'n'} el umbral del {minYieldThreshold}% en rentabilidad bruta de cierre notarial. En distritos consolidados como Salamanca (3,2%) o Chamberí (3,5%), la fuerte escalada del precio de compraventa comprime la rentabilidad por alquiler a mínimos históricos.
+            </p>
+            <span style={{ fontSize: '10px', color: '#8fa6ba' }}>Registro de la Propiedad & Catastro · Modelo CatBoost v2 DMIYC</span>
+          </div>
+        )}
       </div>
     </div>
   );

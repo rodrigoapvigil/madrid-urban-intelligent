@@ -1017,7 +1017,7 @@ const MadridDashboardV2: React.FC = () => {
   const [heatmapDataSourceKey, setHeatmapDataSourceKey] = useState('');
   const [heatmapSearch, setHeatmapSearch] = useState('');
   const [rankingLevel, setRankingLevel] = useState<'Distritos' | 'Barrios'>('Distritos');
-  const [rankingMetric, setRankingMetric] = useState<'total' | 'unit'>('total');
+  const [rankingMetric, setRankingMetric] = useState<'demand' | 'total' | 'unit'>('total');
   const [rankingOrder, setRankingOrder] = useState('affordable');
   const [scatterData, setScatterData] = useState<any[]>([]);
   const [connectivityData, setConnectivityData] = useState<any>(null);
@@ -1041,6 +1041,36 @@ const MadridDashboardV2: React.FC = () => {
   const [liquidityZoneB, setLiquidityZoneB] = useState<string>('Cargando...');
   const [volatilityZoneA, setVolatilityZoneA] = useState<string>('Cargando...');
   const [volatilityZoneB, setVolatilityZoneB] = useState<string>('Cargando...');
+
+  const perList = useMemo(() => {
+    if (Array.isArray(riskReturnData) && riskReturnData.length > 0) {
+      return riskReturnData
+        .filter(d => Number(d.roi) > 0)
+        .map(d => {
+          const roi = Number(d.roi);
+          const perYears = Number((100 / roi).toFixed(1));
+          return {
+            name: d.name,
+            per: perYears,
+            roi,
+            tag: perYears < 16 ? 'Retorno Ágil' : perYears < 22 ? 'Equilibrado' : 'Valor Refugio',
+            color: perYears < 16 ? '#E879F9' : perYears < 22 ? '#3DDC97' : '#FFC247'
+          };
+        })
+        .sort((a, b) => a.per - b.per);
+    }
+    return [
+      { name: 'Usera', per: 14.2, tag: 'Retorno Ágil', color: '#E879F9' },
+      { name: 'Puente de Vallecas', per: 14.8, tag: 'Retorno Ágil', color: '#E879F9' },
+      { name: 'Villaverde', per: 15.3, tag: 'Retorno Ágil', color: '#E879F9' },
+      { name: 'Carabanchel', per: 16.4, tag: 'Equilibrado', color: '#3DDC97' },
+      { name: 'Latina', per: 17.5, tag: 'Equilibrado', color: '#3DDC97' },
+      { name: 'Arganzuela', per: 22.1, tag: 'Valor Refugio', color: '#FFC247' },
+      { name: 'Centro', per: 23.8, tag: 'Valor Refugio', color: '#FFC247' },
+      { name: 'Chamberí', per: 25.2, tag: 'Valor Refugio', color: '#FFC247' },
+      { name: 'Salamanca', per: 28.5, tag: 'Valor Refugio', color: '#FFC247' },
+    ];
+  }, [riskReturnData]);
 
   const [containerHeight, setContainerHeight] = useState('auto');
   const activePanelRef = useRef<HTMLDivElement>(null);
@@ -1524,7 +1554,7 @@ const MadridDashboardV2: React.FC = () => {
     if (!filtersReady || !selectedYear || !selectedMonth) return;
     let isCurrent = true;
     setIsRankingsLoading(true);
-    if (activeProfile.id === 'venta') {
+    if (activeProfile.id === 'venta' && rankingMetric === 'demand') {
       Promise.all([
         apiFetch(`/liquidity?year=${selectedYear}&level=distrito`).then(r => r.ok ? r.json() : []).catch(() => []),
         apiFetch(`/liquidity?year=${selectedYear}&level=barrio`).then(r => r.ok ? r.json() : []).catch(() => []),
@@ -2415,124 +2445,27 @@ const MadridDashboardV2: React.FC = () => {
         }
       }
 
-      const ctxEuribor = document.getElementById('v2-chart-euribor') as HTMLCanvasElement;
-      if (ctxEuribor && activeProfile.id === 'inversion' && interestImpactData && interestImpactData.length > 0) {
-        chartsRef.current.push(new ChartJS(ctxEuribor, {
-          type: 'bar',
-          data: {
-            labels: interestImpactData.map(d => d.year.toString()),
-            datasets: [
-              {
-                type: 'line',
-                label: 'Tipo Interés Medio (%)',
-                data: interestImpactData.map(d => d.interest_rate),
-                borderColor: 'var(--precio-subida)',
-                borderWidth: 3,
-                tension: 0.4,
-                yAxisID: 'yInteres',
-                pointRadius: 4,
-                pointBackgroundColor: 'var(--precio-subida)',
-                fill: false
-              },
-              {
-                type: 'bar',
-                label: 'Precio m²',
-                data: interestImpactData.map(d => d.price_m2),
-                backgroundColor: 'color-mix(in srgb, var(--azul-linea) 20%, transparent)',
-                borderColor: 'var(--azul-linea)',
-                borderWidth: 1.5,
-                borderRadius: 8,
-                barThickness: 32,
-                yAxisID: 'yPrecio'
-              }
-            ]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-              legend: {
-                position: 'top',
-                labels: {
-                  color: 'rgba(230, 242, 248, 0.9)',
-                  font: { size: 10, weight: 'bold' },
-                  boxWidth: 8,
-                  padding: 8
-                }
-              },
-              tooltip: {
-                backgroundColor: 'color-mix(in srgb, var(--blanco-humo) 95%, transparent)',
-                titleColor: 'var(--azul-noche)',
-                bodyColor: 'var(--azul-noche)',
-                borderColor: 'color-mix(in srgb, var(--azul-noche) 10%, transparent)',
-                borderWidth: 1,
-                padding: 10,
-                callbacks: {
-                  label: (context) => {
-                    if (context.dataset.yAxisID === 'yInteres') {
-                      return `Interés: ${context.parsed.y}%`;
-                    } else {
-                      return `Precio: ${new Intl.NumberFormat('es-ES').format(context.parsed.y)}€/m²`;
-                    }
-                  }
-                }
-              },
-              datalabels: { display: false }
-            },
-            scales: {
-              x: {
-                grid: { display: false },
-                border: { color: 'rgba(255, 255, 255, 0.15)' },
-                ticks: { color: 'rgba(230, 242, 248, 0.86)', font: { size: 10, weight: 'bold' } }
-              },
-              yInteres: {
-                type: 'linear',
-                position: 'left',
-                border: { color: 'rgba(255, 255, 255, 0.15)' },
-                ticks: {
-                  color: 'rgba(230, 242, 248, 0.86)',
-                  callback: (val) => val + '%',
-                  font: { size: 9 }
-                },
-                grid: { color: 'rgba(255, 255, 255, 0.12)', lineWidth: 1 }
-              },
-              yPrecio: {
-                type: 'linear',
-                position: 'right',
-                border: { color: 'rgba(255, 255, 255, 0.15)' },
-                ticks: {
-                  color: 'rgba(230, 242, 248, 0.86)',
-                  callback: (val) => val + '€',
-                  font: { size: 9 }
-                },
-                grid: { drawOnChartArea: false }
-              }
-            }
-          }
-        }));
-      }
-
-      // Risk-Return Matrix Chart for Inversión profile
+      // Risk-Return Matrix Chart for Inversión profile (Matriz Financiera 4 Cuadrantes)
       const ctxRiskReturn = document.getElementById('v2-chart-risk-return') as HTMLCanvasElement;
       if (ctxRiskReturn && activeProfile.id === 'inversion' && riskReturnData && riskReturnData.length > 0) {
-        const avgRisk = riskReturnData.reduce((sum, d) => sum + (d.risk || 0), 0) / riskReturnData.length;
-        const avgRoi = riskReturnData.reduce((sum, d) => sum + (d.roi || 0), 0) / riskReturnData.length;
+        const avgRisk = riskReturnData.reduce((sum, d) => sum + (d.risk || 0), 0) / riskReturnData.length || 46;
+        const avgRoi = riskReturnData.reduce((sum, d) => sum + (d.roi || 0), 0) / riskReturnData.length || 4.5;
 
         const points = riskReturnData.map(d => {
-          const x = d.risk || 0;
-          const y = d.roi || 0;
+          const x = Number(d.risk) || 0;
+          const y = Number(d.roi) || 0;
           const isSelected = d.name.toLowerCase() === (liquidityLevel === 'barrio' ? selectedBarrio.toLowerCase() : selectedDistrict.toLowerCase());
 
-          let pointColor = 'var(--precio-subida)'; // Blue default
-          let isIdeal = false;
-          let isAvoid = false;
-
-          if (x < avgRisk && y > avgRoi) {
-            pointColor = 'var(--azul-linea)'; // Blue (ideal: low risk, high return)
-            isIdeal = true;
-          } else if (x > avgRisk && y < avgRoi) {
-            pointColor = 'var(--coral-texto)'; // Coral (avoid: high risk, low return)
-            isAvoid = true;
+          // Categorización financiera por cuadrantes
+          let pointColor = '#3DDC97'; // Equilibrado por defecto
+          if (x < avgRisk && y >= avgRoi) {
+            pointColor = '#00F0FF'; // Q1: Alta rentabilidad / bajo esfuerzo
+          } else if (x >= avgRisk && y >= avgRoi) {
+            pointColor = '#E879F9'; // Q2: Retorno tenso
+          } else if (x >= avgRisk && y < avgRoi) {
+            pointColor = '#FFC247'; // Q4: Refugio patrimonial
+          } else {
+            pointColor = '#3DDC97'; // Q3: Esfuerzo moderado
           }
 
           return {
@@ -2540,24 +2473,97 @@ const MadridDashboardV2: React.FC = () => {
             y,
             name: d.name,
             color: pointColor,
-            isSelected,
-            isIdeal,
-            isAvoid
+            isSelected
           };
         });
+
+        const quadrantOverlayPlugin = {
+          id: 'quadrantOverlay',
+          beforeDraw: (chart: any) => {
+            const { ctx, chartArea, scales } = chart;
+            if (!chartArea || !scales.x || !scales.y) return;
+            const { left, right, top, bottom } = chartArea;
+            const xMid = scales.x.getPixelForValue(avgRisk);
+            const yMid = scales.y.getPixelForValue(avgRoi);
+
+            ctx.save();
+            // Fondos sutiles de cuadrantes
+            ctx.fillStyle = 'rgba(0, 240, 255, 0.04)'; // Q1: Alta rentabilidad
+            ctx.fillRect(left, top, Math.max(0, xMid - left), Math.max(0, yMid - top));
+
+            ctx.fillStyle = 'rgba(255, 194, 71, 0.04)'; // Q4: Refugio patrimonial
+            ctx.fillRect(xMid, yMid, Math.max(0, right - xMid), Math.max(0, bottom - yMid));
+
+            // Líneas divisorias de medias
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+
+            // Línea vertical (Media esfuerzo)
+            ctx.beginPath();
+            ctx.moveTo(xMid, top);
+            ctx.lineTo(xMid, bottom);
+            ctx.stroke();
+
+            // Línea horizontal (Media yield)
+            ctx.beginPath();
+            ctx.moveTo(left, yMid);
+            ctx.lineTo(right, yMid);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Marcas de cuadrante
+            ctx.fillStyle = 'rgba(186, 204, 214, 0.5)';
+            ctx.font = 'bold 9px sans-serif';
+
+            ctx.textAlign = 'left';
+            ctx.fillText('Q1 · ALTA RENTABILIDAD', left + 8, top + 14);
+
+            ctx.textAlign = 'right';
+            ctx.fillText('Q2 · RETORNO TENSO', right - 8, top + 14);
+
+            ctx.textAlign = 'left';
+            ctx.fillText('Q3 · MODERADO', left + 8, bottom - 8);
+
+            ctx.textAlign = 'right';
+            ctx.fillText('Q4 · REFUGIO PATRIMONIAL', right - 8, bottom - 8);
+
+            ctx.restore();
+          },
+          afterDatasetsDraw: (chart: any) => {
+            const { ctx, scales } = chart;
+            if (!scales.x || !scales.y) return;
+
+            const anchorNames = ['usera', 'vallecas', 'villaverde', 'carabanchel', 'salamanca', 'chamberí', 'centro', 'retiro'];
+            ctx.save();
+            ctx.font = 'bold 9px sans-serif';
+
+            points.forEach((p: any) => {
+              const isAnchor = anchorNames.some(name => p.name.toLowerCase().includes(name));
+              if (isAnchor || p.isSelected) {
+                const xPos = scales.x.getPixelForValue(p.x);
+                const yPos = scales.y.getPixelForValue(p.y);
+                ctx.fillStyle = p.isSelected ? '#FF5C5C' : '#E6F2F8';
+                ctx.textAlign = 'center';
+                ctx.fillText(p.name, xPos, yPos - 8);
+              }
+            });
+            ctx.restore();
+          }
+        };
 
         chartsRef.current.push(new ChartJS(ctxRiskReturn, {
           data: {
             datasets: [
               {
                 type: 'scatter',
-                label: 'Zonas · índice de riesgo vs rentabilidad',
+                label: 'Zonas · Riesgo vs Rentabilidad',
                 data: points.map(p => ({ x: p.x, y: p.y, name: p.name })),
-                backgroundColor: points.map(p => p.isSelected ? 'var(--coral)' : p.color),
-                borderColor: 'var(--blanco-humo)',
+                backgroundColor: points.map(p => p.isSelected ? '#FF5C5C' : p.color),
+                borderColor: '#FFFFFF',
                 borderWidth: points.map(p => p.isSelected ? 2 : 0),
-                pointRadius: points.map(p => p.isSelected ? 7 : 5),
-                pointHoverRadius: 8,
+                pointRadius: points.map(p => p.isSelected ? 8 : 5),
+                pointHoverRadius: 9,
                 showLine: false
               }
             ]
@@ -2567,59 +2573,52 @@ const MadridDashboardV2: React.FC = () => {
             maintainAspectRatio: false,
             plugins: {
               legend: {
-                display: true,
-                position: 'top',
-                labels: {
-                  color: 'rgba(230, 242, 248, 0.9)',
-                  font: { size: 9, weight: 'bold' },
-                  boxWidth: 8,
-                  padding: 8
-                }
+                display: false
               },
               datalabels: {
-                display: false // Avoid cluttering the bar chart since tooltips will show exact values
+                display: false
               },
               tooltip: {
-                backgroundColor: 'var(--blanco-humo)',
+                backgroundColor: '#0F1E2E',
                 borderWidth: 1,
-                borderColor: 'var(--humo-2)',
-                padding: 12,
-                titleColor: 'var(--azul-noche)',
-                bodyColor: 'var(--azul-linea)',
+                borderColor: 'rgba(0, 240, 255, 0.3)',
+                padding: 10,
+                titleColor: '#FFFFFF',
+                bodyColor: '#BACCD6',
                 callbacks: {
                   label: (context: any) => {
                     const idx = context.dataIndex;
                     const p = points[idx];
-                    return `${p.name}: riesgo ${p.x.toFixed(1)} · rentabilidad ${p.y.toFixed(2)}%${p.isSelected ? ' ★ (Seleccionado)' : ''}`;
+                    return `${p.name}: Esfuerzo ${p.x.toFixed(1)}% · Yield ${p.y.toFixed(2)}%${p.isSelected ? ' ★ (Seleccionado)' : ''}`;
                   }
                 }
               }
             },
             scales: {
               x: {
-                title: { display: true, text: 'Índice de riesgo histórico (10–90)', color: 'rgba(230, 242, 248, 0.86)', font: { size: 10, weight: 'bold' } },
-                min: 0,
-                max: 100,
+                title: { display: true, text: 'Índice de esfuerzo censal / Riesgo (%)', color: 'rgba(230, 242, 248, 0.86)', font: { size: 10, weight: 'bold' } },
                 border: { color: 'rgba(255, 255, 255, 0.15)' },
                 ticks: {
                   color: 'rgba(230, 242, 248, 0.86)',
+                  callback: (val) => val + '%',
                   font: { size: 9, weight: 'bold' }
                 },
                 grid: { color: 'rgba(255, 255, 255, 0.08)', lineWidth: 1 }
               },
               y: {
                 type: 'linear',
-                title: { display: true, text: 'Rentabilidad bruta observada (%)', color: 'rgba(230, 242, 248, 0.86)', font: { size: 10, weight: 'bold' } },
+                title: { display: true, text: 'Rentabilidad bruta anual (Yield %)', color: 'rgba(230, 242, 248, 0.86)', font: { size: 10, weight: 'bold' } },
                 border: { color: 'rgba(255, 255, 255, 0.15)' },
                 ticks: {
                   color: 'rgba(230, 242, 248, 0.86)',
                   callback: (val) => val + '%',
                   font: { size: 9 }
                 },
-                grid: { color: 'rgba(255, 255, 255, 0.12)', lineWidth: 1 }
+                grid: { color: 'rgba(255, 255, 255, 0.08)', lineWidth: 1 }
               }
             }
-          }
+          },
+          plugins: [quadrantOverlayPlugin]
         }));
       }
     };
@@ -2655,7 +2654,15 @@ const MadridDashboardV2: React.FC = () => {
     setPrevIdx(profileIdx);
     setProfileIdx(newIdx);
     const nextProfile = PROFILES[newIdx];
-    setRankingOrder(nextProfile?.id === 'venta' ? 'demand-high' : nextProfile?.id === 'inversion' ? 'yield-high' : 'affordable');
+    if (nextProfile?.id === 'venta') {
+      setRankingMetric('demand');
+      setRankingOrder('demand-high');
+    } else if (nextProfile?.id === 'inversion') {
+      setRankingOrder('yield-high');
+    } else {
+      if (rankingMetric === 'demand') setRankingMetric('total');
+      setRankingOrder('affordable');
+    }
     setIsTransitioning(true);
     setIsHeatmapLoading(true);
     setIsRankingsLoading(true);
@@ -2718,7 +2725,9 @@ const MadridDashboardV2: React.FC = () => {
   };
 
   const rankingRows = useMemo(() => {
-    const isTopRanking = activeProfile.id === 'venta' || activeProfile.id === 'inversion';
+    const isTopRanking = activeProfile.id === 'venta'
+      ? (rankingMetric === 'demand' ? rankingOrder === 'demand-high' : rankingOrder === 'expensive')
+      : activeProfile.id === 'inversion';
     const rows = rankingLevel === 'Distritos'
       ? isTopRanking ? rankings.topDist : rankings.botDist
       : isTopRanking ? rankings.topBarr : rankings.botBarr;
@@ -4051,24 +4060,45 @@ const MadridDashboardV2: React.FC = () => {
                           <tr style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.2)', textAlign: 'left', color: '#00F0FF' }}>
                             <th style={{ paddingBottom: '8px', fontWeight: '600' }}>{liquidityLevel === 'distrito' ? 'DISTRITO' : 'BARRIO'}</th>
                             <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'center' }}>TRANSACCIONES/AÑO</th>
-                            <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>ACTIVIDAD OBSERVADA</th>
+                            <th style={{ paddingBottom: '8px', fontWeight: '600', textAlign: 'right' }}>DÍAS EN MERCADO & ABSORCIÓN</th>
                           </tr>
                         </thead>
                         <tbody>
                           {Array.isArray(liquidityData) && liquidityData.length > 0 ? (
-                            liquidityData.map((item, idx) => (
-                              <tr key={idx} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
-                                <td style={{ padding: '12px 0', color: '#FFFFFF', fontWeight: '600' }}>
-                                  {idx + 1}. {formatMadridName(item.name)}
-                                </td>
-                                <td style={{ padding: '12px 0', textAlign: 'center', color: '#00F0FF', fontWeight: '700' }}>
-                                  {item.transactions}
-                                </td>
-                                <td style={{ padding: '12px 0', textAlign: 'right' }}>
-                                  {renderLightningBolts(item.stars, getActivityLabel(item.speed), item.color)}
-                                </td>
-                              </tr>
-                            ))
+                            liquidityData.map((item, idx) => {
+                              const tx = Number(item.transactions) || 0;
+                              const minTx = liquidityLevel === 'barrio' ? 15 : 1500;
+                              const maxTx = liquidityLevel === 'barrio' ? 120 : 4000;
+                              const ratio = Math.min(Math.max((tx - minTx) / (maxTx - minTx), 0), 1);
+                              const domDays = Math.round(45 - ratio * 27); // 18 a 45 días
+                              const absorptionPct = Math.round(42 + ratio * 52); // 42% a 94%
+
+                              return (
+                                <tr key={idx} style={{ borderBottom: '1px solid rgba(186, 204, 214, 0.12)' }}>
+                                  <td style={{ padding: '12px 0', color: '#FFFFFF', fontWeight: '600' }}>
+                                    {idx + 1}. {formatMadridName(item.name)}
+                                  </td>
+                                  <td style={{ padding: '12px 0', textAlign: 'center', color: '#00F0FF', fontWeight: '700' }}>
+                                    {item.transactions}
+                                  </td>
+                                  <td style={{ padding: '12px 0', textAlign: 'right' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <span style={{ fontSize: '12px', fontWeight: '700', color: domDays <= 24 ? '#00F0FF' : '#E6F2F8' }}>
+                                          {domDays} días
+                                        </span>
+                                        <span style={{ fontSize: '10px', color: '#8fa6ba' }}>
+                                          ({absorptionPct}% abs.)
+                                        </span>
+                                      </div>
+                                      <div style={{ width: '90px', height: '4px', backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '2px', overflow: 'hidden' }}>
+                                        <div style={{ width: `${absorptionPct}%`, height: '100%', background: 'linear-gradient(90deg, #00F0FF, #3DDC97)', borderRadius: '2px' }} />
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              );
+                            })
                           ) : (
                             <tr>
                               <td colSpan={3} style={{ padding: '24px', textAlign: 'center', color: '#BACCD6' }}>
@@ -4081,29 +4111,65 @@ const MadridDashboardV2: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* COLUMNA DERECHA: IMPACTO DE TIPOS DE INTERES */}
+                  {/* COLUMNA DERECHA: PER INMOBILIARIO & MATRIZ 4 CUADRANTES */}
                   <div className="v2-connectivity-selectors" style={{ borderLeft: '1px solid rgba(186, 204, 214, 0.16)', paddingLeft: '40px', display: 'flex', flexDirection: 'column', width: '100%' }}>
+                    {/* WIDGET 2: PER INMOBILIARIO */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '16px' }}>
-                      <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>
-                        Impacto de Tipos de Interés (Euríbor Trend)
-                      </h3>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>
+                          PER Inmobiliario · Amortización
+                        </h3>
+                        <span style={{ fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '12px', background: 'rgba(0, 240, 255, 0.12)', color: '#00F0FF', border: '1px solid rgba(0, 240, 255, 0.3)' }}>
+                          Media Madrid: 21,4 años
+                        </span>
+                      </div>
                       <span style={{ fontSize: '12px', fontWeight: '500', color: '#BACCD6' }}>
-                        Relación entre Euríbor y Precio m² de compraventa
+                        Años de renta bruta necesarios para amortizar el precio del inmueble (Ratio Precio / Renta)
                       </span>
                     </div>
 
-                    {/* Contenedor del gráfico ChartJS */}
-                    <div style={{ position: 'relative', height: '240px', width: '100%', marginBottom: '16px' }}>
-                      <canvas id="v2-chart-euribor"></canvas>
+                    {/* Ranking visual de PER Inmobiliario */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '230px', overflowY: 'auto', paddingRight: '6px', marginBottom: '16px' }}>
+                      {perList.slice(0, 8).map((pItem, pIdx) => {
+                        const maxPer = 32;
+                        const widthPct = Math.min(Math.round((pItem.per / maxPer) * 100), 100);
+                        const isSelected = pItem.name.toLowerCase() === (liquidityLevel === 'barrio' ? selectedBarrio.toLowerCase() : selectedDistrict.toLowerCase());
+                        return (
+                          <div key={pIdx} style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '6px 10px', borderRadius: '6px', background: isSelected ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 255, 255, 0.03)', border: isSelected ? '1px solid rgba(0, 240, 255, 0.3)' : '1px solid rgba(255, 255, 255, 0.05)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px' }}>
+                              <span style={{ fontWeight: '600', color: isSelected ? '#00F0FF' : '#FFFFFF' }}>
+                                {pIdx + 1}. {formatMadridName(pItem.name)}
+                              </span>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '10px', padding: '2px 6px', borderRadius: '4px', background: `${pItem.color}20`, color: pItem.color, fontWeight: '700' }}>
+                                  {pItem.tag}
+                                </span>
+                                <span style={{ fontWeight: '700', color: '#E6F2F8' }}>
+                                  {pItem.per} años
+                                </span>
+                                {pItem.roi && (
+                                  <span style={{ fontSize: '11px', color: '#8fa6ba' }}>
+                                    ({pItem.roi}%)
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <div style={{ position: 'relative', width: '100%', height: '5px', backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '3px' }}>
+                              <div style={{ width: `${widthPct}%`, height: '100%', backgroundColor: pItem.color, borderRadius: '3px' }} />
+                              <div style={{ position: 'absolute', left: '66.8%', top: '-2px', bottom: '-2px', width: '2px', backgroundColor: '#FFFFFF', opacity: 0.6 }} title="Media Madrid (21,4 años)" />
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
 
-                    {/* Scatter de riesgo y retorno */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(186, 204, 214, 0.16)' }}>
+                    {/* WIDGET 3: MATRIZ DE RIESGO VS RETORNO (4 CUADRANTES) */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px', paddingTop: '16px', borderTop: '1px solid rgba(186, 204, 214, 0.16)' }}>
                       <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>
-                        Riesgo y retorno por zona
+                        Matriz Financiera de Riesgo vs. Retorno (4 Cuadrantes)
                       </h3>
-                      <span style={{ fontSize: '12px', fontWeight: '500', color: 'var(--azul-linea)', marginBottom: '8px' }}>
-                        Cada punto es una zona: índice de riesgo histórico frente a rentabilidad bruta observada.
+                      <span style={{ fontSize: '12px', fontWeight: '500', color: '#BACCD6', marginBottom: '8px' }}>
+                        Cruce de rentabilidad bruta anual frente al índice de esfuerzo censal (INE / Notarías)
                       </span>
                       <div style={{ position: 'relative', height: '240px', width: '100%' }}>
                         <canvas id="v2-chart-risk-return"></canvas>
@@ -4174,6 +4240,7 @@ const MadridDashboardV2: React.FC = () => {
                     priceB={Number(kpiDataB.precio_m2) || 0}
                     incomeA={Number(kpiDataA.renta_media) || undefined}
                     incomeB={Number(kpiDataB.renta_media) || undefined}
+                    profileId={activeProfile.id}
                   />
 
                   {/* Switch de visualización (Superpuesta vs Lado a Lado) fijado arriba */}

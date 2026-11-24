@@ -10,6 +10,7 @@ interface StructuralDisparityBadgeProps {
   priceB: number;
   incomeA?: number;
   incomeB?: number;
+  profileId?: string;
   className?: string;
 }
 
@@ -20,6 +21,7 @@ export const StructuralDisparityBadge: React.FC<StructuralDisparityBadgeProps> =
   priceB,
   incomeA,
   incomeB,
+  profileId = 'alquiler',
   className = '',
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -98,7 +100,12 @@ export const StructuralDisparityBadge: React.FC<StructuralDisparityBadgeProps> =
                   <strong>{new Intl.NumberFormat('es-ES').format(Math.round(incB))} €/año</strong>
                 </div>
               </div>
-              <p className="v2-factor-note">La capacidad de pago del vecindario explica la presión compradora.</p>
+              <p className="v2-factor-note">
+                {profileId === 'alquiler'
+                  ? 'La capacidad de pago del vecindario explica la presión sobre las rentas mensuales.'
+                  : 'La capacidad patrimonial de la zona explica la prima del valor escriturado.'}
+              </p>
+              <span style={{ fontSize: '10px', color: '#688299', marginTop: 'auto' }}>Fuente: Atlas de Renta de los Hogares (INE)</span>
             </div>
 
             {/* Factor 2: Antigüedad y Catastro */}
@@ -119,6 +126,7 @@ export const StructuralDisparityBadge: React.FC<StructuralDisparityBadgeProps> =
                 </div>
               </div>
               <p className="v2-factor-note">Edificaciones señoriales y fincas clásicas cotizan con una prima singular.</p>
+              <span style={{ fontSize: '10px', color: '#688299', marginTop: 'auto' }}>Fuente: Sede Electrónica del Catastro</span>
             </div>
 
             {/* Factor 3: Barreras Urbanísticas */}
@@ -130,6 +138,7 @@ export const StructuralDisparityBadge: React.FC<StructuralDisparityBadgeProps> =
               <p className="v2-factor-body">
                 Fronteras físicas de alta fricción (parque del Retiro, ejes viarios M-30 o trazados ferroviarios) generan discontinuidades urbanas que limitan la oferta contigua.
               </p>
+              <span style={{ fontSize: '10px', color: '#688299', marginTop: 'auto' }}>Fuente: Banco de Datos Ayuntamiento de Madrid</span>
             </div>
           </div>
         </div>
