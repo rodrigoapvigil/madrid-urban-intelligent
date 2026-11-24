@@ -704,6 +704,26 @@ const InfoTooltip: React.FC<{
   );
 };
 
+const formatCurrencyInt = (val: number | null | undefined, unit: string = '€') => {
+  if (val === null || val === undefined || !Number.isFinite(Number(val)) || Number(val) <= 0) return '—';
+  const formatted = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(Number(val)));
+  return `${formatted} ${unit}`.trim();
+};
+
+const formatCurrencyDec = (val: number | null | undefined, decimals: number = 2, unit: string = '€/m²') => {
+  if (val === null || val === undefined || !Number.isFinite(Number(val)) || Number(val) <= 0) return '—';
+  const formatted = new Intl.NumberFormat('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(Number(val));
+  return `${formatted} ${unit}`.trim();
+};
+
+const formatSpanishPercentage = (val: number | null | undefined, decimals: number = 1, showPlus: boolean = true) => {
+  if (val === null || val === undefined || !Number.isFinite(Number(val))) return '—';
+  const num = Number(val);
+  const sign = num > 0 && showPlus ? '+' : num < 0 ? '−' : '';
+  const formatted = Math.abs(num).toFixed(decimals).replace('.', ',');
+  return `${sign}${formatted} %`;
+};
+
 const getComparisonKpiInfo = (metric: string, zoneName: string) => {
   switch (metric) {
     case 'precio_m2_alquiler':
@@ -2979,24 +2999,21 @@ const MadridDashboardV2: React.FC = () => {
                       <strong>{selectedBarrio !== 'Todos' ? formatZoneOption(selectedBarrio) : selectedDistrict !== 'Todos' ? formatZoneOption(selectedDistrict) : 'Madrid'}</strong>
                       {!isMobile && selectedDistrict !== 'Todos' && <small>{selectedBarrio !== 'Todos' ? `${formatZoneOption(selectedDistrict)} › ${formatZoneOption(selectedBarrio)}` : `Distrito · ${formatZoneOption(selectedDistrict)}`}</small>}
                     </div>
-                    <span>{selectedMonth} {selectedYear}</span>
                   </div>
 
                   {activeProfile.id === 'alquiler' && (() => {
-                    const rent = kpiData.p_vivienda || 0;
-                    const incomeMonthly = (kpiData.renta_media || 0) / 12;
+                    const rent = Math.round(kpiData.p_vivienda || 0);
+                    const incomeMonthly = Math.round((kpiData.renta_media || 0) / 12);
                     const effort = incomeMonthly > 0 ? (rent / incomeMonthly) * 100 : 0;
                     const effortColor = '#fbbf24';
                     const salary = Number.parseFloat(userRentSalary);
                     const personalEffort = salary > 0 ? (rent / salary) * 100 : 0;
-                    const money = (value: number) => new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(value);
                     return (
                       <div className="v2-mobile-rent-summary">
                         <section className="v2-rent-hero">
                           <div className="v2-rent-hero-heading">
                             <div>
                               <span className="v2-rent-eyebrow">Precio medio · alquiler</span>
-                              <span className="v2-rent-real"><i />{periodStatusLabel} · {selectedMonth} {selectedYear}</span>
                             </div>
                             <InfoTooltip
                               title="Precio de alquiler por metro cuadrado"
@@ -3006,8 +3023,7 @@ const MadridDashboardV2: React.FC = () => {
                             />
                           </div>
                           <div className="v2-rent-main-value">
-                            <strong>{new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(kpiData.p_m2 || 0)}</strong>
-                            <span>€/m²</span>
+                            <strong>{formatCurrencyDec(kpiData.p_m2, 2, '€/m²')}</strong>
                           </div>
                           {(kpiData.is_prediction || isProjectionPeriod) && Number(kpiData.p_m2) > 0 && (
                             <ConfidenceIntervalBadge
@@ -3018,10 +3034,10 @@ const MadridDashboardV2: React.FC = () => {
                           )}
                           <div className="v2-rent-chips">
                             {Number.isFinite(Number(kpiData.v_mes)) && kpiData.v_mes !== undefined
-                              ? <span>{Number(kpiData.v_mes) < 0 ? '↘' : '↗'} {Number(kpiData.v_mes) > 0 ? '+' : ''}{Number(kpiData.v_mes).toFixed(1).replace('.', ',')} % mes</span>
+                              ? <span>{Number(kpiData.v_mes) < 0 ? '↘' : '↗'} {formatSpanishPercentage(kpiData.v_mes, 1, true)} mes</span>
                               : null}
                             {Number.isFinite(Number(kpiData.v_anual)) && kpiData.v_anual !== undefined
-                              ? <span>{Number(kpiData.v_anual) < 0 ? '↘' : '↗'} {Number(kpiData.v_anual) > 0 ? '+' : ''}{Number(kpiData.v_anual).toFixed(1).replace('.', ',')} % año</span>
+                              ? <span>{Number(kpiData.v_anual) < 0 ? '↘' : '↗'} {formatSpanishPercentage(kpiData.v_anual, 1, true)} año</span>
                               : null}
                             <span className="v2-rent-market">{kpiData.estado_mercado || 'Mercado estable'}</span>
                           </div>
@@ -3029,12 +3045,12 @@ const MadridDashboardV2: React.FC = () => {
                         <section className="v2-rent-secondary">
                           <div className="v2-rent-secondary-card">
                             <span className="v2-rent-eyebrow" title="Calculado sobre vivienda tipo estándar de 70 m²">Alquiler medio (70 m²)</span>
-                            <strong>{money(rent)} <small>€/mes</small></strong>
+                            <strong>{formatCurrencyInt(kpiData.p_vivienda, '€/mes')}</strong>
                           </div>
                           <div className="v2-rent-secondary-card v2-rent-effort">
                             <div className="v2-rent-effort-head"><span className="v2-rent-eyebrow">Esfuerzo de alquiler</span><strong style={{ color: effortColor }}>{effort > 0 ? `${effort.toFixed(0)} %` : '—'}</strong></div>
                             <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(effort, 100)}%`, background: effortColor }} /><b style={{ left: '30%' }} /></div>
-                            <span className="v2-rent-effort-caption">{money(rent)} € de alquiler · {money(incomeMonthly)} € de renta neta media por hogar (Fuente: INE)</span>
+                            <span className="v2-rent-effort-caption">{formatCurrencyInt(rent, '€/mes')} de alquiler · {formatCurrencyInt(incomeMonthly, '€/mes')} de renta neta media por hogar (Fuente: INE)</span>
                             <button className="v2-rent-calc-toggle" type="button" onClick={() => setShowRentCalculator(value => !value)} aria-expanded={showRentCalculator}>
                               {showRentCalculator ? 'Cerrar cálculo' : 'Calcula con tu sueldo'} <span aria-hidden="true">{showRentCalculator ? '↑' : '→'}</span>
                             </button>
@@ -3050,34 +3066,29 @@ const MadridDashboardV2: React.FC = () => {
                   })()}
 
                   <div className="v2-kpi-card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <label>{activeProfile.id === 'inversion' ? (isNetYieldActive ? 'Rentabilidad neta anual' : 'Rentabilidad bruta anual') : 'Precio medio por m²'}</label>
-                        <InfoTooltip
-                          title={activeProfile.id === 'inversion' ? (isNetYieldActive ? 'Rentabilidad neta anual' : 'Rentabilidad bruta anual') : activeProfile.id === 'alquiler' ? 'Precio de alquiler por metro cuadrado' : 'Precio de venta por metro cuadrado'}
-                          description={activeProfile.id === 'inversion'
-                            ? (isNetYieldActive ? 'Rentabilidad neta anual tras deducir cuota de comunidad, IBI proporcional, seguro/mantenimiento y vacancia estimada.' : 'Compara los ingresos anuales estimados por alquiler con el precio de compra de la vivienda.')
-                            : activeProfile.id === 'alquiler'
-                              ? 'Media mensual del alquiler por cada metro cuadrado para la zona y el periodo seleccionados.'
-                              : 'Media del precio de venta por cada metro cuadrado para la zona y el periodo seleccionados.'}
-                          example={activeProfile.id === 'inversion'
-                            ? (isNetYieldActive ? 'Descuenta costes reales según las medias oficiales de Madrid.' : 'El cálculo anualiza el alquiler y lo compara con el precio de compra; no descuenta gastos ni financiación.')
-                            : activeProfile.id === 'alquiler'
-                              ? 'A 20 €/m²/mes, una vivienda de 80 m² equivaldría a 1.600 €/mes.'
-                              : 'A 3.000 €/m², una vivienda de 80 m² equivaldría a 240.000 € antes de gastos.'}
-                          ruleOfThumb={activeProfile.id === 'inversion'
-                            ? 'Usa el conmutador de Rentabilidad Neta para calibrar con tus propios costes.'
-                            : 'Comparar el precio por m² ayuda a comparar zonas con viviendas de distinto tamaño.'}
-                        />
-                      </div>
-                      {(kpiData.is_prediction || isProjectionPeriod) && Number(kpiData.p_m2) > 0 && (
-                        <EstadoBadge status="estimate" />
-                      )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <label>{activeProfile.id === 'inversion' ? (isNetYieldActive ? 'Rentabilidad neta anual' : 'Rentabilidad bruta anual') : 'Precio medio por m²'}</label>
+                      <InfoTooltip
+                        title={activeProfile.id === 'inversion' ? (isNetYieldActive ? 'Rentabilidad neta anual' : 'Rentabilidad bruta anual') : activeProfile.id === 'alquiler' ? 'Precio de alquiler por metro cuadrado' : 'Precio de venta por metro cuadrado'}
+                        description={activeProfile.id === 'inversion'
+                          ? (isNetYieldActive ? 'Rentabilidad neta anual tras deducir cuota de comunidad, IBI proporcional, seguro/mantenimiento y vacancia estimada.' : 'Compara los ingresos anuales estimados por alquiler con el precio de compra de la vivienda.')
+                          : activeProfile.id === 'alquiler'
+                            ? 'Media mensual del alquiler por cada metro cuadrado para la zona y el periodo seleccionados.'
+                            : 'Media del precio de venta por cada metro cuadrado para la zona y el periodo seleccionados.'}
+                        example={activeProfile.id === 'inversion'
+                          ? (isNetYieldActive ? 'Descuenta costes reales según las medias oficiales de Madrid.' : 'El cálculo anualiza el alquiler y lo compara con el precio de compra; no descuenta gastos ni financiación.')
+                          : activeProfile.id === 'alquiler'
+                            ? 'A 20 €/m²/mes, una vivienda de 80 m² equivaldría a 1.600 €/mes.'
+                            : 'A 3.000 €/m², una vivienda de 80 m² equivaldría a 240.000 € antes de gastos.'}
+                        ruleOfThumb={activeProfile.id === 'inversion'
+                          ? 'Usa el conmutador de Rentabilidad Neta para calibrar con tus propios costes.'
+                          : 'Comparar el precio por m² ayuda a comparar zonas con viviendas de distinto tamaño.'}
+                      />
                     </div>
                     <div className="v2-val">
                       {activeProfile.id === 'inversion'
-                        ? (Number.isFinite(Number(kpiData.p_m2)) && Number(kpiData.p_m2) > 0 ? (((isNetYieldActive && netYieldValue !== null ? netYieldValue : Number(kpiData.p_m2)) * 100).toFixed(2) + '%') : '—')
-                        : (Number.isFinite(Number(kpiData.p_m2)) && Number(kpiData.p_m2) > 0 ? new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(kpiData.p_m2)) + ' €/m²' : '—')}
+                        ? (Number.isFinite(Number(kpiData.p_m2)) && Number(kpiData.p_m2) > 0 ? formatSpanishPercentage(isNetYieldActive && netYieldValue !== null ? netYieldValue : Number(kpiData.p_m2) * 100, 2, false) : '—')
+                        : formatCurrencyDec(kpiData.p_m2, 2, '€/m²')}
                     </div>
                     {(kpiData.is_prediction || isProjectionPeriod) && Number(kpiData.p_m2) > 0 && (
                       <ConfidenceIntervalBadge
@@ -3101,42 +3112,34 @@ const MadridDashboardV2: React.FC = () => {
                   )}
 
                   <div className="v2-kpi-card">
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <label>{activeProfile.id === 'inversion' ? 'Precio de inversión' : activeProfile.id === 'alquiler' ? 'Alquiler medio' : 'Precio medio de vivienda'}</label>
-                        <InfoTooltip
-                          title={activeProfile.id === 'inversion' ? 'Precio de inversión' : activeProfile.id === 'alquiler' ? 'Alquiler medio mensual' : 'Precio medio de vivienda'}
-                          description={activeProfile.id === 'inversion'
-                            ? 'Importe medio de compra de la zona, calculado con el precio de venta y la superficie media registrada.'
-                            : `Importe medio ${activeProfile.id === 'alquiler' ? 'mensual de alquiler' : 'de venta'} de la zona, calculado con el precio por m² y la superficie media registrada.`}
-                          example={activeProfile.id === 'alquiler'
-                            ? 'Es un valor mensual calculado con la superficie media de la zona; no representa el precio de un anuncio concreto.'
-                            : 'Es un valor calculado con la superficie media de la zona; no representa el precio de un inmueble concreto.'}
-                          ruleOfThumb="El ámbito y el periodo aparecen junto a las métricas."
-                        />
-                      </div>
-                      {Number(kpiData.p_vivienda) > 0 && <EstadoBadge status={kpiData.is_prediction || isProjectionPeriod ? 'estimate' : 'real'} />}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <label>{activeProfile.id === 'inversion' ? 'Precio de inversión' : activeProfile.id === 'alquiler' ? 'Alquiler medio' : 'Precio medio de vivienda'}</label>
+                      <InfoTooltip
+                        title={activeProfile.id === 'inversion' ? 'Precio de inversión' : activeProfile.id === 'alquiler' ? 'Alquiler medio mensual' : 'Precio medio de vivienda'}
+                        description={activeProfile.id === 'inversion'
+                          ? 'Importe medio de compra de la zona, calculado con el precio de venta y la superficie media registrada.'
+                          : `Importe medio ${activeProfile.id === 'alquiler' ? 'mensual de alquiler' : 'de venta'} de la zona, calculado con el precio por m² y la superficie media registrada.`}
+                        example={activeProfile.id === 'alquiler'
+                          ? 'Es un valor mensual calculado con la superficie media de la zona; no representa el precio de un anuncio concreto.'
+                          : 'Es un valor calculado con la superficie media de la zona; no representa el precio de un inmueble concreto.'}
+                        ruleOfThumb="El ámbito y el periodo aparecen junto a las métricas."
+                      />
                     </div>
                     <div className="v2-val">
-                      {Number.isFinite(Number(kpiData.p_vivienda)) && Number(kpiData.p_vivienda) > 0
-                        ? `${new Intl.NumberFormat('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(Number(kpiData.p_vivienda))} ${activeProfile.id === 'alquiler' ? '€/mes' : '€'}`
-                        : '—'}
+                      {formatCurrencyInt(kpiData.p_vivienda, activeProfile.id === 'alquiler' ? '€/mes' : '€')}
                     </div>
                   </div>
 
                   {activeProfile.id === 'inversion' ? (
                     <div className="v2-kpi-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <label>LTV Estimado (Loan-to-Value)</label>
-                          <InfoTooltip
-                            title="LTV (Loan-to-Value) / Financiación"
-                            description="Indica qué porcentaje del valor total del inmueble financias mediante hipoteca y cuánto aportas de tus propios ahorros."
-                            example="Un LTV del 70% significa que el banco aporta el 70% del precio y tú pagas el 30% restante con ahorros."
-                            ruleOfThumb="Para inversión los bancos suelen financiar el 60%-70%; para vivienda habitual hasta el 80%."
-                          />
-                        </div>
-                        <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <label>LTV Estimado (Loan-to-Value)</label>
+                        <InfoTooltip
+                          title="LTV (Loan-to-Value) / Financiación"
+                          description="Indica qué porcentaje del valor total del inmueble financias mediante hipoteca y cuánto aportas de tus propios ahorros."
+                          example="Un LTV del 70% significa que el banco aporta el 70% del precio y tú pagas el 30% restante con ahorros."
+                          ruleOfThumb="Para inversión los bancos suelen financiar el 60%-70%; para vivienda habitual hasta el 80%."
+                        />
                       </div>
 
                       <div className="v2-val" style={{ fontSize: '24px', margin: '4px 0 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -3248,17 +3251,14 @@ const MadridDashboardV2: React.FC = () => {
                     </div>
                   ) : (
                     <div className="v2-kpi-card">
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <label>Estado Mercado</label>
-                          <InfoTooltip
-                            title="Estado del Mercado Local"
-                            description="Indica la fase del ciclo inmobiliario según las operaciones recientes de compra y alquiler."
-                            example="Crecimiento (+): Precios al alza de forma sostenida. Ajuste (-): Moderación o descenso temporal de precios."
-                            ruleOfThumb="En 'Crecimiento', los precios tienden a subir si esperas; en 'Ajuste', hay más margen para negociar."
-                          />
-                        </div>
-                        <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <label>Estado Mercado</label>
+                        <InfoTooltip
+                          title="Estado del Mercado Local"
+                          description="Indica la fase del ciclo inmobiliario según las operaciones recientes de compra y alquiler."
+                          example="Crecimiento (+): Precios al alza de forma sostenida. Ajuste (-): Moderación o descenso temporal de precios."
+                          ruleOfThumb="En 'Crecimiento', los precios tienden a subir si esperas; en 'Ajuste', hay más margen para negociar."
+                        />
                       </div>
                       <div className="v2-val" style={{ fontSize: '24px' }}>
                         {kpiData.estado_mercado} {kpiData.estado_mercado === 'Crecimiento' ? '(+)' : kpiData.estado_mercado === 'Ajuste' ? '(-)' : ''}
@@ -3269,42 +3269,32 @@ const MadridDashboardV2: React.FC = () => {
                   {activeProfile.id !== 'inversion' ? (
                     <>
                       <div className="v2-kpi-card">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <label>Var. Mensual</label>
-                            <InfoTooltip
-                              title="Variación Mensual"
-                              description="Porcentaje de subida o bajada del precio respecto al mes inmediatamente anterior."
-                              example="Un +1.2% indica que los precios subieron un 1.2% en los últimos 30 días respecto al mes previo."
-                              ruleOfThumb="Permite detectar aceleraciones o cambios rápidos de tendencia en el corto plazo."
-                            />
-                          </div>
-                          <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <label>Var. Mensual</label>
+                          <InfoTooltip
+                            title="Variación Mensual"
+                            description="Porcentaje de subida o bajada del precio respecto al mes inmediatamente anterior."
+                            example="Un +1.2% indica que los precios subieron un 1.2% en los últimos 30 días respecto al mes previo."
+                            ruleOfThumb="Permite detectar aceleraciones o cambios rápidos de tendencia en el corto plazo."
+                          />
                         </div>
                         <div className={`v2-val accent ${Number(kpiData.v_mes) < 0 ? 'negative' : ''}`}>
-                          {Number.isFinite(Number(kpiData.v_mes)) && kpiData.v_mes !== undefined && kpiData.v_mes !== null
-                            ? `${Number(kpiData.v_mes) > 0 ? '+' : ''}${Number(kpiData.v_mes).toFixed(1)}%`
-                            : '—'}
+                          {formatSpanishPercentage(kpiData.v_mes, 1, true)}
                         </div>
                       </div>
 
                       <div className="v2-kpi-card">
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <label>Var. Anual</label>
-                            <InfoTooltip
-                              title="Variación Anual (12 Meses)"
-                              description="La evolución acumulada del precio en el último año completo respecto al mismo mes del año anterior."
-                              example="Un +8.5% anual significa que una vivienda que costaba 200.000€ hace un año ahora se sitúa en torno a 217.000€."
-                              ruleOfThumb="Es el indicador más robusto para medir la tendencia real de fondo y la revalorización patrimonial."
-                            />
-                          </div>
-                          <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <label>Var. Anual</label>
+                          <InfoTooltip
+                            title="Variación Anual (12 Meses)"
+                            description="La evolución acumulada del precio en el último año completo respecto al mismo mes del año anterior."
+                            example="Un +8.5% anual significa que una vivienda que costaba 200.000€ hace un año ahora se sitúa en torno a 217.000€."
+                            ruleOfThumb="Es el indicador más robusto para medir la tendencia real de fondo y la revalorización patrimonial."
+                          />
                         </div>
                         <div className={`v2-val accent ${Number(kpiData.v_anual) < 0 ? 'negative' : ''}`}>
-                          {Number.isFinite(Number(kpiData.v_anual)) && kpiData.v_anual !== undefined && kpiData.v_anual !== null
-                            ? `${Number(kpiData.v_anual) > 0 ? '+' : ''}${Number(kpiData.v_anual).toFixed(1)}%`
-                            : '—'}
+                          {formatSpanishPercentage(kpiData.v_anual, 1, true)}
                         </div>
                       </div>
                     </>
@@ -3312,17 +3302,14 @@ const MadridDashboardV2: React.FC = () => {
                     const amortizacionAnios = kpiData.p_m2 > 0 ? (1 / kpiData.p_m2) : 0;
                     return (
                       <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: activeProfile.color, letterSpacing: '0.5px' }}>AMORTIZACIÓN</label>
-                            <InfoTooltip
-                              title="Años de Amortización (GRM)"
-                              description="Número de años completos de alquiler íntegro que se necesitan para recuperar el 100% de la inversión de compra del inmueble."
-                              example="Si el GRM es de 18 años, significa que con 18 años de rentas de alquiler se cubre el precio total de la compra."
-                              ruleOfThumb="Cuanto menor sea el número de años, más rápida es la amortización y más atractiva la inversión (lo ideal es por debajo de 20 años)."
-                            />
-                          </div>
-                          <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <label style={{ fontSize: '10px', fontWeight: 'bold', color: activeProfile.color, letterSpacing: '0.5px' }}>AMORTIZACIÓN</label>
+                          <InfoTooltip
+                            title="Años de Amortización (GRM)"
+                            description="Número de años completos de alquiler íntegro que se necesitan para recuperar el 100% de la inversión de compra del inmueble."
+                            example="Si el GRM es de 18 años, significa que con 18 años de rentas de alquiler se cubre el precio total de la compra."
+                            ruleOfThumb="Cuanto menor sea el número de años, más rápida es la amortización y más atractiva la inversión (lo ideal es por debajo de 20 años)."
+                          />
                         </div>
                         <div className="v2-val" style={{ color: activeProfile.color }}>
                           {amortizacionAnios > 0 ? amortizacionAnios.toFixed(1) + ' años' : '-'}
@@ -3392,29 +3379,26 @@ const MadridDashboardV2: React.FC = () => {
 
                     return (
                       <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--azul-linea)', letterSpacing: '0.5px' }}>
-                              PODER ADQUISITIVO {selectedBarrio !== 'Todos' ? 'DEL BARRIO' : (selectedDistrict !== 'Todos' ? 'DEL DISTRITO' : 'DE MADRID')}
-                            </label>
-                            <InfoTooltip
-                              title="Poder Adquisitivo y Años de Renta"
-                              description="Mide cuántos años de ingresos anuales brutos íntegros necesita una familia residente típica de esta zona para comprar una vivienda media."
-                              example="Si un piso medio cuesta 350.000€ y la renta media del hogar en la zona es de 50.000€/año, se necesitan 7 años íntegros de sueldo."
-                              ruleOfThumb="Menos de 5 años se considera asequible; entre 5 y 8 años moderado; más de 8 años supone un esfuerzo elevado."
-                            />
-                          </div>
-                          <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--azul-linea)', letterSpacing: '0.5px' }}>
+                            PODER ADQUISITIVO {selectedBarrio !== 'Todos' ? 'DEL BARRIO' : (selectedDistrict !== 'Todos' ? 'DEL DISTRITO' : 'DE MADRID')}
+                          </label>
+                          <InfoTooltip
+                            title="Poder Adquisitivo y Años de Renta"
+                            description="Mide cuántos años de ingresos anuales brutos íntegros necesita una familia residente típica de esta zona para comprar una vivienda media."
+                            example="Si un piso medio cuesta 350.000€ y la renta media del hogar en la zona es de 50.000€/año, se necesitan 7 años íntegros de sueldo."
+                            ruleOfThumb="Menos de 5 años se considera asequible; entre 5 y 8 años moderado; más de 8 años supone un esfuerzo elevado."
+                          />
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          Precio medio vivienda: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(precioMedio)}€</strong>
+                          Precio medio vivienda: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{formatCurrencyInt(precioMedio, '€')}</strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          Renta media {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(rentaAnual)}€/año</strong>
+                          Renta media {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{formatCurrencyInt(rentaAnual, '€/año')}</strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           <span>Años de renta media:</span>
-                          <strong style={{ fontSize: '18px', color: '#00F0FF', fontWeight: '800' }}>{aniosRenta > 0 ? aniosRenta.toFixed(1) : '-'} años</strong>
+                          <strong style={{ fontSize: '18px', color: '#00F0FF', fontWeight: '800' }}>{aniosRenta > 0 ? aniosRenta.toFixed(1).replace('.', ',') : '—'} años</strong>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '600', color: statusColor }}>
                           <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: statusColor }} />
@@ -3477,9 +3461,9 @@ const MadridDashboardV2: React.FC = () => {
                   })()}
 
                   {activeProfile.id === 'alquiler' && (() => {
-                    const alquiler = kpiData.p_vivienda || 0;
+                    const alquiler = Math.round(kpiData.p_vivienda || 0);
                     const rentaMediaAnual = kpiData.renta_media || 0;
-                    const rentaMediaMensual = rentaMediaAnual > 0 ? rentaMediaAnual / 12 : 0;
+                    const rentaMediaMensual = rentaMediaAnual > 0 ? Math.round(rentaMediaAnual / 12) : 0;
                     const dedicar = rentaMediaMensual > 0 ? (alquiler / rentaMediaMensual) * 100 : 0;
 
                     const parsedSalary = parseFloat(userRentSalary);
@@ -3490,23 +3474,20 @@ const MadridDashboardV2: React.FC = () => {
 
                     return (
                       <div className="v2-kpi-card v2-effort-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: '#fbbf24', letterSpacing: '0.5px' }}>ESFUERZO DE ALQUILER</label>
-                            <InfoTooltip
-                              title="Tasa de Esfuerzo Financiero en Alquiler"
-                              description="Porcentaje del presupuesto mensual que un hogar o inquilino destina al pago del alquiler respecto a su renta neta."
-                              example="Para un alquiler de 1.200 € y unos ingresos netos de 3.000 €, el esfuerzo es del 40 %."
-                              ruleOfThumb="El Banco de España recomienda no superar el 30 % - 35 % de los ingresos netos. Superar el 40 % se considera sobreesfuerzo crítico."
-                            />
-                          </div>
-                          <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <label style={{ fontSize: '10px', fontWeight: 'bold', color: '#fbbf24', letterSpacing: '0.5px' }}>ESFUERZO DE ALQUILER</label>
+                          <InfoTooltip
+                            title="Tasa de Esfuerzo Financiero en Alquiler"
+                            description="Porcentaje del presupuesto mensual que un hogar o inquilino destina al pago del alquiler respecto a su renta neta."
+                            example="Para un alquiler de 1.200 € y unos ingresos netos de 3.000 €, el esfuerzo es del 40 %."
+                            ruleOfThumb="El Banco de España recomienda no superar el 30 % - 35 % de los ingresos netos. Superar el 40 % se considera sobreesfuerzo crítico."
+                          />
                         </div>
 
                         <div style={{ fontSize: '11.5px', color: '#BACCD6', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                          <span>Renta neta media hogar:</span>
+                          <span>Renta neta media hogar <span style={{ fontSize: '10px', color: '#00F0FF', fontWeight: 600 }}>(dato INE)</span>:</span>
                           <strong style={{ fontSize: '13px', color: '#FFFFFF' }}>
-                            {rentaMediaMensual > 0 ? `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(rentaMediaMensual)} €/mes` : '—'}
+                            {rentaMediaMensual > 0 ? formatCurrencyInt(rentaMediaMensual, '€/mes') : '—'}
                           </strong>
                         </div>
                         <span style={{ fontSize: '10px', color: '#8fa8be', lineHeight: '1.25', marginTop: '-3px' }}>
@@ -3611,26 +3592,23 @@ const MadridDashboardV2: React.FC = () => {
 
                     return (
                       <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--azul-linea)', letterSpacing: '0.5px' }}>OPORTUNIDAD DE INVERSIÓN</label>
-                            <InfoTooltip
-                              title="Oportunidad y Rentabilidad de Inversión"
-                              description="Combina el rendimiento neto del alquiler con el volumen anual de transacciones para evaluar qué tan rápido y rentable es invertir aquí."
-                              example="Una rentabilidad neta del 4,5% con alta liquidez permite ingresar rentas estables con facilidad para vender si necesitas recuperar el capital."
-                              ruleOfThumb="A mayor liquidez (más de 300 transacciones/año), menor riesgo de quedarte atrapado con el inmueble en caso de querer venderlo."
-                            />
-                          </div>
-                          <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--azul-linea)', letterSpacing: '0.5px' }}>OPORTUNIDAD DE INVERSIÓN</label>
+                          <InfoTooltip
+                            title="Oportunidad y Rentabilidad de Inversión"
+                            description="Combina el rendimiento neto del alquiler con el volumen anual de transacciones para evaluar qué tan rápido y rentable es invertir aquí."
+                            example="Una rentabilidad neta del 4,5% con alta liquidez permite ingresar rentas estables con facilidad para vender si necesitas recuperar el capital."
+                            ruleOfThumb="A mayor liquidez (más de 300 transacciones/año), menor riesgo de quedarte atrapado con el inmueble en caso de querer venderlo."
+                          />
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          GRM {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ fontSize: '15px', color: '#FFFFFF', display: 'block', marginTop: '2px' }}>{grm > 0 ? grm.toFixed(1) : '-'} años <span style={{ fontSize: '10px', fontWeight: 'normal', color: '#00F0FF' }}>(recuperación)</span></strong>
+                          GRM {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ fontSize: '15px', color: '#FFFFFF', display: 'block', marginTop: '2px' }}>{grm > 0 ? grm.toFixed(1).replace('.', ',') : '—'} años <span style={{ fontSize: '10px', fontWeight: 'normal', color: '#00F0FF' }}>(recuperación)</span></strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          Rentabilidad neta esperada: <strong style={{ fontSize: '16px', display: 'block', color: '#00F0FF', fontWeight: '800', marginTop: '2px' }}>{roiNeto > 0 ? roiNeto.toFixed(1) : '-'}%/año</strong>
+                          Rentabilidad neta esperada: <strong style={{ fontSize: '16px', display: 'block', color: '#00F0FF', fontWeight: '800', marginTop: '2px' }}>{roiNeto > 0 ? `${roiNeto.toFixed(1).replace('.', ',')} %/año` : '—'}</strong>
                         </div>
                         <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          Volumen de transacciones: <strong style={{ fontSize: '15px', color: '#FFFFFF' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(transacciones)}/año</strong>
+                          Volumen de transacciones: <strong style={{ fontSize: '15px', color: '#FFFFFF' }}>{formatCurrencyInt(transacciones, 'trans./año')}</strong>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '600', color: liquidezColor }}>
                           <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: liquidezColor }} />
@@ -3729,20 +3707,17 @@ const MadridDashboardV2: React.FC = () => {
                     return (
                       <>
                         <div className="v2-kpi-card">
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <label>¿Cuánto tardará en venderse?</label>
-                              <InfoTooltip
-                                title="Velocidad Media de Venta"
-                                description="Tiempo estimado promedio en meses que tarda una vivienda en cerrarse y firmarse ante notario en este distrito o barrio."
-                                example="Si marca 1.5 meses, la vivienda se vende a buen ritmo. Si supera los 3 meses, la demanda es más selectiva o pausada."
-                                ruleOfThumb="Menos de 2 meses indica un mercado rápido con compradores activos; más de 3 meses exige fijar un precio muy competitivo."
-                              />
-                            </div>
-                            <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label>¿Cuánto tardará en venderse?</label>
+                            <InfoTooltip
+                              title="Velocidad Media de Venta"
+                              description="Tiempo estimado promedio en meses que tarda una vivienda en cerrarse y firmarse ante notario en este distrito o barrio."
+                              example="Si marca 1.5 meses, la vivienda se vende a buen ritmo. Si supera los 3 meses, la demanda es más selectiva o pausada."
+                              ruleOfThumb="Menos de 2 meses indica un mercado rápido con compradores activos; más de 3 meses exige fijar un precio muy competitivo."
+                            />
                           </div>
                           <div className="v2-val" style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                            <span>{velocity > 0 ? (velocity % 1 === 0 ? velocity.toFixed(0) : velocity.toFixed(1)) + ' ' + (velocity === 1 ? 'mes' : 'meses') : '-'}</span>
+                            <span>{velocity > 0 ? (velocity % 1 === 0 ? velocity.toFixed(0) : velocity.toFixed(1).replace('.', ',')) + ' ' + (velocity === 1 ? 'mes' : 'meses') : '—'}</span>
                             <span style={{ fontSize: '12px', fontWeight: '600', color: velocityColor }}>
                               ({velocityLabel})
                             </span>
@@ -3753,20 +3728,17 @@ const MadridDashboardV2: React.FC = () => {
                         </div>
 
                         <div className="v2-kpi-card">
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <label>¿Hay demanda en la zona?</label>
-                              <InfoTooltip
-                                title="Actividad y demanda local"
-                                description="Número de operaciones de compraventa cerradas en el último año según los registros disponibles. Es un indicador de actividad, no un plazo garantizado de venta."
-                                example="Más de 300 transacciones anuales indican un mercado más activo; no significa que cualquier vivienda vaya a venderse en un plazo concreto."
-                                ruleOfThumb="Usa esta cifra junto al precio y a la demanda de la zona; no la interpretes como una promesa de velocidad."
-                              />
-                            </div>
-                            <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label>¿Hay demanda en la zona?</label>
+                            <InfoTooltip
+                              title="Actividad y demanda local"
+                              description="Número de operaciones de compraventa cerradas en el último año según los registros disponibles. Es un indicador de actividad, no un plazo garantizado de venta."
+                              example="Más de 300 transacciones anuales indican un mercado más activo; no significa que cualquier vivienda vaya a venderse en un plazo concreto."
+                              ruleOfThumb="Usa esta cifra junto al precio y a la demanda de la zona; no la interpretes como una promesa de velocidad."
+                            />
                           </div>
                           <div className="v2-val" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span>{transacciones > 0 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(transacciones) + ' trans./año' : '-'}</span>
+                            <span>{transacciones > 0 ? `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(transacciones)} trans./año` : '—'}</span>
                             <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px', fontWeight: '700', color: demandColor }}>
                               <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: demandColor }} />
                               {demandText}
@@ -3778,20 +3750,17 @@ const MadridDashboardV2: React.FC = () => {
                         </div>
 
                         <div className="v2-kpi-card">
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <label>Potencial de ganancia (6 meses)</label>
-                              <InfoTooltip
-                                title="Potencial de Ganancia (6 Meses)"
-                                description="Estimación del incremento de valor que podría experimentar el inmueble si decides esperar un semestre antes de ponerlo a la venta."
-                                example="Si el potencial es de +2.5% y tu vivienda vale 300.000€, posponer la venta podría aportarte unos 7.500€ adicionales de margen."
-                                ruleOfThumb="En fases alcistas, posponer la venta puede aumentar el margen; en fases de ajuste, vender pronto protege tu beneficio."
-                              />
-                            </div>
-                            <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label>Potencial de ganancia (6 meses)</label>
+                            <InfoTooltip
+                              title="Potencial de Ganancia (6 Meses)"
+                              description="Estimación del incremento de valor que podría experimentar el inmueble si decides esperar un semestre antes de ponerlo a la venta."
+                              example="Si el potencial es de +2.5% y tu vivienda vale 300.000€, posponer la venta podría aportarte unos 7.500€ adicionales de margen."
+                              ruleOfThumb="En fases alcistas, posponer la venta puede aumentar el margen; en fases de ajuste, vender pronto protege tu beneficio."
+                            />
                           </div>
                           <div className="v2-val" style={{ color: 'var(--azul-linea)' }}>
-                            {appRate > 0 ? `+${gain6m}%` : appRate < 0 ? `${gain6m}%` : '0.0%'}
+                            {formatSpanishPercentage(appRate / 2, 1, true)}
                           </div>
                           <div style={{ fontSize: '10px', color: 'var(--azul-linea)', marginTop: '2px' }}>
                             más de precio si esperas
