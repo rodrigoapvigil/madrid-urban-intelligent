@@ -5404,6 +5404,7 @@ body.v2-fullscreen-open footer { display: none !important; }
     width: 100%;
     max-width: 1920px;
     padding-inline: clamp(20px, 2.2vw, 48px);
+    padding-top: 20px;
   }
   .v2-root .v2-grid-main {
     grid-template-columns: minmax(280px, 330px) minmax(0, 1fr);

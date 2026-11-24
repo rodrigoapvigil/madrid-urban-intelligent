@@ -2793,6 +2793,7 @@ const MadridDashboardV2: React.FC = () => {
               hideMonthArrows
               keyboardMonthNavigation
               showYearShortcut={false}
+              isCompact={true}
               onOpenMethodology={() => setShowMethodologyDrawer(true)}
             />
           </div>

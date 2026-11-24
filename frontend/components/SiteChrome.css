@@ -2,7 +2,7 @@
    SITE HEADER UNIFICADO (Idéntico a MadridLanding en todas las páginas)
    ========================================================================== */
 :root {
-  --header-h: 88px;
+  --header-h: 100px;
   --page-max: 1920px;
   --page-gutter: clamp(24px, 3vw, 48px);
   --page-content-max: calc(var(--page-max) - 2 * var(--page-gutter));
@@ -476,6 +476,16 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+@media (min-width: 901px) {
+  .site-header .mi-nav--profiles,
+  .mi-header .mi-nav--profiles {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+  }
 }
 
 .mi-nav__profile-pill-group {
@@ -1143,41 +1153,43 @@ main.editorial-page:not(.editorial-page--methodology) { padding-bottom: 40px !im
 }
 
 /* ==========================================================================
-   BOTÓN SELECTOR DE MES CON ESTADO INTEGRADO (Estilo Luminous AUROS Premium)
+   BOTÓN SELECTOR DE MES CON ESTADO INTEGRADO (Estilo Dark Aero Glass Premium)
    ========================================================================== */
 .v2-root .v2-period-trigger,
 .v2-period-trigger {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  height: 44px !important;
-  min-height: 44px !important;
-  padding: 4px 16px !important;
-  border: 1px solid rgba(255, 255, 255, 0.9) !important;
-  border-radius: 10px !important;
-  background: linear-gradient(135deg, #d2fcfb 0%, #ebf5fc 48%, #fcd9ff 100%) !important;
-  color: #031527 !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 16px !important;
+  border: 1px solid rgba(0, 240, 255, 0.45) !important;
+  border-radius: 12px !important;
+  background: rgba(8, 28, 52, 0.9) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  color: #FFFFFF !important;
   cursor: pointer;
   box-sizing: border-box;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
-  min-width: 158px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.12), 0 0 16px rgba(210, 252, 251, 0.35) !important;
+  min-width: auto !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25), 0 0 14px rgba(0, 240, 255, 0.15) !important;
 }
 
 .v2-root .v2-period-trigger:hover,
 .v2-period-trigger:hover {
-  background: linear-gradient(135deg, #d8fdfc 0%, #f0f7fe 48%, #fde0ff 100%) !important;
-  border-color: #ffffff !important;
-  filter: brightness(1.02);
+  background: rgba(14, 42, 75, 0.95) !important;
+  border-color: #00F0FF !important;
+  filter: brightness(1.05);
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.16), 0 0 24px rgba(210, 252, 251, 0.55) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3), 0 0 20px rgba(0, 240, 255, 0.35) !important;
 }
 
 .v2-root .v2-period-trigger:active,
 .v2-period-trigger:active {
   transform: translateY(0);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12), 0 0 10px rgba(210, 252, 251, 0.3) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2) !important;
 }
 
 .v2-root .v2-period-trigger.is-open,
@@ -1186,12 +1198,12 @@ main.editorial-page:not(.editorial-page--methodology) { padding-bottom: 40px !im
   box-shadow: 0 0 0 2px #00e5ff, 0 4px 20px rgba(0, 229, 255, 0.35) !important;
 }
 
-/* Modo compacto: scrollY > 8px -> alto 38px, fila única */
+/* Modo compacto permanente */
 .v2-root .v2-period-trigger.is-compact,
 .v2-period-trigger.is-compact {
-  height: 38px !important;
-  min-height: 38px !important;
-  padding: 0 14px !important;
+  height: 40px !important;
+  min-height: 40px !important;
+  padding: 0 16px !important;
   min-width: auto !important;
 }
 
@@ -1212,18 +1224,13 @@ main.editorial-page:not(.editorial-page--methodology) { padding-bottom: 40px !im
   width: 100%;
 }
 
-.v2-period-trigger-month {
-  font-size: 13.5px;
-  font-weight: 650;
-  color: #031527 !important;
+.v2-period-trigger-month,
+.v2-period-trigger.is-compact .v2-period-trigger-month {
+  font-size: 13.5px !important;
+  font-weight: 650 !important;
+  color: #FFFFFF !important;
   letter-spacing: -0.01em;
   white-space: nowrap;
-}
-
-.v2-period-trigger.is-compact .v2-period-trigger-month {
-  font-size: 13px;
-  font-weight: 600;
-  color: #031527 !important;
 }
 
 .v2-period-trigger-row-bottom {
@@ -1249,13 +1256,13 @@ main.editorial-page:not(.editorial-page--methodology) { padding-bottom: 40px !im
 }
 
 .v2-period-dot.is-projection {
-  background-color: #d97706 !important;
-  box-shadow: 0 0 4px rgba(217, 119, 6, 0.6) !important;
+  background-color: #FFB800 !important;
+  box-shadow: 0 0 6px rgba(255, 184, 0, 0.8) !important;
 }
 
 .v2-period-dot.is-official {
-  background-color: #059669 !important;
-  box-shadow: 0 0 4px rgba(5, 150, 105, 0.6) !important;
+  background-color: #00F0FF !important;
+  box-shadow: 0 0 6px rgba(0, 240, 255, 0.8) !important;
 }
 
 .v2-period-status-text {
@@ -1266,22 +1273,24 @@ main.editorial-page:not(.editorial-page--methodology) { padding-bottom: 40px !im
 }
 
 .v2-period-status-text.is-projection {
-  color: #9a3412 !important;
+  color: #FFB800 !important;
 }
 
 .v2-period-status-text.is-official {
-  color: #065f46 !important;
+  color: #00F0FF !important;
 }
 
 .v2-period-chevron {
   flex-shrink: 0;
-  color: #0c2742 !important;
+  color: #00F0FF !important;
+  stroke: #00F0FF !important;
   transition: transform 0.2s ease, color 0.2s ease;
 }
 
 .v2-period-trigger:hover .v2-period-chevron,
 .v2-period-trigger.is-open .v2-period-chevron {
-  color: #031527 !important;
+  color: #33F3FF !important;
+  stroke: #33F3FF !important;
 }
 
 .v2-period-trigger.is-open .v2-period-chevron {

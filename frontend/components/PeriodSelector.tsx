@@ -74,7 +74,7 @@ export default function PeriodSelector({
   const index = MONTHS.indexOf(month);
   const latestMonth = MONTHS.indexOf(latestReal.month);
   const estimated = Number(year) > Number(latestReal.year) || (year === latestReal.year && index > latestMonth);
-  const compactMode = isCompact !== undefined ? isCompact : internalScrolled;
+  const compactMode = isCompact !== undefined ? isCompact : true;
 
   const move = (delta: number) => {
     let y = Number(year);

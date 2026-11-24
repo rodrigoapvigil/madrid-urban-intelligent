@@ -42,12 +42,12 @@ export function SiteHeader({
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
-  // Sync scroll state (> 8px) to set --header-h (88px at rest, 64px compact)
+  // Sync scroll state (> 8px) to set --header-h (100px at rest, 84px compact)
   useEffect(() => {
     const handleScroll = () => {
       const scrolled = window.scrollY > 8;
       setIsScrolled(scrolled);
-      document.documentElement.style.setProperty('--header-h', scrolled ? '64px' : '88px');
+      document.documentElement.style.setProperty('--header-h', scrolled ? '84px' : '100px');
     };
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
