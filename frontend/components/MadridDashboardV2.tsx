@@ -5389,6 +5389,7 @@ const MadridDashboardV2: React.FC = () => {
       <MethodologyDrawer
         isOpen={showMethodologyDrawer}
         onClose={() => setShowMethodologyDrawer(false)}
+        latestOfficialPeriod={latestAvailablePeriod}
       />
 
       <SiteFooter />

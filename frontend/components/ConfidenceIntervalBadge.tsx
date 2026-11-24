@@ -41,7 +41,7 @@ export const ConfidenceIntervalBadge: React.FC<ConfidenceIntervalBadgeProps> = (
         className="v2-confidence-badge"
         tabIndex={0}
         role="note"
-        aria-label={`Rango probable: ${lowVal} a ${highVal} ${unit}. Intervalo de confianza del ${confidencePercent}%`}
+        aria-label={`Rango probable: ${lowVal} a ${highVal} ${unit}. Rango de incertidumbre del ${confidencePercent} % (se amplía con el horizonte de proyección)`}
         style={{ cursor: 'pointer' }}
       >
         <span
@@ -83,7 +83,7 @@ export const ConfidenceIntervalBadge: React.FC<ConfidenceIntervalBadgeProps> = (
       {showTooltip && (
         <div className="v2-confidence-tooltip" role="tooltip">
           <div className="v2-confidence-tooltip__header">
-            <strong>Intervalo de confianza ({confidencePercent} %)</strong>
+            <strong>Rango de incertidumbre ({confidencePercent} %)</strong>
             <span>Distribución Gaussiana</span>
           </div>
 
@@ -128,7 +128,7 @@ export const ConfidenceIntervalBadge: React.FC<ConfidenceIntervalBadgeProps> = (
           </div>
 
           <p className="v2-confidence-tooltip__footer">
-            Intervalo de confianza del {confidencePercent} %: el modelo estadístico estima que el {confidencePercent} % de las observaciones en condiciones análogas quedan comprendidas en este rango.
+            Rango de incertidumbre del {confidencePercent} % (se amplía con el horizonte de proyección): el modelo estadístico estima que las observaciones en condiciones análogas quedan comprendidas en este rango.
           </p>
         </div>
       )}

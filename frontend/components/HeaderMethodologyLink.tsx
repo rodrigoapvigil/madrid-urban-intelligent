@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState, useRef, useEffect } from 'react';
-import { X, ExternalLink, HelpCircle } from 'lucide-react';
+import { X, ChevronRight, HelpCircle } from 'lucide-react';
+import { METHODOLOGY_SOURCES } from './MethodologyDrawer';
 
 interface HeaderMethodologyLinkProps {
   onOpenFullMethodology?: () => void;
@@ -90,7 +91,7 @@ export const HeaderMethodologyLink: React.FC<HeaderMethodologyLinkProps> = ({
                 <span className="v2-methodology-bullet" aria-hidden="true">●</span>
                 <div>
                   <strong className="v2-methodology-term">Fuentes:</strong>{' '}
-                  <span className="v2-methodology-desc">datos abiertos del Ayuntamiento de Madrid y de la Comunidad de Madrid.</span>
+                  <span className="v2-methodology-desc">{METHODOLOGY_SOURCES.map((s) => s.title).join(', ')}.</span>
                 </div>
               </div>
 
@@ -107,8 +108,8 @@ export const HeaderMethodologyLink: React.FC<HeaderMethodologyLinkProps> = ({
               <div className="v2-methodology-point">
                 <span className="v2-methodology-bullet" aria-hidden="true">●</span>
                 <div>
-                  <strong className="v2-methodology-term">Zonas con tramado:</strong>{' '}
-                  <span className="v2-methodology-desc">sin datos oficiales; no se estiman.</span>
+                  <strong className="v2-methodology-term">Sin datos oficiales (tramado):</strong>{' '}
+                  <span className="v2-methodology-desc">no se estiman.</span>
                 </div>
               </div>
             </div>
@@ -124,7 +125,7 @@ export const HeaderMethodologyLink: React.FC<HeaderMethodologyLinkProps> = ({
                   }}
                 >
                   <span>Abrir ficha técnica detallada</span>
-                  <ExternalLink size={13} aria-hidden="true" />
+                  <ChevronRight size={14} aria-hidden="true" />
                 </button>
               </div>
             )}

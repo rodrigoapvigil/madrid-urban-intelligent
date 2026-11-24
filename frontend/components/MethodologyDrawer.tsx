@@ -1,16 +1,88 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Database, BarChart3, Binary, ShieldCheck, Check, Compass, Layers, GitBranch, TrendingUp, Info } from 'lucide-react';
+import { X, Database, BarChart3, Binary, ShieldCheck, Check, Compass } from 'lucide-react';
+
+export interface MethodologySource {
+  id: string;
+  badge: string;
+  freq: string;
+  title: string;
+  description: string;
+  meta: string[];
+  license?: string;
+}
+
+export const METHODOLOGY_SOURCES: MethodologySource[] = [
+  {
+    id: 'ayuntamiento',
+    badge: 'DATOS MUNICIPALES',
+    freq: 'Actualización periódica oficial',
+    title: 'Banco de Datos Abiertos del Ayuntamiento de Madrid',
+    description: 'Series mensuales del mercado inmobiliario y del alquiler por distrito y barrio censal. Registros de precios medios, contratos formalizados y evolución demográfica.',
+    meta: ['Ámbito: 21 distritos / 131 barrios', 'Trazabilidad: 2018 - 2026'],
+  },
+  {
+    id: 'registradores',
+    badge: 'TRANSACCIONES REALES',
+    freq: 'Registros oficiales',
+    title: 'Colegio de Registradores de la Propiedad de España',
+    description: 'Estadística Registral Inmobiliaria de precios reales de cierre en escritura pública notarial, excluyendo márgenes de negociación u ofertas desactualizadas, junto con importes de hipoteca media y tipos de interés efectivos.',
+    meta: ['Validez jurídica de cierre', 'Transacciones de compra y venta'],
+  },
+  {
+    id: 'osm',
+    badge: 'INFRAESTRUCTURA URBANA',
+    freq: 'Red OpenStreetMap (OSMnx)',
+    title: 'OpenStreetMap (Equipamientos y Movilidad Urbana)',
+    description: 'Cálculo geoespacial de distancias proyectadas a estaciones de Metro, cercanías, hospitales, colegios, universidades y parques, cuantificando el valor intrínseco de accesibilidad y bienestar residencial.',
+    meta: ['Accesibilidad urbana multimodal', 'Proyección geoespacial UTM'],
+    license: '© OpenStreetMap contributors · Licencia ODbL',
+  },
+  {
+    id: 'ine',
+    badge: 'DEMOGRAFÍA Y MACROECONOMÍA',
+    freq: 'INE & Banco de España',
+    title: 'Instituto Nacional de Estadística (INE) & Banco de España',
+    description: 'Atlas de Distribución de Renta de los Hogares a nivel de sección censal, tasas de esfuerzo financiero real y series oficiales de tipos hipotecarios de referencia y Euribor.',
+    meta: ['Renta neta media por hogar', 'Cálculo de esfuerzo de alquiler y compra'],
+  },
+  {
+    id: 'catastro',
+    badge: 'PARQUE EDIFICATORIO',
+    freq: 'Dirección General del Catastro',
+    title: 'Dirección General del Catastro',
+    description: 'Antigüedad del parque residencial, superficies construidas medias y densidades edificatorias por zona, empleadas para la normalización rigurosa de superficies y precios unitarios (€/m²).',
+    meta: ['Base física del inmueble', 'Homogeneización de tipologías'],
+  },
+];
+
+const MONTHS_ORDER = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 
 interface MethodologyDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  latestOfficialPeriod?: { month: string; year: string };
 }
 
-export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, onClose }) => {
+export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({
+  isOpen,
+  onClose,
+  latestOfficialPeriod,
+}) => {
   const [activeTab, setActiveTab] = useState<'fuentes' | 'algoritmo' | 'metricas'>('fuentes');
   const drawerBodyRef = React.useRef<HTMLDivElement>(null);
+
+  // Fechas dinámicas derivadas de la misma variable del selector/pastilla
+  const officialMonth = latestOfficialPeriod?.month || 'Junio';
+  const officialYear = latestOfficialPeriod?.year || '2026';
+  const monthIdx = MONTHS_ORDER.indexOf(officialMonth);
+  const nextMonthIdx = monthIdx >= 0 ? (monthIdx + 1) % 12 : 6;
+  const nextYear = monthIdx === 11 ? Number(officialYear) + 1 : Number(officialYear);
+  const nextMonth = MONTHS_ORDER[nextMonthIdx];
+
+  const officialText = `${officialMonth.toLowerCase()} de ${officialYear}`;
+  const projectionText = `${nextMonth.toLowerCase()} de ${nextYear}`;
 
   // Bloquear completamente el scroll tanto en html como en body y neutralizar eventos wheel/touch fuera del contenido del cajón
   useEffect(() => {
@@ -29,14 +101,12 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
         return;
       }
 
-      // Si el cursor está fuera del cuerpo deslizable del cajón (fondo desenfocado, cabecera, pie), anular completamente el scroll
       const isInsideDrawerBody = drawerBody.contains(e.target as Node);
       if (!isInsideDrawerBody) {
         e.preventDefault();
         return;
       }
 
-      // Si está dentro, permitir el scroll interno pero evitar que se encadene a la página de fondo al llegar a los topes
       const { scrollTop, scrollHeight, clientHeight } = drawerBody;
       const isScrollingUp = e.deltaY < 0;
       const isScrollingDown = e.deltaY > 0;
@@ -89,9 +159,9 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
           <div className="v2-drawer-title-group">
             <span className="v2-drawer-eyebrow">
               <Compass size={13} className="v2-drawer-compass-pulse" aria-hidden="true" />
-              <span>FICHA TÉCNICA Y AUDITORÍA CIENTÍFICA</span>
+              <span>FICHA TÉCNICA</span>
             </span>
-            <h2 id="v2-drawer-title">Metodología y Trazabilidad Algorítmica</h2>
+            <h2 id="v2-drawer-title">Metodología y trazabilidad</h2>
           </div>
           <button
             type="button"
@@ -147,88 +217,34 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
               <div className="v2-drawer-intro-card">
                 <ShieldCheck size={22} className="v2-drawer-intro-icon" />
                 <div>
-                  <h4>Cero datos sintéticos ni inferencias no declaradas</h4>
+                  <h4>Qué es dato oficial y qué es proyección</h4>
                   <p>
-                    DMIYC no utiliza encuestas informales ni precios inflados de portales comerciales sin depuración. Cada precio nace de registros administrativos y bases de datos públicas auditadas.
+                    Hasta {officialText} los precios son los publicados por las fuentes. Desde {projectionText} son proyecciones del modelo DMIYC y se marcan siempre como «Proyección». En barrios con pocos registros se usa el modelo de distrito (ver pestaña Métricas de Ajuste).
                   </p>
                 </div>
               </div>
 
               <div className="v2-sources-list">
-                <div className="v2-source-card">
-                  <div className="v2-source-header">
-                    <span className="v2-source-badge">DATOS MUNICIPALES</span>
-                    <span className="v2-source-freq">Actualización periódica oficial</span>
+                {METHODOLOGY_SOURCES.map((source) => (
+                  <div key={source.id} className="v2-source-card">
+                    <div className="v2-source-header">
+                      <span className="v2-source-badge">{source.badge}</span>
+                      <span className="v2-source-freq">{source.freq}</span>
+                    </div>
+                    <h3>{source.title}</h3>
+                    <p>{source.description}</p>
+                    <div className="v2-source-meta">
+                      {source.meta.map((m, idx) => (
+                        <span key={idx}>{m}</span>
+                      ))}
+                    </div>
+                    {source.license && (
+                      <div className="v2-source-license" style={{ fontSize: '11px', color: '#8fa8be', marginTop: '6px' }}>
+                        {source.license}
+                      </div>
+                    )}
                   </div>
-                  <h3>Banco de Datos Abiertos del Ayuntamiento de Madrid</h3>
-                  <p>
-                    Series mensuales del mercado inmobiliario y del alquiler por distrito y barrio censal. Registros de precios medios, contratos formalizados y evolución demográfica.
-                  </p>
-                  <div className="v2-source-meta">
-                    <span>Ámbito: 21 distritos / 131 barrios</span>
-                    <span>Trazabilidad: 2018 - 2026</span>
-                  </div>
-                </div>
-
-                <div className="v2-source-card">
-                  <div className="v2-source-header">
-                    <span className="v2-source-badge">TRANSACCIONES REALES</span>
-                    <span className="v2-source-freq">Registros oficiales</span>
-                  </div>
-                  <h3>Colegio de Registradores de la Propiedad de España</h3>
-                  <p>
-                    Estadística Registral Inmobiliaria de precios reales de cierre en escritura pública notarial, excluyendo márgenes de negociación u ofertas desactualizadas, junto con importes de hipoteca media y tipos de interés efectivos.
-                  </p>
-                  <div className="v2-source-meta">
-                    <span>Validez jurídica de cierre</span>
-                    <span>Transacciones de compra y venta</span>
-                  </div>
-                </div>
-
-                <div className="v2-source-card">
-                  <div className="v2-source-header">
-                    <span className="v2-source-badge">INFRAESTRUCTURA URBANA</span>
-                    <span className="v2-source-freq">Red OpenStreetMap (OSMnx)</span>
-                  </div>
-                  <h3>Dotación de Equipamientos y Servicios Esenciales</h3>
-                  <p>
-                    Cálculo geoespacial de distancias proyectadas a estaciones de Metro, cercanías, hospitales, colegios, universidades y parques, cuantificando el valor intrínseco de accesibilidad y bienestar residencial.
-                  </p>
-                  <div className="v2-source-meta">
-                    <span>Accesibilidad urbana multimodal</span>
-                    <span>Proyección geoespacial UTM</span>
-                  </div>
-                </div>
-
-                <div className="v2-source-card">
-                  <div className="v2-source-header">
-                    <span className="v2-source-badge">DEMOGRAFÍA Y MACROECONOMÍA</span>
-                    <span className="v2-source-freq">INE & Banco de España</span>
-                  </div>
-                  <h3>Instituto Nacional de Estadística (INE) & Banco de España</h3>
-                  <p>
-                    Atlas de Distribución de Renta de los Hogares a nivel de sección censal, tasas de esfuerzo financiero real y series oficiales de tipos hipotecarios de referencia y Euribor.
-                  </p>
-                  <div className="v2-source-meta">
-                    <span>Renta neta per cápita</span>
-                    <span>Cálculo de esfuerzo de alquiler y compra</span>
-                  </div>
-                </div>
-
-                <div className="v2-source-card">
-                  <div className="v2-source-header">
-                    <span className="v2-source-badge">PARQUE EDIFICATORIO</span>
-                    <span className="v2-source-freq">Dirección General del Catastro</span>
-                  </div>
-                  <h3>Normalización Física y Catastral</h3>
-                  <p>
-                    Antigüedad del parque residencial, superficies construidas medias y densidades edificatorias por zona, empleadas para la normalización rigurosa de superficies y precios unitarios (€/m²).
-                  </p>
-                  <div className="v2-source-meta">
-                    <span>Base física del inmueble</span>
-                    <span>Homogeneización de tipologías</span>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           )}
@@ -264,7 +280,7 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
                   <ul className="v2-benchmarks-list" style={{ marginTop: '10px' }}>
                     <li>
                       <Check size={14} className="v2-check-icon" />
-                      <span><strong>Modelo Granular de Barrio</strong> (para zonas con ≥ 20 observaciones de entrenamiento): Activo en el <strong>91% de los barrios</strong> de Madrid, capturando identidades de precio hiperlocales (MAE de 111,99 €/m² en venta y 0,49 €/m² en alquiler).</span>
+                      <span><strong>Modelo Granular de Barrio</strong> (para zonas con ≥ 20 observaciones de entrenamiento): Activo en el <strong>91 % de los barrios</strong> de Madrid, capturando identidades de precio hiperlocales (MAE de 111,99 €/m² en venta y 0,49 €/m² en alquiler).</span>
                     </li>
                     <li>
                       <Check size={14} className="v2-check-icon" />
@@ -281,13 +297,13 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
                 </div>
 
                 <div className="v2-sub-section">
-                  <h5>Cálculo del Intervalo de Confianza (IC 95%)</h5>
+                  <h5>Rango de Incertidumbre (95 %)</h5>
                   <div className="v2-formula-card v2-formula-card--secondary">
                     <div className="v2-formula-code">
-                      <code>{"IC(95%) = P̂(i,t) ± 1,96 · σ̂_zona · √(1 + h/12)"}</code>
+                      <code>{"Rango(95 %) = P̂(i,t) ± 1,96 · σ̂_zona · √(1 + h/12)"}</code>
                     </div>
                     <p className="v2-formula-note">
-                      El margen de incertidumbre se escala proporcionalmente a la volatilidad histórica de la zona y al horizonte temporal de predicción <em>h</em>, reflejando el incremento natural de entropía a futuro.
+                      El rango de incertidumbre se escala proporcionalmente a la volatilidad histórica de la zona y al horizonte temporal de proyección <em>h</em>, ampliándose gradualmente a mayor lejanía temporal.
                     </p>
                   </div>
                 </div>
@@ -312,12 +328,12 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
                         <strong>R² Venta · Modelo Granular Barrio (XGBoost)</strong>
                         <span>Capacidad explicativa de la varianza territorial en compraventa</span>
                       </div>
-                      <span className="v2-metric-value v2-metric-value--cyan">0.994 (99.4%)</span>
+                      <span className="v2-metric-value v2-metric-value--cyan">0,994 (99,4 %)</span>
                     </div>
                     <div className="v2-metric-track">
                       <div className="v2-metric-fill v2-metric-fill--cyan" style={{ width: '99.4%' }} />
                     </div>
-                    <small>Excelente: el modelo granular de venta explica el 99,44% de la varianza de precios por barrio.</small>
+                    <small>El modelo granular de venta explica el 99,44 % de la varianza de precios por barrio.</small>
                   </div>
 
                   {/* METRIC 2: R2 ALQUILER */}
@@ -327,12 +343,12 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
                         <strong>R² Alquiler · Modelo Granular Barrio (LightGBM)</strong>
                         <span>Capacidad explicativa de la dispersión mensual de rentas</span>
                       </div>
-                      <span className="v2-metric-value v2-metric-value--cyan">0.973 (97.3%)</span>
+                      <span className="v2-metric-value v2-metric-value--cyan">0,973 (97,3 %)</span>
                     </div>
                     <div className="v2-metric-track">
                       <div className="v2-metric-fill v2-metric-fill--cyan" style={{ width: '97.3%' }} />
                     </div>
-                    <small>Excelente: el modelo granular de alquiler explica el 97,33% de la varianza de rentas por m².</small>
+                    <small>El modelo granular de alquiler explica el 97,33 % de la varianza de rentas por m².</small>
                   </div>
 
                   {/* METRIC 3: MAE / MAPE ALQUILER */}
@@ -340,14 +356,14 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
                     <div className="v2-metric-bar-header">
                       <div>
                         <strong>MAE y MAPE en Alquiler Granular</strong>
-                        <span>Error absoluto y relativo medio en el 91% del municipio</span>
+                        <span>Error absoluto y relativo medio en el 91 % de los barrios</span>
                       </div>
-                      <span className="v2-metric-value v2-metric-value--emerald">0,49 €/m² (MAPE 2.38%)</span>
+                      <span className="v2-metric-value v2-metric-value--emerald">0,49 €/m² (MAPE 2,38 %)</span>
                     </div>
                     <div className="v2-metric-track">
                       <div className="v2-metric-fill v2-metric-fill--emerald" style={{ width: '97.62%' }} />
                     </div>
-                    <small>Precisión del 100% en la horquilla de control de ±20% (RMSE: 0,63 €/m²).</small>
+                    <small>El 100 % de las predicciones queda dentro de ±20 % del valor real (RMSE: 0,63 €/m²).</small>
                   </div>
 
                   {/* METRIC 4: MAE / MAPE VENTA */}
@@ -355,30 +371,30 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
                     <div className="v2-metric-bar-header">
                       <div>
                         <strong>MAE y MAPE en Venta Granular</strong>
-                        <span>Error absoluto y relativo medio en el 91% del municipio</span>
+                        <span>Error absoluto y relativo medio en el 91 % de los barrios</span>
                       </div>
-                      <span className="v2-metric-value v2-metric-value--emerald">111,99 €/m² (MAPE 2.09%)</span>
+                      <span className="v2-metric-value v2-metric-value--emerald">111,99 €/m² (MAPE 2,09 %)</span>
                     </div>
                     <div className="v2-metric-track">
                       <div className="v2-metric-fill v2-metric-fill--emerald" style={{ width: '97.91%' }} />
                     </div>
-                    <small>Precisión del 100% en la horquilla de control de ±20% (RMSE: 155,15 €/m²).</small>
+                    <small>El 100 % de las predicciones queda dentro de ±20 % del valor real (RMSE: 155,15 €/m²).</small>
                   </div>
                 </div>
 
                 <div className="v2-benchmarks-card">
-                  <h5>Transparencia en Zonas de Fallback (9% Periferia / Baja Rotación)</h5>
+                  <h5>Transparencia en Zonas de Fallback (9 % Periferia / Baja Rotación)</h5>
                   <p style={{ margin: '0 0 10px 0', fontSize: '12px', color: '#9cb2c4', lineHeight: '1.45' }}>
                     En barrios con menos de 20 transacciones históricas (como Barajas o tramos específicos de chalets en El Viso), el sistema activa el fallback generalista de distrito:
                   </p>
                   <ul className="v2-benchmarks-list">
                     <li>
                       <Check size={14} className="v2-check-icon" />
-                      <span><strong>Fallback Alquiler Distrito</strong>: MAE de 2,86 €/m² y MAPE de 12,56% (85,1% de precisión en rango ±20%).</span>
+                      <span><strong>Fallback Alquiler Distrito</strong>: MAE de 2,86 €/m² y MAPE de 12,56 % (el 85,1 % de las predicciones queda dentro de ±20 %).</span>
                     </li>
                     <li>
                       <Check size={14} className="v2-check-icon" />
-                      <span><strong>Fallback Venta Distrito</strong>: MAE de 1.277 €/m² y MAPE de 21,68% (protección estadística frente a muestras vacías).</span>
+                      <span><strong>Fallback Venta Distrito</strong>: MAE de 1.277 €/m² y MAPE de 21,68 % (protección estadística frente a muestras vacías).</span>
                     </li>
                     <li>
                       <Check size={14} className="v2-check-icon" />
@@ -395,7 +411,7 @@ export const MethodologyDrawer: React.FC<MethodologyDrawerProps> = ({ isOpen, on
         <div className="v2-drawer-footer">
           <div className="v2-drawer-footer__copy">
             <strong>DMIYC · Sistema de Inteligencia Urbana de Madrid</strong>
-            <small>Auditoría de Datos Abiertos y Trazabilidad Algorítmica bajo licencia Creative Commons BY-4.0</small>
+            <small>Datos y licencias según cada fuente · Proyecciones: modelo DMIYC</small>
           </div>
         </div>
       </div>
