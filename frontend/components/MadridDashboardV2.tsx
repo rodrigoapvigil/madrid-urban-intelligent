@@ -958,6 +958,7 @@ const MadridDashboardV2: React.FC = () => {
   const [netYieldValue, setNetYieldValue] = useState<number | null>(null);
   const [isNetYieldActive, setIsNetYieldActive] = useState(false);
   const [mapData, setMapData] = useState<{districts: any[], neighborhoods: any[]}>({ districts: [], neighborhoods: [] });
+  const [isMapLoading, setIsMapLoading] = useState(true);
   const zoneSearchOptions = useMemo<ZoneSearchOption[]>(() => {
     const districts = new Map<string, ZoneSearchOption>();
     availableDistricts.filter(name => name !== 'Todos').forEach(name => districts.set(normalizeZoneLabel(name), { id: `district:name:${normalizeZoneLabel(name)}`, name, kind: 'district' }));
@@ -1327,6 +1328,7 @@ const MadridDashboardV2: React.FC = () => {
 
     if (!hasLoadedPrimaryKpis.current) setIsDashboardLoading(true);
     setIsHeatmapLoading(true);
+    setIsMapLoading(true);
     setDashboardLoadError(null);
     // Never leave data from the previous operation visible while a new profile loads.
     setKpiData({});
@@ -1379,7 +1381,13 @@ const MadridDashboardV2: React.FC = () => {
         }
         setMapData(data);
       })
-      .catch(err => console.error("Error loading map data:", err));
+      .catch(err => {
+        console.error("Error loading map data:", err);
+        if (isLatestRequest()) setMapData({ districts: [], neighborhoods: [] });
+      })
+      .finally(() => {
+        if (isLatestRequest()) setIsMapLoading(false);
+      });
 
     let pAffordability: Promise<any> = Promise.resolve();
     let pSeasonalTrend: Promise<any> = Promise.resolve();
@@ -2651,6 +2659,7 @@ const MadridDashboardV2: React.FC = () => {
     setIsTransitioning(true);
     setIsHeatmapLoading(true);
     setIsRankingsLoading(true);
+    setIsMapLoading(true);
     setRankings({ topDist: [], botDist: [], topBarr: [], botBarr: [] });
     setTimeout(() => setIsTransitioning(false), 480);
   };
@@ -3836,58 +3845,57 @@ const MadridDashboardV2: React.FC = () => {
                     <button type="button" className={mapLevel === 'districts' ? 'active' : ''} aria-pressed={mapLevel === 'districts'} onClick={() => { setMapLevel('districts'); clearSelection(); }}>Distritos</button>
                     <button type="button" className={mapLevel === 'neighborhoods' ? 'active' : ''} aria-pressed={mapLevel === 'neighborhoods'} onClick={() => setMapLevel('neighborhoods')}>Barrios</button>
                   </div>
-                  <div className="v2-dual-maps" style={{ position: 'relative' }}>
-                    {isDashboardLoading && mapData.districts.length === 0 && (
-                      <div className="v2-maps-loading-overlay">
-                        <div className="v2-comp-spinner" />
-                        <span>Sincronizando mapas vectoriales</span>
-                        <p>Cargando capas coropléticas de {activeProfile.label.toLowerCase()}…</p>
+                  <CardLoadingOverlay
+                    isLoading={isMapLoading || (isDashboardLoading && mapData.districts.length === 0)}
+                    message="Calibrando telemetría y algoritmos de mercado…"
+                    className="v2-maps-loading-wrapper"
+                  >
+                    <div className="v2-dual-maps" style={{ position: 'relative' }}>
+                      <div className="v2-map-sub" data-map-level="districts">
+                        <div className="v2-map-placeholder" style={{ border: 'none' }}>
+                          <MadridMap
+                            key="districts-map"
+                            type="districts"
+                            data={mapData.districts}
+                            selectedYear={Number(selectedYear)}
+                            selectedMonth={selectedMonth}
+                            isProjection={isProjectionPeriod}
+                            selectedProfile={activeProfile.label}
+                            selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
+                            selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
+                            selectedZone={selectedMapFeature}
+                            selectedZoneType={isMobile ? undefined : desktopPinnedZone?.zoneType}
+                            drillDownOnSelection={isMobile}
+                            onZoneHover={isMobile ? undefined : handleDesktopZoneHover}
+                            onDistrictClick={handleMapDistrictClick}
+                          />
+                          {!isMobile && <div className="v2-map-panel-heading"><strong>Distritos · {mapMetricLabel}</strong></div>}
+                        </div>
                       </div>
-                    )}
-                    <div className="v2-map-sub" data-map-level="districts">
-                      <div className="v2-map-placeholder" style={{ border: 'none' }}>
-                        <MadridMap
-                          key="districts-map"
-                          type="districts"
-                          data={mapData.districts}
-                          selectedYear={Number(selectedYear)}
-                          selectedMonth={selectedMonth}
-                          isProjection={isProjectionPeriod}
-                          selectedProfile={activeProfile.label}
-                          selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
-                          selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
-                          selectedZone={selectedMapFeature}
-                          selectedZoneType={isMobile ? undefined : desktopPinnedZone?.zoneType}
-                          drillDownOnSelection={isMobile}
-                          onZoneHover={isMobile ? undefined : handleDesktopZoneHover}
-                          onDistrictClick={handleMapDistrictClick}
-                        />
-                        {!isMobile && <div className="v2-map-panel-heading"><strong>Distritos · {mapMetricLabel}</strong></div>}
+                      <div className="v2-map-sub" data-map-level="neighborhoods">
+                        <div className="v2-map-placeholder" style={{ border: 'none' }}>
+                          <MadridMap
+                            key="neighborhoods-map"
+                            type="neighborhoods"
+                            data={mapData.neighborhoods}
+                            selectedYear={Number(selectedYear)}
+                            selectedMonth={selectedMonth}
+                            isProjection={isProjectionPeriod}
+                            selectedProfile={activeProfile.label}
+                            selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
+                            selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
+                            selectedZone={selectedMapFeature}
+                            selectedZoneType={isMobile ? undefined : desktopPinnedZone?.zoneType}
+                            drillDownOnSelection={isMobile}
+                            onZoneHover={isMobile ? undefined : handleDesktopZoneHover}
+                            onDistrictClick={handleMapDistrictClick}
+                            onBarrioClick={handleMapBarrioClick}
+                          />
+                          {!isMobile && <div className="v2-map-panel-heading"><strong>Barrios · {mapMetricLabel}</strong></div>}
+                        </div>
                       </div>
                     </div>
-                    <div className="v2-map-sub" data-map-level="neighborhoods">
-                      <div className="v2-map-placeholder" style={{ border: 'none' }}>
-                        <MadridMap
-                          key="neighborhoods-map"
-                          type="neighborhoods"
-                          data={mapData.neighborhoods}
-                          selectedYear={Number(selectedYear)}
-                          selectedMonth={selectedMonth}
-                          isProjection={isProjectionPeriod}
-                          selectedProfile={activeProfile.label}
-                          selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
-                          selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
-                          selectedZone={selectedMapFeature}
-                          selectedZoneType={isMobile ? undefined : desktopPinnedZone?.zoneType}
-                          drillDownOnSelection={isMobile}
-                          onZoneHover={isMobile ? undefined : handleDesktopZoneHover}
-                          onDistrictClick={handleMapDistrictClick}
-                          onBarrioClick={handleMapBarrioClick}
-                        />
-                        {!isMobile && <div className="v2-map-panel-heading"><strong>Barrios · {mapMetricLabel}</strong></div>}
-                      </div>
-                    </div>
-                  </div>
+                  </CardLoadingOverlay>
                   {!isMobile && desktopDisplayedZone && <FichaZonaDesktop
                     zone={desktopDisplayedZone.zoneId}
                     zoneType={desktopDisplayedZone.zoneType === 'districts' ? 'DISTRITO' : 'BARRIO'}
