@@ -4273,7 +4273,7 @@ const MadridDashboardV2: React.FC = () => {
                         <div className="v2-zone-kpi-value">
                           {annualIncome > 0 ? `${new Intl.NumberFormat('es-ES').format(Math.round(annualIncome))} €` : '—'}
                         </div>
-                        <div className="v2-zone-kpi-sub" style={{ marginTop: '14px' }}>
+                        <div className="v2-zone-kpi-sub">
                           Sobre renta censal (INE · Proyección): {monthlyIncome > 0 ? `${new Intl.NumberFormat('es-ES').format(monthlyIncome)} €/mes` : '—'}
                         </div>
                       </div>
@@ -4314,7 +4314,7 @@ const MadridDashboardV2: React.FC = () => {
                           <InfoTooltip {...getComparisonKpiInfo('velocidad_venta', zoneName)} align="right" />
                         </div>
                         <div className="v2-zone-kpi-value">{velocityText}</div>
-                        <div className="v2-zone-kpi-sub" style={{ marginTop: '14px' }}>
+                        <div className="v2-zone-kpi-sub">
                           Variación anual: {varAnualText}
                         </div>
                       </div>
@@ -4344,7 +4344,7 @@ const MadridDashboardV2: React.FC = () => {
                           <InfoTooltip {...getComparisonKpiInfo('volatilidad', zoneName)} align="right" />
                         </div>
                         <div className="v2-zone-kpi-value">{volatilityVal}</div>
-                        <div className="v2-zone-kpi-sub" style={{ marginTop: '14px' }}>
+                        <div className="v2-zone-kpi-sub">
                           Rango de estabilidad inmobiliaria proyectada
                         </div>
                       </div>
