@@ -30,7 +30,8 @@
   width: 100%;
   max-width: var(--page-max);
   margin-inline: auto;
-  min-height: 76px;
+  min-height: 56px;
+  height: 56px;
   padding-inline: var(--page-gutter) !important;
   display: flex !important;
   align-items: center;
@@ -381,7 +382,8 @@
 @media (max-width: 900px) {
   .site-header,
   .mi-header {
-    min-height: 76px;
+    min-height: 56px;
+    height: 56px;
     padding-inline: 20px;
     grid-template-columns: 1fr auto;
     gap: 12px;

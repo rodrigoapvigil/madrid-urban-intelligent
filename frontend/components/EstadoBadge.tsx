@@ -4,10 +4,10 @@ export type EstadoBadgeStatus = 'real' | 'estimate';
 
 export default function EstadoBadge({ status, className = '' }: { status: EstadoBadgeStatus; className?: string }) {
   const isEstimate = status === 'estimate';
-  const label = isEstimate ? 'Estimación' : 'Dato real';
+  const label = isEstimate ? 'Proyección' : 'Dato oficial';
   const tooltip = isEstimate
-    ? 'Calculado con modelos predictivos sobre transacciones oficiales del Ayuntamiento de Madrid (Margen de confianza: ±5%)'
-    : 'Dato observado en registros oficiales contrastados';
+    ? 'Proyección estimada del modelo DMIYC para meses aún no publicados oficialmente'
+    : 'Dato oficial contrastado publicado por el Ayuntamiento de Madrid y Colegio de Registradores';
 
   return (
     <span

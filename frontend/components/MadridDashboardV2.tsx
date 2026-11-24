@@ -1102,12 +1102,42 @@ const MadridDashboardV2: React.FC = () => {
       ? [...mapFeatureRankRows].sort((a, b) => Number(activeProfile.id === 'inversion' ? b.rentabilidad || 0 : b.precio_m2 || 0) - Number(activeProfile.id === 'inversion' ? a.rentabilidad || 0 : a.precio_m2 || 0)).findIndex(item => normalizeZoneLabel(String(mapFeatureIsDistrict ? item.distrito : item.barrio || '')) === normalizeZoneLabel(displayedMapFeature)) + 1
       : 0;
   const mapFeatureTotal = !isMobile && desktopDisplayedZone ? desktopDisplayedZone.total : mapFeatureRankRows.length;
+  const mapFeatureRankSense = activeProfile.id === 'inversion' ? 'con mayor rentabilidad' : 'más caro';
+  const mapFeatureRankLabel = mapFeatureNoData ? undefined : mapFeatureRank
+    ? `${mapFeatureRank}.º ${mapFeatureRankSense} de ${mapFeatureTotal} ${mapFeatureIsDistrict ? 'distritos' : 'barrios'}`
+    : undefined;
   const mapMetricValue = (item: any) => Number(activeProfile.id === 'inversion' ? item.rentabilidad || 0 : item.precio_m2 || 0);
   const mapFeatureAverage = mapFeatureRankRows.length ? mapFeatureRankRows.reduce((sum, item) => sum + mapMetricValue(item), 0) / mapFeatureRankRows.length : 0;
   const mapFeatureDelta = mapFeatureAverage && mapFeatureItem ? (mapMetricValue(mapFeatureItem) - mapFeatureAverage) / mapFeatureAverage * 100 : null;
   const observedDistrictRows = mapData.districts.filter((item: any) => Number(item.precio_m2) > 0);
   const madridDistrictAverage = observedDistrictRows.length ? observedDistrictRows.reduce((sum, item) => sum + Number(item.precio_m2 || 0), 0) / observedDistrictRows.length : 0;
   const madridMonthlyAverage = mapData.districts.length ? mapData.districts.reduce((sum, item) => sum + Number(item.precio_vivienda || 0), 0) / mapData.districts.length : 0;
+
+  const mapFeatureItemMonthly = Number(mapFeatureItem?.precio_vivienda || mapFeatureItem?.precio_alquiler || 0);
+  const mapFeatureMonthlyDelta = madridMonthlyAverage > 0 && mapFeatureItemMonthly > 0
+    ? (mapFeatureItemMonthly - madridMonthlyAverage) / madridMonthlyAverage * 100
+    : null;
+
+  const formatSpanishDelta = (val: number, metricSuffix: string) => {
+    const sign = val > 0 ? '+' : val < 0 ? '−' : '';
+    const num = Math.abs(val).toFixed(1).replace('.', ',');
+    return `${sign}${num} % ${metricSuffix}`;
+  };
+
+  let mapFeatureDeltaLabel: string | null = null;
+  if (activeProfile.id === 'inversion') {
+    if (mapFeatureDelta !== null) {
+      mapFeatureDeltaLabel = `${formatSpanishDelta(mapFeatureDelta, 'en rentabilidad')} frente a la media de Madrid`;
+    }
+  } else {
+    if (mapFeatureDelta !== null && mapFeatureMonthlyDelta !== null) {
+      const metricName = activeProfile.id === 'alquiler' ? 'en mensualidad' : 'en vivienda';
+      mapFeatureDeltaLabel = `${formatSpanishDelta(mapFeatureDelta, 'en €/m²')} · ${formatSpanishDelta(mapFeatureMonthlyDelta, metricName)} vs. media de Madrid`;
+    } else if (mapFeatureDelta !== null) {
+      mapFeatureDeltaLabel = `${formatSpanishDelta(mapFeatureDelta, 'en €/m²')} frente a la media de Madrid`;
+    }
+  }
+
   const mapFeaturePrimaryLabel = activeProfile.id === 'inversion' ? 'Rentabilidad' : 'Precio medio';
   const mapMetricLabel = activeProfile.id === 'inversion'
     ? 'Rentabilidad bruta (%)'
@@ -2956,7 +2986,7 @@ const MadridDashboardV2: React.FC = () => {
                     const rent = kpiData.p_vivienda || 0;
                     const incomeMonthly = (kpiData.renta_media || 0) / 12;
                     const effort = incomeMonthly > 0 ? (rent / incomeMonthly) * 100 : 0;
-                    const effortColor = '#00D9F2';
+                    const effortColor = '#fbbf24';
                     const salary = Number.parseFloat(userRentSalary);
                     const personalEffort = salary > 0 ? (rent / salary) * 100 : 0;
                     const money = (value: number) => new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(value);
@@ -2988,10 +3018,10 @@ const MadridDashboardV2: React.FC = () => {
                           )}
                           <div className="v2-rent-chips">
                             {Number.isFinite(Number(kpiData.v_mes)) && kpiData.v_mes !== undefined
-                              ? <span>{Number(kpiData.v_mes) < 0 ? '↘' : '↗'} {Number(kpiData.v_mes) > 0 ? '+' : ''}{Number(kpiData.v_mes).toFixed(1)}% mes</span>
+                              ? <span>{Number(kpiData.v_mes) < 0 ? '↘' : '↗'} {Number(kpiData.v_mes) > 0 ? '+' : ''}{Number(kpiData.v_mes).toFixed(1).replace('.', ',')} % mes</span>
                               : null}
                             {Number.isFinite(Number(kpiData.v_anual)) && kpiData.v_anual !== undefined
-                              ? <span>{Number(kpiData.v_anual) < 0 ? '↘' : '↗'} {Number(kpiData.v_anual) > 0 ? '+' : ''}{Number(kpiData.v_anual).toFixed(1)}% año</span>
+                              ? <span>{Number(kpiData.v_anual) < 0 ? '↘' : '↗'} {Number(kpiData.v_anual) > 0 ? '+' : ''}{Number(kpiData.v_anual).toFixed(1).replace('.', ',')} % año</span>
                               : null}
                             <span className="v2-rent-market">{kpiData.estado_mercado || 'Mercado estable'}</span>
                           </div>
@@ -3002,15 +3032,16 @@ const MadridDashboardV2: React.FC = () => {
                             <strong>{money(rent)} <small>€/mes</small></strong>
                           </div>
                           <div className="v2-rent-secondary-card v2-rent-effort">
-                            <div className="v2-rent-effort-head"><span className="v2-rent-eyebrow">Esfuerzo de alquiler</span><strong style={{ color: effortColor }}>{effort > 0 ? `${effort.toFixed(0)}%` : '—'}</strong></div>
+                            <div className="v2-rent-effort-head"><span className="v2-rent-eyebrow">Esfuerzo de alquiler</span><strong style={{ color: effortColor }}>{effort > 0 ? `${effort.toFixed(0)} %` : '—'}</strong></div>
                             <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(effort, 100)}%`, background: effortColor }} /><b style={{ left: '30%' }} /></div>
-                            <span className="v2-rent-effort-caption">{money(rent)} € de alquiler · {money(incomeMonthly)} € de renta media por hogar en Madrid (Fuente: INE)</span>
+                            <span className="v2-rent-effort-caption">{money(rent)} € de alquiler · {money(incomeMonthly)} € de renta neta media por hogar (Fuente: INE)</span>
                             <button className="v2-rent-calc-toggle" type="button" onClick={() => setShowRentCalculator(value => !value)} aria-expanded={showRentCalculator}>
                               {showRentCalculator ? 'Cerrar cálculo' : 'Calcula con tu sueldo'} <span aria-hidden="true">{showRentCalculator ? '↑' : '→'}</span>
                             </button>
                             {showRentCalculator && <div className="v2-rent-calculator">
                               <input type="number" value={userRentSalary} onChange={event => setUserRentSalary(event.target.value)} placeholder="Sueldo neto mensual (€)" aria-label="Sueldo neto mensual" />
-                              {salary > 0 && <span>Tu esfuerzo sería <strong style={{ color: personalEffort <= 30 ? '#00E5EE' : personalEffort <= 40 ? '#F4B860' : '#F08080' }}>{personalEffort.toFixed(0)}%</strong></span>}
+                              <span style={{ fontSize: '10px', color: '#8fa8be', display: 'flex', alignItems: 'center', gap: '4px', margin: '4px 0 2px' }}>🔒 Se calcula en tu navegador y no se guarda</span>
+                              {salary > 0 && <span>Tu esfuerzo sería <strong style={{ color: personalEffort <= 30 ? '#34d399' : personalEffort <= 40 ? '#fbbf24' : '#f87171' }}>{personalEffort.toFixed(1).replace('.', ',')} %</strong></span>}
                             </div>}
                           </div>
                         </section>
@@ -3451,71 +3482,88 @@ const MadridDashboardV2: React.FC = () => {
                     const rentaMediaMensual = rentaMediaAnual > 0 ? rentaMediaAnual / 12 : 0;
                     const dedicar = rentaMediaMensual > 0 ? (alquiler / rentaMediaMensual) * 100 : 0;
 
-                    let statusColor = 'var(--azul-linea)';
-                    if (dedicar > 0) {
-                      if (dedicar < 25) statusColor = 'var(--azul-linea)';
-                      else if (dedicar < 35) statusColor = 'var(--coral)';
-                      else statusColor = 'var(--coral-texto)';
-                    }
-
                     const parsedSalary = parseFloat(userRentSalary);
                     const hasUserSalary = !isNaN(parsedSalary) && parsedSalary > 0;
                     const userEffort = hasUserSalary ? (alquiler / parsedSalary) * 100 : 0;
 
-                    let userStatusColor = 'var(--azul-linea)';
-                    if (userEffort > 0) {
-                      if (userEffort < 25) userStatusColor = 'var(--azul-linea)';
-                      else if (userEffort < 35) userStatusColor = 'var(--coral)';
-                      else userStatusColor = 'var(--coral-texto)';
-                    }
+                    const userEffortColor = userEffort <= 30 ? '#34d399' : userEffort <= 40 ? '#fbbf24' : '#f87171';
 
                     return (
                       <div className="v2-kpi-card v2-effort-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--azul-linea)', letterSpacing: '0.5px' }}>ESFUERZO DE ALQUILER</label>
+                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: '#fbbf24', letterSpacing: '0.5px' }}>ESFUERZO DE ALQUILER</label>
                             <InfoTooltip
                               title="Tasa de Esfuerzo Financiero en Alquiler"
-                              description="El porcentaje del sueldo neto mensual que una persona o familia debe destinar a pagar el alquiler de la vivienda en esta zona."
-                              example="Pon tu sueldo mensual (ej. 1.800€). Si el alquiler medio es 900€, tu esfuerzo sería del 50%. Con 3.000€, sería del 30%."
-                              ruleOfThumb="El Banco de España recomienda no superar el 30%-35% del sueldo neto. Superar el 40% se considera sobreesfuerzo crítico."
+                              description="Porcentaje del presupuesto mensual que un hogar o inquilino destina al pago del alquiler respecto a su renta neta."
+                              example="Para un alquiler de 1.200 € y unos ingresos netos de 3.000 €, el esfuerzo es del 40 %."
+                              ruleOfThumb="El Banco de España recomienda no superar el 30 % - 35 % de los ingresos netos. Superar el 40 % se considera sobreesfuerzo crítico."
                             />
                           </div>
                           <EstadoBadge status={isProjectionPeriod ? 'estimate' : 'real'} />
                         </div>
-                        <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          Alquiler medio {selectedBarrio !== 'Todos' ? 'en el barrio' : (selectedDistrict !== 'Todos' ? 'en el distrito' : 'en Madrid')}: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(alquiler)}€/mes</strong>
+
+                        <div style={{ fontSize: '11.5px', color: '#BACCD6', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                          <span>Renta neta media hogar:</span>
+                          <strong style={{ fontSize: '13px', color: '#FFFFFF' }}>
+                            {rentaMediaMensual > 0 ? `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(rentaMediaMensual)} €/mes` : '—'}
+                          </strong>
                         </div>
-                        <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          Renta media {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(rentaMediaMensual)}€/mes <span style={{ fontSize: '11px', color: '#00F0FF', fontWeight: 'bold' }}>(dato INE)</span></strong>
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#BACCD6', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span>Esfuerzo {selectedBarrio !== 'Todos' ? 'en este barrio' : (selectedDistrict !== 'Todos' ? 'en este distrito' : 'en Madrid')}:</span>
-                          <strong style={{ fontSize: '18px', color: '#00F0FF', fontWeight: '800' }}>{dedicar > 0 ? dedicar.toFixed(0) + '%' : '-'}</strong>
-                          <span style={{ display: 'inline-block', width: '9px', height: '9px', borderRadius: '50%', backgroundColor: statusColor, boxShadow: `0 0 8px ${statusColor}` }} />
+                        <span style={{ fontSize: '10px', color: '#8fa8be', lineHeight: '1.25', marginTop: '-3px' }}>
+                          Renta neta media por hogar (Fuente: INE)
+                        </span>
+
+                        <div style={{ fontSize: '12px', color: '#BACCD6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px', paddingTop: '6px', borderTop: '1px solid rgba(186, 204, 214, 0.12)' }}>
+                          <span>Esfuerzo medio hogar:</span>
+                          <strong style={{ fontSize: '17px', color: '#fbbf24', fontWeight: '800' }}>
+                            {dedicar > 0 ? `${dedicar.toFixed(1).replace('.', ',')} %` : '—'}
+                          </strong>
                         </div>
 
-                        <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: '1px solid rgba(186, 204, 214, 0.16)' }}>
-                          <label style={{ fontSize: '11px', fontWeight: '700', color: '#FFFFFF' }}>¿Cuál es TU renta?</label>
+                        <div style={{ marginTop: '6px', paddingTop: '8px', borderTop: '1px solid rgba(186, 204, 214, 0.16)' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <label style={{ fontSize: '11px', fontWeight: '700', color: '#FFFFFF' }}>Calcula con tu sueldo</label>
+                            <span style={{ fontSize: '10px', color: '#91b0c2' }}>Neto mensual</span>
+                          </div>
                           <input
                             type="number"
                             value={userRentSalary}
                             onChange={(e) => setUserRentSalary(e.target.value)}
-                            placeholder="Sueldo neto mensual (€)"
-                            style={{ width: '100%', padding: '7px 10px', borderRadius: '8px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '12px', marginTop: '4px', outline: 'none' }}
+                            placeholder="Ej. 2.100 €/mes"
+                            aria-label="Sueldo neto mensual para calcular esfuerzo"
+                            style={{ width: '100%', padding: '6px 10px', borderRadius: '7px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.35)', fontSize: '12px', marginTop: '4px', outline: 'none' }}
                           />
-                          <span style={{ fontSize: '10px', color: '#BACCD6', display: 'block', marginTop: '3px' }}>(Opcional, para comparar)</span>
+                          <span style={{ fontSize: '10px', color: '#8fa8be', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                            🔒 Se calcula en tu navegador y no se guarda
+                          </span>
                         </div>
 
                         {hasUserSalary && (
-                          <div style={{ marginTop: '6px', padding: '10px', background: 'rgba(0, 240, 255, 0.12)', border: '1px solid rgba(0, 240, 255, 0.35)', borderRadius: '8px', fontSize: '12px', color: '#FFFFFF', animation: 'v2FadeIn 0.2s ease' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-                              <span>Tu esfuerzo real sería: <strong style={{ color: '#00F0FF', fontSize: '14px' }}>{userEffort.toFixed(0)}%</strong></span>
-                              <span style={{ display: 'inline-block', width: '7px', height: '7px', borderRadius: '50%', backgroundColor: userStatusColor }} />
+                          <div style={{ marginTop: '4px', padding: '9px 10px', background: 'rgba(2, 20, 43, 0.85)', border: `1px solid ${userEffortColor}55`, borderRadius: '8px', animation: 'v2FadeIn 0.2s ease' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                              <span style={{ fontSize: '11.5px', color: '#FFFFFF', fontWeight: '600' }}>Tu esfuerzo personal:</span>
+                              <strong style={{ color: userEffortColor, fontSize: '15px', fontWeight: '800' }}>
+                                {userEffort.toFixed(1).replace('.', ',')} %
+                              </strong>
                             </div>
-                            <span style={{ color: '#BACCD6', fontSize: '11px' }}>
-                              ({userEffort < dedicar ? 'mucho mejor que la media' : 'peor que la media local'})
-                            </span>
+
+                            {/* Medidor visual interactivo con marca del 30% */}
+                            <div style={{ position: 'relative', width: '100%', height: '6px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '999px', margin: '7px 0 4px', overflow: 'hidden' }}>
+                              <div style={{ height: '100%', width: `${Math.min(100, (userEffort / 60) * 100)}%`, background: userEffortColor, borderRadius: '999px', transition: 'width 0.25s ease' }} />
+                            </div>
+                            <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '9.5px', color: '#8fa8be' }}>
+                              <span>0 %</span>
+                              <span style={{ color: userEffort <= 30 ? '#34d399' : '#fbbf24', fontWeight: '700' }}>▲ Marca recomendada: 30 %</span>
+                              <span>60 %+</span>
+                            </div>
+
+                            <p style={{ margin: '5px 0 0', fontSize: '10.5px', color: userEffortColor, fontWeight: '600' }}>
+                              {userEffort <= 30
+                                ? '✓ Dentro del límite recomendado (≤ 30 %)'
+                                : userEffort <= 40
+                                  ? '⚠ Esfuerzo moderado-alto (30 % – 40 %)'
+                                  : '✕ Sobreesfuerzo financiero (> 40 % según Banco de España)'}
+                            </p>
                           </div>
                         )}
                       </div>
@@ -3864,14 +3912,12 @@ const MadridDashboardV2: React.FC = () => {
                     position={{ point: desktopDisplayedZone.point, bounds: desktopDisplayedZone.bounds }}
                     style={{ maxWidth: Math.max(120, desktopDisplayedZone.bounds.right - desktopDisplayedZone.bounds.left - 16) }}
                     pinned={Boolean(desktopPinnedZone && normalizeZoneLabel(selectedMapFeature || '') === normalizeZoneLabel(desktopPinnedZone.zoneId))}
-                    rank={mapFeatureNoData ? undefined : mapFeatureRank
-                      ? `Puesto ${mapFeatureRank} de ${mapFeatureTotal} ${mapFeatureIsDistrict ? 'distritos' : 'barrios'}`
-                      : undefined}
+                    rank={mapFeatureRankLabel}
                     primaryLabel={mapFeaturePrimaryLabel}
                     primaryValue={mapFeaturePrimary}
                     secondaryLabel={mapFeatureSecondaryLabel}
                     secondaryValue={mapFeatureSecondary}
-                    delta={mapFeatureDelta === null ? null : `${mapFeatureDelta > 0 ? '+' : ''}${mapFeatureDelta.toFixed(1)}% frente a la media`}
+                    delta={mapFeatureDeltaLabel}
                     onClose={() => { clearSelection(); desktopZoneHoverRef.current = null; setDesktopZoneHover(null); setDesktopPinnedZone(null); }}
                   />}
                   {isMobile && selectedMapFeature && <FichaZonaMovil
@@ -3879,12 +3925,12 @@ const MadridDashboardV2: React.FC = () => {
                     zoneType={mapFeatureIsDistrict ? 'DISTRITO' : 'BARRIO'}
                     noData={mapFeatureNoData}
                     projectionWithoutHistory={mapFeatureNoData && isProjectionPeriod}
-                    rank={mapFeatureNoData ? undefined : mapFeatureRank ? `Puesto ${mapFeatureRank} de ${mapFeatureRows.length}` : undefined}
+                    rank={mapFeatureRankLabel}
                     primaryLabel={mapFeaturePrimaryLabel}
                     primaryValue={mapFeaturePrimary}
                     secondaryLabel={mapFeatureSecondaryLabel}
                     secondaryValue={mapFeatureSecondary}
-                    delta={mapFeatureDelta === null ? null : `${mapFeatureDelta > 0 ? '+' : ''}${mapFeatureDelta.toFixed(1)}% frente a la media`}
+                    delta={mapFeatureDeltaLabel}
                     onClose={() => { clearSelection(); setSelectedBarrio('Todos'); }}
                   >
                     <div className="v2-map-sheet-actions"><button type="button" onClick={() => { const kind = mapFeatureIsDistrict ? 'district' : 'barrio'; const match = zoneSearchOptions.find(option => option.kind === kind && normalizeZoneLabel(option.name) === normalizeZoneLabel(selectedMapFeature)); if (match) setComparisonZoneA(match); clearSelection(); scrollToDashboardSection('compare'); }}>Ver evolución →</button><button type="button" onClick={() => { clearSelection(); setSelectedBarrio('Todos'); setSelectedDistrict('Todos'); setMapLevel('districts'); }}>Ver Madrid</button></div>
