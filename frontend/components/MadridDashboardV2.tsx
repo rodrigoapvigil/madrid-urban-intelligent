@@ -2534,18 +2534,17 @@ const MadridDashboardV2: React.FC = () => {
             const { ctx, scales } = chart;
             if (!scales.x || !scales.y) return;
 
-            const anchorNames = ['usera', 'vallecas', 'villaverde', 'carabanchel', 'salamanca', 'chamberí', 'centro', 'retiro'];
+            // Evitar solapamiento de textos apelotonados: solo rotular estáticamente la zona seleccionada
             ctx.save();
-            ctx.font = 'bold 9px sans-serif';
+            ctx.font = 'bold 10px sans-serif';
 
             points.forEach((p: any) => {
-              const isAnchor = anchorNames.some(name => p.name.toLowerCase().includes(name));
-              if (isAnchor || p.isSelected) {
+              if (p.isSelected) {
                 const xPos = scales.x.getPixelForValue(p.x);
                 const yPos = scales.y.getPixelForValue(p.y);
-                ctx.fillStyle = p.isSelected ? '#FF5C5C' : '#E6F2F8';
+                ctx.fillStyle = '#FF5C5C';
                 ctx.textAlign = 'center';
-                ctx.fillText(p.name, xPos, yPos - 8);
+                ctx.fillText(`${p.name} ★`, xPos, yPos - 10);
               }
             });
             ctx.restore();
@@ -2579,17 +2578,29 @@ const MadridDashboardV2: React.FC = () => {
                 display: false
               },
               tooltip: {
-                backgroundColor: '#0F1E2E',
+                backgroundColor: '#06182B',
                 borderWidth: 1,
-                borderColor: 'rgba(0, 240, 255, 0.3)',
-                padding: 10,
-                titleColor: '#FFFFFF',
-                bodyColor: '#BACCD6',
+                borderColor: 'rgba(0, 240, 255, 0.45)',
+                padding: 12,
+                titleColor: '#00F0FF',
+                titleFont: { size: 12, weight: 'bold' },
+                bodyColor: '#FFFFFF',
+                bodyFont: { size: 11 },
+                displayColors: false,
                 callbacks: {
+                  title: (context: any) => {
+                    const idx = context[0]?.dataIndex;
+                    const p = points[idx];
+                    return p ? `📍 ${p.name}` : '';
+                  },
                   label: (context: any) => {
                     const idx = context.dataIndex;
                     const p = points[idx];
-                    return `${p.name}: Esfuerzo ${p.x.toFixed(1)}% · Yield ${p.y.toFixed(2)}%${p.isSelected ? ' ★ (Seleccionado)' : ''}`;
+                    return [
+                      `• Rentabilidad Bruta: ${p.y.toFixed(2)}%`,
+                      `• Esfuerzo Censal: ${p.x.toFixed(1)}%`,
+                      p.isSelected ? '★ Zona actualmente seleccionada' : ''
+                    ].filter(Boolean);
                   }
                 }
               }
@@ -4242,30 +4253,28 @@ const MadridDashboardV2: React.FC = () => {
                     incomeA={Number(kpiDataA.renta_media) || undefined}
                     incomeB={Number(kpiDataB.renta_media) || undefined}
                     profileId={activeProfile.id}
-                  />
-
-                  {/* Switch de visualización (Superpuesta vs Lado a Lado) fijado arriba */}
-                  <div className="v2-compare-view-switch-row">
-                    <div className="v2-compare-view-switch-wrap">
-                      <span className="v2-compare-view-label">Vista:</span>
-                      <div className="v2-compare-view-switch" role="group" aria-label="Modo de visualización de gráficos">
-                        <button
-                          type="button"
-                          className={`v2-compare-view-btn ${compareGraphView === 'superpuesta' ? 'is-active' : ''}`}
-                          onClick={() => setCompareGraphView('superpuesta')}
-                        >
-                          Superpuesta (Recomendada)
-                        </button>
-                        <button
-                          type="button"
-                          className={`v2-compare-view-btn ${compareGraphView === 'paralela' ? 'is-active' : ''}`}
-                          onClick={() => setCompareGraphView('paralela')}
-                        >
-                          Lado a Lado
-                        </button>
+                    headerRight={
+                      <div className="v2-compare-view-switch-wrap">
+                        <span className="v2-compare-view-label">Vista:</span>
+                        <div className="v2-compare-view-switch" role="group" aria-label="Modo de visualización de gráficos">
+                          <button
+                            type="button"
+                            className={`v2-compare-view-btn ${compareGraphView === 'superpuesta' ? 'is-active' : ''}`}
+                            onClick={() => setCompareGraphView('superpuesta')}
+                          >
+                            Superpuesta (Recomendada)
+                          </button>
+                          <button
+                            type="button"
+                            className={`v2-compare-view-btn ${compareGraphView === 'paralela' ? 'is-active' : ''}`}
+                            onClick={() => setCompareGraphView('paralela')}
+                          >
+                            Lado a Lado
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  </div>
+                    }
+                  />
 
               {(() => {
                 const renderZoneKpiCard = (target: 'A' | 'B') => {

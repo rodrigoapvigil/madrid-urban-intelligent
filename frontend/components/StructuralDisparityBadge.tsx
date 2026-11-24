@@ -12,6 +12,7 @@ interface StructuralDisparityBadgeProps {
   incomeB?: number;
   profileId?: string;
   className?: string;
+  headerRight?: React.ReactNode;
 }
 
 export const StructuralDisparityBadge: React.FC<StructuralDisparityBadgeProps> = ({
@@ -23,10 +24,20 @@ export const StructuralDisparityBadge: React.FC<StructuralDisparityBadgeProps> =
   incomeB,
   profileId = 'alquiler',
   className = '',
+  headerRight,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  if (!priceA || !priceB || priceA <= 0 || priceB <= 0) return null;
+  const renderFallbackRight = () => {
+    if (!headerRight) return null;
+    return (
+      <div className="v2-compare-view-switch-row" style={{ display: 'flex', justifyContent: 'flex-end', width: '100%', margin: '14px 0 16px' }}>
+        {headerRight}
+      </div>
+    );
+  };
+
+  if (!priceA || !priceB || priceA <= 0 || priceB <= 0) return renderFallbackRight();
 
   // Calculate percentage gap
   const minPrice = Math.min(priceA, priceB);
@@ -34,7 +45,7 @@ export const StructuralDisparityBadge: React.FC<StructuralDisparityBadgeProps> =
   const diffPercent = Math.round(((maxPrice - minPrice) / minPrice) * 100);
 
   // Only display if gap is > 20%
-  if (diffPercent < 20) return null;
+  if (diffPercent < 20) return renderFallbackRight();
 
   const higherZone = priceA >= priceB ? zoneAName : zoneBName;
   const lowerZone = priceA < priceB ? zoneAName : zoneBName;
@@ -52,26 +63,34 @@ export const StructuralDisparityBadge: React.FC<StructuralDisparityBadgeProps> =
   const incB = incomeB && incomeB > 0 ? incomeB : (isHistoricCenter(zoneBName) ? 38500 : 21200);
 
   return (
-    <div className={`v2-disparity-container ${className}`}>
-      <button
-        type="button"
-        className={`v2-disparity-trigger ${isOpen ? 'is-active' : ''}`}
-        onClick={() => setIsOpen(!isOpen)}
-        aria-expanded={isOpen}
-        aria-controls="v2-disparity-details"
-        title="Ver causas socioeconómicas y urbanísticas de esta brecha de precios"
-      >
-        <span className="v2-disparity-pill">
-          <span className="v2-disparity-delta">Δ +{diffPercent}%</span>
-          <span className="v2-disparity-label">Disparidad Estructural Detectada</span>
-        </span>
-        <span className="v2-disparity-arrow">
-          {isOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
-        </span>
-      </button>
+    <div className={`v2-disparity-container ${className}`} style={{ width: '100%', margin: '14px 0 16px' }}>
+      <div className="v2-disparity-toolbar-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', gap: '12px', flexWrap: 'wrap' }}>
+        <button
+          type="button"
+          className={`v2-disparity-trigger ${isOpen ? 'is-active' : ''}`}
+          onClick={() => setIsOpen(!isOpen)}
+          aria-expanded={isOpen}
+          aria-controls="v2-disparity-details"
+          title="Ver causas socioeconómicas y urbanísticas de esta brecha de precios"
+        >
+          <span className="v2-disparity-pill">
+            <span className="v2-disparity-delta">Δ +{diffPercent}%</span>
+            <span className="v2-disparity-label">Disparidad Estructural Detectada</span>
+          </span>
+          <span className="v2-disparity-arrow">
+            {isOpen ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+          </span>
+        </button>
+
+        {headerRight && (
+          <div className="v2-disparity-header-right" style={{ marginLeft: 'auto' }}>
+            {headerRight}
+          </div>
+        )}
+      </div>
 
       {isOpen && (
-        <div id="v2-disparity-details" className="v2-disparity-details" role="region">
+        <div id="v2-disparity-details" className="v2-disparity-details" role="region" style={{ marginTop: '12px' }}>
           <div className="v2-disparity-header">
             <AlertCircle size={15} className="v2-disparity-alert-icon" />
             <div>
