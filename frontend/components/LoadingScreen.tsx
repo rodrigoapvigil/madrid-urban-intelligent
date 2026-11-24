@@ -214,17 +214,17 @@ export default function LoadingScreen({
                 <span className="dmiyc-ls__fact-source">{WAITING_FACTS[phraseIndex].source}</span>
               </div>
             )}
+
+            {/* Compromiso de privacidad para vista móvil */}
+            <div className="dmiyc-ls__privacy-pill dmiyc-ls__privacy-pill--mobile" role="note" aria-label="Compromiso de privacidad">
+              <span>DMIYC no utiliza cookies de seguimiento ni publicidad de terceros · 100% privado y transparente</span>
+            </div>
           </div>
 
           <aside className="dmiyc-ls__telemetry" aria-label="Telemetría de la capital">
             <div className="dmiyc-ls__telemetry-card">
-              <div className="dmiyc-ls__telemetry-head">
-                <span className="dmiyc-ls__telemetry-badge"><i /> Telemetría oficial · Madrid</span>
-                <div className="dmiyc-ls__telemetry-live">
-                  <span>Datos Notaría: Hasta Jun 2026</span>
-                  <span className="dmiyc-ls__telemetry-dot">·</span>
-                  <span>Algoritmo: Nov 2026</span>
-                </div>
+              <div className="dmiyc-ls__privacy-pill" role="note" aria-label="Compromiso de privacidad">
+                <span>DMIYC no utiliza cookies de seguimiento ni publicidad de terceros · 100% privado y transparente</span>
               </div>
 
               <div className="dmiyc-ls__telemetry-grid">
@@ -256,22 +256,10 @@ export default function LoadingScreen({
                   <small>Padrón oficial INE</small>
                 </div>
               </div>
-
-              <div className="dmiyc-ls__telemetry-foot">
-                <div className="dmiyc-ls__telemetry-status">
-                  <span className="dmiyc-ls__pulse-dot" />
-                  <span>{currentPhase}</span>
-                </div>
-                <span className="dmiyc-ls__telemetry-source">Colegio de Registradores · Catastro · Ayto. de Madrid</span>
-              </div>
             </div>
           </aside>
         </section>
       </main>
-
-      <footer className="dmiyc-ls__footer-note" aria-label="Compromiso de privacidad">
-        <span>DMIYC no utiliza cookies de seguimiento ni publicidad de terceros · 100% privado y transparente</span>
-      </footer>
     </div>
   );
 }
