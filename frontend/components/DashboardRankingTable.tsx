@@ -6,6 +6,8 @@ import SegmentedControl from './SegmentedControl';
 
 type RankingRow = { name: string; value: number };
 type OrderMode = 'affordable' | 'expensive' | 'increase' | 'demand-high' | 'demand-low' | 'yield-high' | 'yield-low';
+const VIVIENDA_TIPO_M2 = 70;
+const formatGroupedIntEs = (val: number) => Math.round(val).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
 function Sparkline({ values, color }: { values: number[]; color: string }) {
   const points = values.map((value, index) => {
@@ -87,6 +89,16 @@ export default function DashboardRankingTable({
         return pct >= minYieldThreshold;
       });
     }
+    if (isMobile && (profileId === 'compra' || profileId === 'venta') && metric === 'total') {
+      filtered = filtered.map(row => {
+        const monthly = monthlyByZone.get(normalize(row.name));
+        const vals = monthly ? Array.from({ length: 12 }, (_, idx) => Number(monthly[`m${idx + 1}`])).filter(v => Number.isFinite(v) && v > 0) : [];
+        const latestM2 = vals.length > 0 ? vals[vals.length - 1] : null;
+        return latestM2 && latestM2 > 100
+          ? { ...row, value: Math.round(latestM2) * VIVIENDA_TIPO_M2 }
+          : row;
+      });
+    }
     return filtered.sort((a, b) => {
       if (order === 'increase') {
         const delta = (row: RankingRow) => {
@@ -98,7 +110,7 @@ export default function DashboardRankingTable({
       if (order === 'expensive' || order === 'demand-high' || order === 'yield-high') return b.value - a.value;
       return a.value - b.value;
     });
-  }, [rows, order, previousValues, isInvestment, minYieldThreshold]);
+  }, [rows, order, previousValues, isInvestment, minYieldThreshold, isMobile, profileId, metric, monthlyByZone]);
 
   const title = isDemand
     ? `Top 10 ${zoneLabel} con ${order === 'demand-low' ? 'menos' : 'más'} demanda`
@@ -298,28 +310,36 @@ export default function DashboardRankingTable({
 
               if (profileId === 'compra' || (profileId === 'venta' && metric !== 'demand')) {
                 if (metric === 'total') {
-                  // Salvaguarda: si por desfase o caché residual llegara un valor < 10.000 €, se calibra con el precio m² oficial del Catastro (70 m²)
-                  if (effectiveValue < 10000 && latestM2FromMonthly && latestM2FromMonthly > 100) {
-                    effectiveValue = Math.round(latestM2FromMonthly * 70);
+                  if (isMobile && latestM2FromMonthly && latestM2FromMonthly > 100) {
+                    const roundedM2 = Math.round(latestM2FromMonthly);
+                    effectiveValue = roundedM2 * VIVIENDA_TIPO_M2;
+                    companionM2 = roundedM2;
+                  } else if (effectiveValue < 10000 && latestM2FromMonthly && latestM2FromMonthly > 100) {
+                    // Salvaguarda: si por desfase o caché residual llegara un valor < 10.000 €, se calibra con el precio m² oficial del Catastro (70 m²)
+                    effectiveValue = Math.round(latestM2FromMonthly * VIVIENDA_TIPO_M2);
+                    companionM2 = latestM2FromMonthly;
+                  } else {
+                    companionM2 = latestM2FromMonthly || (effectiveValue > 0 ? Math.round(effectiveValue / VIVIENDA_TIPO_M2) : null);
                   }
-                  companionM2 = latestM2FromMonthly || (effectiveValue > 0 ? Math.round(effectiveValue / 70) : null);
                 } else {
                   // metric === 'unit'
-                  companionTotal = effectiveValue > 0 ? Math.round(effectiveValue * 70) : null;
+                  companionTotal = effectiveValue > 0 ? Math.round(effectiveValue * VIVIENDA_TIPO_M2) : null;
                 }
               } else if (profileId === 'alquiler') {
                 if (metric === 'total') {
-                  companionM2 = latestM2FromMonthly || (effectiveValue > 0 ? Number((effectiveValue / 70).toFixed(1)) : null);
+                  companionM2 = latestM2FromMonthly || (effectiveValue > 0 ? Number((effectiveValue / VIVIENDA_TIPO_M2).toFixed(1)) : null);
                 } else {
-                  companionTotal = effectiveValue > 0 ? Math.round(effectiveValue * 70) : null;
+                  companionTotal = effectiveValue > 0 ? Math.round(effectiveValue * VIVIENDA_TIPO_M2) : null;
                 }
               }
 
               const price = metric === 'unit'
-                ? `${formatNumber(effectiveValue, Number.isInteger(Number(effectiveValue)) ? 0 : 1)} €/m²`
+                ? `${(isMobile && (profileId === 'compra' || profileId === 'venta')) ? formatGroupedIntEs(effectiveValue) : formatNumber(effectiveValue, Number.isInteger(Number(effectiveValue)) ? 0 : 1)} €/m²`
                 : profileId === 'alquiler'
                   ? `${formatEuro(effectiveValue, 0)}/mes`
-                  : formatEuro(effectiveValue, 0);
+                  : (isMobile && (profileId === 'compra' || profileId === 'venta'))
+                    ? `${formatGroupedIntEs(effectiveValue)} €`
+                    : formatEuro(effectiveValue, 0);
 
               const prevPrice = Number.isFinite(previous) && previous > 0
                 ? metric === 'unit'
@@ -345,7 +365,19 @@ export default function DashboardRankingTable({
                           {index + 1}.
                         </span>
                         <span className="v2-ranking-label" style={{ minWidth: 0 }}>
-                          <span className="v2-ranking-name" title={formatName(item.name)} style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: isMobile ? 'normal' : 'nowrap', wordBreak: isMobile ? 'break-word' : undefined }}>
+                          <span
+                          className="v2-ranking-name"
+                          title={formatName(item.name)}
+                          style={{
+                            display: 'block',
+                            overflow: isMobile ? 'visible' : 'hidden',
+                            textOverflow: isMobile ? 'clip' : 'ellipsis',
+                            whiteSpace: isMobile ? 'normal' : 'nowrap',
+                            wordBreak: 'normal',
+                            overflowWrap: 'normal',
+                            hyphens: 'none',
+                          }}
+                        >
                             {formatName(item.name)}
                           </span>
                           {district && (
@@ -389,7 +421,7 @@ export default function DashboardRankingTable({
                         }}
                         title={profileId === 'compra' || profileId === 'venta' ? `Precio medio de venta: ${formatNumber(companionM2, 0)} €/m² (Notarías y Registradores)` : `Precio medio de alquiler: ${formatNumber(companionM2, 1)} €/m²`}
                       >
-                        · {formatNumber(companionM2, profileId === 'alquiler' ? 1 : 0)} €/m²
+                        · {isMobile && (profileId === 'compra' || profileId === 'venta') ? formatGroupedIntEs(companionM2) : formatNumber(companionM2, profileId === 'alquiler' ? 1 : 0)} €/m²
                       </div>
                     )}
                     {(isPriceProfile || (profileId === 'venta' && metric !== 'demand')) && metric === 'unit' && companionTotal && (

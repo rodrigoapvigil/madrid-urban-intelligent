@@ -87,9 +87,14 @@ function getBlueHeatColor(norm: number, val: number, profileId: string, useProfi
  * Formatea valores numéricos con punto de miles (.) y coma decimal (,)
  * seguido del símbolo de unidad correspondiente (€ o %).
  */
-function formatCellDisplay(val: number, profileId: string): string {
+const formatGroupedIntEs = (val: number) => Math.round(val).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+function formatCellDisplay(val: number, profileId: string, isMobile = false): string {
   if (profileId === 'inversion') {
     return `${val.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+  }
+  if (isMobile && (profileId === 'compra' || profileId === 'venta')) {
+    return `${formatGroupedIntEs(val)} €`;
   }
   // Compra, venta y alquiler usan punto de miles y coma decimal en español + €
   return `${val.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} €`;
@@ -158,7 +163,7 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
 
         <div className="hdm-controls">
           <div className="hdm-scale-legend" title="Rampa cromática de 5 bandas térmicas de alta discriminación">
-            <span>{profileId === 'alquiler' ? '< 16 €' : `< ${effectiveMin.toLocaleString('es-ES', { maximumFractionDigits: 0 })} ${unitLabel}`}</span>
+            <span>{profileId === 'alquiler' ? '< 16 €' : `< ${formatGroupedIntEs(effectiveMin)} ${unitLabel}`}</span>
             <div
               className="hdm-scale-bar"
               style={{
@@ -170,7 +175,7 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
               }}
               aria-hidden="true"
             />
-            <span>{profileId === 'alquiler' ? '> 27 €/m²' : `> ${effectiveMax.toLocaleString('es-ES', { maximumFractionDigits: 0 })} ${unitLabel}`}</span>
+            <span>{profileId === 'alquiler' ? '> 27 €/m²' : `> ${formatGroupedIntEs(effectiveMax)} ${unitLabel}`}</span>
           </div>
         </div>
       </div>
@@ -241,7 +246,7 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
                             style={heat ? { backgroundColor: heat.bg, color: heat.text, ...(m.isEst ? { borderColor: heat.text === '#0A192F' ? 'rgba(10, 25, 47, 0.55)' : 'rgba(0, 229, 255, 0.72)' } : {}) } : undefined}
                           >
                             <small style={heat ? { color: heat.text } : undefined}>{m.label}</small>
-                            <span style={heat ? { color: heat.text } : undefined}>{m.val !== null ? formatCellDisplay(m.val, profileId) : '—'}</span>
+                            <span style={heat ? { color: heat.text } : undefined}>{m.val !== null ? formatCellDisplay(m.val, profileId, isMobile) : '—'}</span>
                           </div>
                         );
                       })}

@@ -51,6 +51,7 @@ const COMPARISON_COLORS = {
 } as const;
 
 const COMPARISON_MEDIA_COLOR = '#E5F2F7';
+const VIVIENDA_TIPO_M2 = 70;
 
 type ComparisonLegendItem = { index: number; label: string; color: string; kind: 'real' | 'estimated' | 'madrid' };
 
@@ -410,9 +411,11 @@ const InfoTooltip: React.FC<{
   );
 };
 
+const formatGroupedIntEs = (val: number) => Math.round(val).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
 const formatCurrencyInt = (val: number | null | undefined, unit: string = '€') => {
   if (val === null || val === undefined || !Number.isFinite(Number(val)) || Number(val) <= 0) return '—';
-  const formatted = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(Number(val)));
+  const formatted = new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0, useGrouping: 'always' as any }).format(Math.round(Number(val)));
   return `${formatted} ${unit}`.trim();
 };
 
@@ -2882,7 +2885,10 @@ const MadridDashboardV2: React.FC = () => {
                     const personalEffort = salary > 0 ? (rent / salary) * 100 : 0;
 
                     const rentaAnual = kpiData.renta_media || 0;
-                    const aniosRenta = rentaAnual > 0 ? (kpiData.p_vivienda || 0) / rentaAnual : 0;
+                    const tipo70Total = (isCompra || isVenta) && Number(kpiData.p_m2) > 0
+                      ? Math.round(Number(kpiData.p_m2)) * VIVIENDA_TIPO_M2
+                      : (kpiData.p_vivienda || 0);
+                    const aniosRenta = rentaAnual > 0 ? tipo70Total / rentaAnual : 0;
                     const compraStatusText = aniosRenta <= 0 ? 'Sin datos' : aniosRenta < 5 ? 'Asequible' : aniosRenta < 8 ? 'Moderado' : 'Esfuerzo elevado';
                     const compraStatusColor = aniosRenta <= 0 ? '#baccd6' : aniosRenta < 5 ? '#34D399' : aniosRenta < 8 ? '#FBBF24' : '#F87171';
 
@@ -2926,7 +2932,7 @@ const MadridDashboardV2: React.FC = () => {
                       ? 'Alquiler medio (70 m²)'
                       : isInversion
                         ? 'Precio de inversión'
-                        : 'Precio medio vivienda';
+                        : 'Vivienda tipo (70 m²)';
                     const secondaryLeftUnit = isAlquiler ? '€/mes' : '€';
                     const marketStatus = `${kpiData.estado_mercado || 'Estable'}${kpiData.estado_mercado === 'Crecimiento' ? ' (+)' : kpiData.estado_mercado === 'Ajuste' ? ' (-)' : ''}`;
 
@@ -2954,7 +2960,7 @@ const MadridDashboardV2: React.FC = () => {
                               </>
                             ) : (
                               <>
-                                <strong>{formatCurrencyDec(kpiData.p_m2, 2, '')}</strong>
+                                <strong>{(isCompra || isVenta) ? formatCurrencyInt(kpiData.p_m2, '') : formatCurrencyDec(kpiData.p_m2, 2, '')}</strong>
                                 {Number(kpiData.p_m2) > 0 && <span>€/m²</span>}
                               </>
                             )}
@@ -2964,6 +2970,7 @@ const MadridDashboardV2: React.FC = () => {
                               centralValue={isInversion ? invPercent : Number(kpiData.p_m2)}
                               unit={isInversion ? '%' : '€/m²'}
                               confidencePercent={95}
+                              decimals={(isCompra || isVenta) ? 0 : 2}
                             />
                           )}
                           <div className="v2-rent-chips">
@@ -2994,8 +3001,8 @@ const MadridDashboardV2: React.FC = () => {
                               <span className="v2-kpi-shimmer v2-kpi-shimmer--val" aria-label="Calculando importe medio" />
                             ) : (
                               <strong>
-                                {formatCurrencyInt(kpiData.p_vivienda, '')}
-                                {Number(kpiData.p_vivienda) > 0 ? <small> {secondaryLeftUnit}</small> : null}
+                                {formatCurrencyInt(tipo70Total, '')}
+                                {Number(tipo70Total) > 0 ? <small> {secondaryLeftUnit}</small> : null}
                               </strong>
                             )}
                           </div>
@@ -3019,7 +3026,7 @@ const MadridDashboardV2: React.FC = () => {
                           {isCompra && (
                             <div className="v2-rent-secondary-card v2-rent-effort">
                               <div className="v2-rent-effort-head">
-                                <span className="v2-rent-eyebrow">Poder adquisitivo</span>
+                                <span className="v2-rent-eyebrow">Años de renta para comprar</span>
                                 {isKpiFetching ? <span className="v2-kpi-shimmer v2-kpi-shimmer--chip" /> : <strong style={{ color: compraStatusColor }}>{aniosRenta > 0 ? `${aniosRenta.toFixed(1).replace('.', ',')} años` : '—'}</strong>}
                               </div>
                               <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(100, (aniosRenta / 12) * 100)}%`, background: compraStatusColor }} /><b style={{ left: '41.7%' }} /></div>
@@ -4452,7 +4459,7 @@ const MadridDashboardV2: React.FC = () => {
 
                   const price = Number(kpi.precio_m2) || 0;
                   const otherPrice = Number(otherKpi.precio_m2) || 0;
-                  const diffBase = isMobile ? Math.max(price, otherPrice) : otherPrice;
+                  const diffBase = (isMobile && p.id === 'alquiler') ? Math.max(price, otherPrice) : otherPrice;
                   const diffPct = diffBase ? ((price - otherPrice) / diffBase) * 100 : 0;
                   const formattedDiff = `${diffPct >= 0 ? '+' : '\u2212'}${Math.abs(diffPct).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
 
@@ -4506,11 +4513,12 @@ const MadridDashboardV2: React.FC = () => {
                       </div>
                     );
                   } else if (p.id === 'compra') {
-                    const totalPrice70 = Math.round(price * 70);
-                    const totalDisplay = price > 0 ? `${new Intl.NumberFormat('es-ES').format(totalPrice70)} €` : '—';
-                    const priceM2Display = price > 0 ? `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(price))} €/m²` : '—';
+                    const totalPrice70 = isMobile ? Math.round(price) * VIVIENDA_TIPO_M2 : Math.round(price * VIVIENDA_TIPO_M2);
+                    const totalDisplay = price > 0 ? `${formatGroupedIntEs(totalPrice70)} €` : '—';
+                    const priceM2Display = price > 0 ? `${isMobile ? formatGroupedIntEs(price) : new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(Math.round(price))} €/m²` : '—';
                     const annualIncome = Number(kpi.renta_media) || 0;
                     const monthlyIncome = annualIncome > 0 ? Math.round(annualIncome / 12) : 0;
+                    const yearsToBuy = (annualIncome > 0 && totalPrice70 > 0) ? totalPrice70 / annualIncome : 0;
 
                     col1 = (
                       <div className="v2-zone-kpi-col v2-zone-kpi-col--left">
@@ -4525,7 +4533,20 @@ const MadridDashboardV2: React.FC = () => {
                       </div>
                     );
 
-                    col2 = (
+                    col2 = isMobile ? (
+                      <div className="v2-zone-kpi-col v2-zone-kpi-col--right">
+                        <div className="v2-zone-kpi-label-row">
+                          <span className="v2-zone-kpi-label">AÑOS DE RENTA PARA COMPRAR</span>
+                          <InfoTooltip {...getComparisonKpiInfo('poder_adquisitivo', zoneName)} align="right" />
+                        </div>
+                        <div className="v2-zone-kpi-value">
+                          {yearsToBuy > 0 ? `${yearsToBuy.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} años` : '—'}
+                        </div>
+                        <div className="v2-zone-kpi-sub">
+                          Renta censal (INE · Proyección): {monthlyIncome > 0 ? `${formatGroupedIntEs(monthlyIncome)} €/mes` : '—'}
+                        </div>
+                      </div>
+                    ) : (
                       <div className="v2-zone-kpi-col v2-zone-kpi-col--right">
                         <div className="v2-zone-kpi-label-row">
                           <span className="v2-zone-kpi-label">PODER ADQUISITIVO (INE)</span>
@@ -4680,12 +4701,29 @@ const MadridDashboardV2: React.FC = () => {
                         ? Number(kpiData.p_m2)
                         : madridInvYield;
                       const madridInvPctText = madridInvRatio > 0 ? formatSpanishPercentage(toPercent(madridInvRatio), 1, false) : '';
+                      const madridSeriesPoint = Array.isArray(seriesMadrid) && seriesMadrid.length > 0
+                        ? (seriesMadrid.find((d: any) => Number(d.mes) === selectedMonthIndex + 1) || seriesMadrid[seriesMadrid.length - 1])
+                        : null;
+                      const madridSeriesRaw = Number(madridSeriesPoint?.precio_m2) || 0;
+                      const madridMetricVal = madridSeriesRaw > 0
+                        ? madridSeriesRaw
+                        : (selectedDistrict === 'Todos' && selectedBarrio === 'Todos' ? Number(kpiData.p_m2) || 0 : 0);
+                      const madridMobilePeriod = `${selectedMonth ? `${selectedMonth.slice(0, 3)} ` : ''}${selectedYear}`;
+                      const madridMobileValText = madridMetricVal > 0
+                        ? (p.id === 'inversion'
+                          ? formatSpanishPercentage(toPercent(madridMetricVal), 1, false)
+                          : p.id === 'alquiler'
+                            ? `${madridMetricVal.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €/m²`
+                            : `${formatGroupedIntEs(madridMetricVal)} €/m²`)
+                        : '';
                       const madridLegendLabel = p.id === 'inversion'
                         ? (madridInvPctText ? `Media Madrid (${madridInvPctText} · Registro Ayto. Madrid Q2 2026)` : 'Media Madrid (Registro Ayto. Madrid Q2 2026)')
                         : 'Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)';
-                      const madridChipLabel = p.id === 'inversion'
-                        ? (madridInvPctText ? `Media Madrid (${madridInvPctText} · Q2 2026)` : 'Media Madrid (Q2 2026)')
-                        : 'Media Madrid (21,61 €/m² · Q2 2026)';
+                      const madridChipLabel = isMobile
+                        ? (madridMobileValText ? `Media Madrid (${madridMobileValText} · ${madridMobilePeriod})` : `Media Madrid (${madridMobilePeriod})`)
+                        : p.id === 'inversion'
+                          ? (madridInvPctText ? `Media Madrid (${madridInvPctText} · Q2 2026)` : 'Media Madrid (Q2 2026)')
+                          : 'Media Madrid (21,61 €/m² · Q2 2026)';
                       return effectiveCompareGraphView === 'superpuesta' ? (
                       <div className="v2-compare-view-superpuesta">
                         <div className="v2-overlay-wrapper">
@@ -4820,31 +4858,36 @@ const MadridDashboardV2: React.FC = () => {
                     })()}
 
                     {/* Resumen y balance de la comparativa (accesible en ambas vistas) */}
-                    {comparisonAHasData && comparisonBHasData && p.id === 'alquiler' && (() => {
+                    {comparisonAHasData && comparisonBHasData && (p.id === 'alquiler' || (isMobile && (p.id === 'compra' || p.id === 'venta'))) && (() => {
                       const priceA = Number(kpiDataA.precio_m2) || 0;
                       const priceB = Number(kpiDataB.precio_m2) || 0;
                       const yieldA = Number(kpiDataA.rentabilidad) || 0;
                       const yieldB = Number(kpiDataB.rentabilidad) || 0;
-                      const rentA = Math.round(priceA * 70);
-                      const rentB = Math.round(priceB * 70);
-                      const incomeA = Number(kpiDataA.renta_media) ? Math.round(kpiDataA.renta_media / 12) : 0;
-                      const incomeB = Number(kpiDataB.renta_media) ? Math.round(kpiDataB.renta_media / 12) : 0;
-                      const effortA = (rentA > 0 && incomeA > 0) ? (rentA / incomeA) * 100 : (Number(kpiDataA.esfuerzo_compra) || 0);
-                      const effortB = (rentB > 0 && incomeB > 0) ? (rentB / incomeB) * 100 : (Number(kpiDataB.esfuerzo_compra) || 0);
+                      const total70A = Math.round(priceA * VIVIENDA_TIPO_M2);
+                      const total70B = Math.round(priceB * VIVIENDA_TIPO_M2);
+                      const annualIncomeA = Number(kpiDataA.renta_media) || 0;
+                      const annualIncomeB = Number(kpiDataB.renta_media) || 0;
+                      const incomeA = annualIncomeA ? Math.round(annualIncomeA / 12) : 0;
+                      const incomeB = annualIncomeB ? Math.round(annualIncomeB / 12) : 0;
+                      const effortA = (total70A > 0 && incomeA > 0) ? (total70A / incomeA) * 100 : (Number(kpiDataA.esfuerzo_compra) || 0);
+                      const effortB = (total70B > 0 && incomeB > 0) ? (total70B / incomeB) * 100 : (Number(kpiDataB.esfuerzo_compra) || 0);
+                      const yearsA = (annualIncomeA > 0 && total70A > 0) ? total70A / annualIncomeA : 0;
+                      const yearsB = (annualIncomeB > 0 && total70B > 0) ? total70B / annualIncomeB : 0;
                       const fmtEs = (val: number, decimals = 1) =>
                         val.toLocaleString('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
                       const cheaper = priceA <= priceB ? selectedZoneA : selectedZoneB;
                       const pricier = priceA <= priceB ? selectedZoneB : selectedZoneA;
                       const lessEffort = effortA <= effortB ? selectedZoneA : selectedZoneB;
-                      const monthlySaving = Math.abs(rentA - rentB);
+                      const fewerYears = yearsA <= yearsB ? selectedZoneA : selectedZoneB;
+                      const monthlySaving = Math.abs(total70A - total70B);
                       const pricierPrice = Math.max(priceA, priceB);
                       const cheaperVsPricierPct = pricierPrice > 0 ? (Math.abs(priceA - priceB) / pricierPrice) * 100 : 0;
 
                       const percentDifference = (a: number, b: number) => {
                         if (!isMobile) return b ? `${a > b ? '+' : ''}${((a - b) / b * 100).toFixed(1)}%` : '—';
                         if (!a || !b) return '—';
-                        const maxVal = Math.max(a, b);
-                        const diff = ((a - b) / maxVal) * 100;
+                        const baseVal = p.id === 'alquiler' ? Math.max(a, b) : b;
+                        const diff = ((a - b) / baseVal) * 100;
                         const sign = diff > 0 ? '+' : diff < 0 ? '−' : '';
                         return `${sign}${fmtEs(Math.abs(diff), 1)} %`;
                       };
@@ -4860,16 +4903,35 @@ const MadridDashboardV2: React.FC = () => {
                         const sign = diff > 0 ? '+' : diff < 0 ? '−' : '';
                         return `${sign}${fmtEs(Math.abs(diff), 1)} pt`;
                       };
-                      const allRows = [
-                        { label: 'Precio m²', a: priceA ? `${formatNumber(priceA, 2)} €/m²` : '—', b: priceB ? `${formatNumber(priceB, 2)} €/m²` : '—', diff: percentDifference(priceA, priceB), aWins: priceA <= priceB },
-                        { label: 'Rentabilidad', a: yieldA ? (isMobile ? `${fmtEs(yieldA * 100, 2)} %` : `${(yieldA * 100).toFixed(2)}%`) : '—', b: yieldB ? (isMobile ? `${fmtEs(yieldB * 100, 2)} %` : `${(yieldB * 100).toFixed(2)}%`) : '—', diff: pointDifference(yieldA, yieldB), aWins: yieldA >= yieldB },
-                        { label: 'Esfuerzo', a: effortA ? (isMobile ? `${fmtEs(effortA, 1)} %` : `${effortA.toFixed(1)}%`) : '—', b: effortB ? (isMobile ? `${fmtEs(effortB, 1)} %` : `${effortB.toFixed(1)}%`) : '—', diff: effortDifference(effortA, effortB), aWins: effortA <= effortB },
-                      ];
+                      const yearsDifference = (a: number, b: number) => {
+                        if (!a || !b) return '—';
+                        const diff = a - b;
+                        const sign = diff > 0 ? '+' : diff < 0 ? '−' : '';
+                        return `${sign}${fmtEs(Math.abs(diff), 1)} años`;
+                      };
+                      const allRows = p.id === 'alquiler'
+                        ? [
+                            { label: 'Precio m²', a: priceA ? `${formatNumber(priceA, 2)} €/m²` : '—', b: priceB ? `${formatNumber(priceB, 2)} €/m²` : '—', diff: percentDifference(priceA, priceB), aWins: priceA <= priceB },
+                            { label: 'Rentabilidad', a: yieldA ? (isMobile ? `${fmtEs(yieldA * 100, 2)} %` : `${(yieldA * 100).toFixed(2)}%`) : '—', b: yieldB ? (isMobile ? `${fmtEs(yieldB * 100, 2)} %` : `${(yieldB * 100).toFixed(2)}%`) : '—', diff: pointDifference(yieldA, yieldB), aWins: yieldA >= yieldB },
+                            { label: 'Esfuerzo', a: effortA ? (isMobile ? `${fmtEs(effortA, 1)} %` : `${effortA.toFixed(1)}%`) : '—', b: effortB ? (isMobile ? `${fmtEs(effortB, 1)} %` : `${effortB.toFixed(1)}%`) : '—', diff: effortDifference(effortA, effortB), aWins: effortA <= effortB },
+                          ]
+                        : p.id === 'compra'
+                          ? [
+                              { label: 'Precio m²', a: priceA ? `${formatGroupedIntEs(priceA)} €/m²` : '—', b: priceB ? `${formatGroupedIntEs(priceB)} €/m²` : '—', diff: percentDifference(priceA, priceB), aWins: priceA <= priceB },
+                              { label: 'Vivienda 70 m²', a: total70A ? `${formatGroupedIntEs(total70A)} €` : '—', b: total70B ? `${formatGroupedIntEs(total70B)} €` : '—', diff: percentDifference(total70A, total70B), aWins: total70A <= total70B },
+                              { label: 'Años de renta', a: yearsA ? `${fmtEs(yearsA, 1)} años` : '—', b: yearsB ? `${fmtEs(yearsB, 1)} años` : '—', diff: yearsDifference(yearsA, yearsB), aWins: yearsA <= yearsB },
+                            ]
+                          : [
+                              { label: 'Precio m²', a: priceA ? `${formatGroupedIntEs(priceA)} €/m²` : '—', b: priceB ? `${formatGroupedIntEs(priceB)} €/m²` : '—', diff: percentDifference(priceA, priceB), aWins: priceA >= priceB },
+                              { label: 'Vivienda 70 m²', a: total70A ? `${formatGroupedIntEs(total70A)} €` : '—', b: total70B ? `${formatGroupedIntEs(total70B)} €` : '—', diff: percentDifference(total70A, total70B), aWins: total70A >= total70B },
+                            ];
                       const rows = isMobile && p.id === 'alquiler' ? allRows.filter(row => row.label !== 'Rentabilidad') : allRows;
                       const pricePctDesktop = priceB ? Math.abs((priceA - priceB) / priceB * 100).toFixed(1) : null;
                       const pricePctLabel = isMobile ? `${fmtEs(cheaperVsPricierPct, 1)} %` : `${pricePctDesktop}%`;
+                      const compraRelPctLabel = priceB ? `${fmtEs(Math.abs((priceA - priceB) / priceB) * 100, 1)} %` : '—';
                       const effortDiffDesktop = Math.abs(effortA - effortB).toFixed(1);
                       const effortDiffLabel = isMobile ? fmtEs(Math.abs(effortA - effortB), 1) : effortDiffDesktop;
+                      const yearsDiffLabel = fmtEs(Math.abs(yearsA - yearsB), 1);
 
                       return (
                         <div className="v2-compare-summary">
@@ -4893,10 +4955,14 @@ const MadridDashboardV2: React.FC = () => {
                               ))}
                             </tbody>
                           </table>
-                          {(isMobile ? pricierPrice > 0 : Boolean(pricePctDesktop)) && (
+                          {(isMobile ? (p.id === 'alquiler' ? pricierPrice > 0 : priceB > 0) : Boolean(pricePctDesktop)) && (
                             <p style={{ margin: '8px 0 16px', color: '#b8cbd9', fontSize: '13px' }}>
                               {isMobile
-                                ? `${formatZoneOption(cheaper)} es un ${pricePctLabel} más barata que ${formatZoneOption(pricier)}; ${formatZoneOption(lessEffort)} exige menos esfuerzo sobre la renta media.`
+                                ? p.id === 'compra'
+                                  ? `${formatZoneOption(cheaper)} es ${monthlySaving.toLocaleString('es-ES')} € más barata (vivienda tipo de 70 m²); ${formatZoneOption(fewerYears)} exige menos años de renta media.`
+                                  : p.id === 'venta'
+                                    ? `${formatZoneOption(pricier)} cotiza un ${compraRelPctLabel} por encima de ${formatZoneOption(cheaper)} en vivienda tipo de 70 m².`
+                                    : `${formatZoneOption(cheaper)} es un ${pricePctLabel} más barata que ${formatZoneOption(pricier)}; ${formatZoneOption(lessEffort)} exige menos esfuerzo sobre la renta media.`
                                 : `${cheaper} tiene el alquiler un ${pricePctLabel} más bajo; ${lessEffort} exige menos esfuerzo sobre la renta media.`}
                             </p>
                           )}
@@ -4908,9 +4974,15 @@ const MadridDashboardV2: React.FC = () => {
                               <div>
                                 <strong style={{ color: '#00e5ff' }}>Conclusión: </strong>
                                 <span>
-                                  {cheaper === lessEffort
-                                    ? `${formatZoneOption(cheaper)} ${monthlySaving > 0 ? `es ${monthlySaving.toLocaleString('es-ES')} €/mes más barata` : `es un ${pricePctLabel} más barata`} y reduce el esfuerzo sobre la renta media en ${effortDiffLabel} puntos.`
-                                    : `${formatZoneOption(cheaper)} ${monthlySaving > 0 ? `es ${monthlySaving.toLocaleString('es-ES')} €/mes más barata` : `es un ${pricePctLabel} más barata`}, pero exige ${effortDiffLabel} puntos más de esfuerzo sobre la renta media.`}
+                                  {p.id === 'compra'
+                                    ? (cheaper === fewerYears
+                                      ? `${formatZoneOption(cheaper)} es ${monthlySaving.toLocaleString('es-ES')} € más barata (70 m²) y requiere ${yearsDiffLabel} años menos de renta media.`
+                                      : `${formatZoneOption(cheaper)} es ${monthlySaving.toLocaleString('es-ES')} € más barata (70 m²), pero exige ${yearsDiffLabel} años más de renta media para comprar.`)
+                                    : p.id === 'venta'
+                                      ? `${formatZoneOption(pricier)} obtiene ${monthlySaving.toLocaleString('es-ES')} € más por una vivienda tipo de 70 m² frente a ${formatZoneOption(cheaper)}.`
+                                      : (cheaper === lessEffort
+                                        ? `${formatZoneOption(cheaper)} ${monthlySaving > 0 ? `es ${monthlySaving.toLocaleString('es-ES')} €/mes más barata` : `es un ${pricePctLabel} más barata`} y reduce el esfuerzo sobre la renta media en ${effortDiffLabel} puntos.`
+                                        : `${formatZoneOption(cheaper)} ${monthlySaving > 0 ? `es ${monthlySaving.toLocaleString('es-ES')} €/mes más barata` : `es un ${pricePctLabel} más barata`}, pero exige ${effortDiffLabel} puntos más de esfuerzo sobre la renta media.`)}
                                 </span>
                               </div>
                             </div>

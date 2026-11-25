@@ -391,7 +391,9 @@ const MadridMap: React.FC<MapProps> = ({
       const padding: [number, number] = [Math.max(34, Math.round(size.y * 0.055)), Math.max(18, Math.round(size.x * 0.03))];
       const hasSelectedContext = drillDownOnSelection && Boolean(selectedBarrio || selectedDistrict);
       map.fitBounds(bounds, {
-        padding,
+        ...(isMobile
+          ? { paddingTopLeft: [52, 16] as [number, number], paddingBottomRight: [14, 16] as [number, number] }
+          : { padding }),
         ...(hasSelectedContext ? { maxZoom: type === 'neighborhoods' && selectedBarrio ? 12.2 : 11.5 } : {}),
         animate: false,
       });
@@ -597,7 +599,7 @@ const MadridMap: React.FC<MapProps> = ({
       // A map hidden on first render is fitted by ResizeObserver when it becomes visible.
       if (drillDownOnSelection && (selectedBarrio || selectedDistrict)) {
         if (fitMapToContext()) hasInitialViewRef.current = true;
-      } else if (!hasInitialViewRef.current && fitMapToContext()) {
+      } else if ((isMobile || !hasInitialViewRef.current) && fitMapToContext()) {
         hasInitialViewRef.current = true;
       }
     };
@@ -622,7 +624,9 @@ const MadridMap: React.FC<MapProps> = ({
     if (!map || !bounds?.isValid()) return;
     const size = map.getSize();
     map.fitBounds(bounds, {
-      padding: [Math.max(34, Math.round(size.y * 0.055)), Math.max(18, Math.round(size.x * 0.03))],
+      ...(isMobile
+        ? { paddingTopLeft: [52, 16] as [number, number], paddingBottomRight: [14, 16] as [number, number] }
+        : { padding: [Math.max(34, Math.round(size.y * 0.055)), Math.max(18, Math.round(size.x * 0.03))] }),
       animate: false,
     });
   };

@@ -6102,3 +6102,83 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root[data-platform="mobile"] .hdm-mobile-pill span {
   color: inherit !important;
 }
+
+/* Prompt 1 móvil: Ranking sin cortes de palabras ni clipping de controles */
+.v2-root[data-platform="mobile"] .v2-ranking-controls {
+  height: auto !important;
+  min-height: 38px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.v2-root[data-platform="mobile"] .v2-ranking-order {
+  max-width: 100%;
+  min-height: 36px;
+}
+.v2-root[data-platform="mobile"] .v2-rank-mini-card {
+  padding: 14px 10px !important;
+}
+.v2-root[data-platform="mobile"] .v2-ranking-table-informative {
+  table-layout: fixed !important;
+  width: 100% !important;
+}
+.v2-root[data-platform="mobile"] .v2-ranking-table-informative th:first-child,
+.v2-root[data-platform="mobile"] .v2-ranking-table-informative td:first-child {
+  width: 54% !important;
+}
+.v2-root[data-platform="mobile"] .v2-ranking-table-informative th:last-child,
+.v2-root[data-platform="mobile"] .v2-ranking-table-informative td:last-child {
+  width: 46% !important;
+}
+.v2-root[data-platform="mobile"] .v2-ranking-table-informative tbody tr {
+  height: auto !important;
+  min-height: 44px;
+}
+.v2-root[data-platform="mobile"] .v2-ranking-zone {
+  height: auto !important;
+  min-height: 44px;
+}
+.v2-root[data-platform="mobile"] .v2-ranking-name {
+  white-space: normal !important;
+  word-break: normal !important;
+  overflow-wrap: normal !important;
+  hyphens: none !important;
+  line-height: 1.25;
+}
+.v2-root[data-platform="mobile"] .v2-ranking-value {
+  width: auto !important;
+  white-space: nowrap !important;
+}
+.v2-root[data-platform="mobile"] .v2-ranking-compare-btn {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  padding: 0 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.v2-root[data-platform="mobile"] .v2-rent-effort-caption,
+.v2-root[data-platform="mobile"] .v2-rent-effort-note {
+  font-size: 12px !important;
+  line-height: 1.4;
+}
+
+/* Prompt 3 móvil: Controles del mapa compactos y leyenda sin solapamientos */
+.v2-root[data-platform="mobile"] .v2-map-zoom-controls {
+  top: 8px;
+  left: 8px;
+  gap: 4px;
+}
+.v2-root[data-platform="mobile"] .v2-map-zoom-controls button {
+  width: 36px;
+  height: 36px;
+}
+.v2-root[data-platform="mobile"] .v2-map-legend-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-size: 11px;
+}
+.v2-root[data-platform="mobile"] .v2-map-legend-labels > span {
+  white-space: nowrap;
+}

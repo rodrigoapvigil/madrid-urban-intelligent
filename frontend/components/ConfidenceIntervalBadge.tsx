@@ -7,6 +7,7 @@ interface ConfidenceIntervalBadgeProps {
   unit?: string;
   margin?: number;
   confidencePercent?: number;
+  decimals?: number;
   className?: string;
 }
 
@@ -15,6 +16,7 @@ export const ConfidenceIntervalBadge: React.FC<ConfidenceIntervalBadgeProps> = (
   unit = '€/m²',
   margin,
   confidencePercent = 95,
+  decimals = 2,
   className = '',
 }) => {
   const [showTooltip, setShowTooltip] = useState(false);
@@ -24,8 +26,11 @@ export const ConfidenceIntervalBadge: React.FC<ConfidenceIntervalBadgeProps> = (
 
   // Derivar margen estadístico realista (~5.5%)
   const effectiveMargin = margin ?? (unit === '%' ? 0.28 : Math.max(0.75, Number((centralValue * 0.055).toFixed(2))));
-  const lowVal = (centralValue - effectiveMargin).toFixed(2).replace('.', ',');
-  const highVal = (centralValue + effectiveMargin).toFixed(2).replace('.', ',');
+  const fmt = (v: number) => decimals === 0
+    ? Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    : v.toFixed(decimals).replace('.', ',');
+  const lowVal = fmt(centralValue - effectiveMargin);
+  const highVal = fmt(centralValue + effectiveMargin);
 
   return (
     <div
