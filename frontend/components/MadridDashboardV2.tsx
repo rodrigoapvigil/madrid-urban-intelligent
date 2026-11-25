@@ -1104,6 +1104,65 @@ const MadridDashboardV2: React.FC = () => {
   const latestDashboardRequest = useRef(0);
   const hasLoadedPrimaryKpis = useRef(false);
 
+  const updateKpiScrollState = useCallback((el: HTMLElement | null) => {
+    if (!el) return;
+    const shell = el.closest('.v2-kpi-scroll-shell') as HTMLElement | null;
+    if (!shell) return;
+    const hasMoreBelow = el.scrollHeight - el.scrollTop - el.clientHeight > 6;
+    shell.classList.toggle('has-more-below', hasMoreBelow);
+  }, []);
+
+  const scrollAccordionIntoContainer = useCallback((accordionEl: HTMLElement | null) => {
+    if (!accordionEl) return;
+    const scrollContainer = accordionEl.closest('.v2-kpi-stack') as HTMLElement | null;
+    if (!scrollContainer) return;
+    if (scrollContainer.scrollHeight <= scrollContainer.clientHeight + 2) return;
+
+    const containerRect = scrollContainer.getBoundingClientRect();
+    const accRect = accordionEl.getBoundingClientRect();
+    const targetTop = Math.max(0, accRect.top - containerRect.top + scrollContainer.scrollTop - 8);
+    scrollContainer.scrollTo({ top: targetTop, behavior: 'smooth' });
+  }, []);
+
+  const handleAccordionToggle = useCallback((
+    e: React.MouseEvent<HTMLButtonElement>,
+    isCurrentlyOpen: boolean,
+    setOpen: React.Dispatch<React.SetStateAction<boolean>>
+  ) => {
+    const nextOpen = !isCurrentlyOpen;
+    const accordionEl = e.currentTarget.closest('.v2-sim-accordion') as HTMLElement | null;
+    setOpen(nextOpen);
+    if (nextOpen && accordionEl) {
+      window.setTimeout(() => {
+        scrollAccordionIntoContainer(accordionEl);
+        updateKpiScrollState(accordionEl.closest('.v2-kpi-stack') as HTMLElement | null);
+      }, 90);
+      window.setTimeout(() => {
+        scrollAccordionIntoContainer(accordionEl);
+        updateKpiScrollState(accordionEl.closest('.v2-kpi-stack') as HTMLElement | null);
+      }, 310);
+    } else if (accordionEl) {
+      window.setTimeout(() => {
+        updateKpiScrollState(accordionEl.closest('.v2-kpi-stack') as HTMLElement | null);
+      }, 310);
+    }
+  }, [scrollAccordionIntoContainer, updateKpiScrollState]);
+
+  useEffect(() => {
+    const kpiStack = activePanelRef.current?.querySelector('.v2-kpi-stack') as HTMLElement | null;
+    if (!kpiStack) return;
+    const syncFade = () => updateKpiScrollState(kpiStack);
+    syncFade();
+    const ro = new ResizeObserver(syncFade);
+    ro.observe(kpiStack);
+    Array.from(kpiStack.children).forEach(child => ro.observe(child));
+    window.addEventListener('resize', syncFade);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', syncFade);
+    };
+  }, [profileIdx, isRentSimOpen, isPurchaseSimOpen, isInvSimOpen, isVentaMoreOpen, showPurchaseSim, showInvSim, isNetYieldActive, netYieldValue, updateKpiScrollState]);
+
   useEffect(() => {
     if (!showHelpModal && !showMapHelpModal && !showHeatmapHelpModal && !showCompareHelpModal) return;
     lockScroll();
@@ -3064,7 +3123,7 @@ const MadridDashboardV2: React.FC = () => {
 
             {/* KPI & MAPA SECTION */}
             <div className="v2-grid-main" data-dashboard-section="summary">
-              <div className="v2-kpi-col">
+              <div className="v2-kpi-col" onWheel={(e) => e.stopPropagation()}>
                 <div className="v2-kpi-static-head">
                   {!isMobile && <div className="v2-zone-period-controls">
                     <ZoneSearch
@@ -3093,13 +3152,7 @@ const MadridDashboardV2: React.FC = () => {
                 <div className="v2-kpi-scroll-shell">
                   <div
                     className="v2-kpi-stack"
-                    style={{
-                      overflowY:
-                        activeProfile.id === 'alquiler' ? (isRentSimOpen ? 'auto' : 'hidden') :
-                        activeProfile.id === 'compra'   ? (isPurchaseSimOpen ? 'auto' : 'hidden') :
-                        activeProfile.id === 'inversion'? (isInvSimOpen ? 'auto' : 'hidden') :
-                        isVentaMoreOpen ? 'auto' : 'hidden'  /* venta */
-                    }}
+                    onScroll={(e) => updateKpiScrollState(e.currentTarget)}
                   >
 
                   {activeProfile.id === 'alquiler' && (() => {
@@ -3409,7 +3462,7 @@ const MadridDashboardV2: React.FC = () => {
                           <button
                             type="button"
                             className="v2-sim-accordion-trigger"
-                            onClick={() => setIsPurchaseSimOpen(v => !v)}
+                            onClick={(e) => handleAccordionToggle(e, isPurchaseSimOpen, setIsPurchaseSimOpen)}
                             aria-expanded={isPurchaseSimOpen}
                           >
                             <span className="v2-sim-accordion-label">
@@ -3419,8 +3472,9 @@ const MadridDashboardV2: React.FC = () => {
                             <ChevronDown size={15} className={`v2-sim-chevron ${isPurchaseSimOpen ? 'rotated' : ''}`} />
                           </button>
 
-                          {isPurchaseSimOpen && (
-                            <div className="v2-sim-accordion-body">
+                          <div className="v2-sim-accordion-panel" aria-hidden={!isPurchaseSimOpen}>
+                            <div className="v2-sim-accordion-inner">
+                              <div className="v2-sim-accordion-body">
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                 <div>
                                   <label style={{ fontSize: '10px', color: '#BACCD6' }}>Ingresos anuales (€)</label>
@@ -3471,8 +3525,9 @@ const MadridDashboardV2: React.FC = () => {
                                   </div>
                                 </div>
                               )}
+                              </div>
                             </div>
-                          )}
+                          </div>
                         </div>
                       </>
                     );
@@ -3522,7 +3577,7 @@ const MadridDashboardV2: React.FC = () => {
                           <button
                             type="button"
                             className="v2-sim-accordion-trigger"
-                            onClick={() => setIsRentSimOpen(v => !v)}
+                            onClick={(e) => handleAccordionToggle(e, isRentSimOpen, setIsRentSimOpen)}
                             aria-expanded={isRentSimOpen}
                           >
                             <span className="v2-sim-accordion-label">
@@ -3532,8 +3587,9 @@ const MadridDashboardV2: React.FC = () => {
                             <ChevronDown size={15} className={`v2-sim-chevron ${isRentSimOpen ? 'rotated' : ''}`} />
                           </button>
 
-                          {isRentSimOpen && (
-                            <div className="v2-sim-accordion-body">
+                          <div className="v2-sim-accordion-panel" aria-hidden={!isRentSimOpen}>
+                            <div className="v2-sim-accordion-inner">
+                              <div className="v2-sim-accordion-body">
                               <div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                   <label style={{ fontSize: '11px', fontWeight: '700', color: '#FFFFFF' }}>Calcula con tu sueldo</label>
@@ -3579,8 +3635,9 @@ const MadridDashboardV2: React.FC = () => {
                                   </p>
                                 </div>
                               )}
+                              </div>
                             </div>
-                          )}
+                          </div>
                         </div>
                       </>
                     );
@@ -3630,7 +3687,7 @@ const MadridDashboardV2: React.FC = () => {
                         <button
                           type="button"
                           className="v2-sim-accordion-trigger"
-                          onClick={() => setIsInvSimOpen(v => !v)}
+                          onClick={(e) => handleAccordionToggle(e, isInvSimOpen, setIsInvSimOpen)}
                           aria-expanded={isInvSimOpen}
                         >
                           <span className="v2-sim-accordion-label">
@@ -3640,8 +3697,9 @@ const MadridDashboardV2: React.FC = () => {
                           <ChevronDown size={15} className={`v2-sim-chevron ${isInvSimOpen ? 'rotated' : ''}`} />
                         </button>
 
-                        {isInvSimOpen && (
-                          <div className="v2-sim-accordion-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <div className="v2-sim-accordion-panel" aria-hidden={!isInvSimOpen}>
+                          <div className="v2-sim-accordion-inner">
+                            <div className="v2-sim-accordion-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <ExpenseYieldSimulator
                               grossYield={Number(kpiData.p_m2) || 0.062}
                               purchasePrice={Number(kpiData.p_vivienda) || 280000}
@@ -3797,7 +3855,7 @@ const MadridDashboardV2: React.FC = () => {
                               </button>
 
                               {hasInvSim && (
-                                <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(2, 20, 43, 0.92)', border: `1px solid ${activeProfile.color}55`, borderRadius: '8px', fontSize: '11px', color: '#E2EFF7', display: 'flex', flexDirection: 'column', gap: '6px', animation: 'v2FadeIn 0.2s ease', maxHeight: '180px', overflowY: 'auto' }}>
+                                <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(2, 20, 43, 0.92)', border: `1px solid ${activeProfile.color}55`, borderRadius: '8px', fontSize: '11px', color: '#E2EFF7', display: 'flex', flexDirection: 'column', gap: '6px', animation: 'v2FadeIn 0.2s ease' }}>
                                   <strong style={{ fontSize: '10px', textTransform: 'uppercase', color: activeProfile.color, letterSpacing: '0.05em' }}>Estimación simulada</strong>
                                   <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', borderBottom: '1px solid rgba(186, 204, 214, 0.16)', paddingBottom: '6px' }}>
                                     {projectionRows.map(row => (
@@ -3821,8 +3879,9 @@ const MadridDashboardV2: React.FC = () => {
                               )}
                             </div>
                           </div>
-                        )}
+                        </div>
                       </div>
+                    </div>
                     );
                   })()}
 
@@ -3861,18 +3920,19 @@ const MadridDashboardV2: React.FC = () => {
                         <div className={`v2-sim-accordion ${isVentaMoreOpen ? 'is-open' : ''}`}>
                           <button
                             type="button"
-                            className="v2-sim-trigger"
-                            onClick={() => setIsVentaMoreOpen(v => !v)}
+                            className="v2-sim-accordion-trigger"
+                            onClick={(e) => handleAccordionToggle(e, isVentaMoreOpen, setIsVentaMoreOpen)}
                             aria-expanded={isVentaMoreOpen}
                           >
-                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                              Ver más indicadores
+                            <span className="v2-sim-accordion-label">
+                              <Settings size={14} className="v2-sim-gear" />
+                              <span>Ver más indicadores</span>
                             </span>
                             <ChevronDown size={15} className={`v2-sim-chevron ${isVentaMoreOpen ? 'rotated' : ''}`} />
                           </button>
-                          {isVentaMoreOpen && (
-                            <>
+                          <div className="v2-sim-accordion-panel" aria-hidden={!isVentaMoreOpen}>
+                            <div className="v2-sim-accordion-inner">
+                              <div className="v2-sim-accordion-body" style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                         <div className="v2-kpi-card">
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <label>¿Cuánto tardará en venderse?</label>
@@ -3933,8 +3993,9 @@ const MadridDashboardV2: React.FC = () => {
                             más de precio si esperas
                           </div>
                         </div>
-                            </>
-                          )}
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </>
                     );

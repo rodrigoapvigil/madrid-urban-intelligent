@@ -13,7 +13,7 @@ from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.platypus import (
     BaseDocTemplate, Frame, PageTemplate, Paragraph, Spacer, Table, TableStyle
 )
-from reportlab.graphics.shapes import Drawing
+from reportlab.graphics.shapes import Drawing, String
 from reportlab.graphics.charts.barcharts import VerticalBarChart
 
 from backend.services.veredicto_engine import VeredictoResponse
@@ -68,18 +68,18 @@ def _fmt_pct_es(val: float) -> str:
     return f"{_fmt_es(val, 1, signed=True)} %"
 
 
-def _crear_grafica_comparativa(veredicto: VeredictoResponse, is_alquiler: bool, height_mm: float = 34.0) -> Drawing:
-    """Genera grafica vectorial compacta de barras comparando inmueble, limite inferior, ref. ajustada, tope y Madrid."""
+def _crear_grafica_comparativa(veredicto: VeredictoResponse, is_alquiler: bool, height_mm: float = 36.0) -> Drawing:
+    """Genera grafica vectorial compacta de barras comparando inmueble, ref. ajustada, limites y Madrid."""
     drawing = Drawing(180 * mm, height_mm * mm)
     vals = [
         round(veredicto.precio_m2_inmueble, 2),
-        round(veredicto.rango_bajo, 2),
         round(veredicto.ref_ajustada, 2),
+        round(veredicto.rango_bajo, 2),
         round(veredicto.rango_alto, 2),
         round(veredicto.media_madrid, 2),
     ]
     max_val = max(vals) if vals else 100
-    y_max = max_val * 1.25 if max_val > 0 else 100
+    y_max = max_val * 1.28 if max_val > 0 else 100
 
     v_str = (veredicto.veredicto or "").lower()
     if "debajo" in v_str:
@@ -92,39 +92,40 @@ def _crear_grafica_comparativa(veredicto: VeredictoResponse, is_alquiler: bool, 
         c_user = colors.HexColor("#D97706")
 
     chart = VerticalBarChart()
-    chart.x = 16 * mm
-    chart.y = 6 * mm
-    chart.height = max(18.0, height_mm - 12.0) * mm
-    chart.width = 154 * mm
+    chart.x = 20 * mm
+    chart.y = 7 * mm
+    chart.height = max(18.0, height_mm - 13.0) * mm
+    chart.width = 152 * mm
     chart.data = [vals]
     chart.categoryAxis.categoryNames = [
         "Tu inmueble",
-        "Lím. inferior",
         "Ref. ajustada",
-        "Tope rango",
+        "Lím. inferior",
+        "Lím. superior",
         "Media Madrid",
     ]
     chart.categoryAxis.labels.fontName = "Helvetica"
-    chart.categoryAxis.labels.fontSize = 7.2
+    chart.categoryAxis.labels.fontSize = 8
     chart.categoryAxis.labels.fillColor = C_TEXT
     chart.valueAxis.valueMin = 0
     chart.valueAxis.valueMax = y_max
     chart.valueAxis.labels.fontName = "Helvetica"
-    chart.valueAxis.labels.fontSize = 7
+    chart.valueAxis.labels.fontSize = 8
     chart.valueAxis.labels.fillColor = C_MUTED
-    chart.valueAxis.labelTextFormat = "%.1f" if is_alquiler else "%.0f"
+    chart.valueAxis.labelTextFormat = lambda v: _fmt_es(v, 1 if is_alquiler else 0)
     chart.bars[0].fillColor = C_ACCENT
     chart.bars[(0, 0)].fillColor = c_user
-    chart.bars[(0, 1)].fillColor = C_ACCENT
-    chart.bars[(0, 2)].fillColor = C_TEXT
+    chart.bars[(0, 1)].fillColor = C_TEXT
+    chart.bars[(0, 2)].fillColor = C_ACCENT
     chart.bars[(0, 3)].fillColor = C_MUTED
     chart.bars[(0, 4)].fillColor = colors.HexColor("#94A3B8")
     chart.barLabels.nudge = 3
     chart.barLabelFormat = lambda v: _fmt_es(v, 2 if is_alquiler else 0)
     chart.barLabels.fontName = "Helvetica-Bold"
-    chart.barLabels.fontSize = 6.8
+    chart.barLabels.fontSize = 8
     chart.barLabels.fillColor = C_TEXT
 
+    drawing.add(String(2 * mm, (height_mm - 4.5) * mm, "Escala (€/m²)", fontName="Helvetica-Bold", fontSize=8, fillColor=C_MUTED))
     drawing.add(chart)
     return drawing
 
@@ -154,9 +155,9 @@ def generar_dossier_pdf(veredicto: VeredictoResponse, precio_total: float, metro
     style_body = ParagraphStyle("BodyStyle", parent=styles["Normal"], fontName="Helvetica", fontSize=8.5, leading=11, textColor=C_TEXT)
     style_section_title = ParagraphStyle("SectionTitle", parent=styles["Normal"], fontName="Helvetica-Bold", fontSize=10, leading=12.5, textColor=C_TEXT, spaceBefore=4, spaceAfter=3)
     style_cell_right = ParagraphStyle("CellRight", parent=style_body, alignment=2)
-    style_footnote = ParagraphStyle("FootnoteStyle", parent=styles["Normal"], fontName="Helvetica-Oblique", fontSize=7.5, leading=10, textColor=C_MUTED)
-    style_box_title = ParagraphStyle("BoxTitle", parent=styles["Normal"], fontName="Helvetica-Bold", fontSize=8, leading=10, textColor=C_TEXT, spaceAfter=2)
-    style_box_body = ParagraphStyle("BoxBody", parent=styles["Normal"], fontName="Helvetica", fontSize=7, leading=9.2, textColor=C_MUTED)
+    style_footnote = ParagraphStyle("FootnoteStyle", parent=styles["Normal"], fontName="Helvetica-Oblique", fontSize=8, leading=10.5, textColor=C_MUTED)
+    style_box_title = ParagraphStyle("BoxTitle", parent=styles["Normal"], fontName="Helvetica-Bold", fontSize=8.5, leading=10.5, textColor=C_TEXT, spaceAfter=2)
+    style_box_body = ParagraphStyle("BoxBody", parent=styles["Normal"], fontName="Helvetica", fontSize=8, leading=10, textColor=C_MUTED)
 
     # Dimensiones de pagina A4 (210 x 297 mm) con margenes laterales 15 mm
     page_w, page_h = A4
@@ -201,7 +202,7 @@ def generar_dossier_pdf(veredicto: VeredictoResponse, precio_total: float, metro
         canvas.drawCentredString(page_w / 2.0, header_bottom_y + 10.5 * mm, TEMPLATE_TEXTS["doc_title"])
 
         canvas.setFillColor(C_TEXT)
-        canvas.setFont("Helvetica", 7.8)
+        canvas.setFont("Helvetica", 8)
         right_x = page_w - margin_x
         canvas.drawRightString(right_x, header_bottom_y + 14.5 * mm, f"Fecha: {fecha_hoy}")
         canvas.drawRightString(right_x, header_bottom_y + 10.0 * mm, f"Ref: {ref_code}")
@@ -228,10 +229,10 @@ def generar_dossier_pdf(veredicto: VeredictoResponse, precio_total: float, metro
             ("BOX", (0, 0), (-1, -1), 0.75, C_BORDER),
             ("LINEAFTER", (0, 0), (1, 0), 0.5, C_BORDER),
             ("VALIGN", (0, 0), (-1, -1), "TOP"),
-            ("TOPPADDING", (0, 0), (-1, -1), 5),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-            ("LEFTPADDING", (0, 0), (-1, -1), 7),
-            ("RIGHTPADDING", (0, 0), (-1, -1), 7),
+            ("TOPPADDING", (0, 0), (-1, -1), 4),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
+            ("LEFTPADDING", (0, 0), (-1, -1), 6),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
         ]))
         t_method.wrapOn(canvas, content_w, method_h)
         t_method.drawOn(canvas, margin_x, method_bottom_y)
@@ -241,126 +242,179 @@ def generar_dossier_pdf(veredicto: VeredictoResponse, precio_total: float, metro
         canvas.setLineWidth(0.6)
         canvas.line(margin_x, footer_top_y, page_w - margin_x, footer_top_y)
         canvas.setFillColor(C_MUTED)
-        canvas.setFont("Helvetica", 7.2)
+        canvas.setFont("Helvetica", 8)
         canvas.drawCentredString(page_w / 2.0, footer_top_y - 6.5 * mm, TEMPLATE_TEXTS["footer_tpl"].format(fecha=fecha_hoy))
 
         canvas.restoreState()
 
     # ZONA 2: CUERPO FLEXIBLE
     v_str = (veredicto.veredicto or "").lower()
+    sujeto = "El alquiler indicado" if is_alquiler else "El precio indicado"
     if "debajo" in v_str:
         c_veredicto_bg = colors.HexColor("#DCFCE7")
         c_veredicto_text = colors.HexColor("#166534")
         veredicto_label = "POR DEBAJO DE LA REFERENCIA"
+        veredicto_frase = f"{sujeto} está por debajo del rango razonable para esta zona."
     elif "línea" in v_str or "linea" in v_str:
         c_veredicto_bg = colors.HexColor("#E0F2FE")
         c_veredicto_text = C_ACCENT
         veredicto_label = "EN LÍNEA CON LA ZONA"
+        veredicto_frase = f"{sujeto} está en línea con lo habitual para esta zona."
     elif "muy por encima" in v_str:
         c_veredicto_bg = colors.HexColor("#FEE2E2")
         c_veredicto_text = colors.HexColor("#991B1B")
         veredicto_label = "MUY POR ENCIMA DE LA REFERENCIA"
+        veredicto_frase = f"{sujeto} está muy por encima del rango razonable para esta zona."
     else:
         c_veredicto_bg = colors.HexColor("#FEF3C7")
         c_veredicto_text = colors.HexColor("#92400E")
         veredicto_label = "POR ENCIMA DE LA REFERENCIA"
+        veredicto_frase = f"{sujeto} está por encima del rango razonable para esta zona."
 
     if veredicto.precio_m2_inmueble < veredicto.rango_bajo and veredicto.rango_bajo > 0:
         dist_pct = ((veredicto.rango_bajo - veredicto.precio_m2_inmueble) / veredicto.rango_bajo) * 100
-        distancia_txt = f"Está un {_fmt_es(dist_pct, 1)} % por debajo del límite inferior del rango."
+        distancia_txt = f"Está un {_fmt_es(dist_pct, 1)} % por debajo del límite del rango"
     elif veredicto.precio_m2_inmueble > veredicto.rango_alto and veredicto.rango_alto > 0:
         dist_pct = ((veredicto.precio_m2_inmueble - veredicto.rango_alto) / veredicto.rango_alto) * 100
-        distancia_txt = f"Está un {_fmt_es(dist_pct, 1)} % por encima del límite superior del rango."
+        distancia_txt = f"Está un {_fmt_es(dist_pct, 1)} % por encima del límite del rango"
     else:
-        distancia_txt = "Está dentro del rango razonable."
+        distancia_txt = "Está dentro del rango razonable"
 
     def _build_body_elements(chart_h_mm: float):
         elems = []
 
-        # Datos del inmueble (dentro del cuerpo, nunca en cabecera)
-        zona_label = f"{veredicto.distrito_nombre} (Distrito)" if veredicto.barrio_nombre == veredicto.distrito_nombre else f"{veredicto.barrio_nombre} ({veredicto.distrito_nombre})"
-        datos_inmueble = [
-            [
-                Paragraph("<b>Zona analizada:</b>", style_body),
-                Paragraph(zona_label, style_body),
-                Paragraph("<b>Precio analizado:</b>", style_body),
-                Paragraph(f"<b>{_fmt_es(precio_total, 0)} {unidad_total}</b>", style_body)
-            ],
-            [
-                Paragraph("<b>Superficie:</b>", style_body),
-                Paragraph(f"{_fmt_es(metros, 0)} m² (media zona {_fmt_es(veredicto.superficie_media, 1)} m²)", style_body),
-                Paragraph("<b>Precio por m²:</b>", style_body),
-                Paragraph(f"<b>{fmt_m2(veredicto.precio_m2_inmueble)} €/m²</b>", style_body)
-            ]
-        ]
-        t_inmueble = Table(datos_inmueble, colWidths=[32 * mm, 62 * mm, 32 * mm, 54 * mm])
-        t_inmueble.setStyle(TableStyle([
+        # 1. Bloque de datos del inmueble en una fila de 4 celdas: Zona, Precio, Superficie (con media zona), Precio por m²
+        zona_label = (
+            f"{veredicto.distrito_nombre} (Distrito)"
+            if veredicto.barrio_nombre == veredicto.distrito_nombre
+            else f"{veredicto.barrio_nombre} ({veredicto.distrito_nombre})"
+        )
+        style_cell_label = ParagraphStyle("CL", parent=style_body, fontName="Helvetica-Bold", fontSize=8, leading=9.5, textColor=C_MUTED)
+        style_cell_value = ParagraphStyle("CV", parent=style_body, fontName="Helvetica-Bold", fontSize=9.5, leading=11.5, textColor=C_TEXT)
+        style_cell_sub = ParagraphStyle("CS", parent=style_body, fontName="Helvetica", fontSize=8, leading=9.5, textColor=C_MUTED)
+
+        col_w4 = content_w / 4.0
+        datos_row = [[
+            [Paragraph("Zona", style_cell_label), Paragraph(zona_label, ParagraphStyle("ZV", parent=style_body, fontName="Helvetica-Bold", fontSize=8.5, leading=10.5, textColor=C_TEXT))],
+            [Paragraph("Precio", style_cell_label), Paragraph(f"{_fmt_es(precio_total, 0)} {unidad_total}", style_cell_value)],
+            [Paragraph("Superficie", style_cell_label), Paragraph(f"{_fmt_es(metros, 0)} m²", style_cell_value), Paragraph(f"media zona: {_fmt_es(veredicto.superficie_media, 1)} m²", style_cell_sub)],
+            [Paragraph("Precio por m²", style_cell_label), Paragraph(f"{fmt_m2(veredicto.precio_m2_inmueble)} €/m²", style_cell_value)],
+        ]]
+        t_datos = Table(datos_row, colWidths=[col_w4] * 4)
+        t_datos.setStyle(TableStyle([
+            ("BOX", (0, 0), (-1, -1), 0.6, C_BORDER),
+            ("LINEAFTER", (0, 0), (2, 0), 0.4, C_BORDER),
             ("BACKGROUND", (0, 0), (-1, -1), C_LIGHT_ROW),
-            ("BOX", (0, 0), (-1, -1), 0.5, C_BORDER),
-            ("INNERGRID", (0, 0), (-1, -1), 0.5, C_BORDER),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
             ("TOPPADDING", (0, 0), (-1, -1), 4),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 4),
             ("LEFTPADDING", (0, 0), (-1, -1), 6),
             ("RIGHTPADDING", (0, 0), (-1, -1), 6),
         ]))
-        elems.append(t_inmueble)
+        elems.append(t_datos)
         elems.append(Spacer(1, 5))
 
-        # Veredicto
-        veredicto_box = [
-            [Paragraph(f"<font size='10.5'><b>VEREDICTO: {veredicto_label}</b></font>", ParagraphStyle("VHead", parent=styles["Normal"], textColor=c_veredicto_text, alignment=1))],
-            [Paragraph(
-                f"{distancia_txt}<br/>"
-                f"Para <b>{_fmt_es(metros, 0)} m²</b>, lo razonable estaría entre <b>{_fmt_es(veredicto.rango_total_bajo, 0)} y {_fmt_es(veredicto.rango_total_alto, 0)} {unidad_total}</b> "
-                f"({fmt_m2(veredicto.rango_bajo)} – {fmt_m2(veredicto.rango_alto)} €/m²).",
-                ParagraphStyle("VDesc", parent=styles["Normal"], fontName="Helvetica", fontSize=8.5, leading=11.5, textColor=C_TEXT, alignment=1)
-            )]
+        # 2. Veredicto: badge de color, frase corta y línea de distancia al rango
+        style_badge = ParagraphStyle(
+            "Badge", parent=styles["Normal"],
+            fontName="Helvetica-Bold", fontSize=8.5, leading=10.5,
+            textColor=colors.white, alignment=1
+        )
+        style_vfrase = ParagraphStyle(
+            "VFrase", parent=styles["Normal"],
+            fontName="Helvetica-Bold", fontSize=9.5, leading=12,
+            textColor=C_TEXT, alignment=1
+        )
+        style_vdist = ParagraphStyle(
+            "VDist", parent=styles["Normal"],
+            fontName="Helvetica", fontSize=8.5, leading=11,
+            textColor=C_MUTED, alignment=1
+        )
+        t_badge = Table([[Paragraph(veredicto_label, style_badge)]], colWidths=[72 * mm])
+        t_badge.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, -1), c_veredicto_text),
+            ("TOPPADDING", (0, 0), (-1, -1), 2.5),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
+            ("LEFTPADDING", (0, 0), (-1, -1), 8),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+        ]))
+        t_badge.hAlign = "CENTER"
+
+        veredicto_rows = [
+            [t_badge],
+            [Paragraph(veredicto_frase, style_vfrase)],
+            [Paragraph(distancia_txt, style_vdist)],
         ]
-        t_veredicto = Table(veredicto_box, colWidths=[content_w])
+        t_veredicto = Table(veredicto_rows, colWidths=[content_w])
         t_veredicto.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, -1), c_veredicto_bg),
-            ("BOX", (0, 0), (-1, -1), 0.9, c_veredicto_text),
+            ("BOX", (0, 0), (-1, -1), 1.0, c_veredicto_text),
             ("ALIGN", (0, 0), (-1, -1), "CENTER"),
-            ("TOPPADDING", (0, 0), (-1, -1), 5),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+            ("TOPPADDING", (0, 0), (-1, -1), 3),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
             ("LEFTPADDING", (0, 0), (-1, -1), 8),
             ("RIGHTPADDING", (0, 0), (-1, -1), 8),
         ]))
         elems.append(t_veredicto)
-        elems.append(Spacer(1, 6))
+        elems.append(Spacer(1, 5))
 
-        # Tabla de ajustes
-        elems.append(Paragraph("1. Cálculo de la referencia y ajustes orientativos", style_section_title))
+        # 3. Rango razonable para su superficie, destacado en una caja
+        style_rango_lbl = ParagraphStyle("RL", parent=styles["Normal"], fontName="Helvetica-Bold", fontSize=8, leading=10, textColor=C_ACCENT, alignment=1)
+        style_rango_val = ParagraphStyle("RV", parent=styles["Normal"], fontName="Helvetica-Bold", fontSize=11, leading=13.5, textColor=C_TEXT, alignment=1)
+        style_rango_sub = ParagraphStyle("RS", parent=styles["Normal"], fontName="Helvetica", fontSize=8, leading=10, textColor=C_MUTED, alignment=1)
+        rango_rows = [
+            [Paragraph(f"RANGO RAZONABLE PARA {_fmt_es(metros, 0)} m²", style_rango_lbl)],
+            [Paragraph(f"{_fmt_es(veredicto.rango_total_bajo, 0)} – {_fmt_es(veredicto.rango_total_alto, 0)} {unidad_total}", style_rango_val)],
+            [Paragraph(f"Equivalente por superficie: {fmt_m2(veredicto.rango_bajo)} – {fmt_m2(veredicto.rango_alto)} €/m²", style_rango_sub)],
+        ]
+        t_rango = Table(rango_rows, colWidths=[content_w])
+        t_rango.setStyle(TableStyle([
+            ("BOX", (0, 0), (-1, -1), 1.0, C_ACCENT),
+            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#ECFEFF")),
+            ("TOPPADDING", (0, 0), (-1, -1), 2.5),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
+            ("LEFTPADDING", (0, 0), (-1, -1), 8),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 8),
+        ]))
+        elems.append(t_rango)
+        elems.append(Spacer(1, 5))
+
+        # 4. Tabla de cálculo compacta
         aj = veredicto.ajustes or {}
         est_pct = aj.get("estado", {}).get("pct", 0.0)
         est_val = aj.get("estado", {}).get("valor", "no_indicado")
-        est_txt = "a reformar" if est_val == "a_reformar" else "reformado" if est_val == "reformado" else "buen estado" if est_val == "buen_estado" else "no indicado"
+        est_txt = (
+            "a reformar" if est_val == "a_reformar"
+            else "reformado" if est_val == "reformado"
+            else "buen estado" if est_val == "buen_estado"
+            else "no indicado"
+        )
         asc_pct = aj.get("ascensor", {}).get("pct", 0.0)
         asc_val = aj.get("ascensor", {}).get("valor", "no_indicado")
         asc_txt = "sí" if asc_val == "si" else "no" if asc_val == "no" else "no indicado"
         tam_pct = aj.get("tamano", {}).get("pct", 0.0)
+        margen_pct_txt = f"±{_fmt_es(veredicto.margen_aplicado * 100, 1)} % sobre referencia" if getattr(veredicto, "margen_aplicado", 0) else "Según dispersión y fiabilidad"
 
+        style_th = ParagraphStyle("TH", parent=style_body, fontName="Helvetica-Bold", fontSize=8, leading=10, textColor=colors.white)
+        style_th_r = ParagraphStyle("THR", parent=style_th, alignment=2)
         comp_rows = [
-            [Paragraph("<b>Concepto</b>", ParagraphStyle("TH", parent=style_body, textColor=colors.white)),
-             Paragraph("<b>Detalle</b>", ParagraphStyle("TH2", parent=style_body, textColor=colors.white)),
-             Paragraph("<b>Valor</b>", ParagraphStyle("TH3", parent=style_body, textColor=colors.white, alignment=2))],
-            [Paragraph(f"Referencia base ({veredicto.barrio_nombre})", style_body), Paragraph(f"Último cierre real ({periodo_txt})", style_body), Paragraph(f"{fmt_m2(veredicto.ref_base)} €/m²", style_cell_right)],
-            [Paragraph(f"Ajuste por estado ({est_txt})", style_body), Paragraph("Calibración sobre referencia", style_body), Paragraph(_fmt_pct_es(est_pct), style_cell_right)],
-            [Paragraph(f"Ajuste por ascensor ({asc_txt})", style_body), Paragraph("Calibración sobre referencia", style_body), Paragraph(_fmt_pct_es(asc_pct), style_cell_right)],
-            [Paragraph("Ajuste por tamaño", style_body), Paragraph(f"Media zona: {_fmt_es(veredicto.superficie_media, 1)} m²", style_body), Paragraph(_fmt_pct_es(tam_pct), style_cell_right)],
+            [Paragraph("Concepto", style_th), Paragraph("Detalle", style_th), Paragraph("Valor", style_th_r)],
+            [Paragraph(f"Referencia base · {veredicto.barrio_nombre}", style_body), Paragraph(f"Último cierre real ({periodo_txt})", style_body), Paragraph(f"{fmt_m2(veredicto.ref_base)} €/m²", style_cell_right)],
+            [Paragraph(f"Ajuste por estado · {est_txt}", style_body), Paragraph("Sobre la referencia", style_body), Paragraph(_fmt_pct_es(est_pct), style_cell_right)],
+            [Paragraph(f"Ajuste por ascensor · {asc_txt}", style_body), Paragraph("Sobre la referencia", style_body), Paragraph(_fmt_pct_es(asc_pct), style_cell_right)],
+            [Paragraph(f"Ajuste por tamaño · media {_fmt_es(veredicto.superficie_media, 1)} m²", style_body), Paragraph("Sobre la referencia", style_body), Paragraph(_fmt_pct_es(tam_pct), style_cell_right)],
             [Paragraph("<b>Referencia ajustada</b>", style_body), Paragraph("Base calibrada orientativa", style_body), Paragraph(f"<b>{fmt_m2(veredicto.ref_ajustada)} €/m²</b>", style_cell_right)],
-            [Paragraph("<b>Rango razonable</b>", style_body), Paragraph(f"Para {_fmt_es(metros, 0)} m²: {_fmt_es(veredicto.rango_total_bajo, 0)} – {_fmt_es(veredicto.rango_total_alto, 0)} {unidad_total}", style_body), Paragraph(f"<b>{fmt_m2(veredicto.rango_bajo)} – {fmt_m2(veredicto.rango_alto)} €/m²</b>", style_cell_right)],
-            [Paragraph("Media Madrid Capital", style_body), Paragraph("Referencia metropolitana", style_body), Paragraph(f"{fmt_m2(veredicto.media_madrid)} €/m²", style_cell_right)],
+            [Paragraph("<b>Rango</b>", style_body), Paragraph(margen_pct_txt, style_body), Paragraph(f"<b>{fmt_m2(veredicto.rango_bajo)} – {fmt_m2(veredicto.rango_alto)} €/m²</b>", style_cell_right)],
         ]
-        t_comp = Table(comp_rows, colWidths=[62 * mm, 76 * mm, 42 * mm])
+        t_comp = Table(comp_rows, colWidths=[68 * mm, 72 * mm, 40 * mm])
         t_comp.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), C_TEXT),
             ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, C_LIGHT_ROW]),
             ("BACKGROUND", (0, 5), (-1, 5), colors.HexColor("#ECFEFF")),
             ("BOX", (0, 0), (-1, -1), 0.5, C_BORDER),
             ("INNERGRID", (0, 0), (-1, -1), 0.4, C_BORDER),
-            ("TOPPADDING", (0, 0), (-1, -1), 3),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 3),
+            ("TOPPADDING", (0, 0), (-1, -1), 2.5),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 2.5),
             ("LEFTPADDING", (0, 0), (-1, -1), 5),
             ("RIGHTPADDING", (0, 0), (-1, -1), 5),
         ]))
@@ -369,15 +423,20 @@ def generar_dossier_pdf(veredicto: VeredictoResponse, precio_total: float, metro
         elems.append(Paragraph("Ajustes orientativos, no medidos.", style_footnote))
         elems.append(Spacer(1, 5))
 
-        # Gráfica
-        elems.append(Paragraph("2. Comparativa visual (€/m²)", style_section_title))
+        # 5. Gráfica comparativa
+        elems.append(Paragraph("Comparativa visual (€/m²)", ParagraphStyle("GTitle", parent=style_body, fontName="Helvetica-Bold", fontSize=8.5, leading=10.5, textColor=C_TEXT, spaceAfter=2)))
         elems.append(_crear_grafica_comparativa(veredicto, is_alquiler, height_mm=chart_h_mm))
         elems.append(Spacer(1, 4))
 
-        # Fiabilidad
+        # 6. Línea de fiabilidad
         fiabilidad = "media" if (is_alquiler and veredicto.confianza == "alta") else veredicto.confianza
         no_alq = ", no en alquileres" if is_alquiler else ""
-        tx_txt = f"{_fmt_es(veredicto.num_transacciones, 0)} compraventas registradas en {veredicto.barrio_nombre} ({veredicto.anio_transacciones}){no_alq}" if veredicto.num_transacciones is not None else f"datos limitados en {veredicto.barrio_nombre}"
+        tx_txt = (
+            f"{_fmt_es(veredicto.num_transacciones, 0)} compraventas registradas en "
+            f"{veredicto.barrio_nombre} ({veredicto.anio_transacciones}){no_alq}"
+            if veredicto.num_transacciones is not None
+            else f"datos limitados en {veredicto.barrio_nombre}{no_alq}"
+        )
         elems.append(Paragraph(
             f"<b>Fiabilidad de la referencia:</b> {fiabilidad} · basada en {tx_txt}. "
             f"Datos de {periodo_txt}. No considera planta, orientación ni calidad concreta.",
@@ -386,7 +445,7 @@ def generar_dossier_pdf(veredicto: VeredictoResponse, precio_total: float, metro
         return elems
 
     # Garantizar estrictamente 1 pagina: si el cuerpo excede body_h, reducir altura de grafica
-    for chart_h in (38.0, 32.0, 26.0):
+    for chart_h in (36.0, 31.0, 26.0):
         buffer = io.BytesIO()
         body_frame = Frame(
             margin_x,
