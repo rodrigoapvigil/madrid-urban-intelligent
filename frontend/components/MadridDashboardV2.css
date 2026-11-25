@@ -5408,8 +5408,35 @@ body.v2-fullscreen-open footer { display: none !important; }
   }
   .v2-root .v2-grid-main {
     grid-template-columns: minmax(280px, 330px) minmax(0, 1fr);
-    align-items: start;
+    align-items: stretch;
     gap: clamp(18px, 1.8vw, 30px);
+  }
+  .v2-root .v2-kpi-col {
+    position: relative;
+    min-height: 0;
+    align-self: stretch;
+  }
+  .v2-root .v2-kpi-stack {
+    position: absolute;
+    inset: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 6px;
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in srgb, var(--v2-profile-color, #00E5FF) 45%, transparent) transparent;
+  }
+  .v2-root .v2-kpi-stack::-webkit-scrollbar {
+    width: 5px;
+  }
+  .v2-root .v2-kpi-stack::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .v2-root .v2-kpi-stack::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--v2-profile-color, #00E5FF) 45%, transparent);
+    border-radius: 999px;
+  }
+  .v2-root .v2-kpi-stack::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--v2-profile-color, #00E5FF) 75%, transparent);
   }
   .v2-root .v2-map-card { height: auto; min-height: 0; }
   .v2-root .v2-dual-maps {

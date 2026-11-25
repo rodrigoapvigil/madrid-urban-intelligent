@@ -3186,26 +3186,105 @@ const MadridDashboardV2: React.FC = () => {
                     </div>
                   </div>
 
-                  {activeProfile.id === 'inversion' && (() => {
-                    const amortizacionAnios = kpiData.p_m2 > 0 ? (1 / kpiData.p_m2) : 0;
-                    return (
-                      <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                  {activeProfile.id !== 'inversion' && (
+                    <>
+                      <div className="v2-kpi-card">
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <label style={{ fontSize: '10px', fontWeight: 'bold', color: activeProfile.color, letterSpacing: '0.5px' }}>AMORTIZACIÓN</label>
+                          <label>Estado Mercado</label>
                           <InfoTooltip
-                            title="Años de Amortización (GRM)"
-                            description="Número de años completos de alquiler íntegro que se necesitan para recuperar el 100% de la inversión de compra del inmueble."
-                            example="Si el GRM es de 18 años, significa que con 18 años de rentas de alquiler se cubre el precio total de la compra."
-                            ruleOfThumb="Cuanto menor sea el número de años, más rápida es la amortización y más atractiva la inversión (lo ideal es por debajo de 20 años)."
+                            title="Estado del Mercado Local"
+                            description="Indica la fase del ciclo inmobiliario según las operaciones recientes de compra y alquiler."
+                            example="Crecimiento (+): Precios al alza de forma sostenida. Ajuste (-): Moderación o descenso temporal de precios."
+                            ruleOfThumb="En 'Crecimiento', los precios tienden a subir si esperas; en 'Ajuste', hay más margen para negociar."
                           />
                         </div>
-                        <div className="v2-val" style={{ color: activeProfile.color }}>
-                          {amortizacionAnios > 0 ? amortizacionAnios.toFixed(1) + ' años' : '-'}
-                        </div>
-                        <div style={{ fontSize: '11px', color: '#9FB6C8', marginTop: '2px', fontWeight: '500' }}>
-                          (GRM: Gross Rent Mult.)
+                        <div className="v2-val" style={{ fontSize: '24px' }}>
+                          {kpiData.estado_mercado} {kpiData.estado_mercado === 'Crecimiento' ? '(+)' : kpiData.estado_mercado === 'Ajuste' ? '(-)' : ''}
                         </div>
                       </div>
+
+                      <div className="v2-kpi-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <label>Var. Mensual</label>
+                          <InfoTooltip
+                            title="Variación Mensual"
+                            description="Porcentaje de subida o bajada del precio respecto al mes inmediatamente anterior."
+                            example="Un +1.2% indica que los precios subieron un 1.2% en los últimos 30 días respecto al mes previo."
+                            ruleOfThumb="Permite detectar aceleraciones o cambios rápidos de tendencia en el corto plazo."
+                          />
+                        </div>
+                        <div className={`v2-val accent ${Number(kpiData.v_mes) < 0 ? 'negative' : ''}`}>
+                          {formatSpanishPercentage(kpiData.v_mes, 1, true)}
+                        </div>
+                      </div>
+
+                      <div className="v2-kpi-card">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                          <label>Var. Anual</label>
+                          <InfoTooltip
+                            title="Variación Anual (12 Meses)"
+                            description="La evolución acumulada del precio en el último año completo respecto al mismo mes del año anterior."
+                            example="Un +8.5% anual significa que una vivienda que costaba 200.000€ hace un año ahora se sitúa en torno a 217.000€."
+                            ruleOfThumb="Es el indicador más robusto para medir la tendencia real de fondo y la revalorización patrimonial."
+                          />
+                        </div>
+                        <div className={`v2-val accent ${Number(kpiData.v_anual) < 0 ? 'negative' : ''}`}>
+                          {formatSpanishPercentage(kpiData.v_anual, 1, true)}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {activeProfile.id === 'inversion' && (() => {
+                    const amortizacionAnios = kpiData.p_m2 > 0 ? (1 / kpiData.p_m2) : 0;
+                    const transacciones = kpiData.transacciones || 0;
+                    const liqColor = transacciones > 300 ? '#34D399' : transacciones > 100 ? '#FBBF24' : '#F87171';
+                    const liqLabel = transacciones > 300 ? 'Liquidez alta' : transacciones > 100 ? 'Liquidez media' : 'Liquidez baja';
+                    return (
+                      <>
+                        <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: activeProfile.color, letterSpacing: '0.5px' }}>AMORTIZACIÓN</label>
+                            <InfoTooltip
+                              title="Años de Amortización (GRM)"
+                              description="Número de años completos de alquiler íntegro que se necesitan para recuperar el 100% de la inversión de compra del inmueble."
+                              example="Si el GRM es de 18 años, significa que con 18 años de rentas de alquiler se cubre el precio total de la compra."
+                              ruleOfThumb="Cuanto menor sea el número de años, más rápida es la amortización y más atractiva la inversión (lo ideal es por debajo de 20 años)."
+                            />
+                          </div>
+                          <div className="v2-val" style={{ color: activeProfile.color }}>
+                            {amortizacionAnios > 0 ? amortizacionAnios.toFixed(1) + ' años' : '-'}
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#9FB6C8', marginTop: '2px', fontWeight: '500' }}>
+                            (GRM: Gross Rent Mult.)
+                          </div>
+                        </div>
+
+                        <div className="v2-kpi-card">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label>Liquidez del mercado</label>
+                            <InfoTooltip
+                              title="Liquidez y Volumen de Operaciones"
+                              description="Número anual de compraventas registradas en la zona. Indica con qué facilidad podrías vender el inmueble en el futuro."
+                              example="Más de 300 operaciones/año indica un mercado líquido y activo."
+                              ruleOfThumb="A mayor liquidez, menor riesgo de quedarte atrapado con el activo."
+                            />
+                          </div>
+                          <div className="v2-val" style={{ display: 'flex', alignItems: 'baseline', gap: '8px', fontSize: '22px' }}>
+                            <span>{transacciones > 0 ? `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(transacciones)} op./año` : '—'}</span>
+                            <span style={{ fontSize: '11.5px', fontWeight: 700, color: liqColor }}>· {liqLabel}</span>
+                          </div>
+                        </div>
+
+                        <div className="v2-kpi-card">
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label>Estado Mercado</label>
+                          </div>
+                          <div className="v2-val" style={{ fontSize: '22px' }}>
+                            {kpiData.estado_mercado} {kpiData.estado_mercado === 'Crecimiento' ? '(+)' : kpiData.estado_mercado === 'Ajuste' ? '(-)' : ''}
+                          </div>
+                        </div>
+                      </>
                     );
                   })()}
 
