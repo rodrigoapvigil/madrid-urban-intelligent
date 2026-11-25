@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
@@ -608,6 +609,7 @@ const InfoTooltip: React.FC<{
 }> = ({ title, description, example, ruleOfThumb, align = 'left' }) => {
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [popupStyle, setPopupStyle] = useState<React.CSSProperties>({});
 
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
@@ -617,9 +619,69 @@ const InfoTooltip: React.FC<{
     };
     if (open) {
       document.addEventListener('mousedown', handleOutside);
+      // Calculate position from trigger button
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const popupWidth = 280;
+        let left: number;
+        if (align === 'right') {
+          left = rect.right - popupWidth;
+        } else if (align === 'center') {
+          left = rect.left + rect.width / 2 - popupWidth / 2;
+        } else {
+          left = rect.left;
+        }
+        // Keep within viewport
+        if (left + popupWidth > window.innerWidth - 8) left = window.innerWidth - popupWidth - 8;
+        if (left < 8) left = 8;
+        setPopupStyle({
+          position: 'fixed',
+          top: rect.bottom + 6,
+          left,
+          width: popupWidth + 'px',
+          zIndex: 999999,
+        });
+      }
     }
     return () => document.removeEventListener('mousedown', handleOutside);
-  }, [open]);
+  }, [open, align]);
+
+  const popup = open ? (
+    <div
+      className="v2-info-tooltip"
+      style={{
+        ...popupStyle,
+        backgroundColor: 'var(--azul-noche)',
+        color: 'var(--blanco-humo)',
+        padding: '12px 14px',
+        borderRadius: '12px',
+        boxShadow: '0 10px 28px color-mix(in srgb, var(--azul-noche) 35%, transparent)',
+        border: '0.5px solid color-mix(in srgb, var(--blanco-humo) 15%, transparent)',
+        fontSize: '12px',
+        lineHeight: 1.45,
+        pointerEvents: 'none',
+        textAlign: 'left',
+        animation: 'fadeIn 0.15s ease-out'
+      }}
+    >
+      <div style={{ fontWeight: '700', fontSize: '13px', color: 'var(--blanco-humo)', marginBottom: '4px' }}>
+        {title}
+      </div>
+      <div style={{ color: 'var(--humo-2)', fontSize: '11.5px', marginBottom: ruleOfThumb || example ? '6px' : '0' }}>
+        {description}
+      </div>
+      {example && (
+        <div style={{ color: 'var(--precio-subida)', fontSize: '11px', fontWeight: '400', marginBottom: '4px', borderTop: '0.5px solid color-mix(in srgb, var(--blanco-humo) 10%, transparent)', paddingTop: '5px' }}>
+          <strong style={{ color: 'var(--blanco-humo)', fontWeight: '600' }}>Ejemplo:</strong> {example}
+        </div>
+      )}
+      {ruleOfThumb && (
+        <div style={{ color: 'var(--coral)', fontSize: '11px', fontWeight: '400', borderTop: example ? 'none' : '0.5px solid color-mix(in srgb, var(--blanco-humo) 10%, transparent)', paddingTop: example ? '0' : '5px' }}>
+          <strong style={{ color: 'var(--blanco-humo)', fontWeight: '600' }}>Referencia:</strong> {ruleOfThumb}
+        </div>
+      )}
+    </div>
+  ) : null;
 
   return (
     <div
@@ -658,49 +720,7 @@ const InfoTooltip: React.FC<{
       >
         i
       </button>
-
-      {open && (
-        <div
-          className="v2-info-tooltip"
-          style={{
-            position: 'absolute',
-            top: '24px',
-            left: align === 'left' ? 0 : align === 'center' ? '50%' : 'auto',
-            right: align === 'right' ? 0 : 'auto',
-            transform: align === 'center' ? 'translateX(-50%)' : 'none',
-            width: '280px',
-            backgroundColor: 'var(--azul-noche)',
-            color: 'var(--blanco-humo)',
-            padding: '12px 14px',
-            borderRadius: '12px',
-            boxShadow: '0 10px 28px color-mix(in srgb, var(--azul-noche) 35%, transparent)',
-            border: '0.5px solid color-mix(in srgb, var(--blanco-humo) 15%, transparent)',
-            zIndex: 99999,
-            fontSize: '12px',
-            lineHeight: 1.45,
-            pointerEvents: 'none',
-            textAlign: 'left',
-            animation: 'fadeIn 0.15s ease-out'
-          }}
-        >
-          <div style={{ fontWeight: '700', fontSize: '13px', color: 'var(--blanco-humo)', marginBottom: '4px' }}>
-            {title}
-          </div>
-          <div style={{ color: 'var(--humo-2)', fontSize: '11.5px', marginBottom: ruleOfThumb || example ? '6px' : '0' }}>
-            {description}
-          </div>
-          {example && (
-            <div style={{ color: 'var(--precio-subida)', fontSize: '11px', fontWeight: '400', marginBottom: '4px', borderTop: '0.5px solid color-mix(in srgb, var(--blanco-humo) 10%, transparent)', paddingTop: '5px' }}>
-              <strong style={{ color: 'var(--blanco-humo)', fontWeight: '600' }}>Ejemplo:</strong> {example}
-            </div>
-          )}
-          {ruleOfThumb && (
-            <div style={{ color: 'var(--coral)', fontSize: '11px', fontWeight: '400', borderTop: example ? 'none' : '0.5px solid color-mix(in srgb, var(--blanco-humo) 10%, transparent)', paddingTop: example ? '0' : '5px' }}>
-              <strong style={{ color: 'var(--blanco-humo)', fontWeight: '600' }}>Referencia:</strong> {ruleOfThumb}
-            </div>
-          )}
-        </div>
-      )}
+      {typeof document !== 'undefined' && popup && ReactDOM.createPortal(popup, document.body)}
     </div>
   );
 };
@@ -1038,6 +1058,7 @@ const MadridDashboardV2: React.FC = () => {
   const [isPurchaseSimOpen, setIsPurchaseSimOpen] = useState<boolean>(false);
   const [isRentSimOpen, setIsRentSimOpen] = useState<boolean>(false);
   const [isInvSimOpen, setIsInvSimOpen] = useState<boolean>(false);
+  const [isVentaMoreOpen, setIsVentaMoreOpen] = useState<boolean>(false);
 
   const [ltvPercent, setLtvPercent] = useState<number>(65);
   const [interestImpactData, setInterestImpactData] = useState<any[]>([]);
@@ -3070,7 +3091,16 @@ const MadridDashboardV2: React.FC = () => {
                 </div>
 
                 <div className="v2-kpi-scroll-shell">
-                  <div className="v2-kpi-stack">
+                  <div
+                    className="v2-kpi-stack"
+                    style={{
+                      overflowY:
+                        activeProfile.id === 'alquiler' ? (isRentSimOpen ? 'auto' : 'hidden') :
+                        activeProfile.id === 'compra'   ? (isPurchaseSimOpen ? 'auto' : 'hidden') :
+                        activeProfile.id === 'inversion'? (isInvSimOpen ? 'auto' : 'hidden') :
+                        isVentaMoreOpen ? 'auto' : 'hidden'  /* venta */
+                    }}
+                  >
 
                   {activeProfile.id === 'alquiler' && (() => {
                     const rent = Math.round(kpiData.p_vivienda || 0);
@@ -3827,6 +3857,22 @@ const MadridDashboardV2: React.FC = () => {
 
                     return (
                       <>
+                        {/* Acordeón "Ver más indicadores" para los 3 últimos KPIs de Venta */}
+                        <div className={`v2-sim-accordion ${isVentaMoreOpen ? 'is-open' : ''}`}>
+                          <button
+                            type="button"
+                            className="v2-sim-trigger"
+                            onClick={() => setIsVentaMoreOpen(v => !v)}
+                            aria-expanded={isVentaMoreOpen}
+                          >
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                              Ver más indicadores
+                            </span>
+                            <ChevronDown size={15} className={`v2-sim-chevron ${isVentaMoreOpen ? 'rotated' : ''}`} />
+                          </button>
+                          {isVentaMoreOpen && (
+                            <>
                         <div className="v2-kpi-card">
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                             <label>¿Cuánto tardará en venderse?</label>
@@ -3886,6 +3932,9 @@ const MadridDashboardV2: React.FC = () => {
                           <div style={{ fontSize: '10px', color: '#9FB6C8', marginTop: '2px' }}>
                             más de precio si esperas
                           </div>
+                        </div>
+                            </>
+                          )}
                         </div>
                       </>
                     );
