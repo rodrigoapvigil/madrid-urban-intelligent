@@ -4118,11 +4118,13 @@ const MadridDashboardV2: React.FC = () => {
                         Actividad de mercado por {liquidityLevel === 'distrito' ? 'Distrito' : 'Barrio'}
                       </h3>
                       {isMobile ? (
-                        <div className="v2-tabs-bg small">
-                          <span className="v2-indicator" style={{ transform: `translateX(${liquidityLevel === 'distrito' ? '0' : '100%'})`, width: '80px' }} />
-                          <button type="button" className={`v2-tab-btn ${liquidityLevel === 'distrito' ? 'active' : ''}`} style={{ minWidth: '80px' }} onClick={() => setLiquidityLevel('distrito')}>Distritos</button>
-                          <button type="button" className={`v2-tab-btn ${liquidityLevel === 'barrio' ? 'active' : ''}`} style={{ minWidth: '80px' }} onClick={() => setLiquidityLevel('barrio')}>Barrios</button>
-                        </div>
+                        <SegmentedControl<'distrito' | 'barrio'>
+                          label="Nivel de actividad de mercado"
+                          size="md"
+                          value={liquidityLevel}
+                          options={[{ value: 'distrito', label: 'Distritos' }, { value: 'barrio', label: 'Barrios' }] as const}
+                          onChange={setLiquidityLevel}
+                        />
                       ) : (
                         <SegmentedControl<'distrito' | 'barrio'>
                           label="Nivel de actividad de mercado"

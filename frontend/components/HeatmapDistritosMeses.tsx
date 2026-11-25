@@ -256,7 +256,7 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
             )}
           </div>
 
-          {!search.trim() && filteredRows.length > 5 && (
+          {!search.trim() && filteredRows.length > 5 && level !== 'Barrios' && (
             <button
               type="button"
               className="hdm-mobile-toggle-matrix"

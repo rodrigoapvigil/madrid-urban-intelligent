@@ -192,7 +192,7 @@ export default function DashboardRankingTable({
             <div className="v2-ranking-yield-filter" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span style={{ fontSize: '10px', color: '#8ea5b7', fontWeight: '600', textTransform: 'uppercase' }}>Rent. mín:</span>
               {[
-                { thresh: null, label: 'Todas', count: yieldCounts.all },
+                ...(!isMobile ? [{ thresh: null, label: 'Todas', count: yieldCounts.all }] : []),
                 { thresh: 5, label: '> 5%', count: yieldCounts.gte5 },
                 { thresh: 6, label: '> 6%', count: yieldCounts.gte6 },
                 { thresh: 7, label: '> 7%', count: yieldCounts.gte7 }
@@ -232,9 +232,12 @@ export default function DashboardRankingTable({
               ))}
             </div>
           )}
-          <select className="v2-ranking-order" aria-label="Orden del Top 10" value={orderValue} onChange={event => onOrderChange(event.target.value as OrderMode)}>
-            {orderOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-          </select>
+          {/* Selector de orden: en móvil solo se muestra si hay más de 1 opción con sentido */}
+          {(!isMobile || orderOptions.length > 1) && !(isMobile && isInvestment) && (
+            <select className="v2-ranking-order" aria-label="Orden del Top 10" value={orderValue} onChange={event => onOrderChange(event.target.value as OrderMode)}>
+              {orderOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+            </select>
+          )}
         </div>
       </div>
       {loading && rows.length > 0 && <div className="v2-ranking-loading">Actualizando…</div>}
@@ -342,7 +345,7 @@ export default function DashboardRankingTable({
                           {index + 1}.
                         </span>
                         <span className="v2-ranking-label" style={{ minWidth: 0 }}>
-                          <span className="v2-ranking-name" title={formatName(item.name)} style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <span className="v2-ranking-name" title={formatName(item.name)} style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: isMobile ? 'normal' : 'nowrap', wordBreak: isMobile ? 'break-word' : undefined }}>
                             {formatName(item.name)}
                           </span>
                           {district && (
