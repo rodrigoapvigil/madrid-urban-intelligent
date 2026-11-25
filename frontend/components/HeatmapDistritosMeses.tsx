@@ -42,7 +42,8 @@ function contrastTextForHex(hex: string): string {
   const b = parseInt(clean.slice(4, 6), 16) / 255;
   const toLin = (c: number) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
   const lum = 0.2126 * toLin(r) + 0.7152 * toLin(g) + 0.0722 * toLin(b);
-  return lum > 0.32 ? '#0A192F' : '#ffffff';
+  const contrastWithWhite = 1.05 / (lum + 0.05);
+  return contrastWithWhite < 4.5 ? '#0A192F' : '#ffffff';
 }
 
 function isEstimatedMonth(year: string, monthIndex: number): boolean {
@@ -51,41 +52,34 @@ function isEstimatedMonth(year: string, monthIndex: number): boolean {
   return y > 2026 || (y === 2026 && monthIndex >= 6);
 }
 
-function getBlueHeatColor(norm: number, val: number, profileId: string): { bg: string; text: string; isBold: boolean } {
-  let bg = '#062244';
-  let isBold = false;
+const PROFILE_HEAT_PALETTES: Record<string, [string, string, string, string, string]> = {
+  alquiler: ['#062244', '#074d75', '#00a896', '#00e5ff', '#d9fbff'],
+  compra: ['#3a200a', '#783c07', '#b86a04', '#e59b12', '#ffc83b'],
+  venta: ['#042a17', '#0b5732', '#13884e', '#22be6f', '#4eed9f'],
+  inversion: ['#33103d', '#571c66', '#872b9d', '#be46dc', '#e879f9'],
+};
+
+function getBlueHeatColor(norm: number, val: number, profileId: string, useProfilePalette: boolean = false): { bg: string; text: string; isBold: boolean } {
+  const palette = (useProfilePalette && PROFILE_HEAT_PALETTES[profileId]) || PROFILE_HEAT_PALETTES.alquiler;
+  let bandIndex = 0;
+
   if (profileId === 'alquiler') {
-    if (val < 16) {
-      bg = '#062244';
-    } else if (val < 20) {
-      bg = '#074d75';
-    } else if (val < 24) {
-      bg = '#00a896';
-      isBold = true;
-    } else if (val <= 27) {
-      bg = '#00e5ff';
-      isBold = true;
-    } else {
-      bg = '#d9fbff';
-      isBold = true;
-    }
+    if (val < 16) bandIndex = 0;
+    else if (val < 20) bandIndex = 1;
+    else if (val < 24) bandIndex = 2;
+    else if (val <= 27) bandIndex = 3;
+    else bandIndex = 4;
   } else {
     const t = Math.max(0, Math.min(1, norm));
-    if (t < 0.20) {
-      bg = '#062244';
-    } else if (t < 0.45) {
-      bg = '#074d75';
-    } else if (t < 0.70) {
-      bg = '#00a896';
-      isBold = true;
-    } else if (t < 0.88) {
-      bg = '#00e5ff';
-      isBold = true;
-    } else {
-      bg = '#d9fbff';
-      isBold = true;
-    }
+    if (t < 0.20) bandIndex = 0;
+    else if (t < 0.45) bandIndex = 1;
+    else if (t < 0.70) bandIndex = 2;
+    else if (t < 0.88) bandIndex = 3;
+    else bandIndex = 4;
   }
+
+  const bg = palette[bandIndex];
+  const isBold = bandIndex >= 2;
   return { bg, text: contrastTextForHex(bg), isBold };
 }
 
@@ -112,6 +106,7 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
 }) => {
   const [search, setSearch] = useState('');
   const [showFullMatrixMobile, setShowFullMatrixMobile] = useState(false);
+  const [showAllZonesMobile, setShowAllZonesMobile] = useState(false);
 
   // Extraer todos los valores válidos para calcular min y max reales sobre la misma escala
   const allValues = useMemo(() => {
@@ -207,7 +202,7 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
 
           <div className="hdm-mobile-list">
             {filteredRows.length > 0 ? (
-              filteredRows.map((row) => {
+              (search.trim() ? filteredRows : showAllZonesMobile ? filteredRows : filteredRows.slice(0, 5)).map((row) => {
                 const activeIdx = selectedMonthIdx >= 0 ? selectedMonthIdx : 5;
                 const readVal = (idx: number) => {
                   const raw = Number(row[`m${idx + 1}`]);
@@ -231,14 +226,14 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
                       <strong title={row.zona}>{row.zona}</strong>
                       {deltaPct !== null && (
                         <span className={`hdm-mobile-delta ${deltaPct >= 0 ? 'is-up' : 'is-down'}`}>
-                          {deltaPct >= 0 ? '▲' : '▼'} {Math.abs(deltaPct).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}% año
+                          {deltaPct >= 0 ? '▲' : '▼'} {Math.abs(deltaPct).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} % año
                         </span>
                       )}
                     </div>
                     <div className="hdm-mobile-milestones">
                       {milestones.map((m, idx) => {
                         const norm = m.val !== null ? (m.val - effectiveMin) / (effectiveMax - effectiveMin || 1) : 0;
-                        const heat = m.val !== null ? getBlueHeatColor(norm, m.val, profileId) : null;
+                        const heat = m.val !== null ? getBlueHeatColor(norm, m.val, profileId, true) : null;
                         return (
                           <div
                             key={`${m.label}-${idx}`}
@@ -260,6 +255,18 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
               </div>
             )}
           </div>
+
+          {!search.trim() && filteredRows.length > 5 && (
+            <button
+              type="button"
+              className="hdm-mobile-toggle-matrix"
+              onClick={() => setShowAllZonesMobile(prev => !prev)}
+              aria-expanded={showAllZonesMobile}
+            >
+              <span>{showAllZonesMobile ? `Mostrar primeros 5 ${zoneLabel}s` : `Ver todos los ${zoneLabel}s (${filteredRows.length})`}</span>
+              {showAllZonesMobile ? <ChevronUp size={16} aria-hidden="true" /> : <ChevronDown size={16} aria-hidden="true" />}
+            </button>
+          )}
 
           <button
             type="button"
@@ -356,7 +363,7 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
 
                     // Normalización continua de la celda sobre el rango real
                     const norm = (val - effectiveMin) / (effectiveMax - effectiveMin || 1);
-                    const { bg, text, isBold } = getBlueHeatColor(norm, val, profileId);
+                    const { bg, text, isBold } = getBlueHeatColor(norm, val, profileId, isMobile);
 
                     const isEstimated = isEstimatedMonth(year, i);
                     const formatted = formatCellDisplay(val, profileId);

@@ -349,10 +349,8 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    max-height: 400px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding-right: 2px;
+    max-height: none;
+    overflow: visible;
   }
   .hdm-mobile-row {
     display: flex;
@@ -414,12 +412,14 @@
     font-size: 10px;
     font-weight: 700;
     opacity: 1;
+    color: inherit !important;
   }
   .hdm-mobile-pill span {
     font-size: 11.5px;
     font-weight: 750;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+    color: inherit !important;
   }
   .hdm-mobile-empty {
     padding: 20px 12px;
