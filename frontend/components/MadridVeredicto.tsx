@@ -58,7 +58,7 @@ export default function MadridVeredicto() {
       const latest = data.latest_observed_period;
       const year = latest?.year || 2026;
       const month = latest?.month || 'Junio';
-      return apiFetch(`/map-data?profile=venta&year=${encodeURIComponent(year)}&month=${encodeURIComponent(month)}`);
+      return apiFetch(`/map?year=${encodeURIComponent(year)}&month=${encodeURIComponent(month)}&interest=Compra-venta`);
     }).then(res => {
       if (!res || !res.ok) return null;
       return res.json();
@@ -470,7 +470,9 @@ export default function MadridVeredicto() {
                 </div>
                 <div style={{ textAlign: 'right' }}>
                   <p style={{ fontSize: '11px', color: 'color-mix(in srgb, var(--blanco-humo) 50%, transparent)', margin: 0 }}>Zona analizada</p>
-                  <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--blanco-humo)', margin: '2px 0 0' }}>{resultado.barrio_nombre} ({resultado.distrito_nombre})</p>
+                  <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--blanco-humo)', margin: '2px 0 0' }}>
+                    {resultado.barrio_nombre === resultado.distrito_nombre ? `${resultado.distrito_nombre} (Distrito)` : `${resultado.barrio_nombre} (${resultado.distrito_nombre})`}
+                  </p>
                   <p style={{ fontSize: '11px', color: 'color-mix(in srgb, var(--blanco-humo) 40%, transparent)', margin: '2px 0 0' }}>Datos de cierre: {resultado.fecha_cierre_referencia}</p>
                 </div>
               </div>

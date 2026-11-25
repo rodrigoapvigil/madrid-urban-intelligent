@@ -114,20 +114,13 @@ def buscar_zona_en_db(conn: sqlite3.Connection, termino: str) -> Optional[Tuple[
         if termino_norm in b_norm or b_norm in termino_norm:
             return (b["id_barrio"], b["id_distrito"], b["barrio_nombre"], b["distrito_nombre"])
 
-    # 2. Buscar en Dim_Distrito
+    # 2. Buscar en Dim_Distrito (si coincide con un distrito, evaluar a nivel de distrito, no un barrio al azar)
     cur.execute("SELECT id_distrito, nombre FROM Dim_Distrito")
     distritos = cur.fetchall()
     for d in distritos:
         d_norm = normalizar_texto(d["nombre"])
         if d_norm == termino_norm or termino_norm in d_norm or d_norm in termino_norm:
-            # Tomar el primer barrio del distrito
-            cur.execute("""
-                SELECT id_barrio, nombre FROM Dim_Barrio WHERE id_distrito = ? LIMIT 1
-            """, (d["id_distrito"],))
-            primer_barrio = cur.fetchone()
-            barrio_nom = primer_barrio["nombre"] if primer_barrio else d["nombre"]
-            barrio_id = primer_barrio["id_barrio"] if primer_barrio else 0
-            return (barrio_id, d["id_distrito"], barrio_nom, d["nombre"])
+            return (0, d["id_distrito"], d["nombre"], d["nombre"])
 
     # Fallback por defecto si no hay coincidencia
     if barrios:
@@ -216,41 +209,46 @@ def evaluar_inmueble(
                 precio_m2_distrito = precio_m2_madrid
                 tendencia_distrito = 0.0
 
-        # 3. Media del barrio para esta operacion (fallback al distrito de la misma operacion, nunca a 3500 de compraventa)
-        cur.execute("""
-            SELECT precio_m2, variacion_mensual, variacion_trimestral, variacion_anual
-            FROM Fact_Operacion
-            WHERE id_barrio = ? AND LOWER(tipo_operacion) = LOWER(?) AND id_tiempo = ? AND precio_m2 > 0
-        """, (id_barrio, operacion, max_tiempo))
-        row_barrio = cur.fetchone()
-
-        if row_barrio and row_barrio["precio_m2"]:
-            precio_m2_barrio = float(row_barrio["precio_m2"])
-            tendencia_trimestral = float(row_barrio["variacion_trimestral"] or tendencia_distrito)
-        else:
+        # 3. Media del barrio para esta operacion (si id_barrio == 0 es consulta de distrito)
+        if id_barrio > 0:
             cur.execute("""
-                SELECT AVG(precio_m2) as avg_p, AVG(variacion_trimestral) as avg_trim
+                SELECT precio_m2, variacion_mensual, variacion_trimestral, variacion_anual
                 FROM Fact_Operacion
-                WHERE id_barrio = ? AND LOWER(tipo_operacion) = LOWER(?) AND precio_m2 > 0
-            """, (id_barrio, operacion))
-            row_fallback = cur.fetchone()
-            if row_fallback and row_fallback["avg_p"]:
-                precio_m2_barrio = float(row_fallback["avg_p"])
-                tendencia_trimestral = float(row_fallback["avg_trim"] or tendencia_distrito)
+                WHERE id_barrio = ? AND LOWER(tipo_operacion) = LOWER(?) AND id_tiempo = ? AND precio_m2 > 0
+            """, (id_barrio, operacion, max_tiempo))
+            row_barrio = cur.fetchone()
+
+            if row_barrio and row_barrio["precio_m2"]:
+                precio_m2_barrio = float(row_barrio["precio_m2"])
+                tendencia_trimestral = float(row_barrio["variacion_trimestral"] or tendencia_distrito)
             else:
-                # Si el barrio (ej. Hellin en Alquiler) no tiene registros de esa operacion, usar la media del distrito
-                precio_m2_barrio = precio_m2_distrito
-                tendencia_trimestral = tendencia_distrito
+                cur.execute("""
+                    SELECT AVG(precio_m2) as avg_p, AVG(variacion_trimestral) as avg_trim
+                    FROM Fact_Operacion
+                    WHERE id_barrio = ? AND LOWER(tipo_operacion) = LOWER(?) AND precio_m2 > 0
+                """, (id_barrio, operacion))
+                row_fallback = cur.fetchone()
+                if row_fallback and row_fallback["avg_p"]:
+                    precio_m2_barrio = float(row_fallback["avg_p"])
+                    tendencia_trimestral = float(row_fallback["avg_trim"] or tendencia_distrito)
+                else:
+                    precio_m2_barrio = precio_m2_distrito
+                    tendencia_trimestral = tendencia_distrito
+        else:
+            precio_m2_barrio = precio_m2_distrito
+            tendencia_trimestral = tendencia_distrito
 
         # Serie historica reciente (ultimos 6 meses) del barrio o distrito para grafica del PDF
-        cur.execute("""
-            SELECT id_tiempo, precio_m2
-            FROM Fact_Operacion
-            WHERE id_barrio = ? AND LOWER(tipo_operacion) = LOWER(?) AND precio_m2 > 0
-            ORDER BY id_tiempo DESC
-            LIMIT 6
-        """, (id_barrio, operacion))
-        hist_rows = cur.fetchall()
+        hist_rows = []
+        if id_barrio > 0:
+            cur.execute("""
+                SELECT id_tiempo, precio_m2
+                FROM Fact_Operacion
+                WHERE id_barrio = ? AND LOWER(tipo_operacion) = LOWER(?) AND precio_m2 > 0
+                ORDER BY id_tiempo DESC
+                LIMIT 6
+            """, (id_barrio, operacion))
+            hist_rows = cur.fetchall()
         if not hist_rows:
             cur.execute("""
                 SELECT id_tiempo, AVG(precio_m2) as precio_m2
@@ -266,27 +264,27 @@ def evaluar_inmueble(
             for r in reversed(hist_rows)
         ]
 
-        # Ajuste cualitativo por Estado y Ascensor (si se especifican)
+        # Ajuste cualitativo por Estado y Ascensor (~1% cada uno si se especifican)
         estado_factor = 0.0
         ascensor_factor = 0.0
         ajustes_desc = []
         if estado_inmueble:
             est_norm = estado_inmueble.strip().lower()
             if "reformar" in est_norm:
-                estado_factor = -0.12
-                ajustes_desc.append("Estado 'A reformar' (-12%)")
+                estado_factor = -0.01
+                ajustes_desc.append("Estado 'A reformar' (-1%)")
             elif "reformado" in est_norm:
-                estado_factor = 0.08
-                ajustes_desc.append("Estado 'Reformado' (+8%)")
+                estado_factor = 0.01
+                ajustes_desc.append("Estado 'Reformado' (+1%)")
             else:
                 ajustes_desc.append("Estado 'Buen estado' (0%)")
         if ascensor is not None:
             if ascensor:
-                ascensor_factor = 0.03
-                ajustes_desc.append("Con ascensor (+3%)")
+                ascensor_factor = 0.01
+                ajustes_desc.append("Con ascensor (+1%)")
             else:
-                ascensor_factor = -0.06
-                ajustes_desc.append("Sin ascensor (-6%)")
+                ascensor_factor = -0.01
+                ajustes_desc.append("Sin ascensor (-1%)")
 
         precio_m2_barrio_base = precio_m2_barrio
         precio_m2_barrio = round(precio_m2_barrio_base * (1.0 + estado_factor + ascensor_factor), 2)

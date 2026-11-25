@@ -156,7 +156,9 @@
   box-shadow: 0 20px 50px color-mix(in srgb, var(--azul-noche) 35%, transparent);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  overflow: hidden;
+  overflow: visible;
+  position: relative;
+  z-index: 20;
   margin-bottom: 40px;
 }
 
@@ -939,16 +941,33 @@
 .veredicto-root .v2-zone-search-results {
   position: absolute;
   z-index: 1400;
-  top: calc(100% + 5px);
+  top: calc(100% + 6px);
   left: 0;
   right: 0;
-  max-height: min(320px, 42vh);
+  max-height: 280px;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 6px;
-  border: 1px solid rgba(0, 240, 255, 0.28);
+  border: 1px solid rgba(0, 240, 255, 0.35);
   border-radius: 12px;
   background: #071b31;
-  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.65);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 240, 255, 0.5) rgba(1, 16, 36, 0.7);
+}
+.veredicto-root .v2-zone-search-results::-webkit-scrollbar {
+  width: 6px;
+}
+.veredicto-root .v2-zone-search-results::-webkit-scrollbar-track {
+  background: rgba(1, 16, 36, 0.7);
+  border-radius: 999px;
+}
+.veredicto-root .v2-zone-search-results::-webkit-scrollbar-thumb {
+  background: rgba(0, 240, 255, 0.45);
+  border-radius: 999px;
+}
+.veredicto-root .v2-zone-search-results::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 240, 255, 0.75);
 }
 .veredicto-root .v2-zone-search-group-label {
   display: block;
