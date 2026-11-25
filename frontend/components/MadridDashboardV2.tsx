@@ -916,11 +916,21 @@ const MadridDashboardV2: React.FC = () => {
   const desktopDisplayedZone = desktopZoneHover || desktopPinnedZone;
   const displayedMapFeature = isMobile ? selectedMapFeature : desktopDisplayedZone?.zoneId || activeMapFeature;
   const displayedZoneData = isMobile
-    ? selectedZoneData
+    ? (selectedMapFeature
+        ? (mapLevel === 'districts'
+            ? (() => {
+                const d = mapData.districts.find((item: any) => normalizeZoneLabel(String(item.distrito || '')) === normalizeZoneLabel(selectedMapFeature));
+                return d ? { item: d, isDistrict: true } : selectedZoneData;
+              })()
+            : (() => {
+                const b = mapData.neighborhoods.find((item: any) => normalizeZoneLabel(String(item.barrio || '')) === normalizeZoneLabel(selectedMapFeature));
+                return b ? { item: b, isDistrict: false } : selectedZoneData;
+              })())
+        : null)
     : desktopDisplayedZone
       ? { item: desktopDisplayedZone.item, isDistrict: desktopDisplayedZone.zoneType === 'districts' }
       : activeZoneData;
-  const mapFeatureIsDistrict = displayedZoneData?.isDistrict ?? !displayedMapFeature;
+  const mapFeatureIsDistrict = isMobile ? mapLevel === 'districts' : (displayedZoneData?.isDistrict ?? !displayedMapFeature);
   const mapFeatureRows = mapFeatureIsDistrict ? mapData.districts : mapData.neighborhoods;
   const mapFeatureItem = displayedZoneData?.item || null;
   const mapFeatureHasData = Boolean(mapFeatureItem && (activeProfile.id === 'inversion' ? Number(mapFeatureItem.rentabilidad) > 0 : Number(mapFeatureItem.precio_m2) > 0));
@@ -955,7 +965,25 @@ const MadridDashboardV2: React.FC = () => {
   };
 
   let mapFeatureDeltaLabel: string | null = null;
-  if (activeProfile.id === 'inversion') {
+  const rankingRowForMap = displayedMapFeature
+    ? (mapFeatureIsDistrict ? rankings.topDist : rankings.topBarr).find(
+        (row: any) => normalizeZoneLabel(String(row.name || '')) === normalizeZoneLabel(displayedMapFeature)
+      )
+    : null;
+  const prevValForMap = displayedMapFeature ? rankingPreviousValues[normalizeZoneLabel(displayedMapFeature)] : undefined;
+  const mapFeatureAnnualPct = rankingRowForMap && Number.isFinite(prevValForMap) && prevValForMap! > 0
+    ? ((Number(rankingRowForMap.value) - prevValForMap!) / prevValForMap!) * 100
+    : null;
+
+  if (isMobile && mapFeatureHasData) {
+    if (mapFeatureAnnualPct !== null) {
+      mapFeatureDeltaLabel = `Variación anual: ${mapFeatureAnnualPct >= 0 ? '+' : '−'}${Math.abs(mapFeatureAnnualPct).toFixed(1).replace('.', ',')} %`;
+    } else if (mapFeatureDelta !== null) {
+      mapFeatureDeltaLabel = activeProfile.id === 'inversion'
+        ? `${formatSpanishDelta(mapFeatureDelta, 'en rentabilidad')} frente a Madrid`
+        : `${formatSpanishDelta(mapFeatureDelta, 'en €/m²')} frente a Madrid`;
+    }
+  } else if (activeProfile.id === 'inversion') {
     if (mapFeatureDelta !== null) {
       mapFeatureDeltaLabel = `${formatSpanishDelta(mapFeatureDelta, 'en rentabilidad')} frente a la media de Madrid`;
     }
@@ -982,39 +1010,49 @@ const MadridDashboardV2: React.FC = () => {
       ? mapFeatureHasData && mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_vivienda), 0)} €/mes` : displayedMapFeature ? '' : `${formatNumber(madridMonthlyAverage, 0)} €/mes`
       : mapFeatureHasData && mapFeatureItem?.precio_vivienda ? `${formatNumber(Number(mapFeatureItem.precio_vivienda), 0)} €` : displayedMapFeature ? '' : '';
   const handleMapDistrictClick = useCallback((district: string | null) => {
-    const hoverContext = desktopZoneHoverRef.current;
-    const matchesHover = !isMobile && district && hoverContext && normalizeZoneLabel(district) === normalizeZoneLabel(hoverContext.zoneId);
-    const isAlreadySelected = Boolean(district && normalizeZoneLabel(selectedDistrict) === normalizeZoneLabel(district));
-    selectZone(!isMobile && (isAlreadySelected || !district) ? null : matchesHover ? hoverContext!.zoneId : district);
-    if (!isMobile) {
-      setDesktopPinnedZone(!isAlreadySelected && matchesHover ? hoverContext : null);
-      setSelectedDistrict(isAlreadySelected || !district ? 'Todos' : district);
-      setSelectedBarrio('Todos');
-    }
     if (isMobile) {
-      setSelectedDistrict(district || 'Todos');
-      setSelectedBarrio('Todos');
-      setMapLevel(district ? 'neighborhoods' : 'districts');
+      selectZone(district);
+      return;
     }
+    const hoverContext = desktopZoneHoverRef.current;
+    const matchesHover = district && hoverContext && normalizeZoneLabel(district) === normalizeZoneLabel(hoverContext.zoneId);
+    const isAlreadySelected = Boolean(district && normalizeZoneLabel(selectedDistrict) === normalizeZoneLabel(district));
+    selectZone((isAlreadySelected || !district) ? null : matchesHover ? hoverContext!.zoneId : district);
+    setDesktopPinnedZone(!isAlreadySelected && matchesHover ? hoverContext : null);
+    setSelectedDistrict(isAlreadySelected || !district ? 'Todos' : district);
+    setSelectedBarrio('Todos');
   }, [isMobile, selectZone, selectedDistrict]);
   const handleMapBarrioClick = useCallback((barrio: string | null) => {
-    const hoverContext = desktopZoneHoverRef.current;
-    const matchesHover = !isMobile && barrio && hoverContext && normalizeZoneLabel(barrio) === normalizeZoneLabel(hoverContext.zoneId);
-    const isAlreadySelected = Boolean(barrio && normalizeZoneLabel(selectedBarrio) === normalizeZoneLabel(barrio));
-    selectZone(!isMobile && (isAlreadySelected || !barrio) ? null : matchesHover ? hoverContext!.zoneId : barrio);
-    if (!isMobile) {
-      setDesktopPinnedZone(!isAlreadySelected && matchesHover ? hoverContext : null);
-      if (isAlreadySelected || !barrio) {
-        setSelectedBarrio('Todos');
-        setSelectedDistrict('Todos');
-      } else {
-        const feature = mapData.neighborhoods.find((item: any) => normalizeZoneLabel(String(item.barrio || '')) === normalizeZoneLabel(barrio));
-        setSelectedDistrict(feature?.distrito || 'Todos');
-        setSelectedBarrio(barrio);
-      }
+    if (isMobile) {
+      selectZone(barrio);
+      return;
     }
-    if (isMobile) setSelectedBarrio(barrio || 'Todos');
+    const hoverContext = desktopZoneHoverRef.current;
+    const matchesHover = barrio && hoverContext && normalizeZoneLabel(barrio) === normalizeZoneLabel(hoverContext.zoneId);
+    const isAlreadySelected = Boolean(barrio && normalizeZoneLabel(selectedBarrio) === normalizeZoneLabel(barrio));
+    selectZone((isAlreadySelected || !barrio) ? null : matchesHover ? hoverContext!.zoneId : barrio);
+    setDesktopPinnedZone(!isAlreadySelected && matchesHover ? hoverContext : null);
+    if (isAlreadySelected || !barrio) {
+      setSelectedBarrio('Todos');
+      setSelectedDistrict('Todos');
+    } else {
+      const feature = mapData.neighborhoods.find((item: any) => normalizeZoneLabel(String(item.barrio || '')) === normalizeZoneLabel(barrio));
+      setSelectedDistrict(feature?.distrito || 'Todos');
+      setSelectedBarrio(barrio);
+    }
   }, [isMobile, selectZone, selectedBarrio, mapData.neighborhoods]);
+
+  useEffect(() => {
+    if (!isMobile || !selectedMapFeature) return;
+    const handleOutsideTap = (event: PointerEvent) => {
+      const target = event.target as HTMLElement | null;
+      if (target && !target.closest('.v2-map-card')) {
+        clearSelection();
+      }
+    };
+    document.addEventListener('pointerdown', handleOutsideTap);
+    return () => document.removeEventListener('pointerdown', handleOutsideTap);
+  }, [isMobile, selectedMapFeature, clearSelection]);
   const handleDesktopZoneHover = useCallback((zone: string | null, context?: MapZoneHoverContext) => {
     if (!zone || !context) {
       hoverZone(null);
@@ -2487,18 +2525,14 @@ const MadridDashboardV2: React.FC = () => {
   const applyMobileFilters = () => {
     setSelectedYear(draftFilters.year);
     setSelectedMonth(draftFilters.month);
-    setSelectedDistrict(draftFilters.district);
-    setSelectedBarrio(draftFilters.barrio);
     closeMobileFilters();
   };
 
   const resetMobileFilters = () => {
-    const reset = { year: latestAvailablePeriod.year, month: latestAvailablePeriod.month, district: 'Todos', barrio: 'Todos' };
+    const reset = { year: latestAvailablePeriod.year, month: latestAvailablePeriod.month, district: draftFilters.district, barrio: draftFilters.barrio };
     setDraftFilters(reset);
     setSelectedYear(reset.year);
     setSelectedMonth(reset.month);
-    setSelectedDistrict(reset.district);
-    setSelectedBarrio(reset.barrio);
     closeMobileFilters();
   };
 
@@ -2583,6 +2617,7 @@ const MadridDashboardV2: React.FC = () => {
       <SiteHeader
         activePath="/madrid"
         appearance="aurora"
+        compactBrand={isMobile}
         desktopAction={!isMobile ? (
           <div className="v2-header-desktop-actions">
             <PeriodSelector
@@ -2599,14 +2634,6 @@ const MadridDashboardV2: React.FC = () => {
             />
           </div>
         ) : undefined}
-        mobileAction={isMobile ? (
-          <div className="v2-header-mobile-actions">
-            <button type="button" className="v2-mobile-filter-trigger" aria-expanded={isMobileFiltersOpen} aria-controls="v2-filter-panel" onClick={openMobileFilters}>
-              <SlidersHorizontal size={17} aria-hidden="true" />
-              <span>Filtros</span><b>{Number(selectedDistrict !== 'Todos') + Number(selectedBarrio !== 'Todos') + Number(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month)}</b>
-            </button>
-          </div>
-        ) : undefined}
         profileTabs={PROFILES.map(p => ({ id: p.id, label: p.label }))}
         activeProfileId={activeProfile.id}
         onSelectProfile={(id) => {
@@ -2617,16 +2644,23 @@ const MadridDashboardV2: React.FC = () => {
 
       {isMobile && <div className="v2-mobile-filter-bar">
         <div className="v2-mobile-filter-summary-row">
-          <button type="button" className="v2-mobile-filter-summary" onClick={openMobileFilters}>
+          <div className="v2-mobile-filter-summary">
             <strong>{activeProfile.label}</strong>
             <span>· {selectedBarrio !== 'Todos' ? formatZoneOption(selectedBarrio) : selectedDistrict === 'Todos' ? 'Madrid' : formatZoneOption(selectedDistrict)} · {selectedMonth} {selectedYear}</span>
+          </div>
+          <button type="button" className="v2-mobile-filter-pill" aria-expanded={isMobileFiltersOpen} aria-controls="v2-filter-panel" onClick={openMobileFilters}>
+            <SlidersHorizontal size={14} aria-hidden="true" />
+            <span>Filtros</span>
+            <b>{Number(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month)}</b>
           </button>
+        </div>
+        {(selectedDistrict !== 'Todos' || selectedBarrio !== 'Todos' || selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month) && (
           <div className="v2-mobile-filter-chips">
             {selectedDistrict !== 'Todos' && <button type="button" onClick={() => { setSelectedDistrict('Todos'); setSelectedBarrio('Todos'); }}>‹ {formatZoneOption(selectedDistrict)} ×</button>}
             {selectedBarrio !== 'Todos' && <button type="button" onClick={() => setSelectedBarrio('Todos')}>{formatZoneOption(selectedBarrio)} ×</button>}
             {(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month) && <button type="button" onClick={() => { setSelectedYear(latestAvailablePeriod.year); setSelectedMonth(latestAvailablePeriod.month); }}>{selectedMonth.slice(0, 3)} {selectedYear} ×</button>}
           </div>
-        </div>
+        )}
         <div className="v2-mobile-direct-search">
           <ZoneSearch
             options={zoneSearchOptions}
@@ -2682,46 +2716,6 @@ const MadridDashboardV2: React.FC = () => {
           </div>
           </div>
 
-          {isMobile && <>
-          {/* DISTRITO */}
-          <div className={`v2-dropdown-container ${activeDropdown === 'dist' ? 'v2-z-up' : ''}`}>
-            <span className="v2-filter-label">Distrito</span>
-            <DashboardSelect value={formatZoneOption(visibleFilters.district)} expanded={activeDropdown === 'dist'} onToggle={() => setActiveDropdown(activeDropdown === 'dist' ? null : 'dist')} />
-            {activeDropdown === 'dist' && (
-              <div className="v2-dropdown-menu" role="listbox" aria-label="Distrito">
-                {availableDistricts.map(d => (
-                  <button type="button" key={d} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.district === d} onClick={(e) => { e.stopPropagation(); if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, district: d, barrio: 'Todos' })); else setSelectedDistrict(d); setActiveDropdown(null); }}>{formatZoneOption(d)}</button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* BARRIO */}
-          <div className={`v2-dropdown-container ${activeDropdown === 'barrio' ? 'v2-z-up' : ''}`}>
-            <span className="v2-filter-label">Barrio</span>
-            <DashboardSelect value={visibleFilters.district === 'Todos' ? 'Elige un distrito' : formatZoneOption(visibleFilters.barrio)} disabled={visibleFilters.district === 'Todos'} expanded={activeDropdown === 'barrio'} onToggle={() => setActiveDropdown(activeDropdown === 'barrio' ? null : 'barrio')} />
-            {activeDropdown === 'barrio' && (
-              <div className="v2-dropdown-menu" role="listbox" aria-label="Barrio">
-                <input
-                  className="v2-dropdown-search"
-                  aria-label="Buscar barrio"
-                  placeholder="Buscar barrio…"
-                  onClick={(e) => e.stopPropagation()}
-                  onChange={(e) => {
-                    const query = e.target.value.toLocaleLowerCase('es-ES');
-                    const menu = e.currentTarget.parentElement;
-                    menu?.querySelectorAll<HTMLButtonElement>('.v2-dropdown-item').forEach(item => {
-                      item.hidden = query.length > 0 && !item.textContent?.toLocaleLowerCase('es-ES').includes(query);
-                    });
-                  }}
-                />
-                {(isMobileFiltersOpen ? draftBarrios : availableBarrios).map(b => (
-                  <button type="button" key={b} className="v2-dropdown-item" role="option" aria-selected={visibleFilters.barrio === b} onClick={(e) => { e.stopPropagation(); if (isMobileFiltersOpen) setDraftFilters(current => ({ ...current, barrio: b })); else setSelectedBarrio(b); setActiveDropdown(null); }}>{formatZoneOption(b)}</button>
-                ))}
-              </div>
-            )}
-          </div>
-          </>}
           {/* BOTONES DE ACCIÓN EN ALTO CONTRASTE */}
           <div className="v2-filter-actions">
             <button
@@ -2809,7 +2803,9 @@ const MadridDashboardV2: React.FC = () => {
             )}
 
             {isMobile && <div className="v2-mobile-filter-commit">
-              <button type="button" className="v2-mobile-filter-apply" onClick={applyMobileFilters}>Aplicar ({Number(draftFilters.district !== 'Todos') + Number(draftFilters.barrio !== 'Todos') + Number(draftFilters.year !== latestAvailablePeriod.year || draftFilters.month !== latestAvailablePeriod.month)})</button>
+              <button type="button" className="v2-mobile-filter-apply" onClick={applyMobileFilters}>
+                Aplicar{Number(draftFilters.year !== latestAvailablePeriod.year || draftFilters.month !== latestAvailablePeriod.month) ? ` (${Number(draftFilters.year !== latestAvailablePeriod.year || draftFilters.month !== latestAvailablePeriod.month)})` : ''}
+              </button>
               <button type="button" className="v2-mobile-filter-reset" onClick={resetMobileFilters}>Restablecer al último dato real</button>
             </div>}
 
@@ -2875,6 +2871,7 @@ const MadridDashboardV2: React.FC = () => {
                     const isCompra = activeProfile.id === 'compra';
                     const isVenta = activeProfile.id === 'venta';
                     const isInversion = activeProfile.id === 'inversion';
+                    const isKpiFetching = isDashboardLoading || isTransitioning || Object.keys(kpiData || {}).length === 0;
 
                     const invRatio = isNetYieldActive && netYieldValue !== null ? Number(netYieldValue) : Number(kpiData.p_m2);
                     const invPercent = Number.isFinite(invRatio) && invRatio > 0 ? toPercent(invRatio) : 0;
@@ -2949,7 +2946,9 @@ const MadridDashboardV2: React.FC = () => {
                             />
                           </div>
                           <div className="v2-rent-main-value">
-                            {isInversion ? (
+                            {isKpiFetching ? (
+                              <span className="v2-kpi-shimmer v2-kpi-shimmer--hero" aria-label="Calculando métrica principal" />
+                            ) : isInversion ? (
                               <>
                                 <strong>{invPercent > 0 ? invPercent.toFixed(2).replace('.', ',') : '—'}</strong>
                                 {invPercent > 0 && <span>%</span>}
@@ -2992,15 +2991,19 @@ const MadridDashboardV2: React.FC = () => {
                         <section className="v2-rent-secondary">
                           <div className="v2-rent-secondary-card">
                             <span className="v2-rent-eyebrow" title={isAlquiler ? 'Calculado sobre vivienda tipo estándar de 70 m²' : undefined}>{secondaryLeftLabel}</span>
-                            <strong>
-                              {formatCurrencyInt(kpiData.p_vivienda, '')}
-                              {Number(kpiData.p_vivienda) > 0 ? <small> {secondaryLeftUnit}</small> : null}
-                            </strong>
+                            {isKpiFetching ? (
+                              <span className="v2-kpi-shimmer v2-kpi-shimmer--val" aria-label="Calculando importe medio" />
+                            ) : (
+                              <strong>
+                                {formatCurrencyInt(kpiData.p_vivienda, '')}
+                                {Number(kpiData.p_vivienda) > 0 ? <small> {secondaryLeftUnit}</small> : null}
+                              </strong>
+                            )}
                           </div>
 
                           {isAlquiler && (
                             <div className="v2-rent-secondary-card v2-rent-effort">
-                              <div className="v2-rent-effort-head"><span className="v2-rent-eyebrow">Esfuerzo de alquiler</span><strong style={{ color: '#fbbf24' }}>{effort > 0 ? `${effort.toFixed(0)} %` : '—'}</strong></div>
+                              <div className="v2-rent-effort-head"><span className="v2-rent-eyebrow">Esfuerzo de alquiler</span>{isKpiFetching ? <span className="v2-kpi-shimmer v2-kpi-shimmer--chip" /> : <strong style={{ color: '#fbbf24' }}>{effort > 0 ? `${effort.toFixed(0)} %` : '—'}</strong>}</div>
                               <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(effort, 100)}%`, background: '#fbbf24' }} /><b style={{ left: '30%' }} /></div>
                               <span className="v2-rent-effort-caption">{formatCurrencyInt(rent, '€/mes')} de alquiler · {formatCurrencyInt(incomeMonthly, '€/mes')} de renta neta media por hogar (Fuente: INE)</span>
                               <button className="v2-rent-calc-toggle" type="button" onClick={() => setShowRentCalculator(value => !value)} aria-expanded={showRentCalculator}>
@@ -3018,7 +3021,7 @@ const MadridDashboardV2: React.FC = () => {
                             <div className="v2-rent-secondary-card v2-rent-effort">
                               <div className="v2-rent-effort-head">
                                 <span className="v2-rent-eyebrow">Poder adquisitivo</span>
-                                <strong style={{ color: compraStatusColor }}>{aniosRenta > 0 ? `${aniosRenta.toFixed(1).replace('.', ',')} años` : '—'}</strong>
+                                {isKpiFetching ? <span className="v2-kpi-shimmer v2-kpi-shimmer--chip" /> : <strong style={{ color: compraStatusColor }}>{aniosRenta > 0 ? `${aniosRenta.toFixed(1).replace('.', ',')} años` : '—'}</strong>}
                               </div>
                               <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(100, (aniosRenta / 12) * 100)}%`, background: compraStatusColor }} /><b style={{ left: '41.7%' }} /></div>
                               <span className="v2-rent-effort-caption">Renta media: {formatCurrencyInt(rentaAnual, '€/año')} · {compraStatusText}</span>
@@ -3029,9 +3032,11 @@ const MadridDashboardV2: React.FC = () => {
                             <div className="v2-rent-secondary-card v2-rent-effort">
                               <div className="v2-rent-effort-head">
                                 <span className="v2-rent-eyebrow">Velocidad venta</span>
-                                <strong style={{ color: velocityColor }}>
-                                  {velocity > 0 ? `${velocity % 1 === 0 ? velocity.toFixed(0) : velocity.toFixed(1).replace('.', ',')} ${velocity === 1 ? 'mes' : 'meses'}` : '—'}
-                                </strong>
+                                {isKpiFetching ? <span className="v2-kpi-shimmer v2-kpi-shimmer--chip" /> : (
+                                  <strong style={{ color: velocityColor }}>
+                                    {velocity > 0 ? `${velocity % 1 === 0 ? velocity.toFixed(0) : velocity.toFixed(1).replace('.', ',')} ${velocity === 1 ? 'mes' : 'meses'}` : '—'}
+                                  </strong>
+                                )}
                               </div>
                               <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(100, (velocity / 4) * 100)}%`, background: velocityColor }} /><b style={{ left: '50%' }} /></div>
                               <span className="v2-rent-effort-caption">
@@ -3044,7 +3049,7 @@ const MadridDashboardV2: React.FC = () => {
                             <div className="v2-rent-secondary-card v2-rent-effort">
                               <div className="v2-rent-effort-head">
                                 <span className="v2-rent-eyebrow">Amortización</span>
-                                <strong style={{ color: activeProfile.color }}>{amortizacionAnios > 0 ? `${amortizacionAnios.toFixed(1).replace('.', ',')} años` : '—'}</strong>
+                                {isKpiFetching ? <span className="v2-kpi-shimmer v2-kpi-shimmer--chip" /> : <strong style={{ color: activeProfile.color }}>{amortizacionAnios > 0 ? `${amortizacionAnios.toFixed(1).replace('.', ',')} años` : '—'}</strong>}
                               </div>
                               <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(100, (amortizacionAnios / 30) * 100)}%`, background: activeProfile.color }} /><b style={{ left: '66.7%' }} /></div>
                               <span className="v2-rent-effort-caption">
@@ -3900,11 +3905,13 @@ const MadridDashboardV2: React.FC = () => {
                             selectedMonth={selectedMonth}
                             isProjection={isProjectionPeriod}
                             selectedProfile={activeProfile.label}
-                            selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
-                            selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
+                            selectedDistrict={isMobile ? null : (selectedDistrict === 'Todos' ? null : selectedDistrict)}
+                            selectedBarrio={isMobile ? null : (selectedBarrio === 'Todos' ? null : selectedBarrio)}
                             selectedZone={selectedMapFeature}
-                            selectedZoneType={isMobile ? undefined : desktopPinnedZone?.zoneType}
-                            drillDownOnSelection={isMobile}
+                            selectedZoneType={isMobile ? (mapLevel === 'districts' ? 'districts' : undefined) : desktopPinnedZone?.zoneType}
+                            drillDownOnSelection={false}
+                            isMobile={isMobile}
+                            onBackgroundClick={isMobile ? clearSelection : undefined}
                             onZoneHover={isMobile ? undefined : handleDesktopZoneHover}
                             onDistrictClick={handleMapDistrictClick}
                           />
@@ -3922,10 +3929,12 @@ const MadridDashboardV2: React.FC = () => {
                             isProjection={isProjectionPeriod}
                             selectedProfile={activeProfile.label}
                             selectedDistrict={selectedDistrict === 'Todos' ? null : selectedDistrict}
-                            selectedBarrio={selectedBarrio === 'Todos' ? null : selectedBarrio}
+                            selectedBarrio={isMobile ? null : (selectedBarrio === 'Todos' ? null : selectedBarrio)}
                             selectedZone={selectedMapFeature}
-                            selectedZoneType={isMobile ? undefined : desktopPinnedZone?.zoneType}
-                            drillDownOnSelection={isMobile}
+                            selectedZoneType={isMobile ? (mapLevel === 'neighborhoods' ? 'neighborhoods' : undefined) : desktopPinnedZone?.zoneType}
+                            drillDownOnSelection={isMobile && mapLevel === 'neighborhoods' && selectedDistrict !== 'Todos'}
+                            isMobile={isMobile}
+                            onBackgroundClick={isMobile ? clearSelection : undefined}
                             onZoneHover={isMobile ? undefined : handleDesktopZoneHover}
                             onDistrictClick={handleMapDistrictClick}
                             onBarrioClick={handleMapBarrioClick}
@@ -3952,19 +3961,63 @@ const MadridDashboardV2: React.FC = () => {
                     onClose={() => { clearSelection(); desktopZoneHoverRef.current = null; setDesktopZoneHover(null); setDesktopPinnedZone(null); }}
                   />}
                   {isMobile && selectedMapFeature && <FichaZonaMovil
-                    zone={selectedMapFeature}
+                    zone={formatZoneOption(selectedMapFeature)}
                     zoneType={mapFeatureIsDistrict ? 'DISTRITO' : 'BARRIO'}
+                    badge={isProjectionPeriod ? 'Estimación' : null}
                     noData={mapFeatureNoData}
                     projectionWithoutHistory={mapFeatureNoData && isProjectionPeriod}
                     rank={mapFeatureRankLabel}
                     primaryLabel={mapFeaturePrimaryLabel}
                     primaryValue={mapFeaturePrimary}
-                    secondaryLabel={mapFeatureSecondaryLabel}
-                    secondaryValue={mapFeatureSecondary}
+                    secondaryLabel={activeProfile.id === 'alquiler' ? 'Alquiler medio (70 m²)' : mapFeatureSecondaryLabel}
+                    secondaryValue={activeProfile.id === 'alquiler' && mapFeatureHasData && Number(mapFeatureItem?.precio_m2) > 0
+                      ? `${formatNumber(Math.round(Number(mapFeatureItem.precio_m2) * 70), 0)} €/mes`
+                      : mapFeatureSecondary}
                     delta={mapFeatureDeltaLabel}
-                    onClose={() => { clearSelection(); setSelectedBarrio('Todos'); }}
+                    onClose={() => clearSelection()}
                   >
-                    <div className="v2-map-sheet-actions"><button type="button" onClick={() => { const kind = mapFeatureIsDistrict ? 'district' : 'barrio'; const match = zoneSearchOptions.find(option => option.kind === kind && normalizeZoneLabel(option.name) === normalizeZoneLabel(selectedMapFeature)); if (match) setComparisonZoneA(match); clearSelection(); scrollToDashboardSection('compare'); }}>Ver evolución →</button><button type="button" onClick={() => { clearSelection(); setSelectedBarrio('Todos'); setSelectedDistrict('Todos'); setMapLevel('districts'); }}>Ver Madrid</button></div>
+                    <div className="v2-map-sheet-actions">
+                      {mapFeatureIsDistrict ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const matchedDist = availableDistricts.find(d => normalizeZoneLabel(d) === normalizeZoneLabel(selectedMapFeature)) || selectedMapFeature;
+                            setSelectedDistrict(matchedDist);
+                            setSelectedBarrio('Todos');
+                            setMapLevel('neighborhoods');
+                            clearSelection();
+                          }}
+                        >
+                          Ver barrios
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const feat = mapData.neighborhoods.find((item: any) => normalizeZoneLabel(String(item.barrio || '')) === normalizeZoneLabel(selectedMapFeature));
+                            const parentDist = feat?.distrito || feat?.district;
+                            setSelectedDistrict(parentDist || 'Todos');
+                            setSelectedBarrio('Todos');
+                            setMapLevel('districts');
+                            clearSelection();
+                          }}
+                        >
+                          Ver distrito
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const kind = mapFeatureIsDistrict ? 'district' : 'barrio';
+                          const match = zoneSearchOptions.find(option => option.kind === kind && normalizeZoneLabel(option.name) === normalizeZoneLabel(selectedMapFeature));
+                          if (match) setComparisonZoneA(match);
+                          clearSelection();
+                          scrollToDashboardSection('compare');
+                        }}
+                      >
+                        Comparar
+                      </button>
+                    </div>
                   </FichaZonaMovil>}
                   <DashboardMapLegend
                     title={`Intensidad · ${mapMetricLabel}`}
@@ -4773,42 +4826,49 @@ const MadridDashboardV2: React.FC = () => {
                               <div>
                                 <strong style={{ color: '#00e5ff' }}>Conclusión: </strong>
                                 <span>
-                                  {cheaper} {monthlySaving > 0 ? `permite ahorrar ${monthlySaving.toLocaleString('es-ES')} €/mes` : `es un ${pricePct}% más asequible`} y reduce la tensión salarial en {effortDiff} puntos.
+                                  {cheaper === lessEffort
+                                    ? `${cheaper} ${monthlySaving > 0 ? `es ${monthlySaving.toLocaleString('es-ES')} €/mes más barato` : `es un ${pricePct}% más barato`} y reduce el esfuerzo sobre la renta media en ${effortDiff} puntos.`
+                                    : `${cheaper} ${monthlySaving > 0 ? `es ${monthlySaving.toLocaleString('es-ES')} €/mes más barato` : `es un ${pricePct}% más barato`}, pero exige ${effortDiff} puntos más de esfuerzo sobre la renta media.`}
                                 </span>
                               </div>
                             </div>
                             <div className="v2-compare-conclusion-actions">
-                              <button
-                                type="button"
-                                className="v2-compare-cta-primary"
-                                onClick={() => {
-                                  const dilemmaSec = document.querySelector('[data-dashboard-section="dilemma"]') || document.querySelector('.v2-dilema-section');
-                                  if (dilemmaSec) {
-                                    dilemmaSec.scrollIntoView({ behavior: 'smooth' });
-                                  } else {
-                                    const simToggle = document.querySelector('.v2-rent-calc-toggle') as HTMLButtonElement;
-                                    if (simToggle) {
-                                      simToggle.click();
-                                      simToggle.scrollIntoView({ behavior: 'smooth' });
+                              {!isMobile && (
+                                <button
+                                  type="button"
+                                  className="v2-compare-cta-primary"
+                                  onClick={() => {
+                                    const dilemmaSec = document.querySelector('[data-dashboard-section="dilemma"]') || document.querySelector('.v2-dilema-section');
+                                    if (dilemmaSec) {
+                                      dilemmaSec.scrollIntoView({ behavior: 'smooth' });
                                     } else {
-                                      window.location.href = '/madrid/veredicto';
+                                      const simToggle = document.querySelector('.v2-rent-calc-toggle') as HTMLButtonElement;
+                                      if (simToggle) {
+                                        simToggle.click();
+                                        simToggle.scrollIntoView({ behavior: 'smooth' });
+                                      } else {
+                                        window.location.href = '/madrid/veredicto';
+                                      }
                                     }
-                                  }
-                                }}
-                              >
-                                <span>¿Decidir entre estas dos zonas? [Ver balance Alquilar vs. Comprar]</span>
-                                <ArrowUpRight size={14} />
-                              </button>
+                                  }}
+                                >
+                                  <span>¿Decidir entre estas dos zonas? [Ver balance Alquilar vs. Comprar]</span>
+                                  <ArrowUpRight size={14} />
+                                </button>
+                              )}
                               <button
                                 type="button"
                                 className="v2-compare-cta-secondary"
                                 onClick={() => {
                                   const winnerZone = zoneSearchOptions.find(o => normalizeZoneLabel(o.name) === normalizeZoneLabel(cheaper));
-                                  if (winnerZone?.kind === 'district') {
-                                    setSelectedDistrict(winnerZone.name);
+                                  const targetDistrict = winnerZone?.kind === 'district' ? winnerZone.name : winnerZone?.district;
+                                  if (targetDistrict) {
+                                    setSelectedDistrict(targetDistrict);
                                     setSelectedBarrio('Todos');
+                                    setMapLevel('neighborhoods');
+                                    clearSelection();
                                   }
-                                  const mapSec = document.querySelector('[data-dashboard-section="maps"]') || document.querySelector('.v2-map-card');
+                                  const mapSec = document.querySelector('[data-dashboard-section="map"]') || document.querySelector('.v2-map-card');
                                   mapSec?.scrollIntoView({ behavior: 'smooth' });
                                 }}
                               >

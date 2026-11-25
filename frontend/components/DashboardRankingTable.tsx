@@ -243,9 +243,9 @@ export default function DashboardRankingTable({
         style={{
           width: '100%',
           flex: '1 1 auto',
-          maxHeight: '540px',
-          height: '540px',
-          overflowY: 'auto',
+          maxHeight: isMobile ? 'none' : '540px',
+          height: isMobile ? 'auto' : '540px',
+          overflowY: isMobile ? 'visible' : 'auto',
           overflowX: 'hidden',
           border: '1px solid rgba(186, 204, 214, 0.14)',
           borderRadius: '10px',
@@ -361,10 +361,10 @@ export default function DashboardRankingTable({
                             onCompareZone(item.name);
                           }}
                           title={`Comparar ${formatName(item.name)} con mi zona en el módulo comparador`}
-                          aria-label={`Comparar ${formatName(item.name)} con mi zona`}
+                          aria-label={isMobile ? 'Comparar' : `Comparar ${formatName(item.name)} con mi zona`}
                         >
-                          <Scale size={11} aria-hidden="true" />
-                          <span>Comparar</span>
+                          <Scale size={isMobile ? 14 : 11} aria-hidden="true" />
+                          {!isMobile && <span>Comparar</span>}
                         </button>
                       )}
                     </div>

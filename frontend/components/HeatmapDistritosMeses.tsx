@@ -34,33 +34,59 @@ const MONTH_ABBR = [
  * 4. 24 – 27 €/m²: Cian Neón Saturado (#00e5ff)
  * 5. > 27 €/m²: Pico Glaciar / Blanco Luminoso (#d9fbff)
  */
+function contrastTextForHex(hex: string): string {
+  const clean = hex.replace('#', '');
+  if (clean.length !== 6) return '#ffffff';
+  const r = parseInt(clean.slice(0, 2), 16) / 255;
+  const g = parseInt(clean.slice(2, 4), 16) / 255;
+  const b = parseInt(clean.slice(4, 6), 16) / 255;
+  const toLin = (c: number) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  const lum = 0.2126 * toLin(r) + 0.7152 * toLin(g) + 0.0722 * toLin(b);
+  return lum > 0.32 ? '#0A192F' : '#ffffff';
+}
+
+function isEstimatedMonth(year: string, monthIndex: number): boolean {
+  const y = Number(year);
+  if (!Number.isFinite(y)) return monthIndex >= 6;
+  return y > 2026 || (y === 2026 && monthIndex >= 6);
+}
+
 function getBlueHeatColor(norm: number, val: number, profileId: string): { bg: string; text: string; isBold: boolean } {
+  let bg = '#062244';
+  let isBold = false;
   if (profileId === 'alquiler') {
     if (val < 16) {
-      return { bg: '#062244', text: '#c2d8ed', isBold: false };
+      bg = '#062244';
     } else if (val < 20) {
-      return { bg: '#074d75', text: '#ffffff', isBold: false };
+      bg = '#074d75';
     } else if (val < 24) {
-      return { bg: '#00a896', text: '#ffffff', isBold: true };
+      bg = '#00a896';
+      isBold = true;
     } else if (val <= 27) {
-      return { bg: '#00e5ff', text: '#01162d', isBold: true };
+      bg = '#00e5ff';
+      isBold = true;
     } else {
-      return { bg: '#d9fbff', text: '#011024', isBold: true };
+      bg = '#d9fbff';
+      isBold = true;
+    }
+  } else {
+    const t = Math.max(0, Math.min(1, norm));
+    if (t < 0.20) {
+      bg = '#062244';
+    } else if (t < 0.45) {
+      bg = '#074d75';
+    } else if (t < 0.70) {
+      bg = '#00a896';
+      isBold = true;
+    } else if (t < 0.88) {
+      bg = '#00e5ff';
+      isBold = true;
+    } else {
+      bg = '#d9fbff';
+      isBold = true;
     }
   }
-
-  const t = Math.max(0, Math.min(1, norm));
-  if (t < 0.20) {
-    return { bg: '#062244', text: '#c2d8ed', isBold: false };
-  } else if (t < 0.45) {
-    return { bg: '#074d75', text: '#ffffff', isBold: false };
-  } else if (t < 0.70) {
-    return { bg: '#00a896', text: '#ffffff', isBold: true };
-  } else if (t < 0.88) {
-    return { bg: '#00e5ff', text: '#01162d', isBold: true };
-  } else {
-    return { bg: '#d9fbff', text: '#011024', isBold: true };
-  }
+  return { bg, text: contrastTextForHex(bg), isBold };
 }
 
 /**
@@ -194,9 +220,9 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
                 const refCurrent = currentVal ?? endVal ?? startVal;
                 const deltaPct = startVal && refCurrent ? ((refCurrent - startVal) / startVal) * 100 : null;
                 const milestones = [
-                  { label: 'Ene', val: startVal, isActive: activeIdx === 0, isEst: false },
-                  { label: MONTH_ABBR[activeIdx], val: currentVal, isActive: true, isEst: activeIdx >= 6 },
-                  { label: 'Dic*', val: endVal, isActive: activeIdx === 11, isEst: true },
+                  { label: `Ene${isEstimatedMonth(year, 0) ? '*' : ''}`, val: startVal, isActive: activeIdx === 0, isEst: isEstimatedMonth(year, 0) },
+                  { label: `${MONTH_ABBR[activeIdx]}${isEstimatedMonth(year, activeIdx) ? '*' : ''}`, val: currentVal, isActive: true, isEst: isEstimatedMonth(year, activeIdx) },
+                  { label: `Dic${isEstimatedMonth(year, 11) ? '*' : ''}`, val: endVal, isActive: activeIdx === 11, isEst: isEstimatedMonth(year, 11) },
                 ];
 
                 return (
@@ -216,11 +242,11 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
                         return (
                           <div
                             key={`${m.label}-${idx}`}
-                            className={`hdm-mobile-pill ${m.isActive ? 'is-active' : ''}`}
-                            style={heat ? { backgroundColor: heat.bg, color: heat.text } : undefined}
+                            className={`hdm-mobile-pill ${m.isActive ? 'is-active' : ''} ${m.isEst ? 'is-estimated' : ''}`}
+                            style={heat ? { backgroundColor: heat.bg, color: heat.text, ...(m.isEst ? { borderColor: heat.text === '#0A192F' ? 'rgba(10, 25, 47, 0.55)' : 'rgba(0, 229, 255, 0.72)' } : {}) } : undefined}
                           >
-                            <small>{m.label}</small>
-                            <span>{m.val !== null ? formatCellDisplay(m.val, profileId) : '—'}</span>
+                            <small style={heat ? { color: heat.text } : undefined}>{m.label}</small>
+                            <span style={heat ? { color: heat.text } : undefined}>{m.val !== null ? formatCellDisplay(m.val, profileId) : '—'}</span>
                           </div>
                         );
                       })}
@@ -290,11 +316,11 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
               {/* Columnas mensuales */}
               {MONTH_ABBR.map((abbr, i) => {
                 const isSelected = selectedMonthIdx === i;
-                const isEstimated = i >= 6; // Julio a Diciembre son estimaciones
+                const isEstimated = isEstimatedMonth(year, i);
                 return (
                   <th
                     key={abbr}
-                    className={`hdm-th hdm-th-month ${isSelected ? 'is-selected' : ''}`}
+                    className={`hdm-th hdm-th-month ${isSelected ? 'is-selected' : ''} ${isEstimated ? 'is-estimated' : ''}`}
                     title={
                       isEstimated
                         ? `${MONTH_NAMES[i]}: Estimación predictiva DMIYC (CatBoost v2)`
@@ -332,7 +358,7 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
                     const norm = (val - effectiveMin) / (effectiveMax - effectiveMin || 1);
                     const { bg, text, isBold } = getBlueHeatColor(norm, val, profileId);
 
-                    const isEstimated = i >= 6;
+                    const isEstimated = isEstimatedMonth(year, i);
                     const formatted = formatCellDisplay(val, profileId);
                     
                     let tooltipText = '';
@@ -348,11 +374,12 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
                     return (
                       <td
                         key={i}
-                        className="hdm-cell"
+                        className={`hdm-cell ${isEstimated ? 'is-estimated' : ''}`}
                         style={{
                           backgroundColor: bg,
                           color: text,
                           fontWeight: isBold ? 750 : 550,
+                          ...(isEstimated ? { border: `1px dashed ${text === '#0A192F' ? 'rgba(10, 25, 47, 0.45)' : 'rgba(0, 229, 255, 0.55)'}` } : {}),
                         }}
                         title={tooltipText}
                       >

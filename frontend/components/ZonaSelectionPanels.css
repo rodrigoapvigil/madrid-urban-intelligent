@@ -20,15 +20,21 @@
 
 .zona-panel-desktop { position: fixed; top: 0; left: 0; z-index: 2147482000; width: 260px; max-width: calc(100vw - 16px); padding: 12px; border-radius: 14px; pointer-events: none; visibility: hidden; will-change: transform; }
 .zona-panel-desktop .zona-panel-kind { width: fit-content; color: #00e5ff; font-size: 9px; font-weight: 800; letter-spacing: .08em; }
-.zona-panel-movil { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 12px; width: 100%; margin: 10px 0 0; padding: 12px; border-radius: 14px; }
+.zona-panel-movil { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 10px; width: 100%; margin: 8px 0 0; padding: 10px 12px; border-radius: 14px; }
+.zona-panel-movil-badges { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.zona-panel-movil .zona-panel-kind { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 999px; background: rgba(0, 229, 255, .14); color: #00e5ff; font-size: 9.5px; font-weight: 800; letter-spacing: .07em; }
+.zona-panel-est-badge { display: inline-flex; align-items: center; padding: 2px 7px; border-radius: 999px; background: rgba(245, 158, 11, .16); border: 1px dashed rgba(245, 158, 11, .55); color: #ffd17d; font-size: 9.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 .zona-panel-movil .zona-panel-heading,
 .zona-panel-movil dl,
 .zona-panel-movil > p,
 .zona-panel-movil > :not(.zona-panel-close) { grid-column: 1 / -1; }
-.zona-panel-close { position: absolute; top: -9px; right: -7px; width: 36px; height: 36px; padding: 0; border: 0; background: transparent; color: #c7d8e5; font: inherit; font-size: 24px; cursor: pointer; }
+.zona-panel-movil dl { margin: 4px 0 0; gap: 5px; }
+.zona-panel-movil > p { margin: 4px 0 0; }
+.zona-panel-close { position: absolute; top: 4px; right: 4px; width: 36px; height: 36px; padding: 0; border: 0; background: transparent; color: #c7d8e5; font: inherit; font-size: 22px; line-height: 1; cursor: pointer; }
 .zona-panel-desktop .zona-panel-close { pointer-events: auto; }
-.zona-panel-movil .v2-map-sheet-actions { display: flex; justify-content: space-between; gap: 8px; }
-.zona-panel-movil .v2-map-sheet-actions button { min-height: 36px; padding: 0 10px; border: 1px solid rgba(0,229,255,.28); border-radius: 9px; background: rgba(0,229,255,.08); color: #8ef5ff; font-size: 11px; font-weight: 700; }
+.zona-panel-movil .v2-map-sheet-actions { display: flex; justify-content: space-between; gap: 8px; margin-top: 4px; }
+.zona-panel-movil .v2-map-sheet-actions button { flex: 1 1 0; min-height: 40px; padding: 0 10px; border: 1px solid rgba(0,229,255,.35); border-radius: 10px; background: rgba(0,229,255,.12); color: #eefaff; font-size: 12px; font-weight: 700; cursor: pointer; }
+.zona-panel-movil .v2-map-sheet-actions button:first-child { background: rgba(0,229,255,.2); border-color: rgba(0,229,255,.55); color: #ffffff; }
 .v2-map-card { position: relative; }
 
 @media (max-width: 768px), (pointer: coarse) and (max-height: 500px) {

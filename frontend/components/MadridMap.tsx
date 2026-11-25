@@ -16,11 +16,13 @@ interface MapProps {
   selectedZone?: string | null;
   selectedZoneType?: 'districts' | 'neighborhoods';
   drillDownOnSelection?: boolean;
+  isMobile?: boolean;
   compareZoneA?: string;
   compareZoneB?: string;
   onDistrictClick: (districtName: string | null) => void;
   onBarrioClick?: (barrioName: string | null) => void;
   onZoneHover?: (zoneName: string | null, context?: MapZoneHoverContext) => void;
+  onBackgroundClick?: () => void;
 }
 
 export type MapZoneHoverContext = {
@@ -252,14 +254,16 @@ let cachedBarriosGeoJson: any = null;
 
 const MadridMap: React.FC<MapProps> = ({ 
   type, data, selectedYear, selectedMonth, isProjection = false, selectedProfile, 
-  selectedDistrict, selectedBarrio, selectedZone = null, selectedZoneType, drillDownOnSelection = true, compareZoneA, compareZoneB, onDistrictClick, onBarrioClick, onZoneHover
+  selectedDistrict, selectedBarrio, selectedZone = null, selectedZoneType, drillDownOnSelection = true, isMobile = false, compareZoneA, compareZoneB, onDistrictClick, onBarrioClick, onZoneHover, onBackgroundClick
 }) => {
   const mapRef = useRef<L.Map | null>(null);
   const geoJsonLayerRef = useRef<L.GeoJSON | null>(null);
   const onZoneHoverRef = useRef(onZoneHover);
+  const onBackgroundClickRef = useRef(onBackgroundClick);
   const hasInitialViewRef = useRef(false);
   const containerId = useRef(`map-${type}-${Math.random().toString(36).slice(2, 11)}`).current;
   onZoneHoverRef.current = onZoneHover;
+  onBackgroundClickRef.current = onBackgroundClick;
 
   useEffect(() => () => {
     mapRef.current?.remove();
@@ -348,6 +352,12 @@ const MadridMap: React.FC<MapProps> = ({
       mapRef.current.scrollWheelZoom?.disable();
       mapRef.current.boxZoom?.disable();
       mapRef.current.keyboard?.disable();
+      if (isMobile) {
+        mapRef.current.dragging?.disable();
+      }
+      mapRef.current.on('click', () => {
+        onBackgroundClickRef.current?.();
+      });
     };
     initializeMap();
 
@@ -420,6 +430,30 @@ const MadridMap: React.FC<MapProps> = ({
 
     if (container) {
       resizeObserver.observe(container);
+    }
+
+    const onTouchStartOrMove = (event: TouchEvent) => {
+      const map = mapRef.current;
+      if (!isMobile || !map) return;
+      if (event.touches.length >= 2) {
+        map.dragging?.enable();
+        map.touchZoom?.enable();
+      } else {
+        map.dragging?.disable();
+      }
+    };
+    const onTouchEnd = (event: TouchEvent) => {
+      const map = mapRef.current;
+      if (!isMobile || !map) return;
+      if (event.touches.length < 2) {
+        map.dragging?.disable();
+      }
+    };
+    if (container && isMobile) {
+      container.addEventListener('touchstart', onTouchStartOrMove, { passive: true });
+      container.addEventListener('touchmove', onTouchStartOrMove, { passive: true });
+      container.addEventListener('touchend', onTouchEnd, { passive: true });
+      container.addEventListener('touchcancel', onTouchEnd, { passive: true });
     }
 
     const loadGeoJson = async () => {
@@ -510,7 +544,10 @@ const MadridMap: React.FC<MapProps> = ({
               if (!hasHoverPointer) return;
               onZoneHoverRef.current?.(zoneId, getHoverContext(e));
             },
-            click: activateFeature,
+            click: (e) => {
+              L.DomEvent.stopPropagation(e);
+              activateFeature();
+            },
             add: () => {
               const path = (layer as L.Path).getElement() as SVGPathElement | null;
               if (!path) return;
@@ -570,8 +607,14 @@ const MadridMap: React.FC<MapProps> = ({
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener('v2:fullscreen-open', redrawAfterFullscreenOpen);
+      if (container && isMobile) {
+        container.removeEventListener('touchstart', onTouchStartOrMove);
+        container.removeEventListener('touchmove', onTouchStartOrMove);
+        container.removeEventListener('touchend', onTouchEnd);
+        container.removeEventListener('touchcancel', onTouchEnd);
+      }
     };
-  }, [type, data, selectedProfile, selectedDistrict, selectedBarrio, selectedZone, drillDownOnSelection, containerId, selectedMonth, selectedYear, onDistrictClick, onBarrioClick, style]);
+  }, [type, data, selectedProfile, selectedDistrict, selectedBarrio, selectedZone, drillDownOnSelection, isMobile, containerId, selectedMonth, selectedYear, onDistrictClick, onBarrioClick, style]);
 
   const resetMapView = () => {
     const map = mapRef.current;
@@ -594,7 +637,8 @@ const MadridMap: React.FC<MapProps> = ({
           height: '100%', 
           minWidth: 0,
           minHeight: 0,
-          background: 'transparent'
+          background: 'transparent',
+          touchAction: isMobile ? 'pan-y' : undefined
         }} 
       />
       <div className="v2-map-zoom-controls" role="group" aria-label={`Controles del mapa de ${type === 'districts' ? 'distritos' : 'barrios'}`}>

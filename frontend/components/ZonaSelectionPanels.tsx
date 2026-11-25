@@ -13,6 +13,7 @@ type ZonaPanelProps = {
   onClose?: () => void;
   children?: React.ReactNode;
   zoneType?: 'DISTRITO' | 'BARRIO';
+  badge?: string | null;
   noData?: boolean;
   projectionWithoutHistory?: boolean;
 };
@@ -33,8 +34,16 @@ function AvisoSinDatosDesktop({ projectionWithoutHistory }: { projectionWithoutH
   return <div className="zona-panel-no-data"><h3>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</h3><p>El Ayuntamiento de Madrid no publica registros oficiales contrastados para esta zona. Preferimos no inventarlos.</p>{projectionWithoutHistory && <p>No hay base suficiente para proyectar esta zona, y no aproximamos valores sin datos.</p>}</div>;
 }
 
-function AvisoSinDatosMovil({ zoneType = 'BARRIO', zone, projectionWithoutHistory }: { zoneType?: 'DISTRITO' | 'BARRIO'; zone: string; projectionWithoutHistory?: boolean }) {
-  return <div className="zona-panel-no-data"><span className="zona-panel-kind">{zoneType}</span><strong>{zone}</strong><h3>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</h3><p>El Ayuntamiento de Madrid no publica registros oficiales contrastados para esta zona. Preferimos no inventarlos.</p>{projectionWithoutHistory && <p>No hay base suficiente para proyectar esta zona, y no aproximamos valores sin datos.</p>}</div>;
+function AvisoSinDatosMovil({ zoneType = 'BARRIO', zone, projectionWithoutHistory, badge }: { zoneType?: 'DISTRITO' | 'BARRIO'; zone: string; projectionWithoutHistory?: boolean; badge?: string | null }) {
+  return <div className="zona-panel-no-data">
+    <div className="zona-panel-movil-badges">
+      <span className="zona-panel-kind">{zoneType}</span>
+      {badge && <span className="zona-panel-est-badge">{badge}</span>}
+    </div>
+    <strong>{zone}</strong>
+    <h3>{projectionWithoutHistory ? 'Sin datos oficiales ni estimación' : 'Sin datos oficiales'}</h3>
+    <p>El Ayuntamiento de Madrid no publica registros oficiales contrastados para esta zona.</p>
+  </div>;
 }
 
 export function FichaZonaDesktop({ zone, rank, primaryLabel, primaryValue, secondaryLabel, secondaryValue, delta, onClose, zoneType, position, pinned, style, noData, projectionWithoutHistory }: DesktopZonaPanelProps & Pick<ZonaPanelProps, 'noData' | 'projectionWithoutHistory'>) {
@@ -70,15 +79,24 @@ export function FichaZonaDesktop({ zone, rank, primaryLabel, primaryValue, secon
   </aside>, document.body);
 }
 
-export function FichaZonaMovil({ zone, rank, primaryLabel, primaryValue, secondaryLabel, secondaryValue, delta, onClose, children, zoneType, noData, projectionWithoutHistory }: ZonaPanelProps) {
+export function FichaZonaMovil({ zone, rank, primaryLabel, primaryValue, secondaryLabel, secondaryValue, delta, onClose, children, zoneType, badge, noData, projectionWithoutHistory }: ZonaPanelProps) {
   return <aside className="zona-panel zona-panel-movil" role="status" aria-live="polite">
     <button type="button" className="zona-panel-close" aria-label="Cerrar ficha de zona" onClick={onClose}>×</button>
-    {!noData && <div className="zona-panel-heading"><strong>{zone}</strong>{rank && <span>{rank}</span>}</div>}
-    {noData ? <AvisoSinDatosMovil zoneType={zoneType} zone={zone} projectionWithoutHistory={projectionWithoutHistory} /> : <dl>
+    {!noData && (
+      <div className="zona-panel-heading">
+        <div className="zona-panel-movil-badges">
+          {zoneType && <span className="zona-panel-kind">{zoneType}</span>}
+          {badge && <span className="zona-panel-est-badge">{badge}</span>}
+        </div>
+        <strong>{zone}</strong>
+        {rank && <span>{rank}</span>}
+      </div>
+    )}
+    {noData ? <AvisoSinDatosMovil zoneType={zoneType} zone={zone} projectionWithoutHistory={projectionWithoutHistory} badge={badge} /> : <dl>
       <div><dt>{primaryLabel}</dt><dd>{primaryValue}</dd></div>
       <div><dt>{secondaryLabel}</dt><dd>{secondaryValue}</dd></div>
     </dl>}
     {!noData && delta && <p>{delta}</p>}
-    {!noData && children}
+    {children}
   </aside>;
 }
