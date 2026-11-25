@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   CheckCircle2,
@@ -9,7 +9,6 @@ import {
   ArrowRight,
   Download,
   ShieldCheck,
-  ChevronDown,
   Sparkles
 } from 'lucide-react';
 import { VeredictoResponse, VeredictoEstado } from '../types/veredicto';
@@ -17,6 +16,7 @@ import './MadridVeredicto.css';
 import { apiFetch, apiUrl } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
 import { PRICE_ANALYSIS_LABEL } from '../lib/product-copy';
+import ZoneSearch, { ZoneSearchOption } from './ZoneSearch';
 
 export default function MadridVeredicto() {
   const searchParams = useSearchParams();
@@ -29,10 +29,9 @@ export default function MadridVeredicto() {
   const [precioInput, setPrecioInput] = useState('');
   const [metrosInput, setMetrosInput] = useState('');
   const [districtOptions, setDistrictOptions] = useState<string[]>([]);
-  const [selectedDistrict, setSelectedDistrict] = useState('');
-  const [neighborhoodOptions, setNeighborhoodOptions] = useState<string[]>([]);
-  const [selectedNeighborhood, setSelectedNeighborhood] = useState('');
-  const [isLoadingNeighborhoods, setIsLoadingNeighborhoods] = useState(false);
+  const [barrioItems, setBarrioItems] = useState<Array<{ name: string; district: string; id?: number | string }>>([]);
+  const [selectedDistrict, setSelectedDistrict] = useState('Todos');
+  const [selectedNeighborhood, setSelectedNeighborhood] = useState('Todos');
 
   // Píldoras rápidas opcionales
   const [estadoInmueble, setEstadoInmueble] = useState<'A reformar' | 'Buen estado' | 'Reformado' | null>(null);
@@ -53,39 +52,51 @@ export default function MadridVeredicto() {
       if (!response.ok) throw new Error('No se pudieron cargar los distritos.');
       return response.json();
     }).then(data => {
-      if (active) setDistrictOptions(Array.isArray(data.districts) ? data.districts : []);
+      if (!active) return;
+      const districts = Array.isArray(data.districts) ? data.districts.filter((d: string) => d !== 'Todos') : [];
+      setDistrictOptions(districts);
+      const latest = data.latest_observed_period;
+      const year = latest?.year || 2026;
+      const month = latest?.month || 'Junio';
+      return apiFetch(`/map-data?profile=venta&year=${encodeURIComponent(year)}&month=${encodeURIComponent(month)}`);
+    }).then(res => {
+      if (!res || !res.ok) return null;
+      return res.json();
+    }).then(mapData => {
+      if (!active || !mapData) return;
+      const list = Array.isArray(mapData.neighborhoods) ? mapData.neighborhoods : [];
+      const parsed: Array<{ name: string; district: string; id?: number | string }> = [];
+      const seen = new Set<string>();
+      for (const item of list) {
+        const name = String(item.barrio || item.nombre || item.name || '').trim();
+        const district = String(item.distrito || item.district || '').trim();
+        if (!name || !district) continue;
+        const key = `${district.toLowerCase()}::${name.toLowerCase()}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        parsed.push({ name, district, id: item.id_barrio });
+      }
+      setBarrioItems(parsed);
     }).catch(() => {
-      if (active) setErrorMessage('No se pudieron cargar los distritos de Madrid. Recarga la página para intentarlo de nuevo.');
+      if (active) setErrorMessage('No se pudieron cargar las zonas de Madrid. Recarga la página para intentarlo de nuevo.');
     });
     return () => { active = false; };
   }, []);
 
-  useEffect(() => {
-    if (!selectedDistrict) {
-      setNeighborhoodOptions([]);
-      setSelectedNeighborhood('');
-      return;
-    }
-    let active = true;
-    setIsLoadingNeighborhoods(true);
-    setNeighborhoodOptions([]);
-    setSelectedNeighborhood('');
-    apiFetch(`/neighborhoods?district=${encodeURIComponent(selectedDistrict)}`).then(response => {
-      if (!response.ok) throw new Error('No se pudieron cargar los barrios.');
-      return response.json();
-    }).then(data => {
-      if (!active) return;
-      const neighborhoods = Array.isArray(data) ? data : data.neighborhoods;
-      const options = Array.isArray(neighborhoods) ? neighborhoods.filter((name: string) => name !== 'Todos') : [];
-      setNeighborhoodOptions(options);
-      setSelectedNeighborhood('Todos');
-    }).catch(() => {
-      if (active) setErrorMessage('No se pudieron cargar los barrios de este distrito. Vuelve a seleccionarlo para reintentar.');
-    }).finally(() => {
-      if (active) setIsLoadingNeighborhoods(false);
-    });
-    return () => { active = false; };
-  }, [selectedDistrict]);
+  const zoneSearchOptions = useMemo<ZoneSearchOption[]>(() => {
+    const districts: ZoneSearchOption[] = districtOptions.map(name => ({
+      id: `district:${name}`,
+      name,
+      kind: 'district'
+    }));
+    const barrios: ZoneSearchOption[] = barrioItems.map(b => ({
+      id: `barrio:${b.id ?? `${b.district}:${b.name}`}`,
+      name: b.name,
+      district: b.district,
+      kind: 'barrio'
+    }));
+    return [...districts, ...barrios];
+  }, [districtOptions, barrioItems]);
 
   useEffect(() => {
     if (tokenParam) {
@@ -122,16 +133,23 @@ export default function MadridVeredicto() {
       setErrorMessage('Introduce una superficie en m² válida mayor que cero.');
       return;
     }
-    if (!selectedDistrict || !selectedNeighborhood) {
-      setErrorMessage('Selecciona un distrito y un barrio, o elige todo el distrito.');
+    if (!selectedDistrict || selectedDistrict === 'Todos') {
+      setErrorMessage('Selecciona un distrito o barrio en el buscador de zonas.');
       return;
     }
 
-    const location = selectedNeighborhood === 'Todos' ? selectedDistrict : selectedNeighborhood;
-    await ejecutarEvaluacion(precio, metros, location, operacion);
+    const location = selectedNeighborhood !== 'Todos' ? selectedNeighborhood : selectedDistrict;
+    await ejecutarEvaluacion(precio, metros, location, operacion, estadoInmueble, ascensor);
   };
 
-  const ejecutarEvaluacion = async (precio: number, metros: number, barrio: string, op: string) => {
+  const ejecutarEvaluacion = async (
+    precio: number,
+    metros: number,
+    barrio: string,
+    op: string,
+    nextEstado: 'A reformar' | 'Buen estado' | 'Reformado' | null = estadoInmueble,
+    nextAscensor: boolean | null = ascensor
+  ) => {
     setIsLoading(true);
     setErrorMessage(null);
     try {
@@ -141,8 +159,8 @@ export default function MadridVeredicto() {
         barrio,
         operacion: op
       };
-      if (estadoInmueble) payload.estado_inmueble = estadoInmueble;
-      if (ascensor !== null) payload.ascensor = ascensor;
+      if (nextEstado) payload.estado_inmueble = nextEstado;
+      if (nextAscensor !== null) payload.ascensor = nextAscensor;
 
       const res = await apiFetch('/veredicto/evaluar', {
         method: 'POST',
@@ -164,6 +182,20 @@ export default function MadridVeredicto() {
       setErrorMessage(err.message || 'Error al evaluar el inmueble.');
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const reevaluarSiHayResultado = (
+    nextOp: 'Venta' | 'Alquiler',
+    nextEstado: 'A reformar' | 'Buen estado' | 'Reformado' | null,
+    nextAscensor: boolean | null
+  ) => {
+    if (!resultado) return;
+    const precio = parseFloat(precioInput);
+    const metros = parseFloat(metrosInput);
+    const location = selectedNeighborhood !== 'Todos' ? selectedNeighborhood : selectedDistrict;
+    if (!isNaN(precio) && precio > 0 && !isNaN(metros) && metros > 0 && location && location !== 'Todos') {
+      ejecutarEvaluacion(precio, metros, location, nextOp, nextEstado, nextAscensor);
     }
   };
 
@@ -254,14 +286,14 @@ export default function MadridVeredicto() {
           <div className="veredicto-segmented">
             <button
               type="button"
-              onClick={() => setOperacion('Venta')}
+              onClick={() => { setOperacion('Venta'); reevaluarSiHayResultado('Venta', estadoInmueble, ascensor); }}
               className={`veredicto-segment-btn ${operacion === 'Venta' ? 'active' : ''}`}
             >
               Comprar / Venta
             </button>
             <button
               type="button"
-              onClick={() => setOperacion('Alquiler')}
+              onClick={() => { setOperacion('Alquiler'); reevaluarSiHayResultado('Alquiler', estadoInmueble, ascensor); }}
               className={`veredicto-segment-btn ${operacion === 'Alquiler' ? 'active' : ''}`}
             >
               Alquiler
@@ -326,24 +358,20 @@ export default function MadridVeredicto() {
                     />
                   </div>
 
-                  {/* Distrito */}
-                  <div>
-                    <label htmlFor="veredicto-distrito" className="veredicto-label">
-                      Distrito
-                    </label>
-                    <select id="veredicto-distrito" value={selectedDistrict} onChange={(e) => { setSelectedDistrict(e.target.value); setErrorMessage(null); }} className="veredicto-input" required aria-invalid={Boolean(errorMessage && !selectedDistrict)}>
-                      <option value="">Selecciona un distrito</option>
-                      {districtOptions.map(district => <option key={district} value={district}>{district}</option>)}
-                    </select>
-                  </div>
-                  {/* Barrio dependiente del distrito */}
-                  <div>
-                    <label htmlFor="veredicto-barrio" className="veredicto-label">Barrio</label>
-                    <select id="veredicto-barrio" value={selectedNeighborhood} onChange={(e) => { setSelectedNeighborhood(e.target.value); setErrorMessage(null); }} className="veredicto-input" required disabled={!selectedDistrict || isLoadingNeighborhoods} aria-invalid={Boolean(errorMessage && !selectedNeighborhood)}>
-                      <option value="">{!selectedDistrict ? 'Primero selecciona un distrito' : isLoadingNeighborhoods ? 'Cargando barrios…' : 'Selecciona un barrio'}</option>
-                      {selectedDistrict && <option value="Todos">Todo el distrito</option>}
-                      {neighborhoodOptions.map(neighborhood => <option key={neighborhood} value={neighborhood}>{neighborhood}</option>)}
-                    </select>
+                  {/* Buscador inteligente de distrito o barrio */}
+                  <div style={{ gridColumn: '1 / -1' }}>
+                    <ZoneSearch
+                      options={zoneSearchOptions}
+                      district={selectedDistrict}
+                      barrio={selectedNeighborhood}
+                      title="Zona (Distrito o Barrio)"
+                      formatName={(name) => name}
+                      onSelect={({ district, barrio }) => {
+                        setSelectedDistrict(district);
+                        setSelectedNeighborhood(barrio);
+                        setErrorMessage(null);
+                      }}
+                    />
                   </div>
                 </div>
 
@@ -357,7 +385,11 @@ export default function MadridVeredicto() {
                           key={opt}
                           type="button"
                           className={`veredicto-quick-pill ${estadoInmueble === opt ? 'active' : ''}`}
-                          onClick={() => setEstadoInmueble(prev => prev === opt ? null : opt)}
+                          onClick={() => {
+                            const next = estadoInmueble === opt ? null : opt;
+                            setEstadoInmueble(next);
+                            reevaluarSiHayResultado(operacion, next, ascensor);
+                          }}
                         >
                           {opt}
                         </button>
@@ -371,14 +403,22 @@ export default function MadridVeredicto() {
                       <button
                         type="button"
                         className={`veredicto-quick-pill ${ascensor === true ? 'active' : ''}`}
-                        onClick={() => setAscensor(prev => prev === true ? null : true)}
+                        onClick={() => {
+                          const next = ascensor === true ? null : true;
+                          setAscensor(next);
+                          reevaluarSiHayResultado(operacion, estadoInmueble, next);
+                        }}
                       >
                         Sí
                       </button>
                       <button
                         type="button"
                         className={`veredicto-quick-pill ${ascensor === false ? 'active' : ''}`}
-                        onClick={() => setAscensor(prev => prev === false ? null : false)}
+                        onClick={() => {
+                          const next = ascensor === false ? null : false;
+                          setAscensor(next);
+                          reevaluarSiHayResultado(operacion, estadoInmueble, next);
+                        }}
                       >
                         No
                       </button>
@@ -445,23 +485,23 @@ export default function MadridVeredicto() {
                 <div className="veredicto-kpi-tile">
                   <p className="veredicto-kpi-label">Referencia de {resultado.barrio_nombre}</p>
                   <p className="veredicto-kpi-val">{resultado.precio_m2_barrio_medio.toLocaleString()} €/m²</p>
-                  <p className="veredicto-kpi-sub" style={{ color: resultado.desviacion_pct_barrio > 0 ? 'var(--coral)' : 'var(--precio-subida)' }}>
+                  <p style={{ margin: '4px 0 0', fontSize: '12px', fontWeight: 600, color: resultado.desviacion_pct_barrio > 0 ? '#F87171' : '#34D399' }}>
                     {resultado.desviacion_pct_barrio > 0 ? '+' : ''}{resultado.desviacion_pct_barrio.toFixed(1)}% frente a la referencia
                   </p>
                 </div>
                 <div className="veredicto-kpi-tile">
                   <p className="veredicto-kpi-label">Media en Madrid</p>
                   <p className="veredicto-kpi-val">{resultado.precio_m2_madrid_medio.toLocaleString()} €/m²</p>
-                  <p className="veredicto-kpi-sub" style={{ color: resultado.desviacion_pct_madrid > 0 ? 'var(--coral)' : 'var(--precio-subida)' }}>
+                  <p style={{ margin: '4px 0 0', fontSize: '12px', fontWeight: 600, color: resultado.desviacion_pct_madrid > 0 ? '#F87171' : '#34D399' }}>
                     {resultado.desviacion_pct_madrid > 0 ? '+' : ''}{resultado.desviacion_pct_madrid.toFixed(1)}% vs Madrid
                   </p>
                 </div>
                 <div className="veredicto-kpi-tile">
                   <p className="veredicto-kpi-label">Referencia estimada para la superficie</p>
-                  <p className="veredicto-kpi-val" style={{ color: 'var(--precio-subida)' }}>
+                  <p className="veredicto-kpi-val" style={{ color: '#00F0FF' }}>
                     {resultado.precio_justo_estimado_eur.toLocaleString('es-ES', { maximumFractionDigits: 0 })} {operacion === 'Alquiler' ? '€/mes' : '€'}
                   </p>
-                  <p className="veredicto-kpi-sub" style={{ color: 'color-mix(in srgb, var(--blanco-humo) 40%, transparent)' }}>Cálculo basado en la media observada de la zona</p>
+                  <p className="veredicto-kpi-sub">Cálculo basado en la media observada de la zona</p>
                 </div>
               </div>
             </div>

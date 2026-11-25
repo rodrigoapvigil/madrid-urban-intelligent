@@ -266,6 +266,31 @@ def evaluar_inmueble(
             for r in reversed(hist_rows)
         ]
 
+        # Ajuste cualitativo por Estado y Ascensor (si se especifican)
+        estado_factor = 0.0
+        ascensor_factor = 0.0
+        ajustes_desc = []
+        if estado_inmueble:
+            est_norm = estado_inmueble.strip().lower()
+            if "reformar" in est_norm:
+                estado_factor = -0.12
+                ajustes_desc.append("Estado 'A reformar' (-12%)")
+            elif "reformado" in est_norm:
+                estado_factor = 0.08
+                ajustes_desc.append("Estado 'Reformado' (+8%)")
+            else:
+                ajustes_desc.append("Estado 'Buen estado' (0%)")
+        if ascensor is not None:
+            if ascensor:
+                ascensor_factor = 0.03
+                ajustes_desc.append("Con ascensor (+3%)")
+            else:
+                ascensor_factor = -0.06
+                ajustes_desc.append("Sin ascensor (-6%)")
+
+        precio_m2_barrio_base = precio_m2_barrio
+        precio_m2_barrio = round(precio_m2_barrio_base * (1.0 + estado_factor + ascensor_factor), 2)
+
         # Calculo de desviaciones
         desviacion_pct_barrio = round(((precio_m2_inmueble - precio_m2_barrio) / precio_m2_barrio) * 100, 2)
         desviacion_pct_madrid = round(((precio_m2_inmueble - precio_m2_madrid) / precio_m2_madrid) * 100, 2)
@@ -292,16 +317,22 @@ def evaluar_inmueble(
         # Generacion de argumentos comparativos e informativos
         fmt_precio = f"{precio_m2_inmueble:,.2f}" if is_alquiler else f"{precio_m2_inmueble:,.0f}"
         fmt_barrio = f"{precio_m2_barrio:,.2f}" if is_alquiler else f"{precio_m2_barrio:,.0f}"
+        fmt_barrio_base = f"{precio_m2_barrio_base:,.2f}" if is_alquiler else f"{precio_m2_barrio_base:,.0f}"
         fmt_madrid = f"{precio_m2_madrid:,.2f}" if is_alquiler else f"{precio_m2_madrid:,.0f}"
         unidad_total = "€/mes" if is_alquiler else "€"
+
+        ref_context = (
+            f"{fmt_barrio} €/m² ajustado sobre media base de {fmt_barrio_base} €/m² [{', '.join(ajustes_desc)}]"
+            if ajustes_desc else f"{fmt_barrio} €/m²"
+        )
 
         argumentos = []
         if estado == "CARO":
             argumentos.append(
-                f"El precio indicado ({fmt_precio} €/m²) está un {abs(desviacion_pct_barrio):.1f}% por encima de la referencia estimada de {barrio_nombre} ({fmt_barrio} €/m²)."
+                f"El precio indicado ({fmt_precio} €/m²) está un {abs(desviacion_pct_barrio):.1f}% por encima de la referencia de {barrio_nombre} ({ref_context})."
             )
             argumentos.append(
-                f"Para una superficie de {metros:,.0f} m², la referencia calculada con la media observada de la zona es {precio_justo_estimado:,.0f} {unidad_total} (margen teórico de ajuste: -{margen_eur:,.0f} {unidad_total})."
+                f"Para una superficie de {metros:,.0f} m², la referencia estimada para este perfil es {precio_justo_estimado:,.0f} {unidad_total} (margen teórico de ajuste: -{margen_eur:,.0f} {unidad_total})."
             )
             argumentos.append(
                 f"Frente a la referencia de Madrid capital ({fmt_madrid} €/m²), la diferencia es del {desviacion_pct_madrid:+.1f}%."
@@ -311,10 +342,10 @@ def evaluar_inmueble(
             )
         elif estado == "BARATO":
             argumentos.append(
-                f"El precio indicado ({fmt_precio} €/m²) está un {abs(desviacion_pct_barrio):.1f}% por debajo de la referencia estimada de {barrio_nombre} ({fmt_barrio} €/m²)."
+                f"El precio indicado ({fmt_precio} €/m²) está un {abs(desviacion_pct_barrio):.1f}% por debajo de la referencia de {barrio_nombre} ({ref_context})."
             )
             argumentos.append(
-                f"Para una superficie de {metros:,.0f} m², la referencia calculada con la media observada de la zona es {precio_justo_estimado:,.0f} {unidad_total}."
+                f"Para una superficie de {metros:,.0f} m², la referencia estimada para este perfil es {precio_justo_estimado:,.0f} {unidad_total}."
             )
             argumentos.append(
                 f"Frente a la referencia de Madrid capital ({fmt_madrid} €/m²), la diferencia es del {desviacion_pct_madrid:+.1f}%."
@@ -324,10 +355,10 @@ def evaluar_inmueble(
             )
         else:
             argumentos.append(
-                f"El precio indicado ({fmt_precio} €/m²) está dentro del rango de referencia estimado para {barrio_nombre} ({fmt_barrio} €/m²; diferencia del {desviacion_pct_barrio:+.1f}%)."
+                f"El precio indicado ({fmt_precio} €/m²) está dentro del rango de referencia estimado para {barrio_nombre} ({ref_context}; diferencia del {desviacion_pct_barrio:+.1f}%)."
             )
             argumentos.append(
-                f"Para una superficie de {metros:,.0f} m², la referencia calculada con la media observada de la zona es {precio_justo_estimado:,.0f} {unidad_total}."
+                f"Para una superficie de {metros:,.0f} m², la referencia estimada para este perfil es {precio_justo_estimado:,.0f} {unidad_total}."
             )
             argumentos.append(
                 f"Frente a la referencia de Madrid capital ({fmt_madrid} €/m²), la diferencia es del {desviacion_pct_madrid:+.1f}%."
