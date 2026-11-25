@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { Search } from 'lucide-react';
+import { ChevronDown, ChevronUp, Search } from 'lucide-react';
 import './HeatmapDistritosMeses.css';
 
 interface HeatmapDistritosMesesProps {
@@ -12,6 +12,7 @@ interface HeatmapDistritosMesesProps {
   min?: number;
   max?: number;
   selectedMonth?: string;
+  isMobile?: boolean;
   onOpenMethodology?: () => void;
 }
 
@@ -80,9 +81,11 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
   level = 'Distritos',
   year,
   selectedMonth,
+  isMobile = false,
   onOpenMethodology,
 }) => {
   const [search, setSearch] = useState('');
+  const [showFullMatrixMobile, setShowFullMatrixMobile] = useState(false);
 
   // Extraer todos los valores válidos para calcular min y max reales sobre la misma escala
   const allValues = useMemo(() => {
@@ -151,7 +154,110 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
         </div>
       </div>
 
-      {/* CUADRÍCULA DE CALOR (+52PX ALTURA, BUSCADOR EN TH DISTRITO) */}
+      {/* CUADRÍCULA DE CALOR (EN MÓVIL: FICHA COMPACTA DE TENDENCIA CON DESPLEGABLE OPCIONAL) */}
+      {isMobile && !showFullMatrixMobile ? (
+        <div className="hdm-mobile-summary">
+          <div className="hdm-mobile-search">
+            <Search size={14} className="hdm-th-search-icon" aria-hidden="true" />
+            <input
+              type="search"
+              className="hdm-th-search-input hdm-mobile-search-input"
+              placeholder={`Filtrar ${zoneLabel}...`}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              aria-label={`Filtrar ${zoneLabel}s en la evolución mensual`}
+            />
+            {search && (
+              <button
+                type="button"
+                className="hdm-th-search-clear"
+                onClick={() => setSearch('')}
+                aria-label="Borrar búsqueda"
+              >
+                ×
+              </button>
+            )}
+          </div>
+
+          <div className="hdm-mobile-list">
+            {filteredRows.length > 0 ? (
+              filteredRows.map((row) => {
+                const activeIdx = selectedMonthIdx >= 0 ? selectedMonthIdx : 5;
+                const readVal = (idx: number) => {
+                  const raw = Number(row[`m${idx + 1}`]);
+                  if (!Number.isFinite(raw) || raw <= 0) return null;
+                  return profileId === 'inversion' ? raw * 100 : raw;
+                };
+                const startVal = readVal(0);
+                const currentVal = readVal(activeIdx);
+                const endVal = readVal(11);
+                const refCurrent = currentVal ?? endVal ?? startVal;
+                const deltaPct = startVal && refCurrent ? ((refCurrent - startVal) / startVal) * 100 : null;
+                const milestones = [
+                  { label: 'Ene', val: startVal, isActive: activeIdx === 0, isEst: false },
+                  { label: MONTH_ABBR[activeIdx], val: currentVal, isActive: true, isEst: activeIdx >= 6 },
+                  { label: 'Dic*', val: endVal, isActive: activeIdx === 11, isEst: true },
+                ];
+
+                return (
+                  <div key={row.zona} className="hdm-mobile-row">
+                    <div className="hdm-mobile-row-head">
+                      <strong title={row.zona}>{row.zona}</strong>
+                      {deltaPct !== null && (
+                        <span className={`hdm-mobile-delta ${deltaPct >= 0 ? 'is-up' : 'is-down'}`}>
+                          {deltaPct >= 0 ? '▲' : '▼'} {Math.abs(deltaPct).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}% año
+                        </span>
+                      )}
+                    </div>
+                    <div className="hdm-mobile-milestones">
+                      {milestones.map((m, idx) => {
+                        const norm = m.val !== null ? (m.val - effectiveMin) / (effectiveMax - effectiveMin || 1) : 0;
+                        const heat = m.val !== null ? getBlueHeatColor(norm, m.val, profileId) : null;
+                        return (
+                          <div
+                            key={`${m.label}-${idx}`}
+                            className={`hdm-mobile-pill ${m.isActive ? 'is-active' : ''}`}
+                            style={heat ? { backgroundColor: heat.bg, color: heat.text } : undefined}
+                          >
+                            <small>{m.label}</small>
+                            <span>{m.val !== null ? formatCellDisplay(m.val, profileId) : '—'}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="hdm-mobile-empty">
+                {search.trim() ? `No se encontraron ${zoneLabel}s que coincidan con "${search}"` : 'Calibrando telemetría…'}
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className="hdm-mobile-toggle-matrix"
+            onClick={() => setShowFullMatrixMobile(true)}
+            aria-expanded={false}
+          >
+            <span>Ver matriz anual completa (12 meses)</span>
+            <ChevronDown size={16} aria-hidden="true" />
+          </button>
+        </div>
+      ) : (
+        <>
+          {isMobile && (
+            <button
+              type="button"
+              className="hdm-mobile-toggle-matrix is-collapse"
+              onClick={() => setShowFullMatrixMobile(false)}
+              aria-expanded={true}
+            >
+              <span>Volver a vista resumen móvil</span>
+              <ChevronUp size={16} aria-hidden="true" />
+            </button>
+          )}
       <div className="hdm-table-scroll">
         <table className="hdm-table">
           <thead>
@@ -273,6 +379,8 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
           </tbody>
         </table>
       </div>
+        </>
+      )}
 
       {/* PIE EXPLICATIVO DEL MAPA (SIN EMOJIS, SOBRIO Y RIGUROSO) */}
       <div className="hdm-footer-note">

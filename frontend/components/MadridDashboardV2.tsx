@@ -651,6 +651,8 @@ const MadridDashboardV2: React.FC = () => {
 
   const [isOverlayOpen, setIsOverlayOpen] = useState(true);
   const [compareGraphView, setCompareGraphView] = useState<'superpuesta' | 'paralela'>('superpuesta');
+  const effectiveCompareGraphView = isMobile ? 'superpuesta' : compareGraphView;
+  const [showAllPerMobile, setShowAllPerMobile] = useState(false);
   const [isDashboardLoading, setIsDashboardLoading] = useState(true);
   const [showDashboardLoader, setShowDashboardLoader] = useState(true);
   const [dashboardLoadError, setDashboardLoadError] = useState<string | null>(null);
@@ -2430,8 +2432,8 @@ const MadridDashboardV2: React.FC = () => {
       // Si Zona B o la superpuesta tienen datos pero su canvas aún no estaba en el DOM, reintentar tras un frame
       const pId = activeProfile.id;
       if (
-        (comparisonBHasData && compareGraphView === 'paralela' && !document.getElementById(`v2-chartB-${pId}`)) ||
-        (comparisonAHasData && comparisonBHasData && compareGraphView === 'superpuesta' && !document.getElementById(`v2-overlay-${pId}`))
+        (comparisonBHasData && effectiveCompareGraphView === 'paralela' && !document.getElementById(`v2-chartB-${pId}`)) ||
+        (comparisonAHasData && comparisonBHasData && effectiveCompareGraphView === 'superpuesta' && !document.getElementById(`v2-overlay-${pId}`))
       ) {
         retryTimer = setTimeout(initCharts, 80);
       }
@@ -2446,7 +2448,7 @@ const MadridDashboardV2: React.FC = () => {
       if (retryTimer) clearTimeout(retryTimer);
       clearTimeout(resizeTimer);
     };
-  }, [profileIdx, isTransitioning, isMobile, isZoneALoading, isZoneBLoading, comparisonAHasData, comparisonBHasData, comparisonZoneA, comparisonZoneB, activeProfile.color, seriesA, seriesB, seriesMadrid, activeProfile.id, scatterData, interestImpactData, riskReturnData, liquidityLevel, selectedDistrict, selectedBarrio, selectedYear, selectedZoneA, selectedZoneB, compareGraphView]);
+  }, [profileIdx, isTransitioning, isMobile, isZoneALoading, isZoneBLoading, comparisonAHasData, comparisonBHasData, comparisonZoneA, comparisonZoneB, activeProfile.color, seriesA, seriesB, seriesMadrid, activeProfile.id, scatterData, interestImpactData, riskReturnData, liquidityLevel, selectedDistrict, selectedBarrio, selectedYear, selectedZoneA, selectedZoneB, compareGraphView, effectiveCompareGraphView]);
 
   const handleProfileChange = (newIdx: number) => {
     if (newIdx === profileIdx || isTransitioning) return;
@@ -2613,21 +2615,31 @@ const MadridDashboardV2: React.FC = () => {
         }}
       />
 
-      {isMobile && <nav className="v2-mobile-section-nav is-visible" aria-label="Secciones del cuadro de mando">
-        {[
-          ['Resumen', 'summary'], ['Mapa', 'map'], ['Ranking', 'ranking'], ['Heatmap', 'heatmap'], ['Comparar', 'compare'],
-        ].map(([label, section]) => <button key={section} type="button" onClick={() => scrollToDashboardSection(section)}>{label}</button>)}
-      </nav>}
-
       {isMobile && <div className="v2-mobile-filter-bar">
-        <div className="v2-mobile-filter-summary">
-          <strong>{activeProfile.label}</strong>
-          <span>{selectedDistrict === 'Todos' ? 'Madrid' : formatZoneOption(selectedDistrict)} · {selectedMonth} {selectedYear}</span>
+        <div className="v2-mobile-filter-summary-row">
+          <button type="button" className="v2-mobile-filter-summary" onClick={openMobileFilters}>
+            <strong>{activeProfile.label}</strong>
+            <span>· {selectedBarrio !== 'Todos' ? formatZoneOption(selectedBarrio) : selectedDistrict === 'Todos' ? 'Madrid' : formatZoneOption(selectedDistrict)} · {selectedMonth} {selectedYear}</span>
+          </button>
+          <div className="v2-mobile-filter-chips">
+            {selectedDistrict !== 'Todos' && <button type="button" onClick={() => { setSelectedDistrict('Todos'); setSelectedBarrio('Todos'); }}>‹ {formatZoneOption(selectedDistrict)} ×</button>}
+            {selectedBarrio !== 'Todos' && <button type="button" onClick={() => setSelectedBarrio('Todos')}>{formatZoneOption(selectedBarrio)} ×</button>}
+            {(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month) && <button type="button" onClick={() => { setSelectedYear(latestAvailablePeriod.year); setSelectedMonth(latestAvailablePeriod.month); }}>{selectedMonth.slice(0, 3)} {selectedYear} ×</button>}
+          </div>
         </div>
-        <div className="v2-mobile-filter-chips">
-          {selectedDistrict !== 'Todos' && <button type="button" onClick={() => { setSelectedDistrict('Todos'); setSelectedBarrio('Todos'); }}>‹ {formatZoneOption(selectedDistrict)} ×</button>}
-          {selectedBarrio !== 'Todos' && <button type="button" onClick={() => setSelectedBarrio('Todos')}>{formatZoneOption(selectedBarrio)} ×</button>}
-          {(selectedYear !== latestAvailablePeriod.year || selectedMonth !== latestAvailablePeriod.month) && <button type="button" onClick={() => { setSelectedYear(latestAvailablePeriod.year); setSelectedMonth(latestAvailablePeriod.month); }}>{selectedMonth.slice(0, 3)} {selectedYear} ×</button>}
+        <div className="v2-mobile-direct-search">
+          <ZoneSearch
+            options={zoneSearchOptions}
+            district={selectedDistrict}
+            barrio={selectedBarrio}
+            formatName={formatZoneOption}
+            compact
+            onSelect={({ district, barrio }) => {
+              setSelectedDistrict(district);
+              setSelectedBarrio(barrio);
+              selectZone(barrio !== 'Todos' ? barrio : district !== 'Todos' ? district : null);
+            }}
+          />
         </div>
       </div>}
 
@@ -3041,6 +3053,10 @@ const MadridDashboardV2: React.FC = () => {
                             </div>
                           )}
                         </section>
+                        <Link href="/madrid/veredicto" className="v2-mobile-verdict-cta">
+                          <span>¿Es buen precio? Comprueba un anuncio en 10 s</span>
+                          <ArrowUpRight size={15} aria-hidden="true" />
+                        </Link>
                       </div>
                     );
                   })()}
@@ -4033,6 +4049,7 @@ const MadridDashboardV2: React.FC = () => {
                     level={rankingLevel}
                     year={selectedYear}
                     selectedMonth={selectedMonth}
+                    isMobile={isMobile}
                     onOpenMethodology={() => setShowMethodologyDrawer(true)}
                   />
                 </CardLoadingOverlay>
@@ -4156,8 +4173,8 @@ const MadridDashboardV2: React.FC = () => {
                     </div>
 
                     {/* Ranking visual de PER Inmobiliario */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '230px', overflowY: 'auto', paddingRight: '6px', marginBottom: '16px' }}>
-                      {perList.slice(0, 8).map((pItem, pIdx) => {
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: isMobile && showAllPerMobile ? 'none' : '230px', overflowY: isMobile && showAllPerMobile ? 'visible' : 'auto', paddingRight: '6px', marginBottom: isMobile && perList.length > 5 ? '8px' : '16px' }}>
+                      {(isMobile ? (showAllPerMobile ? perList : perList.slice(0, 5)) : perList.slice(0, 8)).map((pItem, pIdx) => {
                         const widthPct = Math.min(Math.round((pItem.per / maxPer) * 100), 100);
                         const isSelected = pItem.name.toLowerCase() === (liquidityLevel === 'barrio' ? selectedBarrio.toLowerCase() : selectedDistrict.toLowerCase());
                         return (
@@ -4190,18 +4207,60 @@ const MadridDashboardV2: React.FC = () => {
                         );
                       })}
                     </div>
+                    {isMobile && perList.length > 5 && (
+                      <button
+                        type="button"
+                        className="v2-per-mobile-toggle"
+                        onClick={() => setShowAllPerMobile(prev => !prev)}
+                      >
+                        {showAllPerMobile ? 'Mostrar top 5' : `Ver todo (${perList.length})`}
+                      </button>
+                    )}
 
                     {/* WIDGET 3: MATRIZ DE RIESGO VS RETORNO (4 CUADRANTES) */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '8px', paddingTop: '16px', borderTop: '1px solid rgba(186, 204, 214, 0.16)' }}>
                       <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>
-                        Matriz Financiera de Riesgo vs. Retorno (4 Cuadrantes)
+                        {isMobile ? 'Zonas destacadas (Riesgo vs. Retorno)' : 'Matriz Financiera de Riesgo vs. Retorno (4 Cuadrantes)'}
                       </h3>
                       <span style={{ fontSize: '12px', fontWeight: '500', color: '#BACCD6', marginBottom: '8px' }}>
                         Cruce de rentabilidad bruta anual frente al índice de esfuerzo censal (INE / Notarías)
                       </span>
-                      <div style={{ position: 'relative', height: '240px', width: '100%' }}>
-                        <canvas id="v2-chart-risk-return"></canvas>
-                      </div>
+                      {isMobile ? (
+                        (() => {
+                          const valid = (Array.isArray(riskReturnData) ? riskReturnData : []).filter(d => Number(d.roi) > 0 && Number(d.risk) > 0);
+                          if (!valid.length) {
+                            return <div style={{ padding: '14px', borderRadius: '10px', background: 'rgba(255,255,255,.03)', color: '#8fa6ba', fontSize: '12px' }}>Cargando zonas destacadas…</div>;
+                          }
+                          const avgRisk = valid.reduce((s, d) => s + Number(d.risk), 0) / valid.length;
+                          const avgRoi = valid.reduce((s, d) => s + Number(d.roi), 0) / valid.length;
+                          const pickBest = (pred: (d: any) => boolean, score: (d: any) => number) =>
+                            valid.filter(pred).sort((a, b) => score(b) - score(a))[0];
+                          const highlights = [
+                            { item: pickBest(d => Number(d.risk) < avgRisk && Number(d.roi) >= avgRoi, d => Number(d.roi) - Number(d.risk) * 0.05), label: 'Alta rentabilidad y esfuerzo contenido', color: '#00F0FF' },
+                            { item: pickBest(d => Number(d.risk) < avgRisk && Number(d.roi) < avgRoi, d => Number(d.roi)), label: 'Zona equilibrada y esfuerzo moderado', color: '#3DDC97' },
+                            { item: pickBest(d => Number(d.risk) >= avgRisk && Number(d.roi) >= avgRoi, d => Number(d.roi)), label: 'Retorno alto con esfuerzo exigente', color: '#E879F9' },
+                            { item: pickBest(d => Number(d.risk) >= avgRisk && Number(d.roi) < avgRoi, d => -Number(d.risk)), label: 'Refugio patrimonial (prima de capital)', color: '#FFC247' },
+                          ].filter((h): h is { item: any; label: string; color: string } => Boolean(h.item));
+
+                          return (
+                            <div className="v2-mobile-quadrant-grid">
+                              {highlights.map(({ item, label, color }) => (
+                                <div key={item.name} className="v2-mobile-quadrant-card" style={{ borderLeftColor: color }}>
+                                  <div className="v2-mobile-quadrant-head">
+                                    <strong>{formatMadridName(item.name)}</strong>
+                                    <span style={{ color }}>{Number(item.roi).toFixed(2).replace('.', ',')}% bruta</span>
+                                  </div>
+                                  <small>{label} · Esfuerzo {Number(item.risk).toFixed(0)} %</small>
+                                </div>
+                              ))}
+                            </div>
+                          );
+                        })()
+                      ) : (
+                        <div style={{ position: 'relative', height: '240px', width: '100%' }}>
+                          <canvas id="v2-chart-risk-return"></canvas>
+                        </div>
+                      )}
                     </div>
                   </div>
                     );
@@ -4271,7 +4330,7 @@ const MadridDashboardV2: React.FC = () => {
                     incomeA={Number(kpiDataA.renta_media) || undefined}
                     incomeB={Number(kpiDataB.renta_media) || undefined}
                     profileId={activeProfile.id}
-                    headerRight={
+                    headerRight={!isMobile ? (
                       <div className="v2-compare-view-switch-wrap">
                         <span className="v2-compare-view-label">Vista:</span>
                         <div className="v2-compare-view-switch" role="group" aria-label="Modo de visualización de gráficos">
@@ -4291,7 +4350,7 @@ const MadridDashboardV2: React.FC = () => {
                           </button>
                         </div>
                       </div>
-                    }
+                    ) : undefined}
                   />
 
               {(() => {
@@ -4520,7 +4579,7 @@ const MadridDashboardV2: React.FC = () => {
                       const madridChipLabel = p.id === 'inversion'
                         ? (madridInvPctText ? `Media Madrid (${madridInvPctText} · Q2 2026)` : 'Media Madrid (Q2 2026)')
                         : 'Media Madrid (21,61 €/m² · Q2 2026)';
-                      return compareGraphView === 'superpuesta' ? (
+                      return effectiveCompareGraphView === 'superpuesta' ? (
                       <div className="v2-compare-view-superpuesta">
                         <div className="v2-overlay-wrapper">
                           <div className="v2-overlay-header">
