@@ -8,7 +8,7 @@ import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { cssColorResolverPlugin, colorWithAlpha, resolveCssColor } from '../lib/colors';
-import { Activity, ArrowUpRight, Building2, ChevronDown, Compass, HelpCircle, Home, Info, Maximize2, RotateCcw, RotateCw, Settings, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Activity, ArrowUpRight, Building2, ChevronDown, Compass, HelpCircle, Home, Info, RotateCw, Settings, SlidersHorizontal, Tag, X } from 'lucide-react';
 import './MadridDashboardV2.css';
 import './TrustArchitecture.css';
 import { TrustTelemetryBadge } from './TrustTelemetryBadge';
@@ -51,321 +51,6 @@ const COMPARISON_COLORS = {
 } as const;
 
 const COMPARISON_MEDIA_COLOR = '#E5F2F7';
-
-const updateChartZoom = (canvasId: string, action: 'in' | 'out' | 'reset') => {
-  const chart = ChartJS.getChart(canvasId) as any;
-  if (!chart) return;
-
-  if (!chart._initialView) {
-    chart._initialView = {
-      x: { min: chart.scales.x.min, max: chart.scales.x.max },
-      y: { min: chart.scales.y.min, max: chart.scales.y.max },
-    };
-  }
-
-  if (action === 'reset') {
-    chart.options.scales.x.min = chart._initialView.x.min;
-    chart.options.scales.x.max = chart._initialView.x.max;
-    chart.options.scales.y.min = chart._initialView.y.min;
-    chart.options.scales.y.max = chart._initialView.y.max;
-    chart.update('none');
-    return;
-  }
-
-  const factor = action === 'in' ? 0.72 : 1 / 0.72;
-  (['x', 'y'] as const).forEach(axis => {
-    const scale = chart.scales[axis];
-    const initial = chart._initialView[axis];
-    const currentMin = scale.min;
-    const currentMax = scale.max;
-    const center = (currentMin + currentMax) / 2;
-    const range = (currentMax - currentMin) * factor;
-    const nextMin = center - range / 2;
-    const nextMax = center + range / 2;
-    if (action === 'out' && (nextMin < initial.min || nextMax > initial.max)) {
-      chart.options.scales[axis].min = initial.min;
-      chart.options.scales[axis].max = initial.max;
-    } else {
-      chart.options.scales[axis].min = nextMin;
-      chart.options.scales[axis].max = nextMax;
-    }
-  });
-  chart.update('none');
-};
-
-const FullscreenToggle = ({ targetSelector, chartId, label, mobileOnly = false, mobilePlatform = false }: { targetSelector?: string; chartId?: string; label?: string; mobileOnly?: boolean; mobilePlatform?: boolean }) => {
-  const [expanded, setExpanded] = useState(false);
-  const [awaitingLandscape, setAwaitingLandscape] = useState(false);
-  const [rotateScreenVisible, setRotateScreenVisible] = useState(false);
-  const [showOrientationHelp, setShowOrientationHelp] = useState(false);
-  const [toolbarRevision, setToolbarRevision] = useState(0);
-  const targetRef = useRef<HTMLElement | null>(null);
-  const dialogRef = useRef<HTMLDialogElement | null>(null);
-  const placeholderRef = useRef<Comment | null>(null);
-  const [chartReadout, setChartReadout] = useState('Toca un mes · línea continua: dato real · discontinua: estimación');
-  const nativeFullscreenRef = useRef(false);
-  const allowPortraitRef = useRef(false);
-  const rotateScreenVisibleRef = useRef(false);
-
-  useEffect(() => {
-    if (!expanded || !targetRef.current) return;
-    const target = targetRef.current;
-    const oldOverflow = document.body.style.overflow;
-    const dialog = dialogRef.current;
-    target.classList.add('v2-is-fullscreen');
-    if (dialog) target.classList.add('v2-in-dialog');
-    document.body.classList.add('v2-fullscreen-open');
-    document.body.style.overflow = 'hidden';
-    window.history.pushState({ v2Fullscreen: true }, '', `${window.location.pathname}${window.location.search}#pantalla-completa`);
-    const chart = chartId ? ChartJS.getChart(chartId) as any : null;
-    const canvas = chart?.canvas as HTMLCanvasElement | undefined;
-    const originalTooltipEnabled = chart?.options.plugins?.tooltip?.enabled;
-    const updateReadout = (event: PointerEvent) => {
-      if (!chart) return;
-      const points = chart.getElementsAtEventForMode(event, 'index', { intersect: false }, true);
-      const index = points[0]?.index;
-      if (index === undefined) return;
-      const label = String(chart.data.labels?.[index] ?? '');
-      const values = chart.data.datasets.map((dataset: any, datasetIndex: number) => ({
-        index: datasetIndex,
-        name: dataset.label || `Serie ${datasetIndex + 1}`,
-        value: dataset.data?.[index],
-        visible: chart.isDatasetVisible(datasetIndex),
-      })).filter((entry: any) => entry.visible && Number.isFinite(Number(entry.value)) && Number(entry.value) > 0);
-      const format = (value: number) => value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const readoutValues = chart.data.datasets.length === 5
-        ? [[0, 1], [2, 3]].map(indexes => values.find((entry: any) => indexes.includes(entry.index))).filter(Boolean)
-        : values;
-      if (readoutValues.length === 2 && chart.data.datasets.length === 5) {
-        const a = Number((readoutValues[0] as any).value);
-        const b = Number((readoutValues[1] as any).value);
-        const difference = a - b;
-        const relative = b ? difference / b * 100 : 0;
-        setChartReadout(`${label} · ${(readoutValues[0] as any).name.replace(/\s*[·-]\s*(Dato real|Estimación).*$/i, '')} ${format(a)} · ${(readoutValues[1] as any).name.replace(/\s*[·-]\s*(Dato real|Estimación).*$/i, '')} ${format(b)} · Dif. ${difference > 0 ? '+' : ''}${format(difference)} (${relative > 0 ? '+' : ''}${format(relative)}%)`);
-        return;
-      }
-      const formattedValues = readoutValues.map((entry: any) => `${entry.name}: ${format(Number(entry.value))}`)
-      /* For comparison charts, pair real and estimated values so the readout
-         never treats the empty half of a split series as a zero. */
-      setChartReadout(`${label} · ${formattedValues.join(' · ')}`);
-    };
-    if (mobilePlatform && chart && canvas) {
-      chart.options.plugins.tooltip.enabled = false;
-      canvas.addEventListener('pointerup', updateReadout);
-      chart.update('none');
-    }
-    if (chart && !chart.$v2FullscreenOriginal) {
-      chart.$v2FullscreenOriginal = {
-        labels: [...(chart.data.labels || [])],
-        datasets: chart.data.datasets.map((dataset: any) => ({ ...dataset, data: [...(dataset.data || [])] })),
-      };
-    }
-    const chartContainer = target.querySelector('.v2-chart-wrap');
-    const chartResizeObserver = chartContainer && chart ? new ResizeObserver(() => chart.resize()) : null;
-    if (chartContainer) chartResizeObserver?.observe(chartContainer);
-    const resizeChart = () => window.setTimeout(() => chart?.resize(), 180);
-    let rotateHelpTimer: number | undefined;
-    let rotateScreenTimer: number | undefined;
-    const updateOrientationView = () => {
-      const phonePortrait = window.matchMedia('(pointer: coarse) and (max-width: 600px) and (orientation: portrait)').matches;
-      const shouldWait = phonePortrait && !allowPortraitRef.current;
-      setAwaitingLandscape(shouldWait);
-      if (rotateHelpTimer) window.clearTimeout(rotateHelpTimer);
-      if (shouldWait) {
-        if (rotateScreenTimer) window.clearTimeout(rotateScreenTimer);
-        rotateScreenVisibleRef.current = true;
-        setRotateScreenVisible(true);
-        setShowOrientationHelp(false);
-        rotateHelpTimer = window.setTimeout(() => {
-          if (window.matchMedia('(pointer: coarse) and (max-width: 600px) and (orientation: portrait)').matches) setShowOrientationHelp(true);
-        }, 4500);
-      } else {
-        setShowOrientationHelp(false);
-        if (rotateScreenVisibleRef.current) {
-          if (rotateScreenTimer) window.clearTimeout(rotateScreenTimer);
-          rotateScreenTimer = window.setTimeout(() => {
-            rotateScreenVisibleRef.current = false;
-            setRotateScreenVisible(false);
-          }, 250);
-        }
-        window.requestAnimationFrame(() => chart?.resize());
-      }
-    };
-    updateOrientationView();
-    window.addEventListener('orientationchange', updateOrientationView);
-    window.addEventListener('resize', updateOrientationView);
-    window.setTimeout(() => chart?.resize(), 120);
-    window.addEventListener('orientationchange', resizeChart);
-    const onBack = () => setExpanded(false);
-    const onKey = (event: KeyboardEvent) => { if (event.key === 'Escape') window.history.back(); };
-    const onResize = () => chart?.resize();
-    const onFullscreenChange = () => {
-      if (nativeFullscreenRef.current && !document.fullscreenElement) {
-        nativeFullscreenRef.current = false;
-        window.history.back();
-      }
-    };
-    window.addEventListener('popstate', onBack);
-    window.addEventListener('keydown', onKey);
-    window.addEventListener('resize', onResize);
-    document.addEventListener('fullscreenchange', onFullscreenChange);
-    return () => {
-      target.classList.remove('v2-is-fullscreen');
-      target.classList.remove('v2-in-dialog');
-      if (mobilePlatform && chart && canvas) {
-        canvas.removeEventListener('pointerup', updateReadout);
-        chart.options.plugins.tooltip.enabled = originalTooltipEnabled ?? true;
-        chart.update('none');
-      }
-      document.body.classList.remove('v2-fullscreen-open');
-      document.body.style.overflow = oldOverflow;
-      window.removeEventListener('popstate', onBack);
-      window.removeEventListener('keydown', onKey);
-      window.removeEventListener('resize', onResize);
-      window.removeEventListener('orientationchange', resizeChart);
-      window.removeEventListener('orientationchange', updateOrientationView);
-      window.removeEventListener('resize', updateOrientationView);
-      if (rotateHelpTimer) window.clearTimeout(rotateHelpTimer);
-      if (rotateScreenTimer) window.clearTimeout(rotateScreenTimer);
-      rotateScreenVisibleRef.current = false;
-      chartResizeObserver?.disconnect();
-      document.removeEventListener('fullscreenchange', onFullscreenChange);
-      screen.orientation?.unlock?.();
-      if (nativeFullscreenRef.current && document.fullscreenElement) {
-        void document.exitFullscreen?.().catch(() => {});
-        nativeFullscreenRef.current = false;
-      }
-      if (dialog) {
-        if (dialog.open) dialog.close();
-        const placeholder = placeholderRef.current;
-        if (placeholder?.parentNode) placeholder.parentNode.replaceChild(target, placeholder);
-        placeholderRef.current = null;
-        dialog.remove();
-        dialogRef.current = null;
-      }
-      window.setTimeout(() => chart?.resize(), 80);
-    };
-  }, [expanded, chartId, mobilePlatform]);
-
-  const close = () => window.history.back();
-  const exportCsv = () => {
-    const chart = chartId ? ChartJS.getChart(chartId) as any : null;
-    let rows: string[][] = [];
-    if (chart) {
-      rows = [['Periodo', ...chart.data.datasets.map((dataset: any) => dataset.label || 'Serie')], ...(chart.data.labels || []).map((label: any, index: number) => [String(label), ...chart.data.datasets.map((dataset: any) => String(dataset.data?.[index] ?? ''))])];
-    } else {
-      const table = targetRef.current?.querySelector('table');
-      rows = table ? Array.from(table.rows).map(row => Array.from(row.cells).map(cell => cell.innerText.trim())) : [];
-    }
-    if (!rows.length) return;
-    const csv = rows.map(row => row.map(value => `"${value.replace(/"/g, '""')}"`).join(',')).join('\r\n');
-    const url = URL.createObjectURL(new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }));
-    const link = document.createElement('a'); link.href = url; link.download = `${chartId || 'datos-dashboard'}.csv`; link.click(); URL.revokeObjectURL(url);
-  };
-  const exportPng = () => {
-    const chart = chartId ? ChartJS.getChart(chartId) as any : null;
-    if (chart) {
-      const link = document.createElement('a'); link.href = chart.toBase64Image('image/png', 1); link.download = `${chartId}.png`; link.click(); return;
-    }
-    const table = targetRef.current?.querySelector('table');
-    if (!table) return;
-    const rows = Array.from(table.rows).map(row => Array.from(row.cells).map(cell => cell.innerText.trim()));
-    const widths = Math.max(...rows.map(row => row.length), 1);
-    const canvas = document.createElement('canvas'); canvas.width = Math.max(720, widths * 120); canvas.height = Math.max(180, rows.length * 34 + 32);
-    const context = canvas.getContext('2d'); if (!context) return;
-    context.fillStyle = '#06162d'; context.fillRect(0, 0, canvas.width, canvas.height); context.font = '14px sans-serif';
-    rows.forEach((row, rowIndex) => row.forEach((value, colIndex) => { context.fillStyle = rowIndex === 0 ? '#00e5ee' : '#eaf5ff'; context.fillText(value.slice(0, 32), 14 + colIndex * 120, 26 + rowIndex * 34); }));
-    const link = document.createElement('a'); link.href = canvas.toDataURL('image/png'); link.download = 'tabla-dashboard.png'; link.click();
-  };
-  const setRange = (range: '6M' | '12M' | 'Todo') => {
-    const chart = chartId ? ChartJS.getChart(chartId) as any : null;
-    if (!chart?.$v2FullscreenOriginal) return;
-    const original = chart.$v2FullscreenOriginal;
-    const count = range === '6M' ? 6 : range === '12M' ? 12 : original.labels.length;
-    chart.data.labels = original.labels.slice(-count);
-    chart.data.datasets = original.datasets.map((dataset: any) => ({ ...dataset, data: dataset.data.slice(-count) }));
-    chart.update('none'); setToolbarRevision(value => value + 1);
-  };
-  const chart = chartId ? ChartJS.getChart(chartId) as any : null;
-  const open = (event: React.MouseEvent<HTMLButtonElement>) => {
-    const scope = event.currentTarget.closest('.v2-panel') || document;
-    targetRef.current = (targetSelector ? scope.querySelector(targetSelector) : event.currentTarget.closest('.v2-chart-card, .v2-overlay-wrapper')) as HTMLElement | null;
-    if (!targetRef.current) return;
-    allowPortraitRef.current = false;
-    rotateScreenVisibleRef.current = false;
-    setRotateScreenVisible(false);
-    setShowOrientationHelp(false);
-    if (!mobilePlatform && window.matchMedia('(pointer: coarse) and ((max-width: 600px) or (max-height: 600px))').matches) {
-      const fullscreenRequest = document.documentElement.requestFullscreen?.();
-      fullscreenRequest?.then(async () => {
-        nativeFullscreenRef.current = true;
-        const orientation = screen.orientation as ScreenOrientation & { lock?: (value: 'landscape') => Promise<void> };
-        try { await orientation?.lock?.('landscape'); } catch { /* Keep the CSS fullscreen view usable when locking is unsupported. */ }
-      }).catch(() => {});
-    }
-    if (mobilePlatform) {
-      const target = targetRef.current;
-      const appRoot = target.closest('.v2-root');
-      const parent = target.parentNode;
-      if (!appRoot || !parent) return;
-      const placeholder = document.createComment('fullscreen-target');
-      parent.insertBefore(placeholder, target);
-      const dialog = document.createElement('dialog');
-      dialog.className = 'v2-fullscreen-dialog';
-      const body = document.createElement('div');
-      body.className = 'v2-fullscreen-dialog-body';
-      dialog.appendChild(body);
-      appRoot.appendChild(dialog);
-      body.appendChild(target);
-      dialog.addEventListener('cancel', event => { event.preventDefault(); window.history.back(); });
-      dialogRef.current = dialog;
-      placeholderRef.current = placeholder;
-      dialog.showModal();
-      window.requestAnimationFrame(() => window.setTimeout(() => window.dispatchEvent(new Event('v2:fullscreen-open')), 80));
-      setChartReadout('Toca un mes · línea continua: dato real · discontinua: estimación');
-    }
-    setExpanded(true);
-  };
-
-  return <div className="v2-fullscreen-control">
-    <button type="button" className={`v2-expand-button${label ? ' has-label' : ''}${mobileOnly ? ' v2-mobile-only-expand' : ''}`} aria-label={expanded ? 'Cerrar pantalla completa' : label || 'Ampliar a pantalla completa'} title={expanded ? 'Cerrar' : label || 'Pantalla completa'} onClick={expanded ? close : open}>{expanded ? <X size={17} /> : <Maximize2 size={17} />}{!expanded && label && <span>{label}</span>}</button>
-    {expanded && (chartId || targetRef.current?.querySelector('table')) && <div className="v2-fullscreen-toolbar" role="toolbar" aria-label="Herramientas de pantalla completa">
-      {chartId && <div className="v2-fullscreen-zoom" role="group" aria-label="Zoom del gráfico"><button type="button" title="Acercar" aria-label="Acercar gráfica" onClick={() => updateChartZoom(chartId, 'in')}><ZoomIn size={16} /></button><button type="button" title="Alejar" aria-label="Alejar gráfica" onClick={() => updateChartZoom(chartId, 'out')}><ZoomOut size={16} /></button><button type="button" title="Restablecer vista" aria-label="Restablecer zoom de la gráfica" onClick={() => updateChartZoom(chartId, 'reset')}><RotateCcw size={15} /></button></div>}
-      {chartId && <div className="v2-fullscreen-ranges">{(['6M', '12M', 'Todo'] as const).map(range => <button key={range} type="button" onClick={() => setRange(range)}>{range}</button>)}</div>}
-      {chart?.data.datasets.map((dataset: any, index: number) => {
-        const compactLabel = chart.data.datasets.length === 5 && index < 4 ? `${index < 2 ? 'A' : 'B'} ${index % 2 === 0 ? 'real' : 'est.'}` : dataset.label;
-        return <button key={`${dataset.label}-${index}`} type="button" className="v2-fullscreen-series" title={dataset.label} aria-label={`${chart.isDatasetVisible(index) ? 'Ocultar' : 'Mostrar'} ${dataset.label}`} aria-pressed={chart.isDatasetVisible(index)} onClick={() => { chart.setDatasetVisibility(index, !chart.isDatasetVisible(index)); chart.update('none'); setToolbarRevision(value => value + 1); }}><i style={{ background: dataset.borderColor || dataset.backgroundColor }} />{compactLabel}</button>;
-      })}
-      <button type="button" onClick={exportPng}>PNG</button><button type="button" onClick={exportCsv}>CSV</button>
-      <span hidden>{toolbarRevision}</span>
-    </div>}
-    {expanded && mobilePlatform && chartId && <div className="v2-fullscreen-chart-readout" role="status" aria-live="polite">{chartReadout}</div>}
-    {expanded && rotateScreenVisible && <div className={`v2-rotate-screen${awaitingLandscape ? '' : ' is-fading'}`} role="status">
-      <button type="button" className="v2-rotate-close" aria-label="Cerrar vista ampliada" onClick={close}><X size={22} /></button>
-      <RotateCw className="v2-rotate-screen-icon" size={72} aria-hidden="true" />
-      <p>Gira el móvil para verlo en grande</p>
-      {showOrientationHelp && <div className="v2-rotate-help"><span>¿No gira? Revisa el bloqueo de orientación.</span><button type="button" onClick={() => { allowPortraitRef.current = true; setAwaitingLandscape(false); if (rotateScreenVisibleRef.current) window.setTimeout(() => { rotateScreenVisibleRef.current = false; setRotateScreenVisible(false); }, 250); window.requestAnimationFrame(() => chart?.resize()); }}>Verlo en vertical</button></div>}
-    </div>}
-  </div>;
-};
-
-const ChartZoomControls = ({ chartId, mobilePlatform = true }: { chartId: string; mobilePlatform?: boolean }) => (
-  <div className="v2-chart-controls" role="group" aria-label="Controles de zoom de la gráfica">
-    <FullscreenToggle chartId={chartId} mobilePlatform={mobilePlatform} />
-  </div>
-);
-
-const ComparisonChartControls = ({
-  chartId,
-  isMobile,
-}: {
-  chartId: string;
-  isMobile: boolean;
-  onReload?: () => void;
-  isReloading?: boolean;
-}) => isMobile
-  ? <ChartZoomControls chartId={chartId} mobilePlatform={isMobile} />
-  : null;
 
 type ComparisonLegendItem = { index: number; label: string; color: string; kind: 'real' | 'estimated' | 'madrid' };
 
@@ -3173,65 +2858,188 @@ const MadridDashboardV2: React.FC = () => {
                     onScroll={(e) => updateKpiScrollState(e.currentTarget)}
                   >
 
-                  {activeProfile.id === 'alquiler' && (() => {
+                  {(() => {
+                    const isAlquiler = activeProfile.id === 'alquiler';
+                    const isCompra = activeProfile.id === 'compra';
+                    const isVenta = activeProfile.id === 'venta';
+                    const isInversion = activeProfile.id === 'inversion';
+
+                    const invRatio = isNetYieldActive && netYieldValue !== null ? Number(netYieldValue) : Number(kpiData.p_m2);
+                    const invPercent = Number.isFinite(invRatio) && invRatio > 0 ? toPercent(invRatio) : 0;
+
                     const rent = Math.round(kpiData.p_vivienda || 0);
                     const incomeMonthly = Math.round((kpiData.renta_media || 0) / 12);
                     const effort = incomeMonthly > 0 ? (rent / incomeMonthly) * 100 : 0;
-                    const effortColor = '#fbbf24';
                     const salary = Number.parseFloat(userRentSalary);
                     const personalEffort = salary > 0 ? (rent / salary) * 100 : 0;
+
+                    const rentaAnual = kpiData.renta_media || 0;
+                    const aniosRenta = rentaAnual > 0 ? (kpiData.p_vivienda || 0) / rentaAnual : 0;
+                    const compraStatusText = aniosRenta <= 0 ? 'Sin datos' : aniosRenta < 5 ? 'Asequible' : aniosRenta < 8 ? 'Moderado' : 'Esfuerzo elevado';
+                    const compraStatusColor = aniosRenta <= 0 ? '#baccd6' : aniosRenta < 5 ? '#34D399' : aniosRenta < 8 ? '#FBBF24' : '#F87171';
+
+                    const transacciones = kpiData.transacciones || 0;
+                    const velocity = transacciones ? Math.max(1.0, 933.8 / transacciones) : 0;
+                    const velocityColor = velocity <= 0 ? '#baccd6' : velocity < 2.0 ? '#34D399' : velocity < 3.0 ? '#FBBF24' : '#F87171';
+                    const demandText = transacciones > 300 ? 'alta' : transacciones > 100 ? 'moderada' : 'baja';
+
+                    const amortizacionAnios = Number(kpiData.p_m2) > 0 ? 1 / Number(kpiData.p_m2) : 0;
+                    const liqLabel = transacciones > 300 ? 'Liquidez alta' : transacciones > 100 ? 'Liquidez media' : 'Liquidez baja';
+
+                    const heroEyebrow = isInversion
+                      ? (isNetYieldActive ? 'Rentabilidad neta anual' : 'Rentabilidad bruta anual')
+                      : `Precio medio · ${activeProfile.label}`;
+                    const heroTooltip = isInversion
+                      ? {
+                          title: isNetYieldActive ? 'Rentabilidad neta anual' : 'Rentabilidad bruta anual',
+                          description: isNetYieldActive
+                            ? 'Rentabilidad neta anual tras deducir cuota de comunidad, IBI proporcional, seguro/mantenimiento y vacancia estimada.'
+                            : 'Compara los ingresos anuales estimados por alquiler con el precio de compra de la vivienda.',
+                          example: isNetYieldActive
+                            ? 'Descuenta costes reales según las medias oficiales de Madrid.'
+                            : 'El cálculo anualiza el alquiler y lo compara con el precio de compra.',
+                          ruleOfThumb: 'Usa el simulador inferior para calibrar con tus propios costes.',
+                        }
+                      : isAlquiler
+                        ? {
+                            title: 'Precio de alquiler por metro cuadrado',
+                            description: 'Precio medio mensual por metro cuadrado para el periodo y zona seleccionados.',
+                            example: '21,62 €/m² equivale aproximadamente a 1.958 € al mes para una vivienda media.',
+                            ruleOfThumb: 'Compara siempre la misma zona y el mismo periodo.',
+                          }
+                        : {
+                            title: `Precio de ${activeProfile.label.toLowerCase()} por metro cuadrado`,
+                            description: `Media del precio de ${activeProfile.label.toLowerCase()} por cada metro cuadrado para la zona y el periodo seleccionados.`,
+                            example: 'A 3.000 €/m², una vivienda de 80 m² equivaldría a 240.000 € antes de gastos.',
+                            ruleOfThumb: 'Comparar el precio por m² ayuda a comparar zonas con viviendas de distinto tamaño.',
+                          };
+
+                    const secondaryLeftLabel = isAlquiler
+                      ? 'Alquiler medio (70 m²)'
+                      : isInversion
+                        ? 'Precio de inversión'
+                        : 'Precio medio vivienda';
+                    const secondaryLeftUnit = isAlquiler ? '€/mes' : '€';
+                    const marketStatus = `${kpiData.estado_mercado || 'Estable'}${kpiData.estado_mercado === 'Crecimiento' ? ' (+)' : kpiData.estado_mercado === 'Ajuste' ? ' (-)' : ''}`;
+
                     return (
                       <div className="v2-mobile-rent-summary">
                         <section className="v2-rent-hero">
                           <div className="v2-rent-hero-heading">
                             <div>
-                              <span className="v2-rent-eyebrow">Precio medio · alquiler</span>
+                              <span className="v2-rent-eyebrow">{heroEyebrow}</span>
                             </div>
                             <InfoTooltip
-                              title="Precio de alquiler por metro cuadrado"
-                              description="Precio medio mensual por metro cuadrado para el periodo y zona seleccionados."
-                              example="21,62 €/m² equivale aproximadamente a 1.958 € al mes para una vivienda media."
-                              ruleOfThumb="Compara siempre la misma zona y el mismo periodo."
+                              title={heroTooltip.title}
+                              description={heroTooltip.description}
+                              example={heroTooltip.example}
+                              ruleOfThumb={heroTooltip.ruleOfThumb}
                             />
                           </div>
                           <div className="v2-rent-main-value">
-                            <strong>{formatCurrencyDec(kpiData.p_m2, 2, '€/m²')}</strong>
+                            {isInversion ? (
+                              <>
+                                <strong>{invPercent > 0 ? invPercent.toFixed(2).replace('.', ',') : '—'}</strong>
+                                {invPercent > 0 && <span>%</span>}
+                              </>
+                            ) : (
+                              <>
+                                <strong>{formatCurrencyDec(kpiData.p_m2, 2, '')}</strong>
+                                {Number(kpiData.p_m2) > 0 && <span>€/m²</span>}
+                              </>
+                            )}
                           </div>
                           {(kpiData.is_prediction || isProjectionPeriod) && Number(kpiData.p_m2) > 0 && (
                             <ConfidenceIntervalBadge
-                              centralValue={Number(kpiData.p_m2)}
-                              unit="€/m²"
+                              centralValue={isInversion ? invPercent : Number(kpiData.p_m2)}
+                              unit={isInversion ? '%' : '€/m²'}
                               confidencePercent={95}
                             />
                           )}
                           <div className="v2-rent-chips">
-                            {Number.isFinite(Number(kpiData.v_mes)) && kpiData.v_mes !== undefined
-                              ? <span>{Number(kpiData.v_mes) < 0 ? '↘' : '↗'} {formatSpanishPercentage(kpiData.v_mes, 1, true)} mes</span>
-                              : null}
-                            {Number.isFinite(Number(kpiData.v_anual)) && kpiData.v_anual !== undefined
-                              ? <span>{Number(kpiData.v_anual) < 0 ? '↘' : '↗'} {formatSpanishPercentage(kpiData.v_anual, 1, true)} año</span>
-                              : null}
-                            <span className="v2-rent-market">{kpiData.estado_mercado || 'Mercado estable'}</span>
+                            {!isInversion ? (
+                              <>
+                                {Number.isFinite(Number(kpiData.v_mes)) && kpiData.v_mes !== undefined
+                                  ? <span>{Number(kpiData.v_mes) < 0 ? '↘' : '↗'} {formatSpanishPercentage(kpiData.v_mes, 1, true)} mes</span>
+                                  : null}
+                                {Number.isFinite(Number(kpiData.v_anual)) && kpiData.v_anual !== undefined
+                                  ? <span>{Number(kpiData.v_anual) < 0 ? '↘' : '↗'} {formatSpanishPercentage(kpiData.v_anual, 1, true)} año</span>
+                                  : null}
+                              </>
+                            ) : (
+                              <>
+                                {transacciones > 0 && (
+                                  <span>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(transacciones)} op./año</span>
+                                )}
+                                <span>{liqLabel}</span>
+                              </>
+                            )}
+                            <span className="v2-rent-market">{marketStatus}</span>
                           </div>
                         </section>
                         <section className="v2-rent-secondary">
                           <div className="v2-rent-secondary-card">
-                            <span className="v2-rent-eyebrow" title="Calculado sobre vivienda tipo estándar de 70 m²">Alquiler medio (70 m²)</span>
-                            <strong>{formatCurrencyInt(kpiData.p_vivienda, '€/mes')}</strong>
+                            <span className="v2-rent-eyebrow" title={isAlquiler ? 'Calculado sobre vivienda tipo estándar de 70 m²' : undefined}>{secondaryLeftLabel}</span>
+                            <strong>
+                              {formatCurrencyInt(kpiData.p_vivienda, '')}
+                              {Number(kpiData.p_vivienda) > 0 ? <small> {secondaryLeftUnit}</small> : null}
+                            </strong>
                           </div>
-                          <div className="v2-rent-secondary-card v2-rent-effort">
-                            <div className="v2-rent-effort-head"><span className="v2-rent-eyebrow">Esfuerzo de alquiler</span><strong style={{ color: effortColor }}>{effort > 0 ? `${effort.toFixed(0)} %` : '—'}</strong></div>
-                            <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(effort, 100)}%`, background: effortColor }} /><b style={{ left: '30%' }} /></div>
-                            <span className="v2-rent-effort-caption">{formatCurrencyInt(rent, '€/mes')} de alquiler · {formatCurrencyInt(incomeMonthly, '€/mes')} de renta neta media por hogar (Fuente: INE)</span>
-                            <button className="v2-rent-calc-toggle" type="button" onClick={() => setShowRentCalculator(value => !value)} aria-expanded={showRentCalculator}>
-                              {showRentCalculator ? 'Cerrar cálculo' : 'Calcula con tu sueldo'} <span aria-hidden="true">{showRentCalculator ? '↑' : '→'}</span>
-                            </button>
-                            {showRentCalculator && <div className="v2-rent-calculator">
-                              <input type="number" value={userRentSalary} onChange={event => setUserRentSalary(event.target.value)} placeholder="Sueldo neto mensual (€)" aria-label="Sueldo neto mensual" />
-                              <span style={{ fontSize: '10px', color: '#8fa8be', display: 'flex', alignItems: 'center', gap: '4px', margin: '4px 0 2px' }}>🔒 Se calcula en tu navegador y no se guarda</span>
-                              {salary > 0 && <span>Tu esfuerzo sería <strong style={{ color: personalEffort <= 30 ? '#34d399' : personalEffort <= 40 ? '#fbbf24' : '#f87171' }}>{personalEffort.toFixed(1).replace('.', ',')} %</strong></span>}
-                            </div>}
-                          </div>
+
+                          {isAlquiler && (
+                            <div className="v2-rent-secondary-card v2-rent-effort">
+                              <div className="v2-rent-effort-head"><span className="v2-rent-eyebrow">Esfuerzo de alquiler</span><strong style={{ color: '#fbbf24' }}>{effort > 0 ? `${effort.toFixed(0)} %` : '—'}</strong></div>
+                              <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(effort, 100)}%`, background: '#fbbf24' }} /><b style={{ left: '30%' }} /></div>
+                              <span className="v2-rent-effort-caption">{formatCurrencyInt(rent, '€/mes')} de alquiler · {formatCurrencyInt(incomeMonthly, '€/mes')} de renta neta media por hogar (Fuente: INE)</span>
+                              <button className="v2-rent-calc-toggle" type="button" onClick={() => setShowRentCalculator(value => !value)} aria-expanded={showRentCalculator}>
+                                {showRentCalculator ? 'Cerrar cálculo' : 'Calcula con tu sueldo'} <span aria-hidden="true">{showRentCalculator ? '↑' : '→'}</span>
+                              </button>
+                              {showRentCalculator && <div className="v2-rent-calculator">
+                                <input type="number" value={userRentSalary} onChange={event => setUserRentSalary(event.target.value)} placeholder="Sueldo neto mensual (€)" aria-label="Sueldo neto mensual" />
+                                <span style={{ fontSize: '10px', color: '#8fa8be', display: 'flex', alignItems: 'center', gap: '4px', margin: '4px 0 2px' }}>🔒 Se calcula en tu navegador y no se guarda</span>
+                                {salary > 0 && <span>Tu esfuerzo sería <strong style={{ color: personalEffort <= 30 ? '#34d399' : personalEffort <= 40 ? '#fbbf24' : '#f87171' }}>{personalEffort.toFixed(1).replace('.', ',')} %</strong></span>}
+                              </div>}
+                            </div>
+                          )}
+
+                          {isCompra && (
+                            <div className="v2-rent-secondary-card v2-rent-effort">
+                              <div className="v2-rent-effort-head">
+                                <span className="v2-rent-eyebrow">Poder adquisitivo</span>
+                                <strong style={{ color: compraStatusColor }}>{aniosRenta > 0 ? `${aniosRenta.toFixed(1).replace('.', ',')} años` : '—'}</strong>
+                              </div>
+                              <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(100, (aniosRenta / 12) * 100)}%`, background: compraStatusColor }} /><b style={{ left: '41.7%' }} /></div>
+                              <span className="v2-rent-effort-caption">Renta media: {formatCurrencyInt(rentaAnual, '€/año')} · {compraStatusText}</span>
+                            </div>
+                          )}
+
+                          {isVenta && (
+                            <div className="v2-rent-secondary-card v2-rent-effort">
+                              <div className="v2-rent-effort-head">
+                                <span className="v2-rent-eyebrow">Velocidad venta</span>
+                                <strong style={{ color: velocityColor }}>
+                                  {velocity > 0 ? `${velocity % 1 === 0 ? velocity.toFixed(0) : velocity.toFixed(1).replace('.', ',')} ${velocity === 1 ? 'mes' : 'meses'}` : '—'}
+                                </strong>
+                              </div>
+                              <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(100, (velocity / 4) * 100)}%`, background: velocityColor }} /><b style={{ left: '50%' }} /></div>
+                              <span className="v2-rent-effort-caption">
+                                {transacciones > 0 ? `${new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(transacciones)} trans./año · Demanda ${demandText}` : 'Actividad anual'} · Potencial 6m: {formatSpanishPercentage((kpiData.v_anual || 0) / 2, 1, true)}
+                              </span>
+                            </div>
+                          )}
+
+                          {isInversion && (
+                            <div className="v2-rent-secondary-card v2-rent-effort">
+                              <div className="v2-rent-effort-head">
+                                <span className="v2-rent-eyebrow">Amortización</span>
+                                <strong style={{ color: activeProfile.color }}>{amortizacionAnios > 0 ? `${amortizacionAnios.toFixed(1).replace('.', ',')} años` : '—'}</strong>
+                              </div>
+                              <div className="v2-rent-effort-meter"><i style={{ width: `${Math.min(100, (amortizacionAnios / 30) * 100)}%`, background: activeProfile.color }} /><b style={{ left: '66.7%' }} /></div>
+                              <span className="v2-rent-effort-caption">
+                                Años de alquiler íntegro (GRM) · {isNetYieldActive ? 'Con modo neto activo' : 'Sobre rentabilidad bruta'}
+                              </span>
+                            </div>
+                          )}
                         </section>
                       </div>
                     );
@@ -4043,7 +3851,6 @@ const MadridDashboardV2: React.FC = () => {
                     firstProjectionMonth={firstProjectionMonth}
                     onHelp={() => setShowMapHelpModal(true)}
                   >
-                    {isMobile && <FullscreenToggle targetSelector=".v2-map-card" mobileOnly mobilePlatform />}
                     {!isMobile && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} hideMonthArrows keyboardMonthNavigation showYearShortcut={false} />
@@ -4734,7 +4541,7 @@ const MadridDashboardV2: React.FC = () => {
                               </div>
                             ) : isMobile ? (
                               <>
-                                <div className="v2-chart-wrap large"><ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile onReload={reloadComparison} isReloading={isReloadingA || isReloadingB} /><canvas id={`v2-overlay-${p.id}`}></canvas></div>
+                                <div className="v2-chart-wrap large"><canvas id={`v2-overlay-${p.id}`}></canvas></div>
                                 <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={comparisonAHasData ? formatZoneOption(selectedZoneA) : ''} zoneB={comparisonBHasData ? formatZoneOption(selectedZoneB) : ''} madridLabel={madridChipLabel} />
                               </>
                             ) : (
@@ -4745,7 +4552,6 @@ const MadridDashboardV2: React.FC = () => {
                                     ...(comparisonBHasData ? [{ index: 2, label: `${formatZoneOption(selectedZoneB)} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' as const }, { index: 3, label: `${formatZoneOption(selectedZoneB)} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' as const }] : []),
                                     { index: 4, label: madridLegendLabel, color: '#dce8f2', kind: 'madrid' },
                                   ]} />
-                                  <ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile={false} onReload={reloadComparison} isReloading={isReloadingA || isReloadingB} />
                                 </div>
                                 <div className="v2-chart-wrap large"><canvas id={`v2-overlay-${p.id}`}></canvas></div>
                                 <div style={{ fontSize: '10.5px', color: '#8fa6ba', marginTop: '6px', textAlign: 'center' }}>
@@ -4787,12 +4593,9 @@ const MadridDashboardV2: React.FC = () => {
                                 )}
                                 {comparisonAHasData ? (
                                   <>
-                                    {isMobile ? (
-                                      <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile onReload={reloadZoneA} isReloading={isReloadingA} />
-                                    ) : (
+                                    {!isMobile && (
                                       <div className="v2-comparison-chart-meta">
                                         <ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: madridLegendLabel, color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' }]} />
-                                        <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={false} onReload={reloadZoneA} isReloading={isReloadingA} />
                                       </div>
                                     )}
                                     <canvas id={`v2-chartA-${p.id}`}></canvas>
@@ -4828,12 +4631,9 @@ const MadridDashboardV2: React.FC = () => {
                                 )}
                                 {comparisonBHasData ? (
                                   <>
-                                    {isMobile ? (
-                                      <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile onReload={reloadZoneB} isReloading={isReloadingB} />
-                                    ) : (
+                                    {!isMobile && (
                                       <div className="v2-comparison-chart-meta">
                                         <ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: madridLegendLabel, color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' }]} />
-                                        <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={false} onReload={reloadZoneB} isReloading={isReloadingB} />
                                       </div>
                                     )}
                                     <canvas id={`v2-chartB-${p.id}`}></canvas>
