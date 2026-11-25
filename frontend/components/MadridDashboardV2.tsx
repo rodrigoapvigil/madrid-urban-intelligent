@@ -431,10 +431,10 @@ const ComparisonSeriesChips = ({ chartId, zoneA, zoneB }: { chartId: string; zon
 const MadridMap = dynamic(() => import('./MadridMap'), { ssr: false });
 
 const PROFILES = [
-  { id: 'alquiler', label: 'Alquiler', color: 'var(--azul-linea)', op: 'alquiler' },
-  { id: 'compra', label: 'Compra', color: 'var(--azul-linea)', op: 'venta' },
-  { id: 'venta', label: 'Venta', color: 'var(--coral)', op: 'venta' },
-  { id: 'inversion', label: 'Inversión', color: 'var(--texto-secundario-azul)', op: 'inversion' },
+  { id: 'alquiler', label: 'Alquiler', color: '#00E5FF', op: 'alquiler' },
+  { id: 'compra', label: 'Compra', color: '#FBBF24', op: 'venta' },
+  { id: 'venta', label: 'Venta', color: '#34D399', op: 'venta' },
+  { id: 'inversion', label: 'Inversión', color: '#C084FC', op: 'inversion' },
 ];
 
 // La comparación es común a todos los perfiles; solo cambia la métrica y su unidad.
@@ -3202,7 +3202,7 @@ const MadridDashboardV2: React.FC = () => {
                         <div className="v2-val" style={{ color: activeProfile.color }}>
                           {amortizacionAnios > 0 ? amortizacionAnios.toFixed(1) + ' años' : '-'}
                         </div>
-                        <div style={{ fontSize: '11px', color: 'var(--azul-linea)', marginTop: '2px', fontWeight: '500' }}>
+                        <div style={{ fontSize: '11px', color: '#9FB6C8', marginTop: '2px', fontWeight: '500' }}>
                           (GRM: Gross Rent Mult.)
                         </div>
                       </div>
@@ -3215,17 +3215,17 @@ const MadridDashboardV2: React.FC = () => {
                     const aniosRenta = rentaAnual > 0 ? precioMedio / rentaAnual : 0;
 
                     let statusText = 'N/A';
-                    let statusColor = 'var(--azul-linea)';
+                    let statusColor = '#34D399';
                     if (aniosRenta > 0) {
                       if (aniosRenta < 5) {
                         statusText = 'Asequible para habitantes típicos';
-                        statusColor = 'var(--azul-linea)';
+                        statusColor = '#34D399';
                       } else if (aniosRenta < 8) {
                         statusText = 'Moderado para habitantes típicos';
-                        statusColor = 'var(--coral)';
+                        statusColor = '#FBBF24';
                       } else {
                         statusText = 'Difícil para habitantes típicos';
-                        statusColor = 'var(--coral-texto)';
+                        statusColor = '#F87171';
                       }
                     }
 
@@ -3235,33 +3235,33 @@ const MadridDashboardV2: React.FC = () => {
 
                     const userAnios = hasUserSim ? precioMedio / parsedIncome : 0;
                     let userAniosStatus = '';
-                    let userAniosColor = 'var(--azul-linea)';
+                    let userAniosColor = '#34D399';
                     if (userAnios > 0) {
                       if (userAnios < 3) {
                         userAniosStatus = 'Muy asequible';
-                        userAniosColor = 'var(--azul-linea)';
+                        userAniosColor = '#34D399';
                       } else if (userAnios < 6) {
                         userAniosStatus = 'Moderado';
-                        userAniosColor = 'var(--coral)';
+                        userAniosColor = '#FBBF24';
                       } else {
                         userAniosStatus = 'Poco asequible';
-                        userAniosColor = 'var(--coral-texto)';
+                        userAniosColor = '#F87171';
                       }
                     }
 
                     const userEntradaPct = hasUserSim && precioMedio > 0 ? (parsedSavings / precioMedio) * 100 : 0;
                     let userEntradaStatus = '';
-                    let userEntradaColor = 'var(--azul-linea)';
+                    let userEntradaColor = '#34D399';
                     if (userEntradaPct > 0) {
                       if (userEntradaPct >= 30) {
                         userEntradaStatus = 'Hipoteca moderada';
-                        userEntradaColor = 'var(--azul-linea)';
+                        userEntradaColor = '#34D399';
                       } else if (userEntradaPct >= 20) {
                         userEntradaStatus = 'Hipoteca estándar';
-                        userEntradaColor = 'var(--coral)';
+                        userEntradaColor = '#FBBF24';
                       } else {
                         userEntradaStatus = 'Hipoteca de alto riesgo';
-                        userEntradaColor = 'var(--coral-texto)';
+                        userEntradaColor = '#F87171';
                       }
                     }
 
@@ -3269,7 +3269,7 @@ const MadridDashboardV2: React.FC = () => {
                       <>
                         <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', gap: '7px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--azul-linea)', letterSpacing: '0.5px' }}>
+                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: activeProfile.color, letterSpacing: '0.5px' }}>
                               PODER ADQUISITIVO {selectedBarrio !== 'Todos' ? 'DEL BARRIO' : (selectedDistrict !== 'Todos' ? 'DEL DISTRITO' : 'DE MADRID')}
                             </label>
                             <InfoTooltip
@@ -3335,25 +3335,25 @@ const MadridDashboardV2: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => setShowPurchaseSim(true)}
-                                  style={{ width: '100%', background: activeProfile.color, color: '#FFFFFF', border: 'none', padding: '7px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', transition: 'opacity 0.2s', marginTop: '2px' }}
+                                  style={{ width: '100%', background: activeProfile.color, color: '#02152D', border: 'none', padding: '8px', borderRadius: '6px', fontSize: '11.5px', fontWeight: '800', cursor: 'pointer', transition: 'opacity 0.2s', marginTop: '2px' }}
                                 >
                                   Calcular MI caso
                                 </button>
                               </div>
 
                               {hasUserSim && (
-                                <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(0, 240, 255, 0.12)', border: '1px solid rgba(0, 240, 255, 0.35)', borderRadius: '8px', fontSize: '12px', color: '#FFFFFF', display: 'flex', flexDirection: 'column', gap: '6px', animation: 'v2FadeIn 0.2s ease' }}>
+                                <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(2, 20, 43, 0.9)', border: `1px solid ${activeProfile.color}55`, borderRadius: '8px', fontSize: '12px', color: '#FFFFFF', display: 'flex', flexDirection: 'column', gap: '6px', animation: 'v2FadeIn 0.2s ease' }}>
                                   <div>
-                                    <span style={{ color: '#BACCD6' }}>Con tus ingresos ({new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(parsedIncome)}€/año):</span>
+                                    <span style={{ color: '#CBD5E1' }}>Con tus ingresos ({new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(parsedIncome)}€/año):</span>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                                      <span>Serían <strong style={{ color: '#00F0FF' }}>{userAnios.toFixed(1)} años</strong> → <strong style={{ color: userAniosColor }}>{userAniosStatus}</strong></span>
+                                      <span>Serían <strong style={{ color: activeProfile.color }}>{userAnios.toFixed(1)} años</strong> → <strong style={{ color: userAniosColor }}>{userAniosStatus}</strong></span>
                                       <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: userAniosColor }} />
                                     </div>
                                   </div>
                                   <div>
-                                    <span style={{ color: '#BACCD6' }}>Con tus ahorros ({new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(parsedSavings)}€):</span>
+                                    <span style={{ color: '#CBD5E1' }}>Con tus ahorros ({new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(parsedSavings)}€):</span>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                                      <span>Entrada: <strong style={{ color: '#00F0FF' }}>{userEntradaPct.toFixed(0)}%</strong> → <strong style={{ color: userEntradaColor }}>{userEntradaStatus}</strong></span>
+                                      <span>Entrada: <strong style={{ color: activeProfile.color }}>{userEntradaPct.toFixed(0)}%</strong> → <strong style={{ color: userEntradaColor }}>{userEntradaStatus}</strong></span>
                                       <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: userEntradaColor }} />
                                     </div>
                                   </div>
@@ -3481,13 +3481,13 @@ const MadridDashboardV2: React.FC = () => {
                     const transacciones = kpiData.transacciones || 0;
 
                     let liquidezText = 'Liquidez baja';
-                    let liquidezColor = 'var(--coral-texto)';
+                    let liquidezColor = '#F87171';
                     if (transacciones > 300) {
                       liquidezText = 'Liquidez alta (fácil vender)';
-                      liquidezColor = 'var(--azul-linea)';
+                      liquidezColor = '#34D399';
                     } else if (transacciones > 100) {
                       liquidezText = 'Liquidez media';
-                      liquidezColor = 'var(--coral)';
+                      liquidezColor = '#FBBF24';
                     }
 
                     const capital = parseFloat(userInvCapital);
@@ -3554,7 +3554,7 @@ const MadridDashboardV2: React.FC = () => {
 
                               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: '18px', fontWeight: '800', color: '#FFFFFF' }}>
                                 <span>LTV: {ltvPercent}%</span>
-                                <span style={{ fontSize: '11px', fontWeight: '500', color: 'var(--azul-linea)' }}>
+                                <span style={{ fontSize: '11px', fontWeight: '600', color: activeProfile.color }}>
                                   Aporta: {100 - ltvPercent}%
                                 </span>
                               </div>
@@ -3588,7 +3588,7 @@ const MadridDashboardV2: React.FC = () => {
                                       border: 'none',
                                       borderRadius: '4px',
                                       backgroundColor: ltvPercent === val ? activeProfile.color : 'rgba(255, 255, 255, 0.08)',
-                                      color: ltvPercent === val ? '#FFFFFF' : '#BACCD6',
+                                      color: ltvPercent === val ? '#02152D' : '#CBD5E1',
                                       cursor: 'pointer',
                                       transition: 'all 0.2s'
                                     }}
@@ -3679,30 +3679,30 @@ const MadridDashboardV2: React.FC = () => {
                               <button
                                 type="button"
                                 onClick={() => setShowInvSim(true)}
-                                style={{ width: '100%', background: activeProfile.color, color: '#FFFFFF', border: 'none', padding: '7px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', transition: 'opacity 0.2s', marginTop: '2px' }}
+                                style={{ width: '100%', background: activeProfile.color, color: '#02152D', border: 'none', padding: '8px', borderRadius: '6px', fontSize: '11.5px', fontWeight: '800', cursor: 'pointer', transition: 'opacity 0.2s', marginTop: '2px' }}
                               >
                                 Ver proyección
                               </button>
 
                               {hasInvSim && (
-                                <div style={{ marginTop: '6px', padding: '10px', background: 'var(--blanco-humo)', borderRadius: '8px', fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '6px', animation: 'v2FadeIn 0.2s ease', maxHeight: '180px', overflowY: 'auto' }}>
-                                  <strong style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--azul-linea)' }}>Estimación simulada</strong>
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', borderBottom: '1px solid var(--humo-2)', paddingBottom: '6px' }}>
+                                <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(2, 20, 43, 0.92)', border: `1px solid ${activeProfile.color}55`, borderRadius: '8px', fontSize: '11px', color: '#E2EFF7', display: 'flex', flexDirection: 'column', gap: '6px', animation: 'v2FadeIn 0.2s ease', maxHeight: '180px', overflowY: 'auto' }}>
+                                  <strong style={{ fontSize: '10px', textTransform: 'uppercase', color: activeProfile.color, letterSpacing: '0.05em' }}>Estimación simulada</strong>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', borderBottom: '1px solid rgba(186, 204, 214, 0.16)', paddingBottom: '6px' }}>
                                     {projectionRows.map(row => (
-                                      <div key={row.year} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                      <div key={row.year} style={{ display: 'flex', justifyContent: 'space-between', color: '#CBD5E1' }}>
                                         <span>Año {row.year}:</span>
-                                        <span>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(row.from)}€ → <strong>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(row.to)}€</strong></span>
+                                        <span>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(row.from)}€ → <strong style={{ color: '#FFFFFF' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(row.to)}€</strong></span>
                                       </div>
                                     ))}
                                   </div>
-                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', color: 'var(--azul-noche)' }}>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', color: '#E2EFF7' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                      <span>Ganancia total:</span>
-                                      <strong style={{ color: 'var(--azul-linea)' }}>+{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(totalGain)}€ (+{gainPct.toFixed(0)}%)</strong>
+                                      <span style={{ color: '#9FB6C8' }}>Ganancia total:</span>
+                                      <strong style={{ color: '#34D399' }}>+{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(totalGain)}€ (+{gainPct.toFixed(0)}%)</strong>
                                     </div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                      <span>Ganancia anual:</span>
-                                      <strong>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(annualGain)}€/año</strong>
+                                      <span style={{ color: '#9FB6C8' }}>Ganancia anual:</span>
+                                      <strong style={{ color: '#FFFFFF' }}>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(annualGain)}€/año</strong>
                                     </div>
                                   </div>
                                 </div>
@@ -3719,25 +3719,25 @@ const MadridDashboardV2: React.FC = () => {
                     const velocity = transacciones ? Math.max(1.0, 933.8 / transacciones) : 0;
 
                     let velocityLabel = 'Lento';
-                    let velocityColor = 'var(--coral-texto)'; // red
+                    let velocityColor = '#F87171';
                     if (velocity > 0) {
                       if (velocity < 2.0) {
                         velocityLabel = 'Rápido';
-                        velocityColor = 'var(--azul-linea)';
+                        velocityColor = '#34D399';
                       } else if (velocity < 3.0) {
                         velocityLabel = 'Moderado';
-                        velocityColor = 'var(--coral)';
+                        velocityColor = '#FBBF24';
                       }
                     }
 
                     let demandText = 'Baja';
-                    let demandColor = 'var(--coral-texto)';
+                    let demandColor = '#F87171';
                     if (transacciones > 300) {
                       demandText = 'Alta';
-                      demandColor = 'var(--azul-linea)';
+                      demandColor = '#34D399';
                     } else if (transacciones > 100) {
                       demandText = 'Moderada';
-                      demandColor = 'var(--coral)';
+                      demandColor = '#FBBF24';
                     }
 
                     const appRate = kpiData.v_anual || 0;
@@ -3761,7 +3761,7 @@ const MadridDashboardV2: React.FC = () => {
                               ({velocityLabel})
                             </span>
                           </div>
-                          <div style={{ fontSize: '10px', color: 'var(--azul-linea)', marginTop: '2px' }}>
+                          <div style={{ fontSize: '10px', color: '#9FB6C8', marginTop: '2px' }}>
                             Velocidad de venta estimada promedio
                           </div>
                         </div>
@@ -3783,7 +3783,7 @@ const MadridDashboardV2: React.FC = () => {
                               {demandText}
                             </span>
                           </div>
-                          <div style={{ fontSize: '10px', color: 'var(--azul-linea)', marginTop: '2px' }}>
+                          <div style={{ fontSize: '10px', color: '#9FB6C8', marginTop: '2px' }}>
                             Interés y liquidez del mercado local
                           </div>
                         </div>
@@ -3798,10 +3798,10 @@ const MadridDashboardV2: React.FC = () => {
                               ruleOfThumb="En fases alcistas, posponer la venta puede aumentar el margen; en fases de ajuste, vender pronto protege tu beneficio."
                             />
                           </div>
-                          <div className="v2-val" style={{ color: 'var(--azul-linea)' }}>
+                          <div className="v2-val" style={{ color: activeProfile.color }}>
                             {formatSpanishPercentage(appRate / 2, 1, true)}
                           </div>
-                          <div style={{ fontSize: '10px', color: 'var(--azul-linea)', marginTop: '2px' }}>
+                          <div style={{ fontSize: '10px', color: '#9FB6C8', marginTop: '2px' }}>
                             más de precio si esperas
                           </div>
                         </div>
