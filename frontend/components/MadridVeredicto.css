@@ -721,3 +721,62 @@
   .veredicto-main { padding-top: 32px; }
   .veredicto-card { border-radius: 18px; }
 }
+
+/* Quick optional pills (Estado + Ascensor) */
+.veredicto-quick-pills-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px 24px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(186, 204, 214, 0.14);
+}
+
+.veredicto-pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.veredicto-pill-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8fa8be;
+  letter-spacing: 0.03em;
+}
+
+.veredicto-pill-label small {
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+.veredicto-pill-options {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.veredicto-quick-pill {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  border: 1px solid rgba(186, 204, 214, 0.25);
+  background: rgba(2, 21, 45, 0.55);
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.veredicto-quick-pill:hover {
+  border-color: rgba(0, 240, 255, 0.5);
+  color: #ffffff;
+}
+
+.veredicto-quick-pill.active {
+  background: rgba(0, 240, 255, 0.18);
+  border-color: #00f0ff;
+  color: #00f0ff;
+}

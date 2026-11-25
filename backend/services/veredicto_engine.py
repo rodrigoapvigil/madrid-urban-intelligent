@@ -24,6 +24,8 @@ class VeredictoRequest(BaseModel):
     barrio: Optional[str] = Field(default=None, description="Nombre de barrio o distrito")
     distrito: Optional[str] = Field(default=None, description="Nombre opcional del distrito")
     operacion: str = Field(default="Venta", description="Tipo de operacion: Venta o Alquiler")
+    estado_inmueble: Optional[str] = Field(default=None, description="Opcional: A reformar, Buen estado o Reformado")
+    ascensor: Optional[bool] = Field(default=None, description="Opcional: dispone de ascensor")
 
     @field_validator("precio")
     @classmethod
@@ -62,6 +64,10 @@ class VeredictoResponse(BaseModel):
     distrito_nombre: str
     resumen_argumentos: List[str]
     fecha_cierre_referencia: str
+    operacion: str = "Venta"
+    estado_inmueble: Optional[str] = None
+    ascensor: Optional[bool] = None
+    serie_historica: List[Dict[str, Any]] = []
 
 
 def normalizar_texto(texto: str) -> str:
@@ -135,7 +141,9 @@ def evaluar_inmueble(
     metros: float,
     zona_str: str,
     operacion: str = "Venta",
-    db_path: str = DEFAULT_DB_PATH
+    db_path: str = DEFAULT_DB_PATH,
+    estado_inmueble: Optional[str] = None,
+    ascensor: Optional[bool] = None,
 ) -> VeredictoResponse:
     """
     Ejecuta el calculo analitico de veredicto sobre un inmueble dado.
@@ -154,7 +162,7 @@ def evaluar_inmueble(
         id_barrio, id_distrito, barrio_nombre, distrito_nombre = zona_info
         cur = conn.cursor()
 
-        # Obtener ultimo periodo disponible en Fact_Operacion
+        # Obtener ultimo periodo disponible en Fact_Operacion para esta operacion
         cur.execute("""
             SELECT MAX(id_tiempo) as max_tiempo FROM Fact_Operacion
             WHERE LOWER(tipo_operacion) = LOWER(?)
@@ -163,45 +171,100 @@ def evaluar_inmueble(
         max_tiempo = row_tiempo["max_tiempo"] if row_tiempo and row_tiempo["max_tiempo"] else 202606
         fecha_str = f"{str(max_tiempo)[:4]}-{str(max_tiempo)[4:]}"
 
-        # 1. Media del barrio
+        is_alquiler = operacion.strip().lower() == "alquiler"
+        default_madrid_fallback = 21.0 if is_alquiler else 3800.0
+
+        # 1. Media de todo Madrid (primero para servir de ancla por operacion)
+        cur.execute("""
+            SELECT AVG(precio_m2) as avg_madrid
+            FROM Fact_Operacion
+            WHERE LOWER(tipo_operacion) = LOWER(?) AND id_tiempo = ? AND precio_m2 > 0
+        """, (operacion, max_tiempo))
+        row_mad = cur.fetchone()
+        if row_mad and row_mad["avg_madrid"]:
+            precio_m2_madrid = float(row_mad["avg_madrid"])
+        else:
+            cur.execute("""
+                SELECT AVG(precio_m2) as avg_madrid
+                FROM Fact_Operacion
+                WHERE LOWER(tipo_operacion) = LOWER(?) AND precio_m2 > 0
+            """, (operacion,))
+            row_mad_hist = cur.fetchone()
+            precio_m2_madrid = float(row_mad_hist["avg_madrid"]) if row_mad_hist and row_mad_hist["avg_madrid"] else default_madrid_fallback
+
+        # 2. Media del distrito para esta operacion
+        cur.execute("""
+            SELECT AVG(precio_m2) as avg_distrito, AVG(variacion_trimestral) as avg_trim_dist
+            FROM Fact_Operacion
+            WHERE id_distrito = ? AND LOWER(tipo_operacion) = LOWER(?) AND id_tiempo = ? AND precio_m2 > 0
+        """, (id_distrito, operacion, max_tiempo))
+        row_dist = cur.fetchone()
+        if row_dist and row_dist["avg_distrito"]:
+            precio_m2_distrito = float(row_dist["avg_distrito"])
+            tendencia_distrito = float(row_dist["avg_trim_dist"] or 0.0)
+        else:
+            cur.execute("""
+                SELECT AVG(precio_m2) as avg_distrito, AVG(variacion_trimestral) as avg_trim_dist
+                FROM Fact_Operacion
+                WHERE id_distrito = ? AND LOWER(tipo_operacion) = LOWER(?) AND precio_m2 > 0
+            """, (id_distrito, operacion))
+            row_dist_hist = cur.fetchone()
+            if row_dist_hist and row_dist_hist["avg_distrito"]:
+                precio_m2_distrito = float(row_dist_hist["avg_distrito"])
+                tendencia_distrito = float(row_dist_hist["avg_trim_dist"] or 0.0)
+            else:
+                precio_m2_distrito = precio_m2_madrid
+                tendencia_distrito = 0.0
+
+        # 3. Media del barrio para esta operacion (fallback al distrito de la misma operacion, nunca a 3500 de compraventa)
         cur.execute("""
             SELECT precio_m2, variacion_mensual, variacion_trimestral, variacion_anual
             FROM Fact_Operacion
-            WHERE id_barrio = ? AND LOWER(tipo_operacion) = LOWER(?) AND id_tiempo = ?
+            WHERE id_barrio = ? AND LOWER(tipo_operacion) = LOWER(?) AND id_tiempo = ? AND precio_m2 > 0
         """, (id_barrio, operacion, max_tiempo))
         row_barrio = cur.fetchone()
 
         if row_barrio and row_barrio["precio_m2"]:
             precio_m2_barrio = float(row_barrio["precio_m2"])
-            tendencia_trimestral = float(row_barrio["variacion_trimestral"] or 0.0)
+            tendencia_trimestral = float(row_barrio["variacion_trimestral"] or tendencia_distrito)
         else:
-            # Fallback a media del historico reciente
             cur.execute("""
                 SELECT AVG(precio_m2) as avg_p, AVG(variacion_trimestral) as avg_trim
                 FROM Fact_Operacion
-                WHERE id_barrio = ? AND LOWER(tipo_operacion) = LOWER(?)
+                WHERE id_barrio = ? AND LOWER(tipo_operacion) = LOWER(?) AND precio_m2 > 0
             """, (id_barrio, operacion))
             row_fallback = cur.fetchone()
-            precio_m2_barrio = float(row_fallback["avg_p"] or 3500.0)
-            tendencia_trimestral = float(row_fallback["avg_trim"] or 1.2)
+            if row_fallback and row_fallback["avg_p"]:
+                precio_m2_barrio = float(row_fallback["avg_p"])
+                tendencia_trimestral = float(row_fallback["avg_trim"] or tendencia_distrito)
+            else:
+                # Si el barrio (ej. Hellin en Alquiler) no tiene registros de esa operacion, usar la media del distrito
+                precio_m2_barrio = precio_m2_distrito
+                tendencia_trimestral = tendencia_distrito
 
-        # 2. Media del distrito
+        # Serie historica reciente (ultimos 6 meses) del barrio o distrito para grafica del PDF
         cur.execute("""
-            SELECT AVG(precio_m2) as avg_distrito
+            SELECT id_tiempo, precio_m2
             FROM Fact_Operacion
-            WHERE id_distrito = ? AND LOWER(tipo_operacion) = LOWER(?) AND id_tiempo = ?
-        """, (id_distrito, operacion, max_tiempo))
-        row_dist = cur.fetchone()
-        precio_m2_distrito = float(row_dist["avg_distrito"]) if row_dist and row_dist["avg_distrito"] else precio_m2_barrio
-
-        # 3. Media de todo Madrid
-        cur.execute("""
-            SELECT AVG(precio_m2) as avg_madrid
-            FROM Fact_Operacion
-            WHERE LOWER(tipo_operacion) = LOWER(?) AND id_tiempo = ?
-        """, (operacion, max_tiempo))
-        row_mad = cur.fetchone()
-        precio_m2_madrid = float(row_mad["avg_madrid"]) if row_mad and row_mad["avg_madrid"] else 3800.0
+            WHERE id_barrio = ? AND LOWER(tipo_operacion) = LOWER(?) AND precio_m2 > 0
+            ORDER BY id_tiempo DESC
+            LIMIT 6
+        """, (id_barrio, operacion))
+        hist_rows = cur.fetchall()
+        if not hist_rows:
+            cur.execute("""
+                SELECT id_tiempo, AVG(precio_m2) as precio_m2
+                FROM Fact_Operacion
+                WHERE id_distrito = ? AND LOWER(tipo_operacion) = LOWER(?) AND precio_m2 > 0
+                GROUP BY id_tiempo
+                ORDER BY id_tiempo DESC
+                LIMIT 6
+            """, (id_distrito, operacion))
+            hist_rows = cur.fetchall()
+        serie_historica = [
+            {"periodo": f"{str(r['id_tiempo'])[:4]}-{str(r['id_tiempo'])[4:]}", "precio_m2": round(float(r["precio_m2"]), 2)}
+            for r in reversed(hist_rows)
+        ]
 
         # Calculo de desviaciones
         desviacion_pct_barrio = round(((precio_m2_inmueble - precio_m2_barrio) / precio_m2_barrio) * 100, 2)
@@ -227,40 +290,77 @@ def evaluar_inmueble(
             margen_eur = 0.0
 
         # Generacion de argumentos comparativos e informativos
+        fmt_precio = f"{precio_m2_inmueble:,.2f}" if is_alquiler else f"{precio_m2_inmueble:,.0f}"
+        fmt_barrio = f"{precio_m2_barrio:,.2f}" if is_alquiler else f"{precio_m2_barrio:,.0f}"
+        fmt_madrid = f"{precio_m2_madrid:,.2f}" if is_alquiler else f"{precio_m2_madrid:,.0f}"
+        unidad_total = "€/mes" if is_alquiler else "€"
+
         argumentos = []
         if estado == "CARO":
             argumentos.append(
-                f"El precio indicado ({precio_m2_inmueble:,.0f} €/m²) está un {abs(desviacion_pct_barrio):.1f}% por encima de la referencia estimada de {barrio_nombre} ({precio_m2_barrio:,.0f} €/m²)."
+                f"El precio indicado ({fmt_precio} €/m²) está un {abs(desviacion_pct_barrio):.1f}% por encima de la referencia estimada de {barrio_nombre} ({fmt_barrio} €/m²)."
             )
             argumentos.append(
-                f"Para una superficie de {metros:,.0f} m², la referencia calculada con la media observada de la zona es {precio_justo_estimado:,.0f} €."
+                f"Para una superficie de {metros:,.0f} m², la referencia calculada con la media observada de la zona es {precio_justo_estimado:,.0f} {unidad_total} (margen teórico de ajuste: -{margen_eur:,.0f} {unidad_total})."
             )
             argumentos.append(
-                f"Frente a la referencia de Madrid capital ({precio_m2_madrid:,.0f} €/m²), la diferencia es del {desviacion_pct_madrid:+.1f}%."
+                f"Frente a la referencia de Madrid capital ({fmt_madrid} €/m²), la diferencia es del {desviacion_pct_madrid:+.1f}%."
             )
             argumentos.append(
                 f"La serie observada en la zona registra una variación trimestral del {tendencia_trimestral:+.2f}%."
             )
         elif estado == "BARATO":
             argumentos.append(
-                f"El precio indicado ({precio_m2_inmueble:,.0f} €/m²) está un {abs(desviacion_pct_barrio):.1f}% por debajo de la referencia estimada de {barrio_nombre} ({precio_m2_barrio:,.0f} €/m²)."
+                f"El precio indicado ({fmt_precio} €/m²) está un {abs(desviacion_pct_barrio):.1f}% por debajo de la referencia estimada de {barrio_nombre} ({fmt_barrio} €/m²)."
             )
             argumentos.append(
-                f"Para una superficie de {metros:,.0f} m², la referencia calculada con la media observada de la zona es {precio_justo_estimado:,.0f} €."
+                f"Para una superficie de {metros:,.0f} m², la referencia calculada con la media observada de la zona es {precio_justo_estimado:,.0f} {unidad_total}."
             )
             argumentos.append(
-                f"Frente a la referencia de Madrid capital ({precio_m2_madrid:,.0f} €/m²), la diferencia es del {desviacion_pct_madrid:+.1f}%."
+                f"Frente a la referencia de Madrid capital ({fmt_madrid} €/m²), la diferencia es del {desviacion_pct_madrid:+.1f}%."
+            )
+            argumentos.append(
+                f"La serie observada en la zona registra una variación trimestral del {tendencia_trimestral:+.2f}%."
             )
         else:
             argumentos.append(
-                f"El precio indicado ({precio_m2_inmueble:,.0f} €/m²) está dentro del rango de referencia estimado para {barrio_nombre} ({precio_m2_barrio:,.0f} €/m²; diferencia del {desviacion_pct_barrio:+.1f}%)."
+                f"El precio indicado ({fmt_precio} €/m²) está dentro del rango de referencia estimado para {barrio_nombre} ({fmt_barrio} €/m²; diferencia del {desviacion_pct_barrio:+.1f}%)."
             )
             argumentos.append(
-                f"Para una superficie de {metros:,.0f} m², la referencia calculada con la media observada de la zona es {precio_justo_estimado:,.0f} €."
+                f"Para una superficie de {metros:,.0f} m², la referencia calculada con la media observada de la zona es {precio_justo_estimado:,.0f} {unidad_total}."
             )
             argumentos.append(
-                f"Frente a la referencia de Madrid capital ({precio_m2_madrid:,.0f} €/m²), la diferencia es del {desviacion_pct_madrid:+.1f}%."
+                f"Frente a la referencia de Madrid capital ({fmt_madrid} €/m²), la diferencia es del {desviacion_pct_madrid:+.1f}%."
             )
+            argumentos.append(
+                f"La serie observada en la zona registra una variación trimestral del {tendencia_trimestral:+.2f}%."
+            )
+
+        # Factores cualitativos opcionales (Estado + Ascensor) para concretar el veredicto
+        if estado_inmueble:
+            est_norm = estado_inmueble.strip().lower()
+            if "reformar" in est_norm:
+                argumentos.append(
+                    "Estado 'A reformar': el coste de reforma integral debe descontarse del precio objetivo frente a la media zonal de inmuebles listos para entrar."
+                )
+            elif "reformado" in est_norm:
+                argumentos.append(
+                    "Estado 'Reformado': una vivienda recién actualizada suele justificar una prima moderada sobre la media histórica de la zona."
+                )
+            else:
+                argumentos.append(
+                    "Estado 'Buen estado': el inmueble se alinea directamente con el estándar medio de las operaciones observadas en el barrio."
+                )
+
+        if ascensor is not None:
+            if ascensor:
+                argumentos.append(
+                    "Con ascensor: la accesibilidad respalda la liquidez y mantiene el valor frente al parque medio del distrito."
+                )
+            else:
+                argumentos.append(
+                    "Sin ascensor: la ausencia de ascensor penaliza la demanda potencial y refuerza el margen de negociación a la baja."
+                )
 
         return VeredictoResponse(
             estado=estado,
@@ -276,7 +376,11 @@ def evaluar_inmueble(
             barrio_nombre=barrio_nombre,
             distrito_nombre=distrito_nombre,
             resumen_argumentos=argumentos,
-            fecha_cierre_referencia=fecha_str
+            fecha_cierre_referencia=fecha_str,
+            operacion="Alquiler" if is_alquiler else "Venta",
+            estado_inmueble=estado_inmueble,
+            ascensor=ascensor,
+            serie_historica=serie_historica,
         )
     finally:
         conn.close()

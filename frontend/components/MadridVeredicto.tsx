@@ -34,6 +34,10 @@ export default function MadridVeredicto() {
   const [selectedNeighborhood, setSelectedNeighborhood] = useState('');
   const [isLoadingNeighborhoods, setIsLoadingNeighborhoods] = useState(false);
 
+  // Píldoras rápidas opcionales
+  const [estadoInmueble, setEstadoInmueble] = useState<'A reformar' | 'Buen estado' | 'Reformado' | null>(null);
+  const [ascensor, setAscensor] = useState<boolean | null>(null);
+
   // Estados de carga y resultado
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -131,15 +135,19 @@ export default function MadridVeredicto() {
     setIsLoading(true);
     setErrorMessage(null);
     try {
+      const payload: Record<string, any> = {
+        precio,
+        metros,
+        barrio,
+        operacion: op
+      };
+      if (estadoInmueble) payload.estado_inmueble = estadoInmueble;
+      if (ascensor !== null) payload.ascensor = ascensor;
+
       const res = await apiFetch('/veredicto/evaluar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          precio,
-          metros,
-          barrio,
-          operacion: op
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
@@ -159,36 +167,21 @@ export default function MadridVeredicto() {
     }
   };
 
-  // Iniciar pasarela de pago Stripe
-  const handleComprarDossier = async (tipo: 'dossier' | 'suscripcion') => {
+  // Descargar Informe de Negociación gratuito en PDF
+  const handleDescargarPdfGratis = () => {
     if (!resultado) return;
-
-    try {
-      const currentUrl = typeof window !== 'undefined' ? window.location.href.split('?')[0] : '';
-      const res = await apiFetch('/veredicto/crear-sesion-pago', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          tipo,
-          datos_inmueble: {
-            precio: resultado.precio_m2_inmueble * (parseFloat(metrosInput) || 80),
-            metros: parseFloat(metrosInput) || 80,
-            barrio: resultado.barrio_nombre,
-            distrito: resultado.distrito_nombre,
-            operacion
-          },
-          success_url: currentUrl,
-          cancel_url: currentUrl
-        })
-      });
-
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      }
-    } catch (err) {
-      alert('Error iniciando la pasarela de pago. Por favor, inténtalo de nuevo.');
-    }
+    const precio = parseFloat(precioInput) || resultado.precio_m2_inmueble * (parseFloat(metrosInput) || 80);
+    const metros = parseFloat(metrosInput) || 80;
+    const params = new URLSearchParams({
+      precio: String(precio),
+      metros: String(metros),
+      barrio: resultado.barrio_nombre,
+      operacion
+    });
+    if (estadoInmueble) params.set('estado_inmueble', estadoInmueble);
+    if (ascensor !== null) params.set('ascensor', String(ascensor));
+    const url = apiUrl(`/veredicto/descargar-dossier-gratis?${params.toString()}`);
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   const badgeConfig: Record<VeredictoEstado, { label: string }> = {
@@ -354,6 +347,45 @@ export default function MadridVeredicto() {
                   </div>
                 </div>
 
+                {/* Píldoras rápidas opcionales: Estado + Ascensor */}
+                <div className="veredicto-quick-pills-bar">
+                  <div className="veredicto-pill-group">
+                    <span className="veredicto-pill-label">Estado <small>(opcional)</small>:</span>
+                    <div className="veredicto-pill-options">
+                      {(['A reformar', 'Buen estado', 'Reformado'] as const).map((opt) => (
+                        <button
+                          key={opt}
+                          type="button"
+                          className={`veredicto-quick-pill ${estadoInmueble === opt ? 'active' : ''}`}
+                          onClick={() => setEstadoInmueble(prev => prev === opt ? null : opt)}
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="veredicto-pill-group">
+                    <span className="veredicto-pill-label">Ascensor <small>(opcional)</small>:</span>
+                    <div className="veredicto-pill-options">
+                      <button
+                        type="button"
+                        className={`veredicto-quick-pill ${ascensor === true ? 'active' : ''}`}
+                        onClick={() => setAscensor(prev => prev === true ? null : true)}
+                      >
+                        Sí
+                      </button>
+                      <button
+                        type="button"
+                        className={`veredicto-quick-pill ${ascensor === false ? 'active' : ''}`}
+                        onClick={() => setAscensor(prev => prev === false ? null : false)}
+                      >
+                        No
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
                   <button
                     type="submit"
@@ -452,7 +484,7 @@ export default function MadridVeredicto() {
               </div>
             </div>
 
-            {/* SECCIÓN DE MONETIZACIÓN: Dossier Oficial (4,90 €) + Suscripción Pro */}
+            {/* SECCIÓN DE DESCARGA GRATUITA: Informe de Negociación DMIYC */}
             <div className="veredicto-dossier-card">
               <div style={{ maxWidth: '540px' }}>
                 <span style={{
@@ -468,43 +500,25 @@ export default function MadridVeredicto() {
                   textTransform: 'uppercase',
                   marginBottom: '10px'
                 }}>
-                  Documento Certificado para Negociación
+                  Informe Gratuito DMIYC · Listo para compartir
                 </span>
                 <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--blanco-humo)', margin: '0 0 8px 0' }}>
-                  Descarga el Dossier Oficial de Negociación en PDF
+                  Descarga tu Informe de Negociación DMIYC en PDF
                 </h3>
                 <p style={{ fontSize: '13px', color: 'color-mix(in srgb, var(--blanco-humo) 70%, transparent)', lineHeight: 1.5, margin: 0 }}>
-                  Informe imprimible de alta fidelidad con el histórico municipal de cierre del Ayuntamiento de Madrid, métricas de comparables en {resultado.barrio_nombre} y los 5 argumentos estructurados para presentar al propietario, agencia o departamento de riesgos de tu banco.
+                  Informe imprimible gratuito de DMIYC con tabla comparativa oficial ({resultado.barrio_nombre}, {resultado.distrito_nombre} y Madrid), gráfica comparativa de €/m² y argumentos estructurados para negociar con el propietario o agencia.
                 </p>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', minWidth: '260px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: '280px' }}>
                 <button
                   type="button"
-                  onClick={() => handleComprarDossier('dossier')}
+                  onClick={handleDescargarPdfGratis}
                   className="veredicto-btn-primary"
                   style={{ width: '100%', padding: '14px 20px' }}
                 >
                   <Download style={{ width: '16px', height: '16px' }} />
-                  <span>Descargar Dossier Completo (4,90 €)</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleComprarDossier('suscripcion')}
-                  style={{
-                    width: '100%',
-                    padding: '10px 16px',
-                    background: 'color-mix(in srgb, var(--azul-noche) 90%, transparent)',
-                    border: '1px solid color-mix(in srgb, var(--blanco-humo) 15%, transparent)',
-                    borderRadius: '12px',
-                    color: 'color-mix(in srgb, var(--blanco-humo) 80%, transparent)',
-                    fontSize: '11px',
-                    fontWeight: 500,
-                    cursor: 'pointer',
-                    transition: 'all 0.2s'
-                  }}
-                >
-                  Tarifa Pro Inversores: 19 €/mes (Análisis ilimitados)
+                  <span>Descargar Informe de Negociación (PDF Gratis)</span>
                 </button>
               </div>
             </div>

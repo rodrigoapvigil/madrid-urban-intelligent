@@ -12,6 +12,8 @@ export interface VeredictoRequest {
   barrio?: string;
   distrito?: string;
   operacion?: 'Venta' | 'Alquiler';
+  estado_inmueble?: 'A reformar' | 'Buen estado' | 'Reformado';
+  ascensor?: boolean;
 }
 
 export interface VeredictoResponse {
@@ -29,6 +31,9 @@ export interface VeredictoResponse {
   distrito_nombre: string;
   resumen_argumentos: string[];
   fecha_cierre_referencia: string;
+  operacion?: string;
+  estado_inmueble?: string | null;
+  ascensor?: boolean | null;
 }
 
 export interface DossierCheckoutResponse {

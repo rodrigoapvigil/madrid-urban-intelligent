@@ -476,7 +476,9 @@ async def evaluar_veredicto(req: VeredictoRequest):
             precio=precio,
             metros=metros,
             zona_str=barrio,
-            operacion=operacion
+            operacion=operacion,
+            estado_inmueble=req.estado_inmueble,
+            ascensor=req.ascensor,
         )
         return resultado
     except Exception as e:
@@ -540,6 +542,41 @@ def confirmar_sesion_endpoint(session_id: str = Query(..., description="ID de se
         "token": token,
         "datos": datos
     }
+
+
+@app.get("/api/veredicto/descargar-dossier-gratis")
+def descargar_dossier_pdf_gratis_endpoint(
+    precio: float = Query(..., gt=0),
+    metros: float = Query(..., gt=0),
+    barrio: str = Query(...),
+    operacion: str = Query("Venta"),
+    estado_inmueble: Optional[str] = Query(None),
+    ascensor: Optional[bool] = Query(None),
+):
+    """
+    Genera y descarga gratuitamente el Informe de Negociacion en PDF de DMIYC.
+    """
+    try:
+        veredicto = evaluar_inmueble(
+            precio=precio,
+            metros=metros,
+            zona_str=barrio,
+            operacion=operacion,
+            estado_inmueble=estado_inmueble,
+            ascensor=ascensor,
+        )
+        pdf_bytes = generar_dossier_pdf(veredicto, precio_total=precio, metros=metros)
+        nombre_archivo = f"DMIYC_Informe_Negociacion_{veredicto.barrio_nombre}.pdf"
+        return Response(
+            content=pdf_bytes,
+            media_type="application/pdf",
+            headers={
+                "Content-Disposition": f'attachment; filename="{nombre_archivo}"',
+                "Cache-Control": "no-cache"
+            }
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generando dossier: {str(e)}")
 
 
 @app.get("/api/veredicto/descargar-dossier")
