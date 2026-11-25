@@ -1,388 +1,176 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-} from 'chart.js';
-import { Line } from 'react-chartjs-2';
-import { cssColorResolverPlugin } from '../lib/colors';
-import ReactMarkdown from 'react-markdown';
-import Image from 'next/image';
+import React from 'react';
+import Link from 'next/link';
+import { ArrowRight, Building2, Database, ShieldCheck, TrendingUp } from 'lucide-react';
 import './MadridChat.css';
-import { apiFetch } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-  cssColorResolverPlugin
-);
-
-const MadridMap = dynamic(() => import('./MadridMap'), { ssr: false });
-
-type Message = {
-  role: 'user' | 'assistant';
-  content: string;
-};
+const TOP_YIELDS_PREVIEW = [
+  { district: 'Usera', yieldLabel: '7,0 % bruto', barWidth: 100, tag: 'Líder', tone: 'high' },
+  { district: 'Puente de Vallecas', yieldLabel: '6,9 % bruto', barWidth: 97, tag: 'Alta tracción', tone: 'high' },
+  { district: 'Salamanca', yieldLabel: '3,2 % bruto', barWidth: 46, tag: 'Prime · >25 años', tone: 'prime' },
+] as const;
 
 const MadridChat: React.FC = () => {
-  const router = useRouter();
-  const [message, setMessage] = useState('');
-  const [chatHistory, setChatHistory] = useState<Message[]>([]);
-  const [hasStarted, setHasStarted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [sessionId, setSessionId] = useState('');
-  const messagesContainerRef = useRef<HTMLDivElement>(null);
-
-  // Dynamic Dashboard State
-  const [chatContext, setChatContext] = useState({ op: 'venta', year: 2026, district: 'Todos', barrio: 'Todos' });
-  const [kpiData, setKpiData] = useState<any>(null);
-  const [seriesData, setSeriesData] = useState<any[]>([]);
-  const [mapData, setMapData] = useState<any>({ districts: [], neighborhoods: [] });
-  const [dashboardDataStatus, setDashboardDataStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [dataRetry, setDataRetry] = useState(0);
-
-  // Generar un ID de sesión único al montar el componente
-  useEffect(() => {
-    setSessionId(Math.random().toString(36).substring(2, 15));
-  }, []);
-
-  // Auto-scroll al último mensaje usando scrollTop
-  useEffect(() => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
-    }
-  }, [chatHistory, isLoading]);
-
-  // Fetch data when context changes
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      setDashboardDataStatus('loading');
-      try {
-        const barrioParam = chatContext.barrio && chatContext.barrio !== 'Todos' ? `&barrio=${encodeURIComponent(chatContext.barrio)}` : '';
-        const zoneType = chatContext.barrio && chatContext.barrio !== 'Todos' ? 'barrio' : 'distrito';
-        const zoneName = chatContext.barrio && chatContext.barrio !== 'Todos' ? chatContext.barrio : chatContext.district;
-
-        const [kpiRes, seriesRes, mapRes] = await Promise.all([
-          apiFetch(`/kpis?year=${chatContext.year}&op=${chatContext.op}&district=${encodeURIComponent(chatContext.district)}${barrioParam}`),
-          apiFetch(`/series?year=${chatContext.year}&op=${chatContext.op}&zona=${encodeURIComponent(zoneName)}&tipo_zona=${zoneType}`),
-          apiFetch(`/map?year=${chatContext.year}&interest=${chatContext.op === 'alquiler' ? 'Alquiler' : chatContext.op === 'inversion' ? 'Inversión' : 'Venta'}`)
-        ]);
-
-        if (kpiRes.ok) setKpiData(await kpiRes.json());
-        if (seriesRes.ok) setSeriesData(await seriesRes.json());
-        if (mapRes.ok) setMapData(await mapRes.json());
-        setDashboardDataStatus('ready');
-      } catch (error) {
-        console.error("Error fetching dashboard data:", error);
-        setDashboardDataStatus('error');
-      }
-    };
-    fetchDashboardData();
-  }, [chatContext, dataRetry]);
-
-  const handleSend = async () => {
-    if (!message.trim() || isLoading) return;
-
-    const userMessage = message;
-    setMessage('');
-    setHasStarted(true);
-    setIsLoading(true);
-
-    const newHistory: Message[] = [...chatHistory, { role: 'user', content: userMessage }];
-    setChatHistory(newHistory);
-
-    try {
-      const res = await apiFetch('/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage, session_id: sessionId })
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        setChatHistory([...newHistory, { role: 'assistant', content: data.response }]);
-        if (data.context) {
-          setChatContext(prev => ({
-            op: data.context.op || prev.op,
-            year: data.context.year || prev.year,
-            district: data.context.district || prev.district,
-            barrio: data.context.barrio || prev.barrio || 'Todos'
-          }));
-        }
-      } else {
-        setChatHistory([...newHistory, { role: 'assistant', content: 'El asistente AMBI se encuentra en calibración para la versión web pública. Puedes consultar todas las métricas y gráficos directamente en el Dashboard interactivo.' }]);
-      }
-    } catch (error) {
-      console.error(error);
-      setChatHistory([...newHistory, { role: 'assistant', content: 'El motor conversacional de AMBI está temporalmente en modo mantenimiento. Toda la analítica urbana está disponible y activa en el Dashboard interactivo.' }]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      handleSend();
-    }
-  };
-
-  // Chart Configuration
-  const chartColor = chatContext.op === 'alquiler' ? 'var(--azul-linea)' : chatContext.op === 'inversion' ? 'var(--texto-secundario-azul)' : 'var(--azul-linea)';
-  const chartZoneLabel = chatContext.barrio && chatContext.barrio !== 'Todos' ? chatContext.barrio : chatContext.district;
-  const chartData = {
-    labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
-    datasets: [
-      {
-        label: `Precio Medio (${chartZoneLabel})`,
-        data: seriesData.map(d => d.precio_m2 || 0),
-        borderColor: chartColor,
-        backgroundColor: chartColor,
-        borderWidth: 3,
-        pointRadius: 4,
-        tension: 0.4,
-      }
-    ]
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      datalabels: {
-        display: false
-      },
-      legend: { display: true, position: 'top' as const },
-      tooltip: {
-        callbacks: {
-          label: (ctx: any) => `${ctx.dataset.label}: ${new Intl.NumberFormat('es-ES').format(ctx.raw)}€/m²`
-        }
-      }
-    },
-    scales: {
-      x: { grid: { display: false } },
-      y: { grid: { color: 'var(--blanco-humo)' }, border: { display: false } }
-    }
-  };
-
   return (
     <div className="ambi-page-shell">
-    <SiteHeader activePath="/madrid/chat" />
-    <div className="ambi-app-root">
-      
-      {/* 1. SECCIÓN IZQUIERDA (NAV BAR MINIMALISTA) */}
-      <nav className="ambi-nav-sidebar">
-        <div className="nav-brand-small" onClick={() => router.push('/')} style={{ cursor: 'pointer', marginBottom: '20px', textAlign: 'center' }}>
-          <Image src="/AMBI.png" alt="AMBI" width={40} height={40} style={{ objectFit: 'contain', opacity: 0.9 }} />
-        </div>
-        <button className="nav-icon-btn" onClick={() => router.push('/madrid')}>
-          <span className="icon">🏠</span>
-        </button>
-        <div className="nav-divider" />
-        <button className="nav-icon-btn active">
-          <span className="icon">💬</span>
-        </button>
-        <button className="nav-icon-btn" aria-label="Abrir dashboard" onClick={() => router.push('/madrid')}>
-          <span className="icon">📊</span>
-        </button>
-      </nav>
+      <SiteHeader activePath="/madrid/chat" />
 
-      {/* ÁREA DE TRABAJO (CENTRO + DERECHA) */}
-      <div className="ambi-workspace">
-        
-        {/* 2. SECCIÓN CENTRAL (CHATBOT) */}
-        <section className="ambi-chat-section">
-          <div className="chat-container">
-            {!hasStarted && (
-              <div className="chat-welcome-hero" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', padding: '20px 10px' }}>
-                <Image src="/AMBI.png" alt="AMBI" width={180} height={180} priority style={{ objectFit: 'contain', marginBottom: '16px' }} />
-                <h1 style={{ fontSize: '26px', fontWeight: '700', color: 'var(--azul-noche)', marginBottom: '8px' }}>Bienvenido a AMBI</h1>
-                <p style={{ color: 'var(--azul-linea)', fontSize: '15px', maxWidth: '460px', marginBottom: '18px', lineHeight: '1.4' }}>
-                  El asistente conversacional de inteligencia inmobiliaria de Madrid.
-                </p>
-                <div style={{
-                  backgroundColor: 'var(--blanco-humo)',
-                  border: '1px solid var(--humo-2)',
-                  borderRadius: '16px',
-                  padding: '16px 20px',
-                  maxWidth: '500px',
-                  marginBottom: '16px'
-                }}>
-                  <div style={{ display: 'inline-block', backgroundColor: 'var(--blanco-humo)', color: 'var(--precio-subida)', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px', padding: '4px 10px', borderRadius: '12px', marginBottom: '8px' }}>
-                    Fase Experimental
-                  </div>
-                  <p style={{ fontSize: '13px', color: 'var(--azul-linea)', lineHeight: '1.5', margin: '0 0 12px 0' }}>
-                    El motor de lenguaje de AMBI se encuentra en calibración para la versión web pública. Puedes explorar todas las métricas oficiales, mapas y series en tiempo real en el Dashboard.
-                  </p>
-                  <button
-                    onClick={() => router.push('/madrid')}
-                    style={{
-                      backgroundColor: 'var(--precio-subida)',
-                      color: 'var(--blanco-humo)',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '8px 16px',
-                      fontSize: '13px',
-                      fontWeight: 600,
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Abrir Dashboard Interactivo →
-                  </button>
-                </div>
-              </div>
-            )}
-            
-            <div className="chat-messages-area" ref={messagesContainerRef} style={{ flex: 1, minHeight: 0, padding: '20px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              {chatHistory.map((msg, idx) => (
-                <div key={idx} className={`message-bubble ${msg.role}`} style={{
-                  alignSelf: msg.role === 'user' ? 'flex-end' : 'flex-start',
-                  backgroundColor: msg.role === 'user' ? 'var(--precio-subida)' : 'var(--blanco-humo)',
-                  color: msg.role === 'user' ? 'var(--blanco-humo)' : 'var(--azul-noche)',
-                  padding: '12px 18px',
-                  borderRadius: '18px',
-                  maxWidth: '85%',
-                  lineHeight: '1.5',
-                  fontSize: '15px',
-                  boxShadow: '0 2px 5px color-mix(in srgb, var(--azul-noche) 5%, transparent)'
-                }}>
-                  {msg.role === 'assistant' ? (
-                    <ReactMarkdown>{msg.content}</ReactMarkdown>
-                  ) : (
-                    msg.content
-                  )}
-                </div>
-              ))}
-              
-              {isLoading && (
-                <div className="message-bubble assistant" style={{
-                  alignSelf: 'flex-start',
-                  backgroundColor: 'var(--blanco-humo)',
-                  color: 'var(--azul-noche)',
-                  padding: '12px 18px',
-                  borderRadius: '18px',
-                  maxWidth: '85%',
-                  display: 'flex',
-                  gap: '4px',
-                  alignItems: 'center'
-                }}>
-                  <span className="typing-dot" style={{ width: '6px', height: '6px', backgroundColor: 'var(--texto-secundario-azul)', borderRadius: '50%', animation: 'blink 1.4s infinite both' }}></span>
-                  <span className="typing-dot" style={{ width: '6px', height: '6px', backgroundColor: 'var(--texto-secundario-azul)', borderRadius: '50%', animation: 'blink 1.4s infinite both', animationDelay: '0.2s' }}></span>
-                  <span className="typing-dot" style={{ width: '6px', height: '6px', backgroundColor: 'var(--texto-secundario-azul)', borderRadius: '50%', animation: 'blink 1.4s infinite both', animationDelay: '0.4s' }}></span>
-                  <style>{`@keyframes blink { 0% { opacity: 0.2; } 20% { opacity: 1; } 100% { opacity: 0.2; } }`}</style>
-                </div>
-              )}
-            </div>
+      <main className="ambi-main">
+        <div className="ambi-terminal-grid" aria-hidden="true" />
 
-            {/* Caja de escritura exclusiva de esta sección */}
-            <div className="chat-input-dock">
-              <div className="input-pill">
-                <input 
-                  type="text" 
-                  placeholder="Pregúntale a Ambi..." 
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
-                <button className="mic-btn">🎙️</button>
-                <button className="send-btn-round" onClick={handleSend} disabled={isLoading || !message.trim()} style={{ opacity: isLoading || !message.trim() ? 0.5 : 1 }}>↑</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* 3. SECCIÓN DERECHA (INFORMACIÓN VISUAL DINÁMICA) */}
-        <section className="ambi-visual-section" style={{ flex: 1, minHeight: 0, backgroundColor: 'var(--blanco-humo)', padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px', overflowY: 'auto' }}>
-          
-          <div style={{ backgroundColor: 'var(--blanco-humo)', padding: '15px', borderRadius: '16px', boxShadow: '0 2px 8px color-mix(in srgb, var(--azul-noche) 5%, transparent)' }}>
-            <h3 style={{ margin: '0 0 15px 0', fontSize: '16px', fontWeight: 600, color: 'var(--azul-noche)' }}>
-              Evolución {chatContext.op.charAt(0).toUpperCase() + chatContext.op.slice(1)} ({chatContext.year})
-            </h3>
-            <div style={{ height: '220px', width: '100%' }}>
-              {dashboardDataStatus === 'loading' ? (
-                <div className="ambi-data-placeholder" aria-live="polite">Cargando evolución del mercado…</div>
-              ) : seriesData.length > 0 ? (
-                <Line data={chartData} options={chartOptions} />
-              ) : (
-                <div className="ambi-data-placeholder">
-                  {dashboardDataStatus === 'error' ? 'No se han podido cargar las tendencias.' : 'No hay datos de tendencia para este contexto.'}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div style={{ backgroundColor: 'var(--blanco-humo)', padding: '15px', borderRadius: '16px', boxShadow: '0 2px 8px color-mix(in srgb, var(--azul-noche) 5%, transparent)', flexGrow: 1, minHeight: '300px', display: 'flex', flexDirection: 'column' }}>
-            <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', fontWeight: 600, color: 'var(--azul-noche)' }}>
-              Mapa de Calor: {chatContext.barrio && chatContext.barrio !== 'Todos' ? chatContext.barrio : (chatContext.district === 'Todos' ? 'Madrid' : chatContext.district)}
-            </h3>
-            <div style={{ flexGrow: 1, borderRadius: '12px', overflow: 'hidden', position: 'relative' }}>
-              {(() => {
-                const mapType = chatContext.barrio && chatContext.barrio !== 'Todos' ? 'neighborhoods' : 'districts';
-                const mapDataList = mapType === 'neighborhoods' ? mapData.neighborhoods : mapData.districts;
-                return mapDataList && mapDataList.length > 0 ? (
-                  <MadridMap 
-                    type={mapType}
-                    data={mapDataList}
-                    selectedYear={Number(chatContext.year)}
-                    selectedMonth="Abril" 
-                    selectedProfile={chatContext.op === 'alquiler' ? 'Alquiler' : chatContext.op === 'inversion' ? 'Inversión' : 'Venta'} 
-                    selectedDistrict={chatContext.district === 'Todos' ? null : chatContext.district}
-                    selectedBarrio={chatContext.barrio === 'Todos' ? null : chatContext.barrio}
-                    onDistrictClick={() => {}}
+        <div className="ambi-layout">
+          {/* COLUMNA IZQUIERDA: IDENTIDAD & ACCESO */}
+          <section className="ambi-identity-col" aria-labelledby="ambi-heading">
+            <div className="ambi-brand-lockup">
+              <div className="ambi-orb-emblem" aria-hidden="true">
+                <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <linearGradient id="ambiOrbGrad" x1="8" y1="8" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="#00F0FF" />
+                      <stop offset="100%" stopColor="#3DDC97" />
+                    </linearGradient>
+                    <linearGradient id="ambiOrbFill" x1="10" y1="10" x2="54" y2="54" gradientUnits="userSpaceOnUse">
+                      <stop offset="0%" stopColor="rgba(0, 240, 255, 0.22)" />
+                      <stop offset="100%" stopColor="rgba(61, 220, 151, 0.12)" />
+                    </linearGradient>
+                  </defs>
+                  <circle cx="32" cy="32" r="28" fill="url(#ambiOrbFill)" stroke="url(#ambiOrbGrad)" strokeWidth="1.75" />
+                  <path
+                    d="M46 18.5A19.5 19.5 0 1 1 20.5 47.5"
+                    stroke="rgba(0, 240, 255, 0.45)"
+                    strokeWidth="1.2"
+                    strokeLinecap="round"
                   />
-                ) : (
-                  <div className="ambi-data-placeholder" role={dashboardDataStatus === 'error' ? 'alert' : undefined}>
-                    {dashboardDataStatus === 'loading' ? 'Cargando mapa…' : 'No se ha podido cargar el mapa.'}
-                    {dashboardDataStatus === 'error' && <button type="button" onClick={() => setDataRetry(value => value + 1)}>Reintentar</button>}
+                  <path
+                    d="M32 15L35.6 28.4L49 32L35.6 35.6L32 49L28.4 35.6L15 32L28.4 28.4L32 15Z"
+                    fill="url(#ambiOrbGrad)"
+                  />
+                </svg>
+              </div>
+
+              <div className="ambi-brand-copy">
+                <div className="ambi-title-row">
+                  <h1 id="ambi-heading" className="ambi-title">AMBI</h1>
+                  <span className="ambi-version-badge">v2.4 Kernel</span>
+                </div>
+                <p className="ambi-subtitle">Inteligencia Inmobiliaria de Madrid</p>
+              </div>
+            </div>
+
+            <div className="ambi-divider" />
+
+            <p className="ambi-lead">
+              Motor conversacional especializado en microdatos urbanísticos, notariales y socioeconómicos de la Comunidad de Madrid.
+            </p>
+
+            <div className="ambi-status-pill" role="status">
+              <span className="ambi-status-dot" aria-hidden="true" />
+              <span>EN CALIBRACIÓN · LANZAMIENTO Q1 2027</span>
+            </div>
+
+            <p className="ambi-rigor-note">
+              Para garantizar máxima precisión en cifras y referencias catastrales, el motor se audita antes de su apertura pública.
+            </p>
+
+            <div className="ambi-cta-group">
+              <Link href="/madrid" className="ambi-cta-btn">
+                <span>Abrir Dashboard Interactivo</span>
+                <ArrowRight size={17} aria-hidden="true" />
+              </Link>
+            </div>
+
+            <div className="ambi-trust-strip" aria-label="Cobertura oficial de fuentes">
+              <span>
+                <Database size={14} aria-hidden="true" />
+                Colegio de Registradores y Catastro
+              </span>
+              <span>
+                <ShieldCheck size={14} aria-hidden="true" />
+                131 barrios y 21 distritos
+              </span>
+            </div>
+          </section>
+
+          {/* COLUMNA DERECHA: PREVIEW TRANSLÚCIDO (GLASSMORPHISM) */}
+          <section className="ambi-preview-col" aria-label="Vista previa de consulta ejecutiva en AMBI">
+            <div className="ambi-glass-card">
+              <div className="ambi-glass-topbar">
+                <span className="ambi-amber-pill">
+                  <span className="ambi-amber-dot" aria-hidden="true" />
+                  CALIBRACIÓN PÚBLICA · ACCESO TEMPRANO
+                </span>
+                <span className="ambi-preview-tag">VISTA PREVIA · Q2 2026</span>
+              </div>
+
+              <div className="ambi-dialogue">
+                <div className="ambi-msg-user-wrap">
+                  <span className="ambi-msg-meta">Usuario · Consulta estratégica</span>
+                  <div className="ambi-msg-user">
+                    «¿Dónde es más rentable comprar un piso de 200.000 € en Madrid en 2026?»
                   </div>
-                );
-              })()}
-            </div>
-          </div>
+                </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-            <div style={{ backgroundColor: 'var(--blanco-humo)', padding: '15px', borderRadius: '16px', boxShadow: '0 2px 8px color-mix(in srgb, var(--azul-noche) 5%, transparent)' }}>
-              <div style={{ fontSize: '13px', color: 'var(--azul-linea)', marginBottom: '5px' }}>Precio Medio m²</div>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: chartColor }}>
-                {kpiData?.precio_m2 ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(kpiData.precio_m2) + ' €' : '---'}
+                <div className="ambi-msg-assistant">
+                  <div className="ambi-msg-assistant-head">
+                    <span className="ambi-assistant-badge">
+                      <span aria-hidden="true">✦</span> AMBI
+                    </span>
+                    <span className="ambi-source-ref">Cierres Q2 2026 · Notarías e INE</span>
+                  </div>
+
+                  <p className="ambi-assistant-text">
+                    Según cierres del <strong>Q2 2026</strong>, <strong>Usera (7,0 % bruto)</strong> y{' '}
+                    <strong>Puente de Vallecas (6,9 %)</strong> lideran la rentabilidad. En distritos prime como{' '}
+                    <strong>Salamanca (3,2 %)</strong>, la compresión de yields exige plazos superiores a 25 años.
+                  </p>
+
+                  {/* Mini-Card integrada */}
+                  <div className="ambi-mini-card">
+                    <div className="ambi-mini-card-head">
+                      <span className="ambi-mini-title">
+                        <TrendingUp size={14} aria-hidden="true" />
+                        Top Yields Q2 2026 · Presupuesto 200.000 €
+                      </span>
+                      <span className="ambi-mini-badge">Microdatos reales</span>
+                    </div>
+
+                    <div className="ambi-yield-list">
+                      {TOP_YIELDS_PREVIEW.map((item) => (
+                        <div key={item.district} className="ambi-yield-row">
+                          <div className="ambi-yield-meta">
+                            <span className="ambi-yield-district">
+                              <Building2 size={13} aria-hidden="true" />
+                              {item.district}
+                            </span>
+                            <div className="ambi-yield-right">
+                              <span className={`ambi-yield-tag ${item.tone}`}>{item.tag}</span>
+                              <strong className={`ambi-yield-val ${item.tone}`}>{item.yieldLabel}</strong>
+                            </div>
+                          </div>
+                          <div className="ambi-yield-track" aria-hidden="true">
+                            <div
+                              className={`ambi-yield-fill ${item.tone}`}
+                              style={{ width: `${item.barWidth}%` }}
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: '12px', color: kpiData?.variacion_anual > 0 ? 'var(--azul-linea)' : 'var(--coral-texto)', marginTop: '5px', fontWeight: 500 }}>
-                {kpiData?.variacion_anual ? (kpiData.variacion_anual > 0 ? '+' : '') + kpiData.variacion_anual.toFixed(1) + '% (anual)' : ''}
+
+              <div className="ambi-glass-footer">
+                <span>Simulación estática pre-renderizada sobre series auditadas de la Comunidad de Madrid.</span>
               </div>
             </div>
-            
-            <div style={{ backgroundColor: 'var(--blanco-humo)', padding: '15px', borderRadius: '16px', boxShadow: '0 2px 8px color-mix(in srgb, var(--azul-noche) 5%, transparent)' }}>
-              <div style={{ fontSize: '13px', color: 'var(--azul-linea)', marginBottom: '5px' }}>{chatContext.op === 'alquiler' ? 'Renta Mensual Media' : 'Precio Total Medio'}</div>
-              <div style={{ fontSize: '24px', fontWeight: 700, color: 'var(--azul-noche)' }}>
-                {kpiData?.precio_vivienda ? new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(kpiData.precio_vivienda) + ' €' : '---'}
-              </div>
-              <div style={{ fontSize: '12px', color: 'var(--azul-linea)', marginTop: '5px' }}>
-                {chatContext.barrio && chatContext.barrio !== 'Todos' 
-                  ? `Promedio en ${chatContext.barrio}` 
-                  : (chatContext.district === 'Todos' ? 'Promedio en Madrid' : `Promedio en ${chatContext.district}`)}
-              </div>
-            </div>
-          </div>
+          </section>
+        </div>
+      </main>
 
-        </section>
-
-      </div>
-    </div>
-    <SiteFooter />
+      <SiteFooter />
     </div>
   );
 };
