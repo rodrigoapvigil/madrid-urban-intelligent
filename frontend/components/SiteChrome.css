@@ -410,6 +410,23 @@
   .mi-nav {
     display: none;
   }
+
+/* ── Móvil compacto (≤ 650px): misma altura que el dashboard ── */
+@media (max-width: 650px) {
+  .site-header-container,
+  .mi-header-container {
+    --header-h: 50px;
+    height: 50px !important;
+    min-height: 50px !important;
+  }
+
+  .site-header,
+  .mi-header {
+    min-height: 50px !important;
+    height: 50px !important;
+    padding-inline: 16px !important;
+  }
+}
   .auros-footer__top {
     flex-direction: column;
     align-items: flex-start;

@@ -1761,10 +1761,18 @@ footer.auros-footer,
 
 /* Mobile hero: slightly taller chrome, lower centered copy, no redundant bottom strip. */
 @media (max-width: 650px) {
-  .mi-home .mi-header { min-height: 68px; }
+  /* Igualar cabecera landing a la del dashboard: 50px compacto, mismo padding */
+  .mi-home .mi-header {
+    min-height: 50px !important;
+    height: 50px !important;
+    padding-inline: 16px !important;
+  }
+
+  /* Ajustar --header-h para que el contenido debajo no quede descuadrado */
+  .mi-home > main { padding-top: 50px; }
 
   .mi-home .mi-hero__content {
-    padding-top: clamp(88px, 13vh, 118px);
+    padding-top: clamp(68px, 11vh, 100px);
   }
 
   .mi-home .mi-scroll,
@@ -1805,7 +1813,7 @@ footer.auros-footer,
 }
 
 @media (max-width: 650px) {
-  .mi-home > main { padding-top: var(--header-h, 68px); }
+  .mi-home > main { padding-top: 50px; }
 
   .mi-home .mi-hero h1 {
     font-size: clamp(41.4px, 10.58vw, 57.5px);
