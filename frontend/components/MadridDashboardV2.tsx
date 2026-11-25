@@ -376,9 +376,9 @@ const ComparisonSeriesLegend = ({ chartId, items }: { chartId: string; items: Co
       {items.map(item => {
         const chart = ChartJS.getChart(chartId) as any;
         const visible = chart ? chart.isDatasetVisible(item.index) : true;
-        const displayLabel = item.kind === 'madrid' && !item.label.includes('Q2')
-          ? '···· Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)'
-          : item.label;
+        const displayLabel = item.label || (item.kind === 'madrid'
+          ? '···· Media Madrid (Registro Ayto. Madrid Q2 2026)'
+          : '');
         const tooltip = item.kind === 'estimated'
           ? 'Estimación proyectada mediante modelo de Machine Learning considerando estacionalidad e inflación'
           : item.kind === 'madrid'
@@ -407,12 +407,12 @@ const ComparisonSeriesLegend = ({ chartId, items }: { chartId: string; items: Co
   );
 };
 
-const ComparisonSeriesChips = ({ chartId, zoneA, zoneB }: { chartId: string; zoneA: string; zoneB: string }) => {
+const ComparisonSeriesChips = ({ chartId, zoneA, zoneB, madridLabel = 'Media Madrid (21,61 €/m² · Q2 2026)' }: { chartId: string; zoneA: string; zoneB: string; madridLabel?: string }) => {
   const [, setRevision] = useState(0);
   const groups = [
     { key: 'A', label: zoneA, indexes: [0, 1], color: '#00e5ff' },
     { key: 'B', label: zoneB, indexes: [2, 3], color: '#ffb65c' },
-    { key: 'Madrid', label: 'Media Madrid (21,61 €/m² · Q2 2026)', indexes: [4], color: '#dce8f2' },
+    { key: 'Madrid', label: madridLabel, indexes: [4], color: '#dce8f2' },
   ].filter(group => Boolean(group.label));
   return <div className="v2-compare-legend" aria-label="Series de la comparación">
     {groups.map(group => {
@@ -736,6 +736,8 @@ const formatCurrencyDec = (val: number | null | undefined, decimals: number = 2,
   const formatted = new Intl.NumberFormat('es-ES', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }).format(Number(val));
   return `${formatted} ${unit}`.trim();
 };
+
+const toPercent = (decimalRatio: number) => decimalRatio * 100;
 
 const formatSpanishPercentage = (val: number | null | undefined, decimals: number = 1, showPlus: boolean = true) => {
   if (val === null || val === undefined || !Number.isFinite(Number(val))) return '—';
@@ -1061,6 +1063,7 @@ const MadridDashboardV2: React.FC = () => {
   const [isVentaMoreOpen, setIsVentaMoreOpen] = useState<boolean>(false);
 
   const [ltvPercent, setLtvPercent] = useState<number>(65);
+  const [madridInvYield, setMadridInvYield] = useState<number>(0);
   const [interestImpactData, setInterestImpactData] = useState<any[]>([]);
   const [riskReturnData, setRiskReturnData] = useState<any[]>([]);
   const [liquidityZoneA, setLiquidityZoneA] = useState<string>('Cargando...');
@@ -1471,12 +1474,24 @@ const MadridDashboardV2: React.FC = () => {
         renta_media: data.renta_media,
         transacciones: data.transacciones
         });
+        if (activeProfile.id === 'inversion' && selectedDistrict === 'Todos' && selectedBarrio === 'Todos') {
+          setMadridInvYield(Number(data.precio_m2) || 0);
+        }
       })
       .catch(error => {
         if (requestId === latestDashboardRequest.current) {
           setDashboardLoadError(error instanceof Error ? error.message : 'No se han podido cargar los datos del mercado.');
         }
       });
+
+    const pMadridInvKpi = (activeProfile.id === 'inversion' && (selectedDistrict !== 'Todos' || selectedBarrio !== 'Todos'))
+      ? apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${activeProfile.op}&district=Todos&barrio=Todos`)
+          .then(res => res.ok ? res.json() : null)
+          .then(data => {
+            if (isLatestRequest() && data) setMadridInvYield(Number(data.precio_m2) || 0);
+          })
+          .catch(() => {})
+      : Promise.resolve();
 
     // Series Madrid (Average)
     const pSeries = apiFetch(`/series?year=${selectedYear}&op=${op}`)
@@ -1548,7 +1563,7 @@ const MadridDashboardV2: React.FC = () => {
       .catch(err => { console.error("Error loading connectivity:", err); if (isLatestRequest()) setConnectivityData(null); });
 
     // Barrera de promesas: el telón solo se desmonta cuando KPIs, Mapa, Series y Heatmap están en memoria
-    Promise.allSettled([pKpis, pSeries, pMap, pAffordability, pSeasonalTrend, pHeatmap, pConnectivity])
+    Promise.allSettled([pKpis, pMadridInvKpi, pSeries, pMap, pAffordability, pSeasonalTrend, pHeatmap, pConnectivity])
       .finally(() => {
         if (requestId === latestDashboardRequest.current) {
           setIsDashboardLoading(false);
@@ -1704,14 +1719,15 @@ const MadridDashboardV2: React.FC = () => {
 
   // Fetch risk-return matrix data (for Inversión profile only)
   useEffect(() => {
+    if (!filtersReady || !selectedYear || !selectedMonth) return;
     if (activeProfile.id === 'inversion') {
       const level = liquidityLevel === 'distrito' ? 'distrito' : 'barrio';
-      apiFetch(`/risk-return-matrix?level=${level}&district=${encodeURIComponent(selectedDistrict)}`)
+      apiFetch(`/risk-return-matrix?year=${selectedYear}&month=${encodeURIComponent(selectedMonth)}&level=${level}&district=${encodeURIComponent(selectedDistrict)}`)
         .then(res => res.ok ? res.json() : [])
         .then(data => setRiskReturnData(data))
         .catch(err => { console.error("Error fetching risk return data:", err); setRiskReturnData([]); });
     }
-  }, [liquidityLevel, selectedDistrict, activeProfile.id]);
+  }, [filtersReady, selectedYear, selectedMonth, liquidityLevel, selectedDistrict, activeProfile.id]);
 
   // Fetch zone comparative liquidities (for Inversión profile only)
   useEffect(() => {
@@ -1736,9 +1752,10 @@ const MadridDashboardV2: React.FC = () => {
 
   // Fetch zone comparative volatilities (for Inversión profile only)
   useEffect(() => {
+    if (!filtersReady || !selectedYear || !selectedMonth) return;
     if (activeProfile.id === 'inversion') {
       const level = comparisonZoneA.kind === 'district' ? 'distrito' : 'barrio';
-      apiFetch(`/risk-return-matrix?level=${level}&district=Todos`)
+      apiFetch(`/risk-return-matrix?year=${selectedYear}&month=${encodeURIComponent(selectedMonth)}&level=${level}&district=Todos`)
         .then(res => res.ok ? res.json() : [])
         .then(data => {
           const found = data.find((d: any) => d.name.toLowerCase() === selectedZoneA.toLowerCase());
@@ -1750,12 +1767,13 @@ const MadridDashboardV2: React.FC = () => {
         })
         .catch(() => setVolatilityZoneA('N/A'));
     }
-  }, [comparisonZoneA, selectedZoneA, activeProfile.id]);
+  }, [filtersReady, selectedYear, selectedMonth, comparisonZoneA, selectedZoneA, activeProfile.id]);
 
   useEffect(() => {
+    if (!filtersReady || !selectedYear || !selectedMonth) return;
     if (activeProfile.id === 'inversion') {
       const level = comparisonZoneB.kind === 'district' ? 'distrito' : 'barrio';
-      apiFetch(`/risk-return-matrix?level=${level}&district=Todos`)
+      apiFetch(`/risk-return-matrix?year=${selectedYear}&month=${encodeURIComponent(selectedMonth)}&level=${level}&district=Todos`)
         .then(res => res.ok ? res.json() : [])
         .then(data => {
           const found = data.find((d: any) => d.name.toLowerCase() === selectedZoneB.toLowerCase());
@@ -1767,7 +1785,7 @@ const MadridDashboardV2: React.FC = () => {
         })
         .catch(() => setVolatilityZoneB('N/A'));
     }
-  }, [comparisonZoneB, selectedZoneB, activeProfile.id]);
+  }, [filtersReady, selectedYear, selectedMonth, comparisonZoneB, selectedZoneB, activeProfile.id]);
 
 
 
@@ -3239,18 +3257,26 @@ const MadridDashboardV2: React.FC = () => {
                           : 'Comparar el precio por m² ayuda a comparar zonas con viviendas de distinto tamaño.'}
                       />
                     </div>
-                    <div className="v2-val">
-                      {activeProfile.id === 'inversion'
-                        ? (Number.isFinite(Number(kpiData.p_m2)) && Number(kpiData.p_m2) > 0 ? formatSpanishPercentage(isNetYieldActive && netYieldValue !== null ? netYieldValue : Number(kpiData.p_m2) * 100, 2, false) : '—')
-                        : formatCurrencyDec(kpiData.p_m2, 2, '€/m²')}
-                    </div>
-                    {(kpiData.is_prediction || isProjectionPeriod) && Number(kpiData.p_m2) > 0 && (
-                      <ConfidenceIntervalBadge
-                        centralValue={activeProfile.id === 'inversion' ? ((isNetYieldActive && netYieldValue !== null ? netYieldValue : Number(kpiData.p_m2)) * 100) : Number(kpiData.p_m2)}
-                        unit={activeProfile.id === 'inversion' ? '%' : '€/m²'}
-                        confidencePercent={95}
-                      />
-                    )}
+                    {(() => {
+                      const invRatio = isNetYieldActive && netYieldValue !== null ? Number(netYieldValue) : Number(kpiData.p_m2);
+                      const invPercent = Number.isFinite(invRatio) && invRatio > 0 ? toPercent(invRatio) : 0;
+                      return (
+                        <>
+                          <div className="v2-val">
+                            {activeProfile.id === 'inversion'
+                              ? (invPercent > 0 ? formatSpanishPercentage(invPercent, 2, false) : '—')
+                              : formatCurrencyDec(kpiData.p_m2, 2, '€/m²')}
+                          </div>
+                          {(kpiData.is_prediction || isProjectionPeriod) && Number(kpiData.p_m2) > 0 && (
+                            <ConfidenceIntervalBadge
+                              centralValue={activeProfile.id === 'inversion' ? invPercent : Number(kpiData.p_m2)}
+                              unit={activeProfile.id === 'inversion' ? '%' : '€/m²'}
+                              confidencePercent={95}
+                            />
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
 
                   <div className="v2-kpi-card">
@@ -3339,7 +3365,7 @@ const MadridDashboardV2: React.FC = () => {
                             />
                           </div>
                           <div className="v2-val" style={{ color: activeProfile.color }}>
-                            {amortizacionAnios > 0 ? amortizacionAnios.toFixed(1) + ' años' : '-'}
+                            {amortizacionAnios > 0 ? `${amortizacionAnios.toFixed(1).replace('.', ',')} años` : '-'}
                           </div>
                           <div style={{ fontSize: '11px', color: '#9FB6C8', marginTop: '2px', fontWeight: '500' }}>
                             (GRM: Gross Rent Mult.)
@@ -4293,6 +4319,17 @@ const MadridDashboardV2: React.FC = () => {
                   </div>
 
                   {/* COLUMNA DERECHA: PER INMOBILIARIO & MATRIZ 4 CUADRANTES */}
+                  {(() => {
+                    const maxPer = 32;
+                    const madridPerRatio = selectedDistrict === 'Todos' && selectedBarrio === 'Todos'
+                      ? Number(kpiData.p_m2)
+                      : madridInvYield;
+                    const madridPerYears = madridPerRatio > 0 ? 1 / madridPerRatio : 0;
+                    const hasMadridPer = Number.isFinite(madridPerYears) && madridPerYears > 0;
+                    const madridPerLabel = hasMadridPer ? `${madridPerYears.toFixed(1).replace('.', ',')} años` : '';
+                    const madridPerLeftPct = hasMadridPer ? Math.min(100, Math.max(0, (madridPerYears / maxPer) * 100)) : 0;
+
+                    return (
                   <div className="v2-connectivity-selectors" style={{ borderLeft: '1px solid rgba(186, 204, 214, 0.16)', paddingLeft: '40px', display: 'flex', flexDirection: 'column', width: '100%' }}>
                     {/* WIDGET 2: PER INMOBILIARIO */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginBottom: '16px' }}>
@@ -4300,9 +4337,11 @@ const MadridDashboardV2: React.FC = () => {
                         <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>
                           PER Inmobiliario · Amortización
                         </h3>
-                        <span style={{ fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '12px', background: 'rgba(0, 240, 255, 0.12)', color: '#00F0FF', border: '1px solid rgba(0, 240, 255, 0.3)' }}>
-                          Media Madrid: 21,4 años
-                        </span>
+                        {hasMadridPer && (
+                          <span style={{ fontSize: '11px', fontWeight: '700', padding: '3px 8px', borderRadius: '12px', background: 'rgba(0, 240, 255, 0.12)', color: '#00F0FF', border: '1px solid rgba(0, 240, 255, 0.3)' }}>
+                            Media Madrid: {madridPerLabel}
+                          </span>
+                        )}
                       </div>
                       <span style={{ fontSize: '12px', fontWeight: '500', color: '#BACCD6' }}>
                         Años de renta bruta necesarios para amortizar el precio del inmueble (Ratio Precio / Renta)
@@ -4312,7 +4351,6 @@ const MadridDashboardV2: React.FC = () => {
                     {/* Ranking visual de PER Inmobiliario */}
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '230px', overflowY: 'auto', paddingRight: '6px', marginBottom: '16px' }}>
                       {perList.slice(0, 8).map((pItem, pIdx) => {
-                        const maxPer = 32;
                         const widthPct = Math.min(Math.round((pItem.per / maxPer) * 100), 100);
                         const isSelected = pItem.name.toLowerCase() === (liquidityLevel === 'barrio' ? selectedBarrio.toLowerCase() : selectedDistrict.toLowerCase());
                         return (
@@ -4326,18 +4364,20 @@ const MadridDashboardV2: React.FC = () => {
                                   {pItem.tag}
                                 </span>
                                 <span style={{ fontWeight: '700', color: '#E6F2F8' }}>
-                                  {pItem.per} años
+                                  {pItem.per.toFixed(1).replace('.', ',')} años
                                 </span>
                                 {pItem.roi && (
                                   <span style={{ fontSize: '11px', color: '#8fa6ba' }}>
-                                    ({pItem.roi}%)
+                                    ({Number(pItem.roi).toFixed(2).replace('.', ',')}%)
                                   </span>
                                 )}
                               </div>
                             </div>
                             <div style={{ position: 'relative', width: '100%', height: '5px', backgroundColor: 'rgba(255, 255, 255, 0.1)', borderRadius: '3px' }}>
                               <div style={{ width: `${widthPct}%`, height: '100%', backgroundColor: pItem.color, borderRadius: '3px' }} />
-                              <div style={{ position: 'absolute', left: '66.8%', top: '-2px', bottom: '-2px', width: '2px', backgroundColor: '#FFFFFF', opacity: 0.6 }} title="Media Madrid (21,4 años)" />
+                              {hasMadridPer && (
+                                <div style={{ position: 'absolute', left: `${madridPerLeftPct.toFixed(2)}%`, top: '-2px', bottom: '-2px', width: '2px', backgroundColor: '#FFFFFF', opacity: 0.6 }} title={`Media Madrid (${madridPerLabel})`} />
+                              )}
                             </div>
                           </div>
                         );
@@ -4357,6 +4397,8 @@ const MadridDashboardV2: React.FC = () => {
                       </div>
                     </div>
                   </div>
+                    );
+                  })()}
                 </div>
               </section>
             )}
@@ -4660,7 +4702,18 @@ const MadridDashboardV2: React.FC = () => {
                       </div>
                     </div>}
 
-                    {compareGraphView === 'superpuesta' ? (
+                    {(() => {
+                      const madridInvRatio = selectedDistrict === 'Todos' && selectedBarrio === 'Todos' && activeProfile.id === 'inversion'
+                        ? Number(kpiData.p_m2)
+                        : madridInvYield;
+                      const madridInvPctText = madridInvRatio > 0 ? formatSpanishPercentage(toPercent(madridInvRatio), 1, false) : '';
+                      const madridLegendLabel = p.id === 'inversion'
+                        ? (madridInvPctText ? `Media Madrid (${madridInvPctText} · Registro Ayto. Madrid Q2 2026)` : 'Media Madrid (Registro Ayto. Madrid Q2 2026)')
+                        : 'Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)';
+                      const madridChipLabel = p.id === 'inversion'
+                        ? (madridInvPctText ? `Media Madrid (${madridInvPctText} · Q2 2026)` : 'Media Madrid (Q2 2026)')
+                        : 'Media Madrid (21,61 €/m² · Q2 2026)';
+                      return compareGraphView === 'superpuesta' ? (
                       <div className="v2-compare-view-superpuesta">
                         <div className="v2-overlay-wrapper">
                           <div className="v2-overlay-header">
@@ -4682,7 +4735,7 @@ const MadridDashboardV2: React.FC = () => {
                             ) : isMobile ? (
                               <>
                                 <div className="v2-chart-wrap large"><ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile onReload={reloadComparison} isReloading={isReloadingA || isReloadingB} /><canvas id={`v2-overlay-${p.id}`}></canvas></div>
-                                <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={comparisonAHasData ? formatZoneOption(selectedZoneA) : ''} zoneB={comparisonBHasData ? formatZoneOption(selectedZoneB) : ''} />
+                                <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={comparisonAHasData ? formatZoneOption(selectedZoneA) : ''} zoneB={comparisonBHasData ? formatZoneOption(selectedZoneB) : ''} madridLabel={madridChipLabel} />
                               </>
                             ) : (
                               <div className="v2-overlay-chart-stack">
@@ -4690,7 +4743,7 @@ const MadridDashboardV2: React.FC = () => {
                                   <ComparisonSeriesLegend chartId={`v2-overlay-${p.id}`} items={[
                                     ...(comparisonAHasData ? [{ index: 0, label: `${formatZoneOption(selectedZoneA)} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' as const }, { index: 1, label: `${formatZoneOption(selectedZoneA)} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' as const }] : []),
                                     ...(comparisonBHasData ? [{ index: 2, label: `${formatZoneOption(selectedZoneB)} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' as const }, { index: 3, label: `${formatZoneOption(selectedZoneB)} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' as const }] : []),
-                                    { index: 4, label: 'Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)', color: '#dce8f2', kind: 'madrid' },
+                                    { index: 4, label: madridLegendLabel, color: '#dce8f2', kind: 'madrid' },
                                   ]} />
                                   <ComparisonChartControls chartId={`v2-overlay-${p.id}`} isMobile={false} onReload={reloadComparison} isReloading={isReloadingA || isReloadingB} />
                                 </div>
@@ -4738,7 +4791,7 @@ const MadridDashboardV2: React.FC = () => {
                                       <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile onReload={reloadZoneA} isReloading={isReloadingA} />
                                     ) : (
                                       <div className="v2-comparison-chart-meta">
-                                        <ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: 'Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' }]} />
+                                        <ComparisonSeriesLegend chartId={`v2-chartA-${p.id}`} items={[{ index: 0, label: madridLegendLabel, color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneA} · Dato real`, color: COMPARISON_COLORS.zoneA, kind: 'real' }, { index: 2, label: `${selectedZoneA} · Estimación`, color: COMPARISON_COLORS.zoneA, kind: 'estimated' }]} />
                                         <ComparisonChartControls chartId={`v2-chartA-${p.id}`} isMobile={false} onReload={reloadZoneA} isReloading={isReloadingA} />
                                       </div>
                                     )}
@@ -4779,7 +4832,7 @@ const MadridDashboardV2: React.FC = () => {
                                       <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile onReload={reloadZoneB} isReloading={isReloadingB} />
                                     ) : (
                                       <div className="v2-comparison-chart-meta">
-                                        <ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: 'Media Madrid (21,61 €/m² · Registro Ayto. Madrid Q2 2026)', color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' }]} />
+                                        <ComparisonSeriesLegend chartId={`v2-chartB-${p.id}`} items={[{ index: 0, label: madridLegendLabel, color: '#dce8f2', kind: 'madrid' }, { index: 1, label: `${selectedZoneB} · Dato real`, color: COMPARISON_COLORS.zoneB, kind: 'real' }, { index: 2, label: `${selectedZoneB} · Estimación`, color: COMPARISON_COLORS.zoneB, kind: 'estimated' }]} />
                                         <ComparisonChartControls chartId={`v2-chartB-${p.id}`} isMobile={false} onReload={reloadZoneB} isReloading={isReloadingB} />
                                       </div>
                                     )}
@@ -4797,7 +4850,8 @@ const MadridDashboardV2: React.FC = () => {
                           </div>
                         </div>
                       </div>
-                    )}
+                    );
+                    })()}
 
                     {/* Resumen y balance de la comparativa (accesible en ambas vistas) */}
                     {comparisonAHasData && comparisonBHasData && p.id === 'alquiler' && (() => {

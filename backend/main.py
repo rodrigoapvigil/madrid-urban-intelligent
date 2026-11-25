@@ -214,8 +214,13 @@ def get_interest_rate_impact(district: str = "Todos", barrio: str = "Todos"):
     return data.get_interest_rate_impact_data(district, barrio)
 
 @app.get("/api/risk-return-matrix")
-def get_risk_return_matrix(level: str = "distrito", district: str = "Todos"):
-    return data.get_risk_return_matrix_data(level, district)
+def get_risk_return_matrix(
+    year: int = 2026,
+    month: str = "Marzo",
+    level: str = "distrito",
+    district: str = "Todos"
+):
+    return data.get_risk_return_matrix_data(level=level, district=district, year=year, month=month)
 
 @app.get("/api/zone-liquidity")
 def get_zone_liquidity(name: str, level: str = "distrito"):

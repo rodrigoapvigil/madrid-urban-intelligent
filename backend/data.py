@@ -1049,7 +1049,18 @@ def get_rankings(anio: int, mes: str, op: str, level: str = "barrio", category: 
             base_q = f"FROM Fact_Operacion f {join_chain} JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo WHERE t.anio = ? AND t.mes = ? AND f.tipo_operacion = ?"
 
         renta_select = 'AVG(b.renta_media_hogar)' if level == 'barrio' else 'AVG(d.renta_media_hogar)'
-        if category in ("Precio", "Precio m²"):
+        if category == "Rentabilidad" and level == "distrito":
+            df_yield = get_district_gross_yield(anio_int, month_id)
+            if df_yield.empty:
+                return pd.DataFrame()
+            df_dist_renta = pd.read_sql("SELECT nombre as name, renta_media_hogar as renta_hogar FROM Dim_Distrito WHERE id_distrito != -1", conn)
+            df = pd.merge(
+                df_yield.rename(columns={'zona': 'name', 'val': 'value'})[['name', 'value']],
+                df_dist_renta,
+                on='name',
+                how='left'
+            ).sort_values('value', ascending=False)
+        elif category in ("Precio", "Precio m²"):
             price_column = "f.precio_m2" if category == "Precio m²" else "f.precio_promedio_vivienda"
             q = f"SELECT {group_col} as name, AVG({price_column}) as value, {renta_select} as renta_hogar {base_q} GROUP BY name ORDER BY value DESC"
             df = pd.read_sql(q, conn, params=params_base)
@@ -1225,18 +1236,109 @@ def get_predictions(zona_nombre: str, zona_tipo: str = "barrio", op: str = "vent
         conn.close()
 
 
+def get_district_gross_yield(anio: int, mes=None) -> pd.DataFrame:
+    """
+    Fuente unica de rentabilidad bruta por distrito (proporcion decimal):
+    - Meses observados en Fact_Operacion (hasta junio de 2026): AVG(rentabilidad_bruta) con tipo_operacion='alquiler'.
+    - Meses sin observacion en >= 2026 (desde julio de 2026): prediccion agregada de distrito (id_barrio == -1)
+      calculada como (precio_m2_predicho_alq * 12) / precio_m2_predicho_vta.
+    Retorna DataFrame con columnas ['zona', 'mes', 'val'].
+    """
+    if not os.path.exists(DB_PATH):
+        return pd.DataFrame(columns=['zona', 'mes', 'val'])
+    conn = _conn()
+    anio_int = int(anio)
+    month_id = None
+    if mes is not None:
+        month_id = int(mes) if isinstance(mes, (int, float)) or str(mes).isdigit() else int(MONTH_IDS.get(str(mes), 1))
+
+    try:
+        month_clause = "AND t.mes = ?" if month_id is not None else ""
+        params = [anio_int, month_id] if month_id is not None else [anio_int]
+        q = f"""
+            SELECT d.nombre as zona, t.mes, AVG(f.rentabilidad_bruta) as val
+            FROM Fact_Operacion f
+            JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito
+            JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
+            WHERE t.anio = ? AND f.tipo_operacion = 'alquiler'
+              AND f.id_barrio != -1
+              {month_clause}
+            GROUP BY d.nombre, t.mes
+        """
+        df = pd.read_sql(q, conn, params=params)
+
+        if anio_int >= 2026:
+            all_predictions = _get_predictions_df()
+            if not all_predictions.empty:
+                df_alq = _keep_predictions_for_observed_zones(
+                    all_predictions[all_predictions['tipo_operacion'] == 'alquiler'], 'alquiler', conn
+                )
+                df_vta = _keep_predictions_for_observed_zones(
+                    all_predictions[all_predictions['tipo_operacion'] == 'venta'], 'venta', conn
+                )
+                if not df_alq.empty and not df_vta.empty:
+                    df_merged = pd.merge(
+                        df_alq, df_vta,
+                        on=['id_distrito', 'id_barrio', 'anio', 'mes'],
+                        suffixes=('_alq', '_vta')
+                    )
+                    df_merged['val'] = (df_merged['precio_m2_predicho_alq'] * 12) / df_merged['precio_m2_predicho_vta']
+                    cond = (df_merged['anio'] == anio_int) & (df_merged['id_barrio'] == -1)
+                    if month_id is not None:
+                        cond = cond & (df_merged['mes'] == month_id)
+                    filtered_pred = df_merged[cond]
+                    if not filtered_pred.empty:
+                        df_dist_names = pd.read_sql("SELECT id_distrito, nombre as zona FROM Dim_Distrito WHERE id_distrito != -1", conn)
+                        df_pred = pd.merge(filtered_pred, df_dist_names, on='id_distrito', how='inner')[['zona', 'mes', 'val']]
+                        if not df_pred.empty:
+                            df = pd.concat([df, df_pred], ignore_index=True).drop_duplicates(subset=['zona', 'mes'], keep='first')
+
+        if not df.empty:
+            df['val'] = pd.to_numeric(df['val'], errors='coerce')
+            df = df[df['val'].notna() & (df['val'] > 0)]
+        return df
+    except Exception as e:
+        print(f"[get_district_gross_yield] error: {e}")
+        return pd.DataFrame(columns=['zona', 'mes', 'val'])
+    finally:
+        conn.close()
+
+
 def get_heatmap_data(year: int, op: str, level: str = "distrito"):
     """
     Retorna matriz de precios por mes para todas las zonas.
     Formato: [{ zona: "Retiro", m1: 20.5, m2: 21.0, ... }]
     """
     if not os.path.exists(DB_PATH): return []
-    conn = _conn()
     op_l = op.lower()
-    
+
     # Manejo de 'compra' -> 'venta'
     if op_l == 'compra':
         op_l = 'venta'
+
+    if op_l in ('inversión', 'inversion') and level == "distrito":
+        df = get_district_gross_yield(int(year))
+        if df.empty:
+            return []
+        matrix = {}
+        for _, row in df.iterrows():
+            z = row['zona']
+            m = int(row['mes'])
+            val_raw = row['val']
+            v = float(val_raw) if (pd.notnull(val_raw) and not pd.isna(val_raw)) else 0.0
+            if z not in matrix:
+                matrix[z] = {}
+            matrix[z][m] = v
+        results = []
+        for zona, months in matrix.items():
+            item = {"zona": zona}
+            for m in range(1, 13):
+                item[f"m{m}"] = months.get(m, 0.0)
+            results.append(item)
+        results.sort(key=lambda x: x['zona'])
+        return results
+
+    conn = _conn()
 
     if op_l == 'inversión' or op_l == 'inversion':
         val_col = 'rentabilidad_bruta'
@@ -1741,17 +1843,19 @@ def get_interest_rate_impact_data(district: str = "Todos", barrio: str = "Todos"
     return results
 
 
-def get_risk_return_matrix_data(level: str = "distrito", district: str = "Todos") -> list:
+def get_risk_return_matrix_data(level: str = "distrito", district: str = "Todos", year: int = 2026, month: str = "Marzo") -> list:
     """
-    Computes ROI (rentabilidad_bruta) and Volatility (std deviation of precio_m2 over last 24 months)
+    Computes ROI (rentabilidad_bruta) for the selected year/month and Volatility (std deviation of precio_m2)
     for all districts (or barrios of a district).
     """
     if not os.path.exists(DB_PATH):
         return []
-        
+
     conn = _conn()
+    year_int = int(year)
+    month_id = int(month) if isinstance(month, (int, float)) or str(month).isdigit() else int(MONTH_IDS.get(str(month), 1))
     try:
-        # Volatility: standard deviation of precio_m2 across available data
+        # Volatility: standard deviation of precio_m2 across available data (esfuerzo / riesgo)
         q_prices = """
             SELECT f.precio_m2, d.nombre as distrito, b.nombre as barrio
             FROM Fact_Operacion f
@@ -1762,45 +1866,63 @@ def get_risk_return_matrix_data(level: str = "distrito", district: str = "Todos"
               AND t.anio IN (2023, 2024, 2025)
         """
         df_prices = pd.read_sql(q_prices, conn)
-        
-        # ROI: rentabilidad_bruta for the active year/month
-        q_roi = """
-            SELECT f.rentabilidad_bruta, d.nombre as distrito, b.nombre as barrio
-            FROM Fact_Operacion f
-            JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
-            JOIN Dim_Barrio b ON f.id_barrio = b.id_barrio
-            JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito
-            WHERE f.tipo_operacion = 'venta'
-              AND t.anio = 2024 AND t.mes = 4
-        """
-        df_roi = pd.read_sql(q_roi, conn)
-        conn.close()
-        
-        if df_prices.empty or df_roi.empty:
-            return []
-            
+
         if level == "barrio":
+            q_roi = """
+                SELECT f.rentabilidad_bruta, d.nombre as distrito, b.nombre as barrio
+                FROM Fact_Operacion f
+                JOIN Dim_Tiempo t ON f.id_tiempo = t.id_tiempo
+                JOIN Dim_Barrio b ON f.id_barrio = b.id_barrio
+                JOIN Dim_Distrito d ON f.id_distrito = d.id_distrito
+                WHERE f.tipo_operacion = 'alquiler'
+                  AND f.id_barrio != -1
+                  AND t.anio = ? AND t.mes = ?
+            """
+            df_roi = pd.read_sql(q_roi, conn, params=[year_int, month_id])
+            if df_roi.empty and year_int >= 2026:
+                all_predictions = _get_predictions_df()
+                if not all_predictions.empty:
+                    df_alq = _keep_predictions_for_observed_zones(
+                        all_predictions[all_predictions['tipo_operacion'] == 'alquiler'], 'alquiler', conn
+                    )
+                    df_vta = _keep_predictions_for_observed_zones(
+                        all_predictions[all_predictions['tipo_operacion'] == 'venta'], 'venta', conn
+                    )
+                    if not df_alq.empty and not df_vta.empty:
+                        df_m = pd.merge(df_alq, df_vta, on=['id_distrito', 'id_barrio', 'anio', 'mes'], suffixes=('_alq', '_vta'))
+                        df_m = df_m[(df_m['anio'] == year_int) & (df_m['mes'] == month_id) & (df_m['id_barrio'] != -1)]
+                        df_m['rentabilidad_bruta'] = (df_m['precio_m2_predicho_alq'] * 12) / df_m['precio_m2_predicho_vta']
+                        df_b = pd.read_sql("SELECT id_barrio, nombre as barrio FROM Dim_Barrio WHERE id_barrio != -1", conn)
+                        df_d = pd.read_sql("SELECT id_distrito, nombre as distrito FROM Dim_Distrito WHERE id_distrito != -1", conn)
+                        df_roi = pd.merge(pd.merge(df_m, df_b, on='id_barrio'), df_d, on='id_distrito')[['rentabilidad_bruta', 'distrito', 'barrio']]
+            conn.close()
+
+            if df_prices.empty or df_roi.empty:
+                return []
+
             if district != "Todos":
                 df_prices = df_prices[df_prices['distrito'] == district]
                 df_roi = df_roi[df_roi['distrito'] == district]
-            
+
             df_vol = df_prices.groupby('barrio')['precio_m2'].std().reset_index()
             df_vol.rename(columns={'precio_m2': 'volatility'}, inplace=True)
-            
+
             df_roi_grouped = df_roi.groupby('barrio')['rentabilidad_bruta'].mean().reset_index()
             df_roi_grouped.rename(columns={'rentabilidad_bruta': 'roi'}, inplace=True)
-            
+
             df_merged = pd.merge(df_vol, df_roi_grouped, on='barrio')
             df_merged.rename(columns={'barrio': 'name'}, inplace=True)
         else:
+            conn.close()
+            df_roi = get_district_gross_yield(year_int, month_id)
+            if df_prices.empty or df_roi.empty:
+                return []
+
             df_vol = df_prices.groupby('distrito')['precio_m2'].std().reset_index()
-            df_vol.rename(columns={'precio_m2': 'volatility'}, inplace=True)
-            
-            df_roi_grouped = df_roi.groupby('distrito')['rentabilidad_bruta'].mean().reset_index()
-            df_roi_grouped.rename(columns={'rentabilidad_bruta': 'roi'}, inplace=True)
-            
-            df_merged = pd.merge(df_vol, df_roi_grouped, on='distrito')
-            df_merged.rename(columns={'distrito': 'name'}, inplace=True)
+            df_vol.rename(columns={'precio_m2': 'volatility', 'distrito': 'name'}, inplace=True)
+
+            df_roi_grouped = df_roi.rename(columns={'zona': 'name', 'val': 'roi'})[['name', 'roi']]
+            df_merged = pd.merge(df_vol, df_roi_grouped, on='name')
             
         df_merged.fillna({'volatility': 0.0, 'roi': 0.05}, inplace=True)
         
