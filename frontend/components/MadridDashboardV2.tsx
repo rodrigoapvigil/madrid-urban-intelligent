@@ -4327,40 +4327,73 @@ const MadridDashboardV2: React.FC = () => {
             <section className="v2-compare-section" data-dashboard-section="compare">
               <div className="v2-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                 <div className="v2-compare-title-block">
-                  <h2 style={{ margin: 0 }}>Comparar zonas</h2>
+                  <div className="v2-compare-title-row">
+                    <h2 style={{ margin: 0 }}>Comparar zonas</h2>
+                    {isMobile && (
+                      <div className="v2-compare-title-icons">
+                        <button
+                          type="button"
+                          className="v2-compare-icon-btn"
+                          title="Recargar o restablecer comparativa"
+                          aria-label="Recargar o restablecer comparativa"
+                          onClick={() => {
+                            const defA = zoneSearchOptions.find(o => o.kind === 'district' && normalizeZoneLabel(o.name).includes('fuencarral')) || zoneSearchOptions.find(o => o.kind === 'district') || comparisonZoneA;
+                            const defB = zoneSearchOptions.find(o => o.kind === 'barrio' && normalizeZoneLabel(o.name).includes('fuente del berro')) || zoneSearchOptions.find(o => o.kind === 'district' && o.id !== defA.id) || comparisonZoneB;
+                            setComparisonZoneA(defA);
+                            setComparisonZoneB(defB);
+                            reloadComparison();
+                          }}
+                          disabled={isReloadingA || isReloadingB}
+                        >
+                          <RotateCw size={14} className={isReloadingA || isReloadingB ? 'v2-spin' : ''} />
+                        </button>
+                        <button
+                          type="button"
+                          className="v2-compare-icon-btn"
+                          aria-label="Cómo comparar zonas"
+                          title="Cómo comparar zonas"
+                          onClick={() => setShowCompareHelpModal(true)}
+                        >
+                          <HelpCircle size={15} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   <span className="v2-compare-subtitle" style={{ color: '#8fa6ba', fontSize: '13px' }}>Elige dos zonas y mira cómo se diferencian</span>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  {!isMobile && <div className="v2-compare-desktop-toolbar">
-                    <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />
-                  </div>}
-                  <button
-                    type="button"
-                    className="v2-compare-reset-btn"
-                    title="Restablecer selección a las zonas por defecto"
-                    aria-label="Restablecer selección"
-                    onClick={() => {
-                      const defA = zoneSearchOptions.find(o => o.kind === 'district' && normalizeZoneLabel(o.name).includes('fuencarral')) || zoneSearchOptions.find(o => o.kind === 'district') || comparisonZoneA;
-                      const defB = zoneSearchOptions.find(o => o.kind === 'barrio' && normalizeZoneLabel(o.name).includes('fuente del berro')) || zoneSearchOptions.find(o => o.kind === 'district' && o.id !== defA.id) || comparisonZoneB;
-                      setComparisonZoneA(defA);
-                      setComparisonZoneB(defB);
-                      reloadComparison();
-                    }}
-                    disabled={isReloadingA || isReloadingB}
-                  >
-                    <RotateCw size={11} className={isReloadingA || isReloadingB ? 'v2-spin' : ''} />
-                    <span>{isReloadingA || isReloadingB ? 'Sincronizando…' : 'Restablecer'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="v2-compare-help-corner"
-                    aria-label="Cómo comparar zonas"
-                    title="Cómo comparar zonas"
-                    onClick={() => setShowCompareHelpModal(true)}
-                  >
-                    <HelpCircle size={15} />
-                  </button>
-                </div>
+                {!isMobile && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div className="v2-compare-desktop-toolbar">
+                      <PeriodSelector year={selectedYear} month={selectedMonth} years={availableYears} latestReal={latestAvailablePeriod} onChange={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }} />
+                    </div>
+                    <button
+                      type="button"
+                      className="v2-compare-reset-btn"
+                      title="Restablecer selección a las zonas por defecto"
+                      aria-label="Restablecer selección"
+                      onClick={() => {
+                        const defA = zoneSearchOptions.find(o => o.kind === 'district' && normalizeZoneLabel(o.name).includes('fuencarral')) || zoneSearchOptions.find(o => o.kind === 'district') || comparisonZoneA;
+                        const defB = zoneSearchOptions.find(o => o.kind === 'barrio' && normalizeZoneLabel(o.name).includes('fuente del berro')) || zoneSearchOptions.find(o => o.kind === 'district' && o.id !== defA.id) || comparisonZoneB;
+                        setComparisonZoneA(defA);
+                        setComparisonZoneB(defB);
+                        reloadComparison();
+                      }}
+                      disabled={isReloadingA || isReloadingB}
+                    >
+                      <RotateCw size={11} className={isReloadingA || isReloadingB ? 'v2-spin' : ''} />
+                      <span>{isReloadingA || isReloadingB ? 'Sincronizando…' : 'Restablecer'}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className="v2-compare-help-corner"
+                      aria-label="Cómo comparar zonas"
+                      title="Cómo comparar zonas"
+                      onClick={() => setShowCompareHelpModal(true)}
+                    >
+                      <HelpCircle size={15} />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="v2-compare-zone-selectors v2-compare-selectors-sticky">
