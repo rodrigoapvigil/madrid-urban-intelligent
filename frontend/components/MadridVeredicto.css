@@ -1123,7 +1123,27 @@
 }
 .veredicto-range-bar-legend .dot-band { background: rgba(0, 240, 255, 0.45); border: 1px solid #00F0FF; }
 .veredicto-range-bar-legend .dot-user { background: #F87171; }
+.veredicto-range-bar-legend .dot-user.tone-bajo { background: #34D399; }
+.veredicto-range-bar-legend .dot-user.tone-linea { background: #00F0FF; }
+.veredicto-range-bar-legend .dot-user.tone-encima { background: #FBBF24; }
+.veredicto-range-bar-legend .dot-user.tone-muy_encima { background: #F87171; }
 .veredicto-range-bar-legend .dot-madrid { background: #94A3B8; }
+
+.veredicto-distance-line {
+  margin: 8px 0 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #E2EFF7 !important;
+}
+
+.veredicto-range-scale-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: #9FB6C8;
+  font-variant-numeric: tabular-nums;
+  margin-top: -4px;
+}
 
 .veredicto-range-track {
   position: relative;

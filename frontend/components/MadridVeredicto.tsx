@@ -475,11 +475,19 @@ export default function MadridVeredicto() {
         {resultado && (() => {
           const isAlquilerRes = (resultado.operacion || operacion).toLowerCase() === 'alquiler';
           const unidadTotal = isAlquilerRes ? '€/mes' : '€';
-          const fmtM2 = (v: number) => Number(v).toLocaleString('es-ES', {
-            minimumFractionDigits: isAlquilerRes ? 2 : 0,
-            maximumFractionDigits: isAlquilerRes ? 2 : 0
-          });
-          const fmtPct = (v: number) => `${v > 0 ? '+' : ''}${v.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
+          const fmtEs = (v: number, decimals = 0, signed = false) => {
+            const absVal = Math.abs(v);
+            const fixed = absVal.toFixed(decimals);
+            const [intPart, decPart] = fixed.split('.');
+            const intFormatted = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            const numStr = decPart !== undefined ? `${intFormatted},${decPart}` : intFormatted;
+            if (signed) {
+              return v < 0 ? `−${numStr}` : `+${numStr}`;
+            }
+            return v < 0 ? `−${numStr}` : numStr;
+          };
+          const fmtM2 = (v: number) => fmtEs(Number(v), isAlquilerRes ? 2 : 0);
+          const fmtPct = (v: number) => (v === 0 ? '0,0 %' : `${fmtEs(v, 1, true)} %`);
 
           const vNorm = (resultado.veredicto || '').toLowerCase();
           const tone = vNorm.includes('debajo')
@@ -518,6 +526,16 @@ export default function MadridVeredicto() {
             }
           };
 
+          const distanciaTexto = resultado.precio_m2_inmueble < resultado.rango_bajo
+            ? `Está un ${fmtEs(((resultado.rango_bajo - resultado.precio_m2_inmueble) / resultado.rango_bajo) * 100, 1)} % por debajo del límite inferior del rango`
+            : resultado.precio_m2_inmueble > resultado.rango_alto
+              ? `Está un ${fmtEs(((resultado.precio_m2_inmueble - resultado.rango_alto) / resultado.rango_alto) * 100, 1)} % por encima del límite superior del rango`
+              : 'Está dentro del rango razonable';
+
+          const fiabilidad = isAlquilerRes && resultado.confianza === 'alta'
+            ? 'media'
+            : resultado.confianza;
+
           const mesesEs: Record<string, string> = {
             '01': 'enero', '02': 'febrero', '03': 'marzo', '04': 'abril',
             '05': 'mayo', '06': 'junio', '07': 'julio', '08': 'agosto',
@@ -544,7 +562,7 @@ export default function MadridVeredicto() {
           <div className="veredicto-results">
             {/* Nueva Ficha Unificada de Veredicto */}
             <div className={`veredicto-result-hero veredicto-tone-${tone}`}>
-              {/* 1. Veredicto en una frase + badge de color */}
+              {/* 1. Veredicto en una frase + badge de color + distancia al rango */}
               <div className="veredicto-hero-header">
                 <div>
                   <span className={`veredicto-state-badge tone-${tone}`}>
@@ -553,6 +571,7 @@ export default function MadridVeredicto() {
                   <h2 className="veredicto-hero-title">
                     {phraseMap[modalidad][tone]}
                   </h2>
+                  <p className="veredicto-distance-line">{distanciaTexto}</p>
                 </div>
                 <div className="veredicto-zone-meta">
                   <p className="veredicto-zone-meta-label">Zona analizada</p>
@@ -566,10 +585,10 @@ export default function MadridVeredicto() {
               <div className="veredicto-range-bar-wrap">
                 <div className="veredicto-range-bar-legend">
                   <span>
-                    <i className="dot-band" /> Rango de la zona: <strong>{fmtM2(resultado.rango_bajo)} – {fmtM2(resultado.rango_alto)} €/m²</strong>
+                    <i className="dot-band" /> Rango razonable: <strong>{fmtM2(resultado.rango_bajo)} – {fmtM2(resultado.rango_alto)} €/m²</strong>
                   </span>
                   <span>
-                    <i className="dot-user" /> Tu inmueble: <strong>{fmtM2(resultado.precio_m2_inmueble)} €/m²</strong>
+                    <i className={`dot-user tone-${tone}`} /> Tu inmueble: <strong>{fmtM2(resultado.precio_m2_inmueble)} €/m²</strong>
                   </span>
                   <span>
                     <i className="dot-madrid" /> Media Madrid: <strong>{fmtM2(resultado.media_madrid)} €/m²</strong>
@@ -596,6 +615,10 @@ export default function MadridVeredicto() {
                     <span className="marker-tag user">{fmtM2(resultado.precio_m2_inmueble)} €/m²</span>
                   </div>
                 </div>
+                <div className="veredicto-range-scale-ends">
+                  <span>{fmtM2(minScale)} €/m²</span>
+                  <span>{fmtM2(maxScale)} €/m²</span>
+                </div>
               </div>
 
               {/* 3. Tabla de cálculo */}
@@ -609,15 +632,15 @@ export default function MadridVeredicto() {
                         <td className="num">{fmtM2(resultado.ref_base)} €/m²</td>
                       </tr>
                       <tr>
-                        <td>Ajuste por estado ({resultado.ajustes?.estado?.valor === 'a_reformar' ? 'A reformar' : resultado.ajustes?.estado?.valor === 'reformado' ? 'Reformado' : resultado.ajustes?.estado?.valor === 'buen_estado' ? 'Buen estado' : 'No indicado'})</td>
+                        <td>Ajuste por estado ({resultado.ajustes?.estado?.valor === 'a_reformar' ? 'a reformar' : resultado.ajustes?.estado?.valor === 'reformado' ? 'reformado' : resultado.ajustes?.estado?.valor === 'buen_estado' ? 'buen estado' : 'no indicado'})</td>
                         <td className="num">{fmtPct(resultado.ajustes?.estado?.pct ?? 0)}</td>
                       </tr>
                       <tr>
-                        <td>Ajuste por ascensor ({resultado.ajustes?.ascensor?.valor === 'si' ? 'Sí' : resultado.ajustes?.ascensor?.valor === 'no' ? 'No' : 'No indicado'})</td>
+                        <td>Ajuste por ascensor ({resultado.ajustes?.ascensor?.valor === 'si' ? 'sí' : resultado.ajustes?.ascensor?.valor === 'no' ? 'no' : 'no indicado'})</td>
                         <td className="num">{fmtPct(resultado.ajustes?.ascensor?.pct ?? 0)}</td>
                       </tr>
                       <tr>
-                        <td>Ajuste por tamaño (media zona {resultado.superficie_media} m²)</td>
+                        <td>Ajuste por tamaño (media zona {fmtEs(resultado.superficie_media, 1)} m²)</td>
                         <td className="num">{fmtPct(resultado.ajustes?.tamano?.pct ?? 0)}</td>
                       </tr>
                       <tr className="row-highlight">
@@ -636,20 +659,19 @@ export default function MadridVeredicto() {
 
               {/* 4. Frase de rango total para la superficie */}
               <div className="veredicto-total-range-box">
-                Para <strong>{metrosNum.toLocaleString('es-ES')} m²</strong>, lo razonable estaría entre{' '}
-                <strong>{Math.round(resultado.rango_total_bajo).toLocaleString('es-ES')}</strong> y{' '}
-                <strong>{Math.round(resultado.rango_total_alto).toLocaleString('es-ES')} {unidadTotal}</strong>.
+                Para <strong>{fmtEs(metrosNum, 0)} m²</strong>, lo razonable estaría entre{' '}
+                <strong>{fmtEs(Math.round(resultado.rango_total_bajo), 0)}</strong> y{' '}
+                <strong>{fmtEs(Math.round(resultado.rango_total_alto), 0)} {unidadTotal}</strong>.
               </div>
 
               {/* 5. Línea de confianza + 6. Aviso legal */}
               <div className="veredicto-confidence-footer">
                 <p className="veredicto-confidence-line">
-                  Confianza {resultado.confianza}
-                  {resultado.confianza_indirecta ? ' (confianza estimada)' : ''}:{' '}
+                  Fiabilidad de la referencia: {fiabilidad} · basada en{' '}
                   {resultado.num_transacciones !== null
-                    ? `${resultado.num_transacciones.toLocaleString('es-ES')} transacciones en ${resultado.barrio_nombre} (${resultado.anio_transacciones})`
-                    : `datos limitados en ${resultado.barrio_nombre}`}.
-                  {' '}Datos de {periodoTexto}. No considera planta, orientación ni calidad concreta.
+                    ? `${fmtEs(resultado.num_transacciones, 0)} compraventas registradas en ${resultado.barrio_nombre} (${resultado.anio_transacciones})`
+                    : `datos limitados en ${resultado.barrio_nombre}`}
+                  {isAlquilerRes ? ', no en alquileres' : ''}. Datos de {periodoTexto}. No considera planta, orientación ni calidad concreta.
                 </p>
                 <p className="veredicto-legal-note">
                   No es una tasación ni una garantía de precio.
