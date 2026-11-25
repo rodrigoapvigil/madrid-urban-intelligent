@@ -504,8 +504,9 @@
   border: none;
   background: transparent !important;
   padding: 0 0 8px 0 !important;
+  font-family: var(--font-matter, 'Inter', 'DM Sans', sans-serif) !important;
   font-size: 13px !important;
-  font-weight: 500 !important;
+  font-weight: 600 !important;
   letter-spacing: 0.08em !important;
   text-transform: uppercase !important;
   color: #BACCD6;
@@ -1108,6 +1109,14 @@ main.editorial-page:not(.editorial-page--methodology) { padding-bottom: 40px !im
    ========================================================================== */
 
 /* Alineación exacta de cabecera con el contenido (panel lateral y mapas) */
+.v2-root .site-header-container,
+.v2-root .mi-header-container {
+  background: rgba(10, 42, 79, 0.85) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
 .v2-root .site-header,
 .v2-root .mi-header {
   display: flex !important;
