@@ -3044,8 +3044,7 @@ const MadridDashboardV2: React.FC = () => {
             {/* KPI & MAPA SECTION */}
             <div className="v2-grid-main" data-dashboard-section="summary">
               <div className="v2-kpi-col">
-                <div className="v2-kpi-stack">
-
+                <div className="v2-kpi-static-head">
                   {!isMobile && <div className="v2-zone-period-controls">
                     <ZoneSearch
                       options={zoneSearchOptions}
@@ -3068,6 +3067,10 @@ const MadridDashboardV2: React.FC = () => {
                       {!isMobile && selectedDistrict !== 'Todos' && <small>{selectedBarrio !== 'Todos' ? `${formatZoneOption(selectedDistrict)} › ${formatZoneOption(selectedBarrio)}` : `Distrito · ${formatZoneOption(selectedDistrict)}`}</small>}
                     </div>
                   </div>
+                </div>
+
+                <div className="v2-kpi-scroll-shell">
+                  <div className="v2-kpi-stack">
 
                   {activeProfile.id === 'alquiler' && (() => {
                     const rent = Math.round(kpiData.p_vivienda || 0);
@@ -3887,6 +3890,7 @@ const MadridDashboardV2: React.FC = () => {
                       </>
                     );
                   })()}
+                  </div>
                 </div>
               </div>
 
