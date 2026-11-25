@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic';
 import ChartJS from 'chart.js/auto';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import { cssColorResolverPlugin, colorWithAlpha, resolveCssColor } from '../lib/colors';
-import { Activity, ArrowUpRight, Building2, ChevronDown, Compass, HelpCircle, Home, Info, Maximize2, RotateCcw, RotateCw, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
+import { Activity, ArrowUpRight, Building2, ChevronDown, Compass, HelpCircle, Home, Info, Maximize2, RotateCcw, RotateCw, Settings, SlidersHorizontal, Tag, X, ZoomIn, ZoomOut } from 'lucide-react';
 import './MadridDashboardV2.css';
 import './TrustArchitecture.css';
 import { TrustTelemetryBadge } from './TrustTelemetryBadge';
@@ -1033,6 +1033,11 @@ const MadridDashboardV2: React.FC = () => {
   const [userInvCapital, setUserInvCapital] = useState<string>('');
   const [userInvDuration, setUserInvDuration] = useState<string>('');
   const [showInvSim, setShowInvSim] = useState<boolean>(false);
+
+  // Accordion states (closed by default to level sidebar with maps)
+  const [isPurchaseSimOpen, setIsPurchaseSimOpen] = useState<boolean>(false);
+  const [isRentSimOpen, setIsRentSimOpen] = useState<boolean>(false);
+  const [isInvSimOpen, setIsInvSimOpen] = useState<boolean>(false);
 
   const [ltvPercent, setLtvPercent] = useState<number>(65);
   const [interestImpactData, setInterestImpactData] = useState<any[]>([]);
@@ -3162,18 +3167,6 @@ const MadridDashboardV2: React.FC = () => {
                     )}
                   </div>
 
-                  {activeProfile.id === 'inversion' && (
-                    <ExpenseYieldSimulator
-                      grossYield={Number(kpiData.p_m2) || 0.062}
-                      purchasePrice={Number(kpiData.p_vivienda) || 280000}
-                      monthlyRent={Number(kpiData.p_vivienda) && Number(kpiData.p_m2) ? Math.round((Number(kpiData.p_vivienda) * Number(kpiData.p_m2)) / 12) : 1450}
-                      onNetYieldChange={(netY, isNet) => {
-                        setNetYieldValue(netY);
-                        setIsNetYieldActive(isNet);
-                      }}
-                    />
-                  )}
-
                   <div className="v2-kpi-card">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <label>{activeProfile.id === 'inversion' ? 'Precio de inversión' : activeProfile.id === 'alquiler' ? 'Alquiler medio' : 'Precio medio de vivienda'}</label>
@@ -3193,175 +3186,7 @@ const MadridDashboardV2: React.FC = () => {
                     </div>
                   </div>
 
-                  {activeProfile.id === 'inversion' ? (
-                    <div className="v2-kpi-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <label>LTV Estimado (Loan-to-Value)</label>
-                        <InfoTooltip
-                          title="LTV (Loan-to-Value) / Financiación"
-                          description="Indica qué porcentaje del valor total del inmueble financias mediante hipoteca y cuánto aportas de tus propios ahorros."
-                          example="Un LTV del 70% significa que el banco aporta el 70% del precio y tú pagas el 30% restante con ahorros."
-                          ruleOfThumb="Para inversión los bancos suelen financiar el 60%-70%; para vivienda habitual hasta el 80%."
-                        />
-                      </div>
-
-                      <div className="v2-val" style={{ fontSize: '24px', margin: '4px 0 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                        <span>LTV: {ltvPercent}%</span>
-                        <span style={{ fontSize: '11px', fontWeight: '500', color: 'var(--azul-linea)' }}>
-                          Aporta: {100 - ltvPercent}%
-                        </span>
-                      </div>
-
-                      <div style={{ fontSize: '11px', color: '#BACCD6', display: 'flex', flexDirection: 'column', gap: '4px', borderTop: '1px solid rgba(186, 204, 214, 0.16)', paddingTop: '6px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ color: '#BACCD6' }}>Hipoteca Estimada:</span>
-                          <span style={{ fontWeight: '700', color: '#FFFFFF' }}>
-                            {new Intl.NumberFormat('es-ES').format(Math.round((kpiData.p_vivienda || 0) * (ltvPercent / 100)))}€
-                          </span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                          <span style={{ color: '#BACCD6' }}>Aportación Comprador:</span>
-                          <span style={{ fontWeight: '700', color: '#FFFFFF' }}>
-                            {new Intl.NumberFormat('es-ES').format(Math.round((kpiData.p_vivienda || 0) * ((100 - ltvPercent) / 100)))}€
-                          </span>
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', margin: '4px 0' }}>
-                        <div style={{ display: 'flex', gap: '4px' }}>
-                          {[60, 70, 80].map((val) => (
-                            <button
-                              key={val}
-                              onClick={() => setLtvPercent(val)}
-                              style={{
-                                flex: 1,
-                                padding: '4px 0',
-                                fontSize: '10px',
-                                fontWeight: '700',
-                                border: 'none',
-                                borderRadius: '4px',
-                                backgroundColor: ltvPercent === val ? activeProfile.color : 'rgba(255, 255, 255, 0.08)',
-                                color: ltvPercent === val ? '#FFFFFF' : '#BACCD6',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s'
-                              }}
-                            >
-                              Preset: {val}%
-                            </button>
-                          ))}
-                        </div>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', borderTop: '1px solid rgba(186, 204, 214, 0.16)', paddingTop: '6px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '9px', fontWeight: 'bold', color: '#BACCD6' }}>AJUSTE MANUAL LTV:</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
-                              <input
-                                type="number"
-                                min="10"
-                                max="100"
-                                value={ltvPercent}
-                                onChange={(e) => {
-                                  const val = Math.min(100, Math.max(10, parseInt(e.target.value) || 0));
-                                  setLtvPercent(val);
-                                }}
-                                style={{
-                                  width: '42px',
-                                  border: '1px solid rgba(0, 240, 255, 0.4)',
-                                  borderRadius: '4px',
-                                  padding: '2px 4px',
-                                  fontSize: '11px',
-                                  fontWeight: '700',
-                                  textAlign: 'center',
-                                  background: '#011024',
-                                  color: '#FFFFFF',
-                                  outline: 'none'
-                                }}
-                              />
-                              <span style={{ fontSize: '11px', fontWeight: '700', color: '#00F0FF' }}>%</span>
-                            </div>
-                          </div>
-
-                          <input
-                            type="range"
-                            min="10"
-                            max="100"
-                            value={ltvPercent}
-                            onChange={(e) => setLtvPercent(parseInt(e.target.value))}
-                            style={{
-                              width: '100%',
-                              cursor: 'pointer',
-                              accentColor: activeProfile.color,
-                              height: '4px',
-                              borderRadius: '2px',
-                              background: 'rgba(186, 204, 214, 0.2)',
-                              outline: 'none',
-                              margin: '2px 0'
-                            }}
-                          />
-                        </div>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', fontSize: '10px', color: '#BACCD6', fontWeight: '500', gap: '4px' }}>
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--coral)', flexShrink: 0 }}>
-                          <path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A5.5 5.5 0 0 0 7.5 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5" />
-                          <path d="M9 18h6" />
-                          <path d="M10 22h4" />
-                        </svg>
-                        <span style={{ color: '#00F0FF', fontWeight: '600' }}>
-                          {ltvPercent <= 65 ? 'Alto ahorro = Zona premium' : ltvPercent <= 75 ? 'Ahorro medio = Zona de estabilidad' : 'Financiación estándar'}
-                        </span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="v2-kpi-card">
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <label>Estado Mercado</label>
-                        <InfoTooltip
-                          title="Estado del Mercado Local"
-                          description="Indica la fase del ciclo inmobiliario según las operaciones recientes de compra y alquiler."
-                          example="Crecimiento (+): Precios al alza de forma sostenida. Ajuste (-): Moderación o descenso temporal de precios."
-                          ruleOfThumb="En 'Crecimiento', los precios tienden a subir si esperas; en 'Ajuste', hay más margen para negociar."
-                        />
-                      </div>
-                      <div className="v2-val" style={{ fontSize: '24px' }}>
-                        {kpiData.estado_mercado} {kpiData.estado_mercado === 'Crecimiento' ? '(+)' : kpiData.estado_mercado === 'Ajuste' ? '(-)' : ''}
-                      </div>
-                    </div>
-                  )}
-
-                  {activeProfile.id !== 'inversion' ? (
-                    <>
-                      <div className="v2-kpi-card">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <label>Var. Mensual</label>
-                          <InfoTooltip
-                            title="Variación Mensual"
-                            description="Porcentaje de subida o bajada del precio respecto al mes inmediatamente anterior."
-                            example="Un +1.2% indica que los precios subieron un 1.2% en los últimos 30 días respecto al mes previo."
-                            ruleOfThumb="Permite detectar aceleraciones o cambios rápidos de tendencia en el corto plazo."
-                          />
-                        </div>
-                        <div className={`v2-val accent ${Number(kpiData.v_mes) < 0 ? 'negative' : ''}`}>
-                          {formatSpanishPercentage(kpiData.v_mes, 1, true)}
-                        </div>
-                      </div>
-
-                      <div className="v2-kpi-card">
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <label>Var. Anual</label>
-                          <InfoTooltip
-                            title="Variación Anual (12 Meses)"
-                            description="La evolución acumulada del precio en el último año completo respecto al mismo mes del año anterior."
-                            example="Un +8.5% anual significa que una vivienda que costaba 200.000€ hace un año ahora se sitúa en torno a 217.000€."
-                            ruleOfThumb="Es el indicador más robusto para medir la tendencia real de fondo y la revalorización patrimonial."
-                          />
-                        </div>
-                        <div className={`v2-val accent ${Number(kpiData.v_anual) < 0 ? 'negative' : ''}`}>
-                          {formatSpanishPercentage(kpiData.v_anual, 1, true)}
-                        </div>
-                      </div>
-                    </>
-                  ) : (() => {
+                  {activeProfile.id === 'inversion' && (() => {
                     const amortizacionAnios = kpiData.p_m2 > 0 ? (1 / kpiData.p_m2) : 0;
                     return (
                       <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
@@ -3441,85 +3266,103 @@ const MadridDashboardV2: React.FC = () => {
                     }
 
                     return (
-                      <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--azul-linea)', letterSpacing: '0.5px' }}>
-                            PODER ADQUISITIVO {selectedBarrio !== 'Todos' ? 'DEL BARRIO' : (selectedDistrict !== 'Todos' ? 'DEL DISTRITO' : 'DE MADRID')}
-                          </label>
-                          <InfoTooltip
-                            title="Poder Adquisitivo y Años de Renta"
-                            description="Mide cuántos años de ingresos anuales brutos íntegros necesita una familia residente típica de esta zona para comprar una vivienda media."
-                            example="Si un piso medio cuesta 350.000€ y la renta media del hogar en la zona es de 50.000€/año, se necesitan 7 años íntegros de sueldo."
-                            ruleOfThumb="Menos de 5 años se considera asequible; entre 5 y 8 años moderado; más de 8 años supone un esfuerzo elevado."
-                          />
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          Precio medio vivienda: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{formatCurrencyInt(precioMedio, '€')}</strong>
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          Renta media {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ display: 'block', fontSize: '15px', color: '#FFFFFF', marginTop: '2px' }}>{formatCurrencyInt(rentaAnual, '€/año')}</strong>
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#BACCD6', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          <span>Años de renta media:</span>
-                          <strong style={{ fontSize: '18px', color: '#00F0FF', fontWeight: '800' }}>{aniosRenta > 0 ? aniosRenta.toFixed(1).replace('.', ',') : '—'} años</strong>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '600', color: statusColor }}>
-                          <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: statusColor }} />
-                          <span>{statusText}</span>
-                        </div>
-
-                        <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: '1px solid rgba(186, 204, 214, 0.16)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <span style={{ fontSize: '11px', fontWeight: '700', color: '#FFFFFF' }}>¿Tu situación es diferente?</span>
-
-                          <div>
-                            <label style={{ fontSize: '10px', color: '#BACCD6' }}>Ingresos anuales (€)</label>
-                            <input
-                              type="number"
-                              value={userPurchaseIncome}
-                              onChange={(e) => { setUserPurchaseIncome(e.target.value); setShowPurchaseSim(false); }}
-                              placeholder="Ej: 80000"
-                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
+                      <>
+                        <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', gap: '7px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--azul-linea)', letterSpacing: '0.5px' }}>
+                              PODER ADQUISITIVO {selectedBarrio !== 'Todos' ? 'DEL BARRIO' : (selectedDistrict !== 'Todos' ? 'DEL DISTRITO' : 'DE MADRID')}
+                            </label>
+                            <InfoTooltip
+                              title="Poder Adquisitivo y Años de Renta"
+                              description="Mide cuántos años de ingresos anuales brutos íntegros necesita una familia residente típica de esta zona para comprar una vivienda media."
+                              example="Si un piso medio cuesta 350.000€ y la renta media del hogar en la zona es de 50.000€/año, se necesitan 7 años íntegros de sueldo."
+                              ruleOfThumb="Menos de 5 años se considera asequible; entre 5 y 8 años moderado; más de 8 años supone un esfuerzo elevado."
                             />
                           </div>
-
-                          <div>
-                            <label style={{ fontSize: '10px', color: '#BACCD6' }}>Ahorros disponibles (€)</label>
-                            <input
-                              type="number"
-                              value={userPurchaseSavings}
-                              onChange={(e) => { setUserPurchaseSavings(e.target.value); setShowPurchaseSim(false); }}
-                              placeholder="Ej: 150000"
-                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
-                            />
+                          <div style={{ fontSize: '12px', color: '#BACCD6', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                            <span>Renta media {selectedBarrio !== 'Todos' ? 'barrio' : (selectedDistrict !== 'Todos' ? 'distrito' : 'Madrid')}:</span>
+                            <strong style={{ fontSize: '14px', color: '#FFFFFF' }}>{formatCurrencyInt(rentaAnual, '€/año')}</strong>
                           </div>
+                          <div style={{ fontSize: '12px', color: '#BACCD6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '4px', borderTop: '1px solid rgba(186, 204, 214, 0.12)' }}>
+                            <span>Años de renta media:</span>
+                            <strong style={{ fontSize: '18px', color: '#00F0FF', fontWeight: '800' }}>{aniosRenta > 0 ? aniosRenta.toFixed(1).replace('.', ',') : '—'} años</strong>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '600', color: statusColor }}>
+                            <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: statusColor }} />
+                            <span>{statusText}</span>
+                          </div>
+                        </div>
 
+                        <div className={`v2-sim-accordion ${isPurchaseSimOpen ? 'is-open' : ''}`}>
                           <button
-                            onClick={() => setShowPurchaseSim(true)}
-                            style={{ width: '100%', background: activeProfile.color, color: '#FFFFFF', border: 'none', padding: '7px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', transition: 'opacity 0.2s', marginTop: '4px' }}
+                            type="button"
+                            className="v2-sim-accordion-trigger"
+                            onClick={() => setIsPurchaseSimOpen(v => !v)}
+                            aria-expanded={isPurchaseSimOpen}
                           >
-                            Calcular MI caso
+                            <span className="v2-sim-accordion-label">
+                              <Settings size={14} className="v2-sim-gear" />
+                              <span>Simular mi capacidad de compra (Ahorros e Ingresos)</span>
+                            </span>
+                            <ChevronDown size={15} className={`v2-sim-chevron ${isPurchaseSimOpen ? 'rotated' : ''}`} />
                           </button>
-                        </div>
 
-                        {hasUserSim && (
-                          <div style={{ marginTop: '6px', padding: '10px', background: 'rgba(0, 240, 255, 0.12)', border: '1px solid rgba(0, 240, 255, 0.35)', borderRadius: '8px', fontSize: '12px', color: '#FFFFFF', display: 'flex', flexDirection: 'column', gap: '6px', animation: 'v2FadeIn 0.2s ease' }}>
-                            <div>
-                              <span style={{ color: '#BACCD6' }}>Con tus ingresos ({new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(parsedIncome)}€/año):</span>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                                <span>Serían <strong style={{ color: '#00F0FF' }}>{userAnios.toFixed(1)} años</strong> → <strong style={{ color: userAniosColor }}>{userAniosStatus}</strong></span>
-                                <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: userAniosColor }} />
+                          {isPurchaseSimOpen && (
+                            <div className="v2-sim-accordion-body">
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <div>
+                                  <label style={{ fontSize: '10px', color: '#BACCD6' }}>Ingresos anuales (€)</label>
+                                  <input
+                                    type="number"
+                                    value={userPurchaseIncome}
+                                    onChange={(e) => { setUserPurchaseIncome(e.target.value); setShowPurchaseSim(false); }}
+                                    placeholder="Ej: 80000"
+                                    style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
+                                  />
+                                </div>
+
+                                <div>
+                                  <label style={{ fontSize: '10px', color: '#BACCD6' }}>Ahorros disponibles (€)</label>
+                                  <input
+                                    type="number"
+                                    value={userPurchaseSavings}
+                                    onChange={(e) => { setUserPurchaseSavings(e.target.value); setShowPurchaseSim(false); }}
+                                    placeholder="Ej: 150000"
+                                    style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
+                                  />
+                                </div>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setShowPurchaseSim(true)}
+                                  style={{ width: '100%', background: activeProfile.color, color: '#FFFFFF', border: 'none', padding: '7px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', transition: 'opacity 0.2s', marginTop: '2px' }}
+                                >
+                                  Calcular MI caso
+                                </button>
                               </div>
+
+                              {hasUserSim && (
+                                <div style={{ marginTop: '8px', padding: '10px', background: 'rgba(0, 240, 255, 0.12)', border: '1px solid rgba(0, 240, 255, 0.35)', borderRadius: '8px', fontSize: '12px', color: '#FFFFFF', display: 'flex', flexDirection: 'column', gap: '6px', animation: 'v2FadeIn 0.2s ease' }}>
+                                  <div>
+                                    <span style={{ color: '#BACCD6' }}>Con tus ingresos ({new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(parsedIncome)}€/año):</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                                      <span>Serían <strong style={{ color: '#00F0FF' }}>{userAnios.toFixed(1)} años</strong> → <strong style={{ color: userAniosColor }}>{userAniosStatus}</strong></span>
+                                      <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: userAniosColor }} />
+                                    </div>
+                                  </div>
+                                  <div>
+                                    <span style={{ color: '#BACCD6' }}>Con tus ahorros ({new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(parsedSavings)}€):</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
+                                      <span>Entrada: <strong style={{ color: '#00F0FF' }}>{userEntradaPct.toFixed(0)}%</strong> → <strong style={{ color: userEntradaColor }}>{userEntradaStatus}</strong></span>
+                                      <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: userEntradaColor }} />
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
-                            <div>
-                              <span style={{ color: '#BACCD6' }}>Con tus ahorros ({new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(parsedSavings)}€):</span>
-                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '2px' }}>
-                                <span>Entrada: <strong style={{ color: '#00F0FF' }}>{userEntradaPct.toFixed(0)}%</strong> → <strong style={{ color: userEntradaColor }}>{userEntradaStatus}</strong></span>
-                                <span style={{ display: 'inline-block', width: '6px', height: '6px', borderRadius: '50%', backgroundColor: userEntradaColor }} />
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
+                          )}
+                        </div>
+                      </>
                     );
                   })()}
 
@@ -3536,81 +3379,98 @@ const MadridDashboardV2: React.FC = () => {
                     const userEffortColor = userEffort <= 30 ? '#34d399' : userEffort <= 40 ? '#fbbf24' : '#f87171';
 
                     return (
-                      <div className="v2-kpi-card v2-effort-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <label style={{ fontSize: '10px', fontWeight: 'bold', color: '#fbbf24', letterSpacing: '0.5px' }}>ESFUERZO DE ALQUILER</label>
-                          <InfoTooltip
-                            title="Tasa de Esfuerzo Financiero en Alquiler"
-                            description="Porcentaje del presupuesto mensual que un hogar o inquilino destina al pago del alquiler respecto a su renta neta."
-                            example="Para un alquiler de 1.200 € y unos ingresos netos de 3.000 €, el esfuerzo es del 40 %."
-                            ruleOfThumb="El Banco de España recomienda no superar el 30 % - 35 % de los ingresos netos. Superar el 40 % se considera sobreesfuerzo crítico."
-                          />
-                        </div>
-
-                        <div style={{ fontSize: '11.5px', color: '#BACCD6', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-                          <span>Renta neta media hogar <span style={{ fontSize: '10px', color: '#00F0FF', fontWeight: 600 }}>(dato INE)</span>:</span>
-                          <strong style={{ fontSize: '13px', color: '#FFFFFF' }}>
-                            {rentaMediaMensual > 0 ? formatCurrencyInt(rentaMediaMensual, '€/mes') : '—'}
-                          </strong>
-                        </div>
-                        <span style={{ fontSize: '10px', color: '#8fa8be', lineHeight: '1.25', marginTop: '-3px' }}>
-                          Renta neta media por hogar (Fuente: INE)
-                        </span>
-
-                        <div style={{ fontSize: '12px', color: '#BACCD6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px', paddingTop: '6px', borderTop: '1px solid rgba(186, 204, 214, 0.12)' }}>
-                          <span>Esfuerzo medio hogar:</span>
-                          <strong style={{ fontSize: '17px', color: '#fbbf24', fontWeight: '800' }}>
-                            {dedicar > 0 ? `${dedicar.toFixed(1).replace('.', ',')} %` : '—'}
-                          </strong>
-                        </div>
-
-                        <div style={{ marginTop: '6px', paddingTop: '8px', borderTop: '1px solid rgba(186, 204, 214, 0.16)' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <label style={{ fontSize: '11px', fontWeight: '700', color: '#FFFFFF' }}>Calcula con tu sueldo</label>
-                            <span style={{ fontSize: '10px', color: '#91b0c2' }}>Neto mensual</span>
+                      <>
+                        <div className="v2-kpi-card v2-effort-card" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <label style={{ fontSize: '10px', fontWeight: 'bold', color: '#fbbf24', letterSpacing: '0.5px' }}>ESFUERZO DE ALQUILER</label>
+                            <InfoTooltip
+                              title="Tasa de Esfuerzo Financiero en Alquiler"
+                              description="Porcentaje del presupuesto mensual que un hogar o inquilino destina al pago del alquiler respecto a su renta neta."
+                              example="Para un alquiler de 1.200 € y unos ingresos netos de 3.000 €, el esfuerzo es del 40 %."
+                              ruleOfThumb="El Banco de España recomienda no superar el 30 % - 35 % de los ingresos netos. Superar el 40 % se considera sobreesfuerzo crítico."
+                            />
                           </div>
-                          <input
-                            type="number"
-                            value={userRentSalary}
-                            onChange={(e) => setUserRentSalary(e.target.value)}
-                            placeholder="Ej. 2.100 €/mes"
-                            aria-label="Sueldo neto mensual para calcular esfuerzo"
-                            style={{ width: '100%', padding: '6px 10px', borderRadius: '7px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.35)', fontSize: '12px', marginTop: '4px', outline: 'none' }}
-                          />
-                          <span style={{ fontSize: '10px', color: '#8fa8be', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
-                            🔒 Se calcula en tu navegador y no se guarda
-                          </span>
+
+                          <div style={{ fontSize: '11.5px', color: '#BACCD6', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                            <span>Renta neta media hogar <span style={{ fontSize: '10px', color: '#00F0FF', fontWeight: 600 }}>(dato INE)</span>:</span>
+                            <strong style={{ fontSize: '13px', color: '#FFFFFF' }}>
+                              {rentaMediaMensual > 0 ? formatCurrencyInt(rentaMediaMensual, '€/mes') : '—'}
+                            </strong>
+                          </div>
+
+                          <div style={{ fontSize: '12px', color: '#BACCD6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px', paddingTop: '6px', borderTop: '1px solid rgba(186, 204, 214, 0.12)' }}>
+                            <span>Esfuerzo medio hogar:</span>
+                            <strong style={{ fontSize: '18px', color: '#fbbf24', fontWeight: '800' }}>
+                              {dedicar > 0 ? `${dedicar.toFixed(1).replace('.', ',')} %` : '—'}
+                            </strong>
+                          </div>
                         </div>
 
-                        {hasUserSalary && (
-                          <div style={{ marginTop: '4px', padding: '9px 10px', background: 'rgba(2, 20, 43, 0.85)', border: `1px solid ${userEffortColor}55`, borderRadius: '8px', animation: 'v2FadeIn 0.2s ease' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                              <span style={{ fontSize: '11.5px', color: '#FFFFFF', fontWeight: '600' }}>Tu esfuerzo personal:</span>
-                              <strong style={{ color: userEffortColor, fontSize: '15px', fontWeight: '800' }}>
-                                {userEffort.toFixed(1).replace('.', ',')} %
-                              </strong>
-                            </div>
+                        <div className={`v2-sim-accordion ${isRentSimOpen ? 'is-open' : ''}`}>
+                          <button
+                            type="button"
+                            className="v2-sim-accordion-trigger"
+                            onClick={() => setIsRentSimOpen(v => !v)}
+                            aria-expanded={isRentSimOpen}
+                          >
+                            <span className="v2-sim-accordion-label">
+                              <Settings size={14} className="v2-sim-gear" />
+                              <span>Calcular esfuerzo según mi nómina neta</span>
+                            </span>
+                            <ChevronDown size={15} className={`v2-sim-chevron ${isRentSimOpen ? 'rotated' : ''}`} />
+                          </button>
 
-                            {/* Medidor visual interactivo con marca del 30% */}
-                            <div style={{ position: 'relative', width: '100%', height: '6px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '999px', margin: '7px 0 4px', overflow: 'hidden' }}>
-                              <div style={{ height: '100%', width: `${Math.min(100, (userEffort / 60) * 100)}%`, background: userEffortColor, borderRadius: '999px', transition: 'width 0.25s ease' }} />
-                            </div>
-                            <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '9.5px', color: '#8fa8be' }}>
-                              <span>0 %</span>
-                              <span style={{ color: userEffort <= 30 ? '#34d399' : '#fbbf24', fontWeight: '700' }}>▲ Marca recomendada: 30 %</span>
-                              <span>60 %+</span>
-                            </div>
+                          {isRentSimOpen && (
+                            <div className="v2-sim-accordion-body">
+                              <div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <label style={{ fontSize: '11px', fontWeight: '700', color: '#FFFFFF' }}>Calcula con tu sueldo</label>
+                                  <span style={{ fontSize: '10px', color: '#91b0c2' }}>Neto mensual</span>
+                                </div>
+                                <input
+                                  type="number"
+                                  value={userRentSalary}
+                                  onChange={(e) => setUserRentSalary(e.target.value)}
+                                  placeholder="Ej. 2.100 €/mes"
+                                  aria-label="Sueldo neto mensual para calcular esfuerzo"
+                                  style={{ width: '100%', padding: '6px 10px', borderRadius: '7px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.35)', fontSize: '12px', marginTop: '4px', outline: 'none' }}
+                                />
+                                <span style={{ fontSize: '10px', color: '#8fa8be', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+                                  🔒 Se calcula en tu navegador y no se guarda
+                                </span>
+                              </div>
 
-                            <p style={{ margin: '5px 0 0', fontSize: '10.5px', color: userEffortColor, fontWeight: '600' }}>
-                              {userEffort <= 30
-                                ? '✓ Dentro del límite recomendado (≤ 30 %)'
-                                : userEffort <= 40
-                                  ? '⚠ Esfuerzo moderado-alto (30 % – 40 %)'
-                                  : '✕ Sobreesfuerzo financiero (> 40 % según Banco de España)'}
-                            </p>
-                          </div>
-                        )}
-                      </div>
+                              {hasUserSalary && (
+                                <div style={{ marginTop: '8px', padding: '9px 10px', background: 'rgba(2, 20, 43, 0.85)', border: `1px solid ${userEffortColor}55`, borderRadius: '8px', animation: 'v2FadeIn 0.2s ease' }}>
+                                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{ fontSize: '11.5px', color: '#FFFFFF', fontWeight: '600' }}>Tu esfuerzo personal:</span>
+                                    <strong style={{ color: userEffortColor, fontSize: '15px', fontWeight: '800' }}>
+                                      {userEffort.toFixed(1).replace('.', ',')} %
+                                    </strong>
+                                  </div>
+
+                                  <div style={{ position: 'relative', width: '100%', height: '6px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '999px', margin: '7px 0 4px', overflow: 'hidden' }}>
+                                    <div style={{ height: '100%', width: `${Math.min(100, (userEffort / 60) * 100)}%`, background: userEffortColor, borderRadius: '999px', transition: 'width 0.25s ease' }} />
+                                  </div>
+                                  <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'space-between', fontSize: '9.5px', color: '#8fa8be' }}>
+                                    <span>0 %</span>
+                                    <span style={{ color: userEffort <= 30 ? '#34d399' : '#fbbf24', fontWeight: '700' }}>▲ Marca recomendada: 30 %</span>
+                                    <span>60 %+</span>
+                                  </div>
+
+                                  <p style={{ margin: '5px 0 0', fontSize: '10.5px', color: userEffortColor, fontWeight: '600' }}>
+                                    {userEffort <= 30
+                                      ? '✓ Dentro del límite recomendado (≤ 30 %)'
+                                      : userEffort <= 40
+                                        ? '⚠ Esfuerzo moderado-alto (30 % – 40 %)'
+                                        : '✕ Sobreesfuerzo financiero (> 40 % según Banco de España)'}
+                                  </p>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </>
                     );
                   })()}
 
@@ -3654,83 +3514,199 @@ const MadridDashboardV2: React.FC = () => {
                     const annualGain = duracion > 0 ? totalGain / duracion : 0;
 
                     return (
-                      <div className="v2-kpi-card" style={{ border: `1.5px solid ${activeProfile.color}44`, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                          <label style={{ fontSize: '10px', fontWeight: 'bold', color: 'var(--azul-linea)', letterSpacing: '0.5px' }}>OPORTUNIDAD DE INVERSIÓN</label>
-                          <InfoTooltip
-                            title="Oportunidad y Rentabilidad de Inversión"
-                            description="Combina el rendimiento neto del alquiler con el volumen anual de transacciones para evaluar qué tan rápido y rentable es invertir aquí."
-                            example="Una rentabilidad neta del 4,5% con alta liquidez permite ingresar rentas estables con facilidad para vender si necesitas recuperar el capital."
-                            ruleOfThumb="A mayor liquidez (más de 300 transacciones/año), menor riesgo de quedarte atrapado con el inmueble en caso de querer venderlo."
-                          />
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          GRM {selectedBarrio !== 'Todos' ? 'del barrio' : (selectedDistrict !== 'Todos' ? 'del distrito' : 'de Madrid')}: <strong style={{ fontSize: '15px', color: '#FFFFFF', display: 'block', marginTop: '2px' }}>{grm > 0 ? grm.toFixed(1).replace('.', ',') : '—'} años <span style={{ fontSize: '10px', fontWeight: 'normal', color: '#00F0FF' }}>(recuperación)</span></strong>
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          Rentabilidad neta esperada: <strong style={{ fontSize: '16px', display: 'block', color: '#00F0FF', fontWeight: '800', marginTop: '2px' }}>{roiNeto > 0 ? `${roiNeto.toFixed(1).replace('.', ',')} %/año` : '—'}</strong>
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#BACCD6' }}>
-                          Volumen de transacciones: <strong style={{ fontSize: '15px', color: '#FFFFFF' }}>{formatCurrencyInt(transacciones, 'trans./año')}</strong>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '11px', fontWeight: '600', color: liquidezColor }}>
-                          <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', backgroundColor: liquidezColor }} />
-                          <span>{liquidezText}</span>
-                        </div>
+                      <div className={`v2-sim-accordion ${isInvSimOpen ? 'is-open' : ''}`}>
+                        <button
+                          type="button"
+                          className="v2-sim-accordion-trigger"
+                          onClick={() => setIsInvSimOpen(v => !v)}
+                          aria-expanded={isInvSimOpen}
+                        >
+                          <span className="v2-sim-accordion-label">
+                            <Settings size={14} className="v2-sim-gear" />
+                            <span>Simular apalancamiento hipotecario (LTV) y gastos</span>
+                          </span>
+                          <ChevronDown size={15} className={`v2-sim-chevron ${isInvSimOpen ? 'rotated' : ''}`} />
+                        </button>
 
-                        <div style={{ marginTop: '8px', paddingTop: '10px', borderTop: '1px solid rgba(186, 204, 214, 0.16)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                          <span style={{ fontSize: '11px', fontWeight: '700', color: '#FFFFFF' }}>¿Quieres simular tu inversión?</span>
-
-                          <div>
-                            <label style={{ fontSize: '10px', color: '#BACCD6' }}>Capital inicial (€)</label>
-                            <input
-                              type="number"
-                              value={userInvCapital}
-                              onChange={(e) => { setUserInvCapital(e.target.value); setShowInvSim(false); }}
-                              placeholder="Ej: 300000"
-                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
+                        {isInvSimOpen && (
+                          <div className="v2-sim-accordion-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <ExpenseYieldSimulator
+                              grossYield={Number(kpiData.p_m2) || 0.062}
+                              purchasePrice={Number(kpiData.p_vivienda) || 280000}
+                              monthlyRent={Number(kpiData.p_vivienda) && Number(kpiData.p_m2) ? Math.round((Number(kpiData.p_vivienda) * Number(kpiData.p_m2)) / 12) : 1450}
+                              onNetYieldChange={(netY, isNet) => {
+                                setNetYieldValue(netY);
+                                setIsNetYieldActive(isNet);
+                              }}
                             />
-                          </div>
 
-                          <div>
-                            <label style={{ fontSize: '10px', color: '#BACCD6' }}>Duración (años)</label>
-                            <input
-                              type="number"
-                              value={userInvDuration}
-                              onChange={(e) => { setUserInvDuration(e.target.value); setShowInvSim(false); }}
-                              placeholder="Ej: 5"
-                              style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
-                            />
-                          </div>
+                            {/* Selector de LTV */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', borderTop: '1px solid rgba(186, 204, 214, 0.16)', paddingTop: '10px' }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                <label style={{ fontSize: '10px', fontWeight: 'bold', color: '#BACCD6', letterSpacing: '0.5px' }}>LTV ESTIMADO (LOAN-TO-VALUE)</label>
+                                <InfoTooltip
+                                  title="LTV (Loan-to-Value) / Financiación"
+                                  description="Indica qué porcentaje del valor total del inmueble financias mediante hipoteca y cuánto aportas de tus propios ahorros."
+                                  example="Un LTV del 70% significa que el banco aporta el 70% del precio y tú pagas el 30% restante con ahorros."
+                                  ruleOfThumb="Para inversión los bancos suelen financiar el 60%-70%; para vivienda habitual hasta el 80%."
+                                />
+                              </div>
 
-                          <button
-                            onClick={() => setShowInvSim(true)}
-                            style={{ width: '100%', background: activeProfile.color, color: '#FFFFFF', border: 'none', padding: '7px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', transition: 'opacity 0.2s', marginTop: '4px' }}
-                          >
-                            Ver proyección
-                          </button>
-                        </div>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', fontSize: '18px', fontWeight: '800', color: '#FFFFFF' }}>
+                                <span>LTV: {ltvPercent}%</span>
+                                <span style={{ fontSize: '11px', fontWeight: '500', color: 'var(--azul-linea)' }}>
+                                  Aporta: {100 - ltvPercent}%
+                                </span>
+                              </div>
 
-                        {hasInvSim && (
-                          <div style={{ marginTop: '6px', padding: '10px', background: 'var(--blanco-humo)', borderRadius: '8px', fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '6px', animation: 'v2FadeIn 0.2s ease', maxHeight: '180px', overflowY: 'auto' }}>
-                            <strong style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--azul-linea)' }}>Estimación simulada</strong>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', borderBottom: '1px solid var(--humo-2)', paddingBottom: '6px' }}>
-                              {projectionRows.map(row => (
-                                <div key={row.year} style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                  <span>Año {row.year}:</span>
-                                  <span>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(row.from)}€ → <strong>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(row.to)}€</strong></span>
+                              <div style={{ fontSize: '11px', color: '#BACCD6', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                  <span>Hipoteca Estimada:</span>
+                                  <span style={{ fontWeight: '700', color: '#FFFFFF' }}>
+                                    {new Intl.NumberFormat('es-ES').format(Math.round((kpiData.p_vivienda || 0) * (ltvPercent / 100)))}€
+                                  </span>
                                 </div>
-                              ))}
+                                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                  <span>Aportación Comprador:</span>
+                                  <span style={{ fontWeight: '700', color: '#FFFFFF' }}>
+                                    {new Intl.NumberFormat('es-ES').format(Math.round((kpiData.p_vivienda || 0) * ((100 - ltvPercent) / 100)))}€
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div style={{ display: 'flex', gap: '4px' }}>
+                                {[60, 70, 80].map((val) => (
+                                  <button
+                                    key={val}
+                                    type="button"
+                                    onClick={() => setLtvPercent(val)}
+                                    style={{
+                                      flex: 1,
+                                      padding: '4px 0',
+                                      fontSize: '10px',
+                                      fontWeight: '700',
+                                      border: 'none',
+                                      borderRadius: '4px',
+                                      backgroundColor: ltvPercent === val ? activeProfile.color : 'rgba(255, 255, 255, 0.08)',
+                                      color: ltvPercent === val ? '#FFFFFF' : '#BACCD6',
+                                      cursor: 'pointer',
+                                      transition: 'all 0.2s'
+                                    }}
+                                  >
+                                    Preset: {val}%
+                                  </button>
+                                ))}
+                              </div>
+
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                  <span style={{ fontSize: '9px', fontWeight: 'bold', color: '#BACCD6' }}>AJUSTE MANUAL LTV:</span>
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '2px' }}>
+                                    <input
+                                      type="number"
+                                      min="10"
+                                      max="100"
+                                      value={ltvPercent}
+                                      onChange={(e) => {
+                                        const val = Math.min(100, Math.max(10, parseInt(e.target.value) || 0));
+                                        setLtvPercent(val);
+                                      }}
+                                      style={{
+                                        width: '42px',
+                                        border: '1px solid rgba(0, 240, 255, 0.4)',
+                                        borderRadius: '4px',
+                                        padding: '2px 4px',
+                                        fontSize: '11px',
+                                        fontWeight: '700',
+                                        textAlign: 'center',
+                                        background: '#011024',
+                                        color: '#FFFFFF',
+                                        outline: 'none'
+                                      }}
+                                    />
+                                    <span style={{ fontSize: '11px', fontWeight: '700', color: '#00F0FF' }}>%</span>
+                                  </div>
+                                </div>
+                                <input
+                                  type="range"
+                                  min="10"
+                                  max="100"
+                                  value={ltvPercent}
+                                  onChange={(e) => setLtvPercent(parseInt(e.target.value))}
+                                  style={{
+                                    width: '100%',
+                                    cursor: 'pointer',
+                                    accentColor: activeProfile.color,
+                                    height: '4px',
+                                    borderRadius: '2px',
+                                    background: 'rgba(186, 204, 214, 0.2)',
+                                    outline: 'none'
+                                  }}
+                                />
+                              </div>
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', color: 'var(--azul-noche)' }}>
-                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span>Ganancia total:</span>
-                                <strong style={{ color: 'var(--azul-linea)' }}>+{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(totalGain)}€ (+{gainPct.toFixed(0)}%)</strong>
+
+                            {/* Simulador de inversión personal */}
+                            <div style={{ borderTop: '1px solid rgba(186, 204, 214, 0.16)', paddingTop: '10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#BACCD6' }}>
+                                <span>Liquidez local ({formatCurrencyInt(transacciones, 'trans./año')})</span>
+                                <span style={{ color: liquidezColor, fontWeight: '600' }}>{liquidezText}</span>
                               </div>
-                              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                                <span>Ganancia anual:</span>
-                                <strong>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(annualGain)}€/año</strong>
+                              <span style={{ fontSize: '11px', fontWeight: '700', color: '#FFFFFF', marginTop: '2px' }}>Proyección de capital</span>
+
+                              <div>
+                                <label style={{ fontSize: '10px', color: '#BACCD6' }}>Capital inicial (€)</label>
+                                <input
+                                  type="number"
+                                  value={userInvCapital}
+                                  onChange={(e) => { setUserInvCapital(e.target.value); setShowInvSim(false); }}
+                                  placeholder="Ej: 300000"
+                                  style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
+                                />
                               </div>
+
+                              <div>
+                                <label style={{ fontSize: '10px', color: '#BACCD6' }}>Duración (años)</label>
+                                <input
+                                  type="number"
+                                  value={userInvDuration}
+                                  onChange={(e) => { setUserInvDuration(e.target.value); setShowInvSim(false); }}
+                                  placeholder="Ej: 5"
+                                  style={{ width: '100%', padding: '6px 10px', borderRadius: '6px', background: '#011024', color: '#FFFFFF', border: '1.5px solid rgba(0, 240, 255, 0.4)', fontSize: '11px', marginTop: '2px', outline: 'none' }}
+                                />
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={() => setShowInvSim(true)}
+                                style={{ width: '100%', background: activeProfile.color, color: '#FFFFFF', border: 'none', padding: '7px', borderRadius: '6px', fontSize: '11px', fontWeight: '700', cursor: 'pointer', transition: 'opacity 0.2s', marginTop: '2px' }}
+                              >
+                                Ver proyección
+                              </button>
+
+                              {hasInvSim && (
+                                <div style={{ marginTop: '6px', padding: '10px', background: 'var(--blanco-humo)', borderRadius: '8px', fontSize: '11px', display: 'flex', flexDirection: 'column', gap: '6px', animation: 'v2FadeIn 0.2s ease', maxHeight: '180px', overflowY: 'auto' }}>
+                                  <strong style={{ fontSize: '10px', textTransform: 'uppercase', color: 'var(--azul-linea)' }}>Estimación simulada</strong>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', borderBottom: '1px solid var(--humo-2)', paddingBottom: '6px' }}>
+                                    {projectionRows.map(row => (
+                                      <div key={row.year} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                        <span>Año {row.year}:</span>
+                                        <span>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(row.from)}€ → <strong>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(row.to)}€</strong></span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', color: 'var(--azul-noche)' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                      <span>Ganancia total:</span>
+                                      <strong style={{ color: 'var(--azul-linea)' }}>+{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(totalGain)}€ (+{gainPct.toFixed(0)}%)</strong>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                                      <span>Ganancia anual:</span>
+                                      <strong>{new Intl.NumberFormat('es-ES', { maximumFractionDigits: 0 }).format(annualGain)}€/año</strong>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </div>
                         )}
