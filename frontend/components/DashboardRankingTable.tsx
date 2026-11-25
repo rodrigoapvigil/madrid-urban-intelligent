@@ -349,7 +349,7 @@ export default function DashboardRankingTable({
                     : formatEuro(previous, 0)
                 : null;
               const investmentPct = rawVal > 1 ? rawVal : rawVal * 100;
-              const valueLabel = isDemand ? `${formatNumber(rawVal, 0)} trans.` : isInvestment ? `${formatNumber(investmentPct, 1)}%` : price;
+              const valueLabel = isDemand ? `${formatGroupedIntEs(rawVal)} trans.` : isInvestment ? `${formatNumber(investmentPct, 1)}%` : price;
               const district = level === 'Barrios' ? districtForZone?.(item.name) : undefined;
               const selected = Boolean(highlightedZone && normalize(highlightedZone) === normalize(item.name));
               return (

@@ -721,6 +721,7 @@ const MadridDashboardV2: React.FC = () => {
     topDist: [], botDist: [], topBarr: [], botBarr: []
   });
   const [rankingPreviousValues, setRankingPreviousValues] = useState<Record<string, number>>({});
+  const [ventaRentM2, setVentaRentM2] = useState<number>(0);
   const [isRankingsLoading, setIsRankingsLoading] = useState(true);
   const [affordabilityData, setAffordabilityData] = useState<any[]>([]);
   const [seasonalTrend, setSeasonalTrend] = useState<any[]>([]);
@@ -1379,15 +1380,33 @@ const MadridDashboardV2: React.FC = () => {
   }, [selectedYear, selectedMonth, activeProfile.op, activeProfile.id, selectedZoneB, comparisonZoneB, filtersReady, rejectInvalidRentalSeries, reloadKeyB]);
 
   useEffect(() => {
+    if (!filtersReady || !selectedYear || !selectedMonth || activeProfile.id !== 'venta') return;
+    let isCurrent = true;
+    apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=alquiler&district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => {
+        if (!isCurrent || !data) return;
+        const val = Number(data.precio_m2);
+        if (Number.isFinite(val) && val > 0 && val <= 100) {
+          setVentaRentM2(val);
+        }
+      })
+      .catch(() => {});
+    return () => { isCurrent = false; };
+  }, [filtersReady, selectedYear, selectedMonth, activeProfile.id, selectedDistrict, selectedBarrio]);
+
+  useEffect(() => {
     if (!filtersReady || !selectedYear || !selectedMonth) return;
     let isCurrent = true;
     setIsRankingsLoading(true);
     if (activeProfile.id === 'venta' && rankingMetric === 'demand') {
+      const currentLiqYear = Math.min(Number(selectedYear), 2025);
+      const prevLiqYear = currentLiqYear - 1;
       Promise.all([
-        apiFetch(`/liquidity?year=${selectedYear}&level=distrito`).then(r => r.ok ? r.json() : []).catch(() => []),
-        apiFetch(`/liquidity?year=${selectedYear}&level=barrio`).then(r => r.ok ? r.json() : []).catch(() => []),
-        Number(selectedYear) > 2023 ? apiFetch(`/liquidity?year=${Number(selectedYear) - 1}&level=distrito`).then(r => r.ok ? r.json() : []).catch(() => []) : Promise.resolve([]),
-        Number(selectedYear) > 2023 ? apiFetch(`/liquidity?year=${Number(selectedYear) - 1}&level=barrio`).then(r => r.ok ? r.json() : []).catch(() => []) : Promise.resolve([]),
+        apiFetch(`/liquidity?year=${currentLiqYear}&level=distrito`).then(r => r.ok ? r.json() : []).catch(() => []),
+        apiFetch(`/liquidity?year=${currentLiqYear}&level=barrio`).then(r => r.ok ? r.json() : []).catch(() => []),
+        prevLiqYear >= 2023 ? apiFetch(`/liquidity?year=${prevLiqYear}&level=distrito`).then(r => r.ok ? r.json() : []).catch(() => []) : Promise.resolve([]),
+        prevLiqYear >= 2023 ? apiFetch(`/liquidity?year=${prevLiqYear}&level=barrio`).then(r => r.ok ? r.json() : []).catch(() => []) : Promise.resolve([]),
       ]).then(([dist, barr, previousDist, previousBarr]) => {
         if (!isCurrent) return;
         const mapLiquidity = (list: any[]) => list.map(item => ({ name: item.name, value: item.transactions }));
@@ -5045,9 +5064,8 @@ const MadridDashboardV2: React.FC = () => {
               <section className="v2-dilema-section" data-dashboard-section="dilemma" style={{ marginTop: '36px' }}>
                 <DilemaVenderAlquilar
                   currentZoneName={selectedBarrio !== 'Todos' ? formatZoneOption(selectedBarrio) : selectedDistrict !== 'Todos' ? formatZoneOption(selectedDistrict) : 'Madrid'}
-                  rentPriceM2={Number(kpiData.p_m2) || 21.6}
-                  salePriceM2={Number(kpiData.p_m2) || 4350}
-                  annualYield={Number(kpiData.rentabilidad) || 0.058}
+                  rentPriceM2={ventaRentM2}
+                  salePriceM2={Number(kpiData.p_m2) || 0}
                 />
               </section>
             )}

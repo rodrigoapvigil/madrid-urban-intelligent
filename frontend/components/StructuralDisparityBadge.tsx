@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { AlertCircle, ChevronDown, ChevronUp, Building2, Wallet, MapPin, Layers } from 'lucide-react';
+import { AlertCircle, ChevronDown, ChevronUp, Wallet } from 'lucide-react';
 
 interface StructuralDisparityBadgeProps {
   zoneAName: string;
@@ -14,6 +14,9 @@ interface StructuralDisparityBadgeProps {
   className?: string;
   headerRight?: React.ReactNode;
 }
+
+const formatGroupedIntEs = (val: number) =>
+  Math.round(val).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
 export const StructuralDisparityBadge: React.FC<StructuralDisparityBadgeProps> = ({
   zoneAName,
@@ -47,20 +50,8 @@ export const StructuralDisparityBadge: React.FC<StructuralDisparityBadgeProps> =
   // Only display if gap is > 20%
   if (diffPercent < 20) return renderFallbackRight();
 
-  const higherZone = priceA >= priceB ? zoneAName : zoneBName;
-  const lowerZone = priceA < priceB ? zoneAName : zoneBName;
-
-  // Derive realistic urban metrics based on zone profiles
-  const isHistoricCenter = (name: string) =>
-    ['salamanca', 'recoletos', 'castellana', 'jeronimos', 'centro', 'chamberi', 'almagro'].some((k) =>
-      name.toLowerCase().includes(k)
-    );
-
-  const yearA = isHistoricCenter(zoneAName) ? 1935 : 1978;
-  const yearB = isHistoricCenter(zoneBName) ? 1935 : 1982;
-
-  const incA = incomeA && incomeA > 0 ? incomeA : (isHistoricCenter(zoneAName) ? 38500 : 21200);
-  const incB = incomeB && incomeB > 0 ? incomeB : (isHistoricCenter(zoneBName) ? 38500 : 21200);
+  const hasIncomeA = typeof incomeA === 'number' && Number.isFinite(incomeA) && incomeA > 0;
+  const hasIncomeB = typeof incomeB === 'number' && Number.isFinite(incomeB) && incomeB > 0;
 
   return (
     <div className={`v2-disparity-container ${className}`} style={{ width: '100%', margin: '14px 0 16px' }}>
@@ -71,10 +62,10 @@ export const StructuralDisparityBadge: React.FC<StructuralDisparityBadgeProps> =
           onClick={() => setIsOpen(!isOpen)}
           aria-expanded={isOpen}
           aria-controls="v2-disparity-details"
-          title="Ver causas socioeconómicas y urbanísticas de esta brecha de precios"
+          title="Ver causas socioeconómicas de esta brecha de precios"
         >
           <span className="v2-disparity-pill">
-            <span className="v2-disparity-delta">Δ +{diffPercent}%</span>
+            <span className="v2-disparity-delta">Δ +{diffPercent} %</span>
             <span className="v2-disparity-label">Disparidad Estructural Detectada</span>
           </span>
           <span className="v2-disparity-arrow">
@@ -94,72 +85,44 @@ export const StructuralDisparityBadge: React.FC<StructuralDisparityBadgeProps> =
           <div className="v2-disparity-header">
             <AlertCircle size={15} className="v2-disparity-alert-icon" />
             <div>
-              <strong>¿Por qué existe una diferencia del {diffPercent}% entre {zoneAName} y {zoneBName}?</strong>
+              <strong>¿Por qué existe una diferencia del {diffPercent} % entre {zoneAName} y {zoneBName}?</strong>
               <p>
-                Este salto no obedece a una anomalía o error algorítmico, sino a factores estructurales, socioeconómicos y urbanísticos contrastados en registros oficiales.
+                Parte de la diferencia puede explicarse por la renta de los hogares y por otros factores del entorno. Esta herramienta solo mide la renta.
               </p>
             </div>
           </div>
 
-          <div className="v2-disparity-factors-grid">
-            {/* Factor 1: Renta media INE */}
+          <div className="v2-disparity-factors-grid" style={{ gridTemplateColumns: '1fr' }}>
             <div className="v2-factor-card">
               <div className="v2-factor-title">
                 <Wallet size={13} aria-hidden="true" />
-                <span>Renta Media Hogar (INE)</span>
+                <span>Renta media del hogar (INE)</span>
               </div>
               <div className="v2-factor-comparison">
                 <div>
                   <small>{zoneAName}</small>
-                  <strong>{new Intl.NumberFormat('es-ES').format(Math.round(incA))} €/año</strong>
+                  <strong>{hasIncomeA ? `${formatGroupedIntEs(incomeA!)} €/año` : '—'}</strong>
                 </div>
                 <span className="v2-factor-vs">vs</span>
                 <div>
                   <small>{zoneBName}</small>
-                  <strong>{new Intl.NumberFormat('es-ES').format(Math.round(incB))} €/año</strong>
+                  <strong>{hasIncomeB ? `${formatGroupedIntEs(incomeB!)} €/año` : '—'}</strong>
                 </div>
               </div>
               <p className="v2-factor-note">
                 {profileId === 'alquiler'
-                  ? 'La capacidad de pago del vecindario explica la presión sobre las rentas mensuales.'
-                  : 'La capacidad patrimonial de la zona explica la prima del valor escriturado.'}
+                  ? 'La capacidad de pago del vecindario influye en la presión sobre las rentas mensuales.'
+                  : 'La capacidad patrimonial de la zona influye en el nivel de precios de compraventa.'}
               </p>
-              <span style={{ fontSize: '10px', color: '#688299', marginTop: 'auto' }}>Fuente: Atlas de Renta de los Hogares (INE)</span>
-            </div>
-
-            {/* Factor 2: Antigüedad y Catastro */}
-            <div className="v2-factor-card">
-              <div className="v2-factor-title">
-                <Building2 size={13} aria-hidden="true" />
-                <span>Antigüedad del Parque (Catastro)</span>
-              </div>
-              <div className="v2-factor-comparison">
-                <div>
-                  <small>{zoneAName}</small>
-                  <strong>~{yearA} (Edif. Protegida)</strong>
-                </div>
-                <span className="v2-factor-vs">vs</span>
-                <div>
-                  <small>{zoneBName}</small>
-                  <strong>~{yearB} (Ensanche)</strong>
-                </div>
-              </div>
-              <p className="v2-factor-note">Edificaciones señoriales y fincas clásicas cotizan con una prima singular.</p>
-              <span style={{ fontSize: '10px', color: '#688299', marginTop: 'auto' }}>Fuente: Sede Electrónica del Catastro</span>
-            </div>
-
-            {/* Factor 3: Barreras Urbanísticas */}
-            <div className="v2-factor-card">
-              <div className="v2-factor-title">
-                <MapPin size={13} aria-hidden="true" />
-                <span>Efecto Frontera y Zonas Verdes</span>
-              </div>
-              <p className="v2-factor-body">
-                Fronteras físicas de alta fricción (parque del Retiro, ejes viarios M-30 o trazados ferroviarios) generan discontinuidades urbanas que limitan la oferta contigua.
-              </p>
-              <span style={{ fontSize: '10px', color: '#688299', marginTop: 'auto' }}>Fuente: Banco de Datos Ayuntamiento de Madrid</span>
+              {(hasIncomeA || hasIncomeB) && (
+                <span style={{ fontSize: '10px', color: '#688299', marginTop: 'auto' }}>Fuente: Atlas de Renta de los Hogares (INE)</span>
+              )}
             </div>
           </div>
+
+          <p style={{ margin: '10px 0 0', fontSize: '12px', color: '#9fb4c7', lineHeight: 1.45 }}>
+            Otros factores que suelen influir, no medidos aquí: antigüedad del parque, barreras urbanas y zonas verdes.
+          </p>
         </div>
       )}
     </div>

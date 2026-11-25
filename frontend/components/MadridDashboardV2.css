@@ -6129,6 +6129,7 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root[data-platform="mobile"] .v2-ranking-table-informative td:last-child {
   width: 46% !important;
 }
+.v2-root[data-platform="mobile"] .v2-ranking-table tbody tr,
 .v2-root[data-platform="mobile"] .v2-ranking-table-informative tbody tr {
   height: auto !important;
   min-height: 44px;
