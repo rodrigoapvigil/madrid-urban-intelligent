@@ -4,6 +4,13 @@
  */
 
 export type VeredictoEstado = 'CARO' | 'EN_LINEA' | 'BARATO';
+export type VeredictoModalidad = 'alquiler' | 'comprar' | 'vender';
+
+export interface VeredictoAjustes {
+  estado: { valor: string; pct: number };
+  ascensor: { valor: string; pct: number };
+  tamano: { superficie_media: number; pct: number };
+}
 
 export interface VeredictoRequest {
   url?: string;
@@ -17,6 +24,21 @@ export interface VeredictoRequest {
 }
 
 export interface VeredictoResponse {
+  veredicto: string;
+  ref_base: number;
+  ajustes: VeredictoAjustes;
+  ref_ajustada: number;
+  rango_bajo: number;
+  rango_alto: number;
+  rango_total_bajo: number;
+  rango_total_alto: number;
+  confianza: 'alta' | 'media' | 'baja' | string;
+  confianza_indirecta: boolean;
+  num_transacciones: number | null;
+  anio_transacciones: number | null;
+  periodo_dato: string;
+  superficie_media: number;
+  media_madrid: number;
   estado: VeredictoEstado;
   precio_m2_inmueble: number;
   precio_m2_barrio_medio: number;

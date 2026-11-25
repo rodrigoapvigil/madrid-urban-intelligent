@@ -11,7 +11,7 @@ import {
   ShieldCheck,
   Sparkles
 } from 'lucide-react';
-import { VeredictoResponse, VeredictoEstado } from '../types/veredicto';
+import { VeredictoResponse, VeredictoEstado, VeredictoModalidad } from '../types/veredicto';
 import './MadridVeredicto.css';
 import { apiFetch, apiUrl } from '../lib/api';
 import { SiteFooter, SiteHeader } from './SiteChrome';
@@ -23,7 +23,8 @@ export default function MadridVeredicto() {
   const tokenParam = searchParams.get('token');
   const sessionIdParam = searchParams.get('session_id');
 
-  const [operacion, setOperacion] = useState<'Venta' | 'Alquiler'>('Venta');
+  const [modalidad, setModalidad] = useState<VeredictoModalidad>('comprar');
+  const operacion: 'Venta' | 'Alquiler' = modalidad === 'alquiler' ? 'Alquiler' : 'Venta';
 
   // Campos del formulario
   const [precioInput, setPrecioInput] = useState('');
@@ -281,22 +282,43 @@ export default function MadridVeredicto() {
           </p>
         </div>
 
-        {/* Selector de Operación (Venta / Alquiler) */}
+        {/* Selector de Modalidad (Alquiler / Comprar / Vender) */}
         <div className="veredicto-segmented-wrap">
-          <div className="veredicto-segmented">
+          <div className="veredicto-segmented" role="tablist" aria-label="Modalidad de análisis">
             <button
               type="button"
-              onClick={() => { setOperacion('Venta'); reevaluarSiHayResultado('Venta', estadoInmueble, ascensor); }}
-              className={`veredicto-segment-btn ${operacion === 'Venta' ? 'active' : ''}`}
+              role="tab"
+              aria-selected={modalidad === 'alquiler'}
+              onClick={() => { setModalidad('alquiler'); reevaluarSiHayResultado('Alquiler', estadoInmueble, ascensor); }}
+              className={`veredicto-segment-btn ${modalidad === 'alquiler' ? 'active' : ''}`}
             >
-              Comprar / Venta
+              Alquiler
             </button>
             <button
               type="button"
-              onClick={() => { setOperacion('Alquiler'); reevaluarSiHayResultado('Alquiler', estadoInmueble, ascensor); }}
-              className={`veredicto-segment-btn ${operacion === 'Alquiler' ? 'active' : ''}`}
+              role="tab"
+              aria-selected={modalidad === 'comprar'}
+              onClick={() => {
+                const prevOp = operacion;
+                setModalidad('comprar');
+                if (prevOp !== 'Venta') reevaluarSiHayResultado('Venta', estadoInmueble, ascensor);
+              }}
+              className={`veredicto-segment-btn ${modalidad === 'comprar' ? 'active' : ''}`}
             >
-              Alquiler
+              Comprar
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={modalidad === 'vender'}
+              onClick={() => {
+                const prevOp = operacion;
+                setModalidad('vender');
+                if (prevOp !== 'Venta') reevaluarSiHayResultado('Venta', estadoInmueble, ascensor);
+              }}
+              className={`veredicto-segment-btn ${modalidad === 'vender' ? 'active' : ''}`}
+            >
+              Vender
             </button>
           </div>
         </div>
@@ -449,80 +471,189 @@ export default function MadridVeredicto() {
           </div>
         </div>
 
-        {/* 3. Resultados del Veredicto */}
-        {resultado && (
+        {/* 3. Resultados del Veredicto (Nueva Ficha Paso 2 + Paso 4) */}
+        {resultado && (() => {
+          const isAlquilerRes = (resultado.operacion || operacion).toLowerCase() === 'alquiler';
+          const unidadTotal = isAlquilerRes ? '€/mes' : '€';
+          const fmtM2 = (v: number) => Number(v).toLocaleString('es-ES', {
+            minimumFractionDigits: isAlquilerRes ? 2 : 0,
+            maximumFractionDigits: isAlquilerRes ? 2 : 0
+          });
+          const fmtPct = (v: number) => `${v > 0 ? '+' : ''}${v.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
+
+          const vNorm = (resultado.veredicto || '').toLowerCase();
+          const tone = vNorm.includes('debajo')
+            ? 'bajo'
+            : vNorm.includes('línea') || vNorm.includes('linea')
+              ? 'linea'
+              : vNorm.includes('muy por encima')
+                ? 'muy_encima'
+                : 'encima';
+
+          const badgeMap: Record<string, string> = {
+            bajo: 'Por debajo de la referencia',
+            linea: 'En línea con la zona',
+            encima: 'Por encima de la referencia',
+            muy_encima: 'Muy por encima'
+          };
+
+          const phraseMap: Record<VeredictoModalidad, Record<string, string>> = {
+            alquiler: {
+              bajo: 'El alquiler indicado está por debajo del rango razonable para esta zona.',
+              linea: 'El alquiler indicado está en línea con lo habitual para esta zona.',
+              encima: 'El alquiler indicado está por encima del rango razonable para esta zona.',
+              muy_encima: 'El alquiler indicado está muy por encima del rango razonable para esta zona.'
+            },
+            comprar: {
+              bajo: 'El precio de compra es barato para pagar respecto a la referencia de la zona.',
+              linea: 'El precio de compra es razonable para pagar, en línea con la zona.',
+              encima: 'El precio de compra es caro para pagar respecto a la referencia de la zona.',
+              muy_encima: 'El precio de compra es muy caro para pagar respecto a la referencia de la zona.'
+            },
+            vender: {
+              bajo: 'El precio de venta es bajo para publicar respecto a la referencia de la zona.',
+              linea: 'El precio de venta es ajustado para publicar, en línea con la zona.',
+              encima: 'El precio de venta es alto para publicar respecto a la referencia de la zona.',
+              muy_encima: 'El precio de venta es muy alto para publicar respecto a la referencia de la zona.'
+            }
+          };
+
+          const mesesEs: Record<string, string> = {
+            '01': 'enero', '02': 'febrero', '03': 'marzo', '04': 'abril',
+            '05': 'mayo', '06': 'junio', '07': 'julio', '08': 'agosto',
+            '09': 'septiembre', '10': 'octubre', '11': 'noviembre', '12': 'diciembre'
+          };
+          const periodoParts = (resultado.periodo_dato || resultado.fecha_cierre_referencia || '').split('-');
+          const periodoTexto = periodoParts.length === 2
+            ? `${mesesEs[periodoParts[1]] || periodoParts[1]} ${periodoParts[0]}`
+            : (resultado.periodo_dato || resultado.fecha_cierre_referencia);
+
+          const minScale = Math.min(resultado.rango_bajo, resultado.media_madrid, resultado.precio_m2_inmueble) * 0.85;
+          const maxScale = Math.max(resultado.rango_alto, resultado.media_madrid, resultado.precio_m2_inmueble) * 1.15;
+          const span = Math.max(1, maxScale - minScale);
+          const pctPos = (val: number) => Math.max(2, Math.min(98, ((val - minScale) / span) * 100));
+
+          const bandLeft = pctPos(resultado.rango_bajo);
+          const bandRight = pctPos(resultado.rango_alto);
+          const bandWidth = Math.max(4, bandRight - bandLeft);
+          const userPos = pctPos(resultado.precio_m2_inmueble);
+          const madridPos = pctPos(resultado.media_madrid);
+          const metrosNum = parseFloat(metrosInput) || 80;
+
+          return (
           <div className="veredicto-results">
-            {/* Tarjeta de Veredicto Principal con Efecto Glass y Gradiente */}
-            <div className={`veredicto-result-hero ${resultado.estado}`}>
-              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', marginBottom: '20px' }}>
+            {/* Nueva Ficha Unificada de Veredicto */}
+            <div className={`veredicto-result-hero veredicto-tone-${tone}`}>
+              {/* 1. Veredicto en una frase + badge de color */}
+              <div className="veredicto-hero-header">
                 <div>
-                  <span
-                    className="veredicto-state-badge"
-                  >
-                    {badgeConfig[resultado.estado].label}
+                  <span className={`veredicto-state-badge tone-${tone}`}>
+                    {badgeMap[tone]}
                   </span>
                   <h2 className="veredicto-hero-title">
-                    {resultado.desviacion_pct_barrio === 0
-                      ? 'En torno a la referencia estimada de la zona'
-                      : `${Math.abs(resultado.desviacion_pct_barrio).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}% ${resultado.desviacion_pct_barrio > 0 ? 'por encima de' : 'por debajo de'} la referencia estimada de la zona`}
+                    {phraseMap[modalidad][tone]}
                   </h2>
-                  <p style={{ margin: '8px 0 0', color: 'color-mix(in srgb, var(--blanco-humo) 65%, transparent)', fontSize: '12px' }}>La referencia resume operaciones de cierre observadas. No es una tasación ni una garantía de precio.</p>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: '11px', color: 'color-mix(in srgb, var(--blanco-humo) 50%, transparent)', margin: 0 }}>Zona analizada</p>
-                  <p style={{ fontSize: '15px', fontWeight: 700, color: 'var(--blanco-humo)', margin: '2px 0 0' }}>
+                <div className="veredicto-zone-meta">
+                  <p className="veredicto-zone-meta-label">Zona analizada</p>
+                  <p className="veredicto-zone-meta-name">
                     {resultado.barrio_nombre === resultado.distrito_nombre ? `${resultado.distrito_nombre} (Distrito)` : `${resultado.barrio_nombre} (${resultado.distrito_nombre})`}
                   </p>
-                  <p style={{ fontSize: '11px', color: 'color-mix(in srgb, var(--blanco-humo) 40%, transparent)', margin: '2px 0 0' }}>Datos de cierre: {resultado.fecha_cierre_referencia}</p>
                 </div>
               </div>
 
-              {/* Grid de 4 Indicadores Clave */}
-              <div className="veredicto-kpi-grid">
-                <div className="veredicto-kpi-tile">
-                  <p className="veredicto-kpi-label">Inmueble analizado</p>
-                  <p className="veredicto-kpi-val">{resultado.precio_m2_inmueble.toLocaleString()} €/m²</p>
-                  <p className="veredicto-kpi-sub" style={{ color: 'color-mix(in srgb, var(--blanco-humo) 40%, transparent)' }}>Precio indicado por m²</p>
+              {/* 2. Barra horizontal comparativa en €/m² */}
+              <div className="veredicto-range-bar-wrap">
+                <div className="veredicto-range-bar-legend">
+                  <span>
+                    <i className="dot-band" /> Rango de la zona: <strong>{fmtM2(resultado.rango_bajo)} – {fmtM2(resultado.rango_alto)} €/m²</strong>
+                  </span>
+                  <span>
+                    <i className="dot-user" /> Tu inmueble: <strong>{fmtM2(resultado.precio_m2_inmueble)} €/m²</strong>
+                  </span>
+                  <span>
+                    <i className="dot-madrid" /> Media Madrid: <strong>{fmtM2(resultado.media_madrid)} €/m²</strong>
+                  </span>
                 </div>
-                <div className="veredicto-kpi-tile">
-                  <p className="veredicto-kpi-label">Referencia de {resultado.barrio_nombre}</p>
-                  <p className="veredicto-kpi-val">{resultado.precio_m2_barrio_medio.toLocaleString()} €/m²</p>
-                  <p style={{ margin: '4px 0 0', fontSize: '12px', fontWeight: 600, color: resultado.desviacion_pct_barrio > 0 ? '#F87171' : '#34D399' }}>
-                    {resultado.desviacion_pct_barrio > 0 ? '+' : ''}{resultado.desviacion_pct_barrio.toFixed(1)}% frente a la referencia
-                  </p>
-                </div>
-                <div className="veredicto-kpi-tile">
-                  <p className="veredicto-kpi-label">Media en Madrid</p>
-                  <p className="veredicto-kpi-val">{resultado.precio_m2_madrid_medio.toLocaleString()} €/m²</p>
-                  <p style={{ margin: '4px 0 0', fontSize: '12px', fontWeight: 600, color: resultado.desviacion_pct_madrid > 0 ? '#F87171' : '#34D399' }}>
-                    {resultado.desviacion_pct_madrid > 0 ? '+' : ''}{resultado.desviacion_pct_madrid.toFixed(1)}% vs Madrid
-                  </p>
-                </div>
-                <div className="veredicto-kpi-tile">
-                  <p className="veredicto-kpi-label">Referencia estimada para la superficie</p>
-                  <p className="veredicto-kpi-val" style={{ color: '#00F0FF' }}>
-                    {resultado.precio_justo_estimado_eur.toLocaleString('es-ES', { maximumFractionDigits: 0 })} {operacion === 'Alquiler' ? '€/mes' : '€'}
-                  </p>
-                  <p className="veredicto-kpi-sub">Cálculo basado en la media observada de la zona</p>
-                </div>
-              </div>
-            </div>
 
-            {/* Argumentos Tácticos para la Negociación */}
-            <div className="veredicto-args-card">
-              <h3 style={{ fontSize: '17px', fontWeight: 700, color: 'var(--blanco-humo)', margin: '0 0 16px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <TrendingUp style={{ width: '18px', height: '18px', color: 'var(--precio-subida)' }} />
-                <span>Cómo leer esta comparación</span>
-              </h3>
-              <div>
-                {resultado.resumen_argumentos.map((arg, idx) => (
-                  <div key={idx} className="veredicto-arg-item">
-                    <span className="veredicto-arg-num">
-                      {idx + 1}
-                    </span>
-                    <span>{arg}</span>
+                <div className="veredicto-range-track" aria-label="Comparativa de precio por metro cuadrado">
+                  <div
+                    className="veredicto-range-band"
+                    style={{ left: `${bandLeft}%`, width: `${bandWidth}%` }}
+                  />
+                  <div
+                    className="veredicto-marker-madrid"
+                    style={{ left: `${madridPos}%` }}
+                    title={`Media Madrid: ${fmtM2(resultado.media_madrid)} €/m²`}
+                  >
+                    <span className="marker-tag madrid">Madrid {fmtM2(resultado.media_madrid)}</span>
                   </div>
-                ))}
+                  <div
+                    className={`veredicto-marker-user tone-${tone}`}
+                    style={{ left: `${userPos}%` }}
+                    title={`Tu inmueble: ${fmtM2(resultado.precio_m2_inmueble)} €/m²`}
+                  >
+                    <span className="marker-tag user">{fmtM2(resultado.precio_m2_inmueble)} €/m²</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Tabla de cálculo */}
+              <div className="veredicto-calc-block">
+                <h3 className="veredicto-calc-heading">Cómo leer esta comparación</h3>
+                <div className="veredicto-calc-table-wrap">
+                  <table className="veredicto-calc-table">
+                    <tbody>
+                      <tr>
+                        <td>Referencia base ({resultado.barrio_nombre})</td>
+                        <td className="num">{fmtM2(resultado.ref_base)} €/m²</td>
+                      </tr>
+                      <tr>
+                        <td>Ajuste por estado ({resultado.ajustes?.estado?.valor === 'a_reformar' ? 'A reformar' : resultado.ajustes?.estado?.valor === 'reformado' ? 'Reformado' : resultado.ajustes?.estado?.valor === 'buen_estado' ? 'Buen estado' : 'No indicado'})</td>
+                        <td className="num">{fmtPct(resultado.ajustes?.estado?.pct ?? 0)}</td>
+                      </tr>
+                      <tr>
+                        <td>Ajuste por ascensor ({resultado.ajustes?.ascensor?.valor === 'si' ? 'Sí' : resultado.ajustes?.ascensor?.valor === 'no' ? 'No' : 'No indicado'})</td>
+                        <td className="num">{fmtPct(resultado.ajustes?.ascensor?.pct ?? 0)}</td>
+                      </tr>
+                      <tr>
+                        <td>Ajuste por tamaño (media zona {resultado.superficie_media} m²)</td>
+                        <td className="num">{fmtPct(resultado.ajustes?.tamano?.pct ?? 0)}</td>
+                      </tr>
+                      <tr className="row-highlight">
+                        <td>Referencia ajustada</td>
+                        <td className="num">{fmtM2(resultado.ref_ajustada)} €/m²</td>
+                      </tr>
+                      <tr>
+                        <td>Rango razonable</td>
+                        <td className="num">{fmtM2(resultado.rango_bajo)} – {fmtM2(resultado.rango_alto)} €/m²</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p className="veredicto-calc-footnote">Ajustes orientativos, no medidos.</p>
+              </div>
+
+              {/* 4. Frase de rango total para la superficie */}
+              <div className="veredicto-total-range-box">
+                Para <strong>{metrosNum.toLocaleString('es-ES')} m²</strong>, lo razonable estaría entre{' '}
+                <strong>{Math.round(resultado.rango_total_bajo).toLocaleString('es-ES')}</strong> y{' '}
+                <strong>{Math.round(resultado.rango_total_alto).toLocaleString('es-ES')} {unidadTotal}</strong>.
+              </div>
+
+              {/* 5. Línea de confianza + 6. Aviso legal */}
+              <div className="veredicto-confidence-footer">
+                <p className="veredicto-confidence-line">
+                  Confianza {resultado.confianza}
+                  {resultado.confianza_indirecta ? ' (confianza estimada)' : ''}:{' '}
+                  {resultado.num_transacciones !== null
+                    ? `${resultado.num_transacciones.toLocaleString('es-ES')} transacciones en ${resultado.barrio_nombre} (${resultado.anio_transacciones})`
+                    : `datos limitados en ${resultado.barrio_nombre}`}.
+                  {' '}Datos de {periodoTexto}. No considera planta, orientación ni calidad concreta.
+                </p>
+                <p className="veredicto-legal-note">
+                  No es una tasación ni una garantía de precio.
+                </p>
               </div>
             </div>
 
@@ -536,19 +667,19 @@ export default function MadridVeredicto() {
                   fontSize: '10px',
                   fontWeight: 700,
                   letterSpacing: '0.05em',
-                  color: 'var(--texto-secundario-azul)',
-                  background: 'color-mix(in srgb, var(--azul-linea) 40%, transparent)',
-                  border: '1px solid color-mix(in srgb, var(--precio-subida) 40%, transparent)',
+                  color: '#00F0FF',
+                  background: 'rgba(0, 240, 255, 0.12)',
+                  border: '1px solid rgba(0, 240, 255, 0.35)',
                   textTransform: 'uppercase',
                   marginBottom: '10px'
                 }}>
                   Informe Gratuito DMIYC · Listo para compartir
                 </span>
-                <h3 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--blanco-humo)', margin: '0 0 8px 0' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: 700, color: '#FFFFFF', margin: '0 0 8px 0' }}>
                   Descarga tu Informe de Negociación DMIYC en PDF
                 </h3>
-                <p style={{ fontSize: '13px', color: 'color-mix(in srgb, var(--blanco-humo) 70%, transparent)', lineHeight: 1.5, margin: 0 }}>
-                  Informe imprimible gratuito de DMIYC con tabla comparativa oficial ({resultado.barrio_nombre}, {resultado.distrito_nombre} y Madrid), gráfica comparativa de €/m² y argumentos estructurados para negociar con el propietario o agencia.
+                <p style={{ fontSize: '13px', color: '#CBD5E1', lineHeight: 1.5, margin: 0 }}>
+                  Informe gratuito en 1 página A4 de DMIYC con el veredicto, tabla de ajustes, rango en €/m², gráfica comparativa y nivel de confianza para compartir con el propietario o agencia.
                 </p>
               </div>
 
@@ -565,7 +696,8 @@ export default function MadridVeredicto() {
               </div>
             </div>
           </div>
-        )}
+          );
+        })()}
       </main>
 
       {/* Footer Apple Dark */}

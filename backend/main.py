@@ -435,9 +435,10 @@ async def evaluar_veredicto(req: VeredictoRequest):
     Soporta evaluacion directa por campos o complementada por URL.
     """
     precio = req.precio
-    metros = req.metros
+    metros = req.metros or req.superficie
     barrio = req.barrio or req.distrito
-    operacion = req.operacion or "Venta"
+    operacion = req.tipo_operacion or req.operacion or "Venta"
+    estado_inm = req.estado_inmueble or req.estado
 
     # Si se aporta URL y faltan datos, intentar extraerlos
     if req.url and (precio is None or metros is None or not barrio):
@@ -465,7 +466,7 @@ async def evaluar_veredicto(req: VeredictoRequest):
                 }
             }
 
-    if precio is None or metros is None or not barrio:
+    if precio is None or metros is None or (not barrio and not req.id_barrio):
         raise HTTPException(
             status_code=400,
             detail="Se requieren precio (> 0), metros (> 0) y barrio o distrito para emitir el veredicto."
@@ -475,10 +476,11 @@ async def evaluar_veredicto(req: VeredictoRequest):
         resultado = evaluar_inmueble(
             precio=precio,
             metros=metros,
-            zona_str=barrio,
+            zona_str=barrio or "",
             operacion=operacion,
-            estado_inmueble=req.estado_inmueble,
+            estado_inmueble=estado_inm,
             ascensor=req.ascensor,
+            id_barrio=req.id_barrio,
         )
         return resultado
     except Exception as e:
