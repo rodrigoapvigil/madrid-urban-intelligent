@@ -4934,7 +4934,12 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root[data-platform="mobile"] .mi-brand__acronym { font-size: 16px !important; letter-spacing: -0.02em; }
 .v2-root[data-platform="mobile"] .mi-header__mobile-action { display: none !important; }
 .v2-root[data-platform="mobile"] .v2-mobile-section-nav { display: none !important; }
-.v2-root[data-platform="mobile"] .v2-viewport { margin-top: 0 !important; padding-top: 0 !important; }
+.v2-root[data-platform="mobile"] .v2-viewport {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
 .v2-root[data-platform="mobile"] .v2-panel { padding-top: 8px !important; }
 .v2-root[data-platform="mobile"] .v2-mobile-filter-bar {
   position: relative !important; inset-block-start: auto !important; z-index: 45 !important;

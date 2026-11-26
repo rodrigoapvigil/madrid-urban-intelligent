@@ -5074,8 +5074,17 @@ const MadridDashboardV2: React.FC = () => {
                                     setMapLevel('neighborhoods');
                                     clearSelection();
                                   }
-                                  const mapSec = document.querySelector('[data-dashboard-section="map"]') || document.querySelector('.v2-map-card');
-                                  mapSec?.scrollIntoView({ behavior: 'smooth' });
+                                  const mapSec = document.querySelector<HTMLElement>('[data-dashboard-section="map"]') || document.querySelector<HTMLElement>('.v2-map-card');
+                                  if (mapSec) {
+                                    if (isMobile) {
+                                      const viewport = document.querySelector<HTMLElement>('.v2-viewport');
+                                      if (viewport && viewport.scrollTop !== 0) viewport.scrollTop = 0;
+                                      const top = mapSec.getBoundingClientRect().top + window.scrollY - 60;
+                                      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+                                    } else {
+                                      mapSec.scrollIntoView({ behavior: 'smooth' });
+                                    }
+                                  }
                                 }}
                               >
                                 <Compass size={13} />
