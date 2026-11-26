@@ -148,7 +148,13 @@ const formatNumber = (value: number, maximumFractionDigits = 0) =>
   new Intl.NumberFormat('es-ES', { maximumFractionDigits }).format(value);
 const formatEuro = (value: number, maximumFractionDigits = 0) => `${formatNumber(value, maximumFractionDigits)} €`;
 const formatZoneOption = (value: string) => value === 'Todos' ? 'Madrid (media)' : formatMadridName(value);
-const normalizeZoneLabel = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es');
+const normalizeZoneLabel = (value: string) => value
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .toLocaleLowerCase('es')
+  .replace(/\s*[-–—]\s*/g, '-')
+  .replace(/\s+/g, ' ')
+  .trim();
 
 const getNiceChartScale = (datasets: Array<Array<number | null>>) => {
   const values = datasets.flat().filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
