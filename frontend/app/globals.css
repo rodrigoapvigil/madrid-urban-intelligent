@@ -13,6 +13,15 @@ html, body {
   overflow-x: clip;
 }
 
+@media (max-width: 768px) {
+  html, body {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden !important;
+    overscroll-behavior-x: none;
+  }
+}
+
 html, body { min-height: 100%; background: #02142B; }
 body {
   position: relative;

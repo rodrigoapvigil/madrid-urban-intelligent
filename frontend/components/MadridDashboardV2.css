@@ -4934,9 +4934,35 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root[data-platform="mobile"] .mi-brand__acronym { font-size: 16px !important; letter-spacing: -0.02em; }
 .v2-root[data-platform="mobile"] .mi-header__mobile-action { display: none !important; }
 .v2-root[data-platform="mobile"] .v2-mobile-section-nav { display: none !important; }
+.v2-root[data-platform="mobile"] {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: clip !important;
+  overscroll-behavior-x: none;
+}
+.v2-root[data-platform="mobile"] .v2-panel:not(.v2-active) {
+  display: none !important;
+}
+.v2-root[data-platform="mobile"] .v2-panel.v2-active {
+  position: relative !important;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow-x: clip !important;
+}
+.v2-root[data-platform="mobile"] .v2-grid-main,
+.v2-root[data-platform="mobile"] .v2-compare-section,
+.v2-root[data-platform="mobile"] .v2-overlay-wrapper,
+.v2-root[data-platform="mobile"] .v2-map-card,
+.v2-root[data-platform="mobile"] .v2-rank-mini-card {
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
 .v2-root[data-platform="mobile"] .v2-viewport {
   margin-top: 0 !important;
   padding-top: 0 !important;
+  height: auto !important;
   overflow-x: clip !important;
   overflow-y: visible !important;
 }
