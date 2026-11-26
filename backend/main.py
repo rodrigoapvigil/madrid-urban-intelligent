@@ -1,11 +1,17 @@
 from fastapi import FastAPI, Query, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional, List
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel, Field
+from typing import Optional, List, Any, Dict
+from collections import deque
 import pandas as pd
 import os
 import sys
 import re
-from typing import Any, Dict
+import time
+import logging
+
+logger = logging.getLogger("uvicorn.error")
 
 # Render puede arrancar `main:app` con `backend/` como directorio de trabajo.
 # Añadir la raíz del repositorio permite resolver tanto `backend.services` como `data/`.
@@ -38,11 +44,66 @@ allowed_origins = default_origins + env_origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_origin_regex=r"^https:\/\/(dmiyc|madrid-urban-intelligent)[a-zA-Z0-9-]*\.vercel\.app$",
+    allow_origin_regex=r"^https:\/\/(dmiyc|madrid-urban-intelligent)\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["Content-Type", "Authorization", "Accept", "X-Requested-With"],
 )
+
+# Rate Limiter en memoria con ventana deslizante y tope de IPs (anti-DoS)
+_RATE_LIMIT_BUCKETS: Dict[str, deque] = {}
+_MAX_RATE_LIMIT_KEYS = 5000
+
+
+def _get_client_ip(request: Request) -> str:
+    forwarded = request.headers.get("X-Forwarded-For", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def _rate_limit_rule(path: str) -> tuple[int, int]:
+    """Devuelve (max_requests, window_seconds) según el coste del endpoint."""
+    if path == "/api/chat":
+        return (20, 60)
+    if path in (
+        "/api/veredicto/extraer-url",
+        "/api/veredicto/evaluar",
+        "/api/veredicto/crear-sesion-pago",
+        "/api/veredicto/descargar-dossier",
+        "/api/veredicto/descargar-dossier-gratis",
+    ):
+        return (25, 60)
+    return (120, 60)
+
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    path = request.url.path
+    if path.startswith("/api/") and path != "/api/health" and request.method != "OPTIONS":
+        max_req, window = _rate_limit_rule(path)
+        client_ip = _get_client_ip(request)
+        bucket_key = f"{client_ip}:{path if max_req < 120 else 'general'}"
+        now = time.monotonic()
+
+        if bucket_key not in _RATE_LIMIT_BUCKETS and len(_RATE_LIMIT_BUCKETS) >= _MAX_RATE_LIMIT_KEYS:
+            oldest_key = next(iter(_RATE_LIMIT_BUCKETS))
+            _RATE_LIMIT_BUCKETS.pop(oldest_key, None)
+
+        timestamps = _RATE_LIMIT_BUCKETS.setdefault(bucket_key, deque())
+        while timestamps and now - timestamps[0] > window:
+            timestamps.popleft()
+
+        if len(timestamps) >= max_req:
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Demasiadas peticiones. Por favor, espera unos segundos."},
+                headers={"Retry-After": str(window)},
+            )
+        timestamps.append(now)
+
+    return await call_next(request)
+
 
 # Middleware de Cabeceras de Seguridad HTTP (Hardening 100/100)
 @app.middleware("http")
@@ -53,6 +114,10 @@ async def security_headers_middleware(request: Request, call_next):
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    if request.url.path.startswith("/api/"):
+        response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+    if os.getenv("ENVIRONMENT", "").lower() == "production" or os.getenv("RENDER", "").lower() == "true":
+        response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return response
 
 @app.get("/")
@@ -228,8 +293,6 @@ def get_zone_liquidity(name: str, level: str = "distrito"):
 
 
 
-from pydantic import BaseModel
-
 try:
     from ambi_rag import get_llm, get_rag_context
     from langchain_classic.memory import ConversationBufferWindowMemory
@@ -240,8 +303,8 @@ except Exception:
     AMBI_AVAILABLE = False
 
 class ChatRequest(BaseModel):
-    message: str
-    session_id: str
+    message: str = Field(..., min_length=1, max_length=2000)
+    session_id: str = Field(..., min_length=1, max_length=128)
 
 class ChatResponse(BaseModel):
     response: str
@@ -405,23 +468,23 @@ def clear_session(session_id: str):
 
 # ── Endpoints de El Veredicto ──────────────────────────────────────────────
 try:
-    from services.veredicto_engine import VeredictoRequest, VeredictoResponse, evaluar_inmueble
-    from services.portal_parser import parse_portal_url, PortalParsedData
-    from services.payment_service import (
-        crear_sesion_checkout, procesar_webhook_stripe, verificar_token_descarga, confirmar_pago_y_generar_token
-    )
-    from services.pdf_generator import generar_dossier_pdf
-except ImportError:
     from backend.services.veredicto_engine import VeredictoRequest, VeredictoResponse, evaluar_inmueble
     from backend.services.portal_parser import parse_portal_url, PortalParsedData
     from backend.services.payment_service import (
         crear_sesion_checkout, procesar_webhook_stripe, verificar_token_descarga, confirmar_pago_y_generar_token
     )
     from backend.services.pdf_generator import generar_dossier_pdf
+except ImportError:
+    from services.veredicto_engine import VeredictoRequest, VeredictoResponse, evaluar_inmueble
+    from services.portal_parser import parse_portal_url, PortalParsedData
+    from services.payment_service import (
+        crear_sesion_checkout, procesar_webhook_stripe, verificar_token_descarga, confirmar_pago_y_generar_token
+    )
+    from services.pdf_generator import generar_dossier_pdf
 
 
 class ExtraerUrlRequest(BaseModel):
-    url: str
+    url: str = Field(..., min_length=8, max_length=2048)
 
 
 @app.post("/api/veredicto/extraer-url", response_model=PortalParsedData)
@@ -493,10 +556,10 @@ async def evaluar_veredicto(req: VeredictoRequest):
 
 
 class CrearSesionPagoPayload(BaseModel):
-    tipo: str = "dossier"  # 'dossier' (4,90 €) o 'suscripcion' (19 €/mes)
+    tipo: str = Field(default="dossier", pattern="^(dossier|suscripcion)$")
     datos_inmueble: Dict[str, Any]
-    success_url: Optional[str] = None
-    cancel_url: Optional[str] = None
+    success_url: Optional[str] = Field(default=None, max_length=512)
+    cancel_url: Optional[str] = Field(default=None, max_length=512)
 
 
 @app.post("/api/veredicto/crear-sesion-pago")
@@ -515,8 +578,11 @@ def crear_sesion_pago_endpoint(payload: CrearSesionPagoPayload):
             cancel_url=cancel_url
         )
         return sesion
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error creando sesion de pago: {str(e)}")
+        logger.error(f"Error creando sesion de pago: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Error interno al iniciar la sesión de pago.")
 
 
 @app.post("/api/veredicto/webhook")
@@ -530,7 +596,8 @@ async def webhook_stripe(request: Request):
         resultado = procesar_webhook_stripe(payload_bytes, sig_header)
         return resultado
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Webhook error: {str(e)}")
+        logger.warning(f"Webhook de Stripe rechazado: {e}")
+        raise HTTPException(status_code=400, detail="Firma o payload de webhook inválido.")
 
 
 @app.get("/api/veredicto/confirmar-sesion")
@@ -573,7 +640,8 @@ def descargar_dossier_pdf_gratis_endpoint(
             ascensor=ascensor,
         )
         pdf_bytes = generar_dossier_pdf(veredicto, precio_total=precio, metros=metros)
-        nombre_archivo = f"DMIYC_Informe_Negociacion_{veredicto.barrio_nombre}.pdf"
+        safe_barrio = re.sub(r"[^A-Za-z0-9_-]", "_", veredicto.barrio_nombre or "Madrid")
+        nombre_archivo = f"DMIYC_Informe_Negociacion_{safe_barrio}.pdf"
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
@@ -583,7 +651,8 @@ def descargar_dossier_pdf_gratis_endpoint(
             }
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error generando dossier: {str(e)}")
+        logger.error(f"Error generando dossier gratuito: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Error interno al generar el informe PDF.")
 
 
 @app.get("/api/veredicto/descargar-dossier")
@@ -612,7 +681,8 @@ def descargar_dossier_pdf_endpoint(token: str = Query(..., description="Token de
         )
         pdf_bytes = generar_dossier_pdf(veredicto, precio_total=precio, metros=metros)
 
-        nombre_archivo = f"Dossier_Negociacion_{veredicto.barrio_nombre}.pdf"
+        safe_barrio = re.sub(r"[^A-Za-z0-9_-]", "_", veredicto.barrio_nombre or "Madrid")
+        nombre_archivo = f"Dossier_Negociacion_{safe_barrio}.pdf"
         return Response(
             content=pdf_bytes,
             media_type="application/pdf",
@@ -622,7 +692,8 @@ def descargar_dossier_pdf_endpoint(token: str = Query(..., description="Token de
             }
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error generando dossier: {str(e)}")
+        logger.error(f"Error generando dossier de pago: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Error interno al generar el dossier PDF.")
 
 
 if __name__ == "__main__":

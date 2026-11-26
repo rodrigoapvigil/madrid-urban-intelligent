@@ -10,12 +10,58 @@ import hashlib
 import base64
 import json
 import time
+import secrets
+import logging
+from urllib.parse import urlparse
 from typing import Optional, Dict, Any, Tuple
 import stripe
 
+logger = logging.getLogger("uvicorn.error")
+
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
-DOWNLOAD_TOKEN_SECRET = os.getenv("DOWNLOAD_TOKEN_SECRET", "mui_token_secret_salt_2026")
+_EPHEMERAL_TOKEN_SECRET = secrets.token_urlsafe(32)
+if not os.getenv("DOWNLOAD_TOKEN_SECRET"):
+    logger.warning("DOWNLOAD_TOKEN_SECRET no configurado; usando secreto efímero en memoria.")
+
+
+def _is_production() -> bool:
+    return (
+        os.getenv("ENVIRONMENT", "").lower() == "production"
+        or os.getenv("RENDER", "").lower() == "true"
+    )
+
+
+def _get_download_token_secret() -> str:
+    return os.getenv("DOWNLOAD_TOKEN_SECRET", "").strip() or _EPHEMERAL_TOKEN_SECRET
+
+
+def validar_redirect_url(url: str) -> bool:
+    """Valida que la URL de retorno pertenezca a un origen autorizado (anti Open Redirect)."""
+    if not url or not isinstance(url, str):
+        return False
+    try:
+        parsed = urlparse(url)
+    except Exception:
+        return False
+    if parsed.scheme not in ("http", "https") or not parsed.netloc:
+        return False
+
+    origin = f"{parsed.scheme}://{parsed.netloc}".lower()
+    allowed = {
+        "https://dmiyc.com",
+        "https://www.dmiyc.com",
+        "https://madrid-urban-intelligent.vercel.app",
+    }
+    if not _is_production():
+        allowed.update({"http://localhost:3000", "http://127.0.0.1:3000"})
+
+    for extra in os.getenv("ALLOWED_ORIGINS", "").split(","):
+        extra_clean = extra.strip().rstrip("/").lower()
+        if extra_clean:
+            allowed.add(extra_clean)
+
+    return origin in allowed
 
 if STRIPE_SECRET_KEY:
     stripe.api_key = STRIPE_SECRET_KEY
@@ -58,7 +104,7 @@ def generar_token_descarga(datos_inmueble: Dict[str, Any], expira_en_segundos: i
     payload_json = json.dumps(payload, separators=(',', ':'), sort_keys=True).encode("utf-8")
     b64_payload = base64.urlsafe_b64encode(payload_json).decode("utf-8").rstrip("=")
     firma = hmac.new(
-        DOWNLOAD_TOKEN_SECRET.encode("utf-8"),
+        _get_download_token_secret().encode("utf-8"),
         b64_payload.encode("utf-8"),
         hashlib.sha256
     ).hexdigest()
@@ -89,7 +135,7 @@ def verificar_token_descarga(token: str) -> Optional[Dict[str, Any]]:
         try:
             b64_payload, signature = token.rsplit(".", 1)
             expected_sig = hmac.new(
-                DOWNLOAD_TOKEN_SECRET.encode("utf-8"),
+                _get_download_token_secret().encode("utf-8"),
                 b64_payload.encode("utf-8"),
                 hashlib.sha256
             ).hexdigest()[:32]
@@ -134,6 +180,9 @@ def crear_sesion_checkout(
     Si STRIPE_SECRET_KEY no esta configurada (entorno de pruebas local o CI),
     opera en modo simulacion seguro.
     """
+    if not validar_redirect_url(success_url) or not validar_redirect_url(cancel_url):
+        raise ValueError("URL de retorno no autorizada.")
+
     if not STRIPE_SECRET_KEY:
         token_simulado = generar_token_descarga(datos_inmueble)
         simulated_url = f"{success_url}?session_id=sim_test_{token_simulado}&token={token_simulado}"
@@ -206,17 +255,15 @@ def confirmar_pago_y_generar_token(session_id: str) -> Tuple[Optional[str], Opti
     if not session_id:
         return None, None, "missing_session"
 
-    # Soporte para modo simulacion exclusivamente con prefijo sim_test_
+    # Soporte para modo simulacion exclusivamente fuera de produccion y sin Stripe real
     if session_id.startswith("sim_test_"):
-        token_sim = session_id.replace("sim_test_", "")
-        datos = verificar_token_descarga(token_sim) or {
-            "precio": 350000,
-            "metros": 80,
-            "barrio": "Goya",
-            "operacion": "Venta"
-        }
-        token = token_sim if ("." in token_sim or token_sim in _TOKEN_STORE) else generar_token_descarga(datos)
-        return token, datos, "paid"
+        if STRIPE_SECRET_KEY or _is_production():
+            return None, None, "simulation_disabled"
+        token_sim = session_id.removeprefix("sim_test_")
+        datos = verificar_token_descarga(token_sim)
+        if not datos:
+            return None, None, "invalid_simulation_token"
+        return token_sim, datos, "paid"
 
     if not STRIPE_SECRET_KEY:
         return None, None, "stripe_not_configured"
@@ -245,6 +292,8 @@ def procesar_webhook_stripe(payload_bytes: bytes, sig_header: str) -> Dict[str, 
     la sesion pagada cuando corresponde.
     """
     if not STRIPE_WEBHOOK_SECRET:
+        if _is_production() or STRIPE_SECRET_KEY:
+            raise ValueError("STRIPE_WEBHOOK_SECRET no configurado para verificar la firma.")
         event = json.loads(payload_bytes.decode("utf-8"))
     else:
         event = stripe.Webhook.construct_event(

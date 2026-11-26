@@ -267,6 +267,19 @@ async def parse_portal_url(url: str, timeout_sec: float = 10.0, max_redirects: i
                         error_mensaje=f"No fue posible acceder a la página del anuncio (código {resp.status_code})."
                     )
 
+                max_bytes = 2 * 1024 * 1024  # 2 MB máximo (anti-DoS por respuesta masiva)
+                content_length = resp.headers.get("Content-Length")
+                if content_length and content_length.isdigit() and int(content_length) > max_bytes:
+                    return PortalParsedData(
+                        requiere_manual=True,
+                        error_mensaje="La página del anuncio supera el tamaño máximo permitido."
+                    )
+                if len(resp.content) > max_bytes:
+                    return PortalParsedData(
+                        requiere_manual=True,
+                        error_mensaje="La página del anuncio supera el tamaño máximo permitido."
+                    )
+
                 return parse_html_content(resp.text, url=current_url)
 
         except httpx.TimeoutException:
