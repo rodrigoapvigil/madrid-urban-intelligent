@@ -232,14 +232,22 @@ export const DilemaVenderAlquilar: React.FC<DilemaVenderAlquilarProps> = ({
         </div>
 
         <div className="v2-verdict-recommendation">
-          <div className="v2-rec-badge">
-            <CheckCircle size={14} />
-            <span>
-              A {holdingYears} años (neto): Escenario A {formatEuro(scenarioAFiveYears)} · Escenario B {formatEuro(totalValueWithRent)}
-            </span>
+          <div className="v2-rec-badge" style={{ alignItems: 'flex-start' }}>
+            <CheckCircle size={14} style={{ marginTop: 2, flexShrink: 0 }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <span>A {holdingYears} años (neto):</span>
+              <span>Escenario A: {formatEuro(scenarioAFiveYears)}</span>
+              <span>Escenario B: {formatEuro(totalValueWithRent)}</span>
+            </div>
           </div>
-          <small>
-            Rentabilidad bruta alquiler: <strong>{formatDecEs(grossYieldPct, 1)} %</strong> · Rentabilidad neta: <strong>{formatDecEs(netYieldPct, 1)} %</strong> · Orientativo; no es asesoramiento fiscal ni financiero.
+          <small style={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+            <span>
+              Rentabilidad bruta alquiler: <strong>{formatDecEs(grossYieldPct, 1)} %</strong>
+            </span>
+            <span>
+              Rentabilidad neta: <strong>{formatDecEs(netYieldPct, 1)} %</strong>
+            </span>
+            <span>Orientativo; no es asesoramiento fiscal ni financiero.</span>
           </small>
         </div>
       </div>
