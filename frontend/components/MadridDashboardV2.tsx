@@ -729,6 +729,7 @@ const MadridDashboardV2: React.FC = () => {
   const [rankingPreviousValues, setRankingPreviousValues] = useState<Record<string, number>>({});
   const [ventaRentM2, setVentaRentM2] = useState<number>(0);
   const [invCompraM2, setInvCompraM2] = useState<number>(0);
+  const [mobileOverlayInspectIdx, setMobileOverlayInspectIdx] = useState<number | null>(null);
   const [isRankingsLoading, setIsRankingsLoading] = useState(true);
   const [affordabilityData, setAffordabilityData] = useState<any[]>([]);
   const [seasonalTrend, setSeasonalTrend] = useState<any[]>([]);
@@ -2107,6 +2108,11 @@ const MadridDashboardV2: React.FC = () => {
                   }
                 }
               },
+              onClick: (_evt: any, elements: any[]) => {
+                if (isMobile && elements?.length) {
+                  setMobileOverlayInspectIdx(elements[0].index);
+                }
+              },
               plugins: {
                 legend: {
                   display: false,
@@ -2154,7 +2160,7 @@ const MadridDashboardV2: React.FC = () => {
                   }
                 },
                 tooltip: {
-                  enabled: true,
+                  enabled: !isMobile,
                   position: 'nearest',
                   backgroundColor: 'color-mix(in srgb, var(--azul-noche) 95%, transparent)',
                   titleColor: 'var(--blanco-humo)',
@@ -2167,7 +2173,19 @@ const MadridDashboardV2: React.FC = () => {
                   borderWidth: 0.5,
                   borderColor: 'color-mix(in srgb, var(--blanco-humo) 20%, transparent)',
                   displayColors: false,
-                  filter: (item: any) => item.datasetIndex !== 4,
+                  filter: (item: any) => {
+                    if (item.datasetIndex === 4) return false;
+                    const monthNum = item.dataIndex + 1;
+                    if (item.datasetIndex === 1) {
+                      const ptA = effA.find((p: any) => Number(p.mes) === monthNum);
+                      if (ptA && !ptA.is_prediction) return false;
+                    }
+                    if (item.datasetIndex === 3) {
+                      const ptB = effB.find((p: any) => Number(p.mes) === monthNum);
+                      if (ptB && !ptB.is_prediction) return false;
+                    }
+                    return true;
+                  },
                   boxWidth: 10,
                   boxHeight: 10,
                   callbacks: {
@@ -4870,6 +4888,117 @@ const MadridDashboardV2: React.FC = () => {
                             ) : isMobile ? (
                               <>
                                 <div className="v2-chart-wrap large"><canvas id={`v2-overlay-${p.id}`}></canvas></div>
+                                {(() => {
+                                  const activeIdx = mobileOverlayInspectIdx !== null ? mobileOverlayInspectIdx : (selectedMonthIndex >= 0 ? selectedMonthIndex : 10);
+                                  const monthNum = activeIdx + 1;
+                                  const metricCfg = getComparisonMetric(p.id);
+                                  const ptA = Array.isArray(seriesA) ? seriesA.find((d: any) => Number(d.mes) === monthNum) : null;
+                                  const ptB = Array.isArray(seriesB) ? seriesB.find((d: any) => Number(d.mes) === monthNum) : null;
+                                  const ptM = Array.isArray(seriesMadrid) ? seriesMadrid.find((d: any) => Number(d.mes) === monthNum) : null;
+                                  const prevA = activeIdx > 0 && Array.isArray(seriesA) ? seriesA.find((d: any) => Number(d.mes) === monthNum - 1) : null;
+                                  const prevB = activeIdx > 0 && Array.isArray(seriesB) ? seriesB.find((d: any) => Number(d.mes) === monthNum - 1) : null;
+
+                                  const rawA = ptA ? Number(ptA.precio_m2) * metricCfg.multiplier : null;
+                                  const rawB = ptB ? Number(ptB.precio_m2) * metricCfg.multiplier : null;
+                                  const rawM = ptM ? Number(ptM.precio_m2) * metricCfg.multiplier : null;
+                                  const rawPrevA = prevA ? Number(prevA.precio_m2) * metricCfg.multiplier : null;
+                                  const rawPrevB = prevB ? Number(prevB.precio_m2) * metricCfg.multiplier : null;
+
+                                  const decimals = (p.id === 'compra' || p.id === 'venta') ? 0 : metricCfg.decimals;
+                                  const fmtVal = (v: number) => new Intl.NumberFormat('es-ES', {
+                                    minimumFractionDigits: decimals,
+                                    maximumFractionDigits: decimals,
+                                    useGrouping: 'always' as any,
+                                  }).format(decimals === 0 ? Math.round(v) : v);
+
+                                  const renderMiniCard = (
+                                    tag: 'A' | 'B',
+                                    zoneName: string,
+                                    accent: string,
+                                    val: number | null,
+                                    prevVal: number | null,
+                                    isPred: boolean
+                                  ) => {
+                                    const vsMad = val !== null && rawM && rawM > 0 ? ((val - rawM) / rawM) * 100 : null;
+                                    const vsPrev = val !== null && prevVal && prevVal > 0 ? ((val - prevVal) / prevVal) * 100 : null;
+                                    const fmtPct = (pct: number) => `${pct > 0 ? '+' : pct < 0 ? '−' : ''}${Math.abs(pct).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`;
+                                    return (
+                                      <div style={{
+                                        padding: '9px 10px',
+                                        borderRadius: '10px',
+                                        background: 'rgba(255, 255, 255, 0.035)',
+                                        border: '1px solid rgba(186, 204, 214, 0.14)',
+                                        borderLeft: `3px solid ${accent}`,
+                                        minWidth: 0,
+                                      }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px', marginBottom: '4px' }}>
+                                          <strong style={{ fontSize: '11.5px', color: '#ffffff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                            {tag} · {zoneName}
+                                          </strong>
+                                          <span style={{ fontSize: '9.5px', fontWeight: 700, color: isPred ? '#ffd27a' : '#00e676', flexShrink: 0 }}>
+                                            {isPred ? 'Est.' : 'Real'}
+                                          </span>
+                                        </div>
+                                        <div style={{ fontSize: '15px', fontWeight: 800, color: '#ffffff', lineHeight: 1.15 }}>
+                                          {val !== null ? `${fmtVal(val)} ${metricCfg.tooltipUnit}` : '—'}
+                                        </div>
+                                        {val !== null && p.id !== 'inversion' && (
+                                          <div style={{ fontSize: '11px', color: '#b8cddb', marginTop: '2px' }}>
+                                            ~{formatGroupedIntEs(Math.round(val * VIVIENDA_TIPO_M2))} {p.id === 'alquiler' ? '€/mes' : '€'} · 70 m²
+                                          </div>
+                                        )}
+                                        {(vsMad !== null || vsPrev !== null) && (
+                                          <div style={{ fontSize: '10.5px', color: '#9fb4c7', marginTop: '4px', lineHeight: 1.35 }}>
+                                            {vsMad !== null && <div>vs. Madrid: <strong style={{ color: '#e2f1fa' }}>{fmtPct(vsMad)}</strong></div>}
+                                            {vsPrev !== null && <div>Mes ant.: <strong style={{ color: '#e2f1fa' }}>{fmtPct(vsPrev)}</strong></div>}
+                                          </div>
+                                        )}
+                                      </div>
+                                    );
+                                  };
+
+                                  const diffAB = rawA !== null && rawB !== null ? rawA - rawB : null;
+                                  const diffPctAB = diffAB !== null && rawB && rawB > 0 ? (diffAB / rawB) * 100 : null;
+
+                                  return (
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px', marginBottom: '10px' }}>
+                                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: '#9fb4c7' }}>
+                                        <strong style={{ color: '#eaf5ff', fontSize: '12px' }}>{MONTHS_ES[activeIdx]} {selectedYear}</strong>
+                                        <span>Toca un mes en la gráfica</span>
+                                      </div>
+                                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '8px' }}>
+                                        {renderMiniCard('A', formatZoneOption(selectedZoneA), COMPARISON_COLORS.zoneA, rawA, rawPrevA, Boolean(ptA?.is_prediction))}
+                                        {renderMiniCard('B', formatZoneOption(selectedZoneB), COMPARISON_COLORS.zoneB, rawB, rawPrevB, Boolean(ptB?.is_prediction))}
+                                      </div>
+                                      {(rawM !== null || diffAB !== null) && (
+                                        <div style={{
+                                          display: 'flex',
+                                          flexWrap: 'wrap',
+                                          alignItems: 'center',
+                                          justifyContent: 'space-between',
+                                          gap: '6px 12px',
+                                          padding: '8px 10px',
+                                          borderRadius: '10px',
+                                          background: 'rgba(255, 255, 255, 0.03)',
+                                          border: '1px solid rgba(186, 204, 214, 0.14)',
+                                          fontSize: '11.5px',
+                                          color: '#cfe0ee',
+                                        }}>
+                                          {rawM !== null && (
+                                            <span>Media Madrid: <strong style={{ color: '#ffffff' }}>{fmtVal(rawM)} {metricCfg.tooltipUnit}</strong></span>
+                                          )}
+                                          {diffAB !== null && diffPctAB !== null && (
+                                            <span>
+                                              Dif. A–B: <strong style={{ color: '#00e5ff' }}>
+                                                {diffAB > 0 ? '+' : diffAB < 0 ? '−' : ''}{fmtVal(Math.abs(diffAB))} {metricCfg.tooltipUnit} ({diffPctAB > 0 ? '+' : diffPctAB < 0 ? '−' : ''}{Math.abs(diffPctAB).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %)
+                                              </strong>
+                                            </span>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
                                 <ComparisonSeriesChips chartId={`v2-overlay-${p.id}`} zoneA={comparisonAHasData ? formatZoneOption(selectedZoneA) : ''} zoneB={comparisonBHasData ? formatZoneOption(selectedZoneB) : ''} madridLabel={madridChipLabel} />
                               </>
                             ) : (
