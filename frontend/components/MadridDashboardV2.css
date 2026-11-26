@@ -6205,3 +6205,30 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root[data-platform="mobile"] .v2-sim-accordion-body button {
   font-size: max(12px, 1em);
 }
+
+/* Móvil: permitir que el popover de Rango probable salga sin cortarse ni solapar su cabecera */
+.v2-root[data-platform="mobile"] .v2-rent-hero {
+  overflow: visible !important;
+  position: relative;
+  z-index: 25;
+}
+.v2-root[data-platform="mobile"] .v2-confidence-badge-wrap {
+  position: relative;
+}
+.v2-root[data-platform="mobile"] .v2-confidence-tooltip {
+  left: 0 !important;
+  right: auto !important;
+  width: min(320px, calc(100vw - 48px)) !important;
+  max-width: calc(100vw - 48px) !important;
+  z-index: 150 !important;
+  box-sizing: border-box;
+}
+.v2-root[data-platform="mobile"] .v2-confidence-tooltip__header {
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 2px !important;
+}
+.v2-root[data-platform="mobile"] .v2-confidence-tooltip__range {
+  grid-template-columns: 1fr !important;
+  gap: 6px !important;
+}

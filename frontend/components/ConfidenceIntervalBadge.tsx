@@ -45,8 +45,10 @@ export const ConfidenceIntervalBadge: React.FC<ConfidenceIntervalBadgeProps> = (
       <div
         className="v2-confidence-badge"
         tabIndex={0}
-        role="note"
+        role="button"
+        aria-expanded={showTooltip}
         aria-label={`Rango probable: ${lowVal} a ${highVal} ${unit}. Rango de incertidumbre del ${confidencePercent} % (se amplía con el horizonte de proyección)`}
+        onClick={() => setShowTooltip(prev => !prev)}
         style={{ cursor: 'pointer' }}
       >
         <span
@@ -99,7 +101,7 @@ export const ConfidenceIntervalBadge: React.FC<ConfidenceIntervalBadgeProps> = (
             </div>
             <div className="v2-range-box v2-range-box--central">
               <small>Valor Esperado</small>
-              <strong>{centralValue.toFixed(2).replace('.', ',')} {unit}</strong>
+              <strong>{fmt(centralValue)} {unit}</strong>
             </div>
             <div className="v2-range-box">
               <small>Límite Superior</small>

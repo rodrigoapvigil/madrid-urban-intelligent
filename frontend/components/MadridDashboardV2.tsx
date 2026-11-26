@@ -2873,12 +2873,14 @@ const MadridDashboardV2: React.FC = () => {
                       }}
                     />
                   </div>}
-                  <div className="v2-kpi-context" aria-live="polite">
-                    <div>
-                      <strong>{selectedBarrio !== 'Todos' ? formatZoneOption(selectedBarrio) : selectedDistrict !== 'Todos' ? formatZoneOption(selectedDistrict) : 'Madrid'}</strong>
-                      {!isMobile && selectedDistrict !== 'Todos' && <small>{selectedBarrio !== 'Todos' ? `${formatZoneOption(selectedDistrict)} › ${formatZoneOption(selectedBarrio)}` : `Distrito · ${formatZoneOption(selectedDistrict)}`}</small>}
+                  {!isMobile && (
+                    <div className="v2-kpi-context" aria-live="polite">
+                      <div>
+                        <strong>{selectedBarrio !== 'Todos' ? formatZoneOption(selectedBarrio) : selectedDistrict !== 'Todos' ? formatZoneOption(selectedDistrict) : 'Madrid'}</strong>
+                        {selectedDistrict !== 'Todos' && <small>{selectedBarrio !== 'Todos' ? `${formatZoneOption(selectedDistrict)} › ${formatZoneOption(selectedBarrio)}` : `Distrito · ${formatZoneOption(selectedDistrict)}`}</small>}
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <div className="v2-kpi-scroll-shell">
