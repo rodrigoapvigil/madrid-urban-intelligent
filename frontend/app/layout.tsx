@@ -105,6 +105,7 @@ export default function RootLayout({
                 geo: { '@type': 'GeoCoordinates', latitude: 40.4168, longitude: -3.7038 },
               },
               isAccessibleForFree: true,
+              license: 'https://www.apache.org/licenses/LICENSE-2.0',
               keywords: ['precio vivienda Madrid', 'alquiler Madrid', 'rentabilidad inmobiliaria Madrid', 'barrios de Madrid'],
             },
           ],
