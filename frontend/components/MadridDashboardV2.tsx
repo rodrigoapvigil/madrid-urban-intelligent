@@ -3158,10 +3158,6 @@ const MadridDashboardV2: React.FC = () => {
                             </div>
                           )}
                         </section>
-                        <Link href="/madrid/veredicto" className="v2-mobile-verdict-cta">
-                          <span>¿Es buen precio? Comprueba un anuncio en 10 s</span>
-                          <ArrowUpRight size={15} aria-hidden="true" />
-                        </Link>
                       </div>
                     );
                   })()}
@@ -5232,6 +5228,15 @@ const MadridDashboardV2: React.FC = () => {
                   salePriceM2={Number(kpiData.p_m2) || 0}
                 />
               </section>
+            )}
+
+            {isMobile && (
+              <div style={{ marginTop: '20px' }}>
+                <Link href="/madrid/veredicto" className="v2-mobile-verdict-cta">
+                  <span>¿Es buen precio? Analiza un anuncio</span>
+                  <ArrowUpRight size={15} aria-hidden="true" />
+                </Link>
+              </div>
             )}
             </div>
         ))}
