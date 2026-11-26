@@ -6258,3 +6258,30 @@ body.v2-fullscreen-open footer { display: none !important; }
   grid-template-columns: 1fr !important;
   gap: 6px !important;
 }
+
+/* Móvil: agrandar el número principal de la tarjeta secundaria izquierda y apilar su unidad */
+.v2-root[data-platform="mobile"] .v2-rent-secondary-card:not(.v2-rent-effort) {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.v2-root[data-platform="mobile"] .v2-rent-secondary-card:not(.v2-rent-effort) > strong {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 10px;
+  font-size: clamp(23px, 6.5vw, 34px) !important;
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+  overflow: visible;
+}
+.v2-root[data-platform="mobile"] .v2-rent-secondary-card:not(.v2-rent-effort) > strong small {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #b8cddb;
+  line-height: 1.2;
+}
