@@ -5111,7 +5111,7 @@ const MadridDashboardV2: React.FC = () => {
                     })()}
 
                     {/* Resumen y balance de la comparativa (accesible en ambas vistas) */}
-                    {comparisonAHasData && comparisonBHasData && (p.id === 'alquiler' || (isMobile && (p.id === 'compra' || p.id === 'venta'))) && (() => {
+                    {comparisonAHasData && comparisonBHasData && (p.id === 'alquiler' || (isMobile && (p.id === 'compra' || p.id === 'venta') && Number(kpiDataA.precio_m2) > 100 && Number(kpiDataB.precio_m2) > 100)) && (() => {
                       const priceA = Number(kpiDataA.precio_m2) || 0;
                       const priceB = Number(kpiDataB.precio_m2) || 0;
                       const yieldA = Number(kpiDataA.rentabilidad) || 0;
@@ -5275,13 +5275,16 @@ const MadridDashboardV2: React.FC = () => {
                                     setMapLevel('neighborhoods');
                                     clearSelection();
                                   }
-                                  const mapSec = document.querySelector<HTMLElement>('[data-dashboard-section="map"]') || document.querySelector<HTMLElement>('.v2-map-card');
+                                  const panelRoot = activePanelRef.current || document;
+                                  const mapSec = panelRoot.querySelector<HTMLElement>('[data-dashboard-section="map"]') || panelRoot.querySelector<HTMLElement>('.v2-map-card');
                                   if (mapSec) {
                                     if (isMobile) {
-                                      const viewport = document.querySelector<HTMLElement>('.v2-viewport');
-                                      if (viewport && viewport.scrollTop !== 0) viewport.scrollTop = 0;
-                                      const top = mapSec.getBoundingClientRect().top + window.scrollY - 60;
-                                      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+                                      window.requestAnimationFrame(() => {
+                                        const viewport = document.querySelector<HTMLElement>('.v2-viewport');
+                                        if (viewport && viewport.scrollTop !== 0) viewport.scrollTop = 0;
+                                        const top = mapSec.getBoundingClientRect().top + window.scrollY - 60;
+                                        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+                                      });
                                     } else {
                                       mapSec.scrollIntoView({ behavior: 'smooth' });
                                     }
@@ -5302,6 +5305,8 @@ const MadridDashboardV2: React.FC = () => {
                       const valA = Number(kpiDataA.precio_m2) || 0;
                       const valB = Number(kpiDataB.precio_m2) || 0;
                       if (valA <= 0 || valB <= 0) return null;
+                      if ((p.id === 'compra' || p.id === 'venta') && (valA <= 100 || valB <= 100)) return null;
+                      if (p.id === 'inversion' && (valA > 1 || valB > 1)) return null;
                       const aIsHigher = valA >= valB;
                       const minVal = Math.min(valA, valB);
                       const maxVal = Math.max(valA, valB);
