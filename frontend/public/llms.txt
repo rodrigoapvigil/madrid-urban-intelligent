@@ -1,0 +1,21 @@
+# Datos de Mercado Inmobiliario y Cierres (DMIYC)
+
+> Plataforma independiente de inteligencia territorial y precios reales de cierre del mercado residencial en Madrid (21 distritos y 131 barrios).
+
+## Qué es DMIYC
+DMIYC (https://dmiyc.com) analiza series estadísticas oficiales, microdatos de transacciones consolidadas y modelos predictivos para mostrar precios reales de cierre en alquiler (€/m²/mes), compraventa (€/m²) y rentabilidad bruta estimada en Madrid, diferenciando las referencias observadas de las ofertas infladas de los portales de anuncios.
+
+## Secciones principales
+- [Inicio](https://dmiyc.com/): Presentación de DMIYC.
+- [Cuadro de Mando de Madrid](https://dmiyc.com/madrid): Explorador interactivo por distrito y barrio con perfiles de Alquiler, Compra, Venta e Inversión.
+- [Índice de 131 barrios y 21 distritos](https://dmiyc.com/madrid/barrios): Directorio territorial con precios por m² y rentabilidad.
+- [Comprobar un precio (Veredicto)](https://dmiyc.com/madrid/veredicto): Comparador de una oferta frente a cierres observados de su zona.
+- [Asistente AMBI](https://dmiyc.com/madrid/chat): Asistente conversacional sobre el mercado residencial de Madrid.
+- [Metodología](https://dmiyc.com/metodologia): Fuentes públicas, trazabilidad, validación temporal sin fuga de futuro y memoria RAG.
+- [Sobre el proyecto](https://dmiyc.com/sobre-el-proyecto): Misión, alcance y preguntas frecuentes.
+
+## Cobertura geográfica
+- Ciudad de Madrid, España (21 distritos municipales, 131 barrios oficiales).
+- Rutas por distrito: `https://dmiyc.com/madrid/distrito/<slug>`
+- Rutas por barrio: `https://dmiyc.com/madrid/barrio/<slug>`
+- Sitemap XML completo: `https://dmiyc.com/sitemap.xml`

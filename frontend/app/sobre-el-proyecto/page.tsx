@@ -42,6 +42,22 @@ export default function AboutPage() {
           </section>
 
           <section className="editorial-page__section">
+            <h2>Preguntas Frecuentes sobre DMIYC</h2>
+            <p>
+              <strong>¿En qué se diferencia DMIYC de portales como Idealista o Fotocasa?</strong><br />
+              Los portales de anuncios muestran precios de oferta solicitados por los vendedores o propietarios. DMIYC analiza precios de cierre observados, series estadísticas oficiales y ratios de rentabilidad en los 21 distritos y 131 barrios de Madrid.
+            </p>
+            <p>
+              <strong>¿Cuántas zonas de Madrid cubre la plataforma?</strong><br />
+              DMIYC cubre los 21 distritos municipales y los 131 barrios oficiales de la ciudad de Madrid, tanto en operaciones de alquiler como de compraventa e inversión.
+            </p>
+            <p>
+              <strong>¿Es gratuito consultar los precios por barrio?</strong><br />
+              Sí. El acceso al cuadro de mando interactivo, al índice de barrios y al asistente AMBI es público y gratuito, sin registro previo.
+            </p>
+          </section>
+
+          <section className="editorial-page__section">
             <h2>Acceso Público y Contacto</h2>
             <p>
               La consulta del Cuadro de Mando es pública, libre y gratuita, sin necesidad de registro ni aportación de datos personales. Para sugerencias técnicas o reporte de incidencias:
@@ -59,10 +75,46 @@ export default function AboutPage() {
 
           <div className="editorial-page__actions">
             <Link className="editorial-page__button" href="/madrid">Explorar el cuadro de mando</Link>
+            <Link href="/madrid/barrios">Índice de 131 barrios</Link>
             <Link href="/metodologia">Consultar metodología</Link>
           </div>
         </div>
       </main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: [
+              {
+                '@type': 'Question',
+                name: '¿En qué se diferencia DMIYC de portales como Idealista o Fotocasa?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Los portales de anuncios muestran precios de oferta solicitados por los vendedores. DMIYC analiza precios de cierre observados, series estadísticas oficiales y ratios de rentabilidad en los 21 distritos y 131 barrios de Madrid.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: '¿Cuántas zonas de Madrid cubre DMIYC?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'DMIYC cubre los 21 distritos municipales y los 131 barrios oficiales de Madrid, con métricas de alquiler, compraventa e inversión.',
+                },
+              },
+              {
+                '@type': 'Question',
+                name: '¿Es gratuito consultar los precios por barrio en DMIYC?',
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: 'Sí, la consulta del cuadro de mando interactivo, el índice territorial de barrios y el asistente AMBI es pública y gratuita.',
+                },
+              },
+            ],
+          }).replace(/</g, '\\u003c'),
+        }}
+      />
       <SiteFooter />
     </>
   );
