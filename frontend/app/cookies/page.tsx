@@ -3,7 +3,7 @@ import { SiteFooter, SiteHeader } from '../../components/SiteChrome';
 import '../editorial.css';
 
 export const metadata: Metadata = {
-  title: 'Política de Cookies | Decide Madrid: Invierte Y Compra (DMIYC)',
+  title: 'Política de Cookies | Datos de Mercado Inmobiliario y Cierres (DMIYC)',
   description: 'Información sobre cookies, almacenamiento local y conexiones de terceros en DMIYC.',
   alternates: { canonical: '/cookies' },
 };

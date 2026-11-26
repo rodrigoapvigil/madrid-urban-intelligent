@@ -3,7 +3,7 @@ import { SiteFooter, SiteHeader } from '../../components/SiteChrome';
 import '../editorial.css';
 
 export const metadata: Metadata = {
-  title: 'Aviso Legal | Decide Madrid: Invierte Y Compra (DMIYC)',
+  title: 'Aviso Legal | Datos de Mercado Inmobiliario y Cierres (DMIYC)',
   description: 'Información legal, condiciones de uso y limitación de responsabilidad de DMIYC.',
   alternates: { canonical: '/aviso-legal' },
 };
@@ -18,7 +18,7 @@ export default function LegalPage() {
         <p className="editorial-page__lead">Última actualización: <strong>9 de noviembre de 2026</strong>.</p>
 
         <section className="editorial-page__section"><h2>1. Titular y naturaleza del proyecto</h2>
-          <ul><li><strong>Titular:</strong> Rodrigo Alonzo Peña Vigil, a título personal.</li><li><strong>Proyecto:</strong> Decide Madrid: Invierte Y Compra (DMIYC).</li><li><strong>Dominio:</strong> dmiyc.com.</li><li><strong>Contacto:</strong> <a href="mailto:privacidad@dmiyc.com">privacidad@dmiyc.com</a>.</li></ul>
+          <ul><li><strong>Titular:</strong> Rodrigo Alonzo Peña Vigil, a título personal.</li><li><strong>Proyecto:</strong> Datos de Mercado Inmobiliario y Cierres (DMIYC).</li><li><strong>Dominio:</strong> dmiyc.com.</li><li><strong>Contacto:</strong> <a href="mailto:privacidad@dmiyc.com">privacidad@dmiyc.com</a>.</li></ul>
           <p>DMIYC es un proyecto personal, gratuito y sin ánimo de lucro. Es independiente del Ayuntamiento de Madrid y no es una plataforma municipal.</p>
         </section>
         <section className="editorial-page__section"><h2>2. Objeto y uso permitido</h2>

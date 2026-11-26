@@ -4,8 +4,8 @@ import { SiteFooter, SiteHeader } from '../../components/SiteChrome';
 import '../editorial.css';
 
 export const metadata: Metadata = {
-  title: 'Sobre Decide Madrid: Invierte Y Compra (DMIYC)',
-  description: 'Conoce la misión, arquitectura y metodología de Decide Madrid: Invierte Y Compra, un proyecto independiente de análisis del mercado residencial madrileño.',
+  title: 'Sobre Datos de Mercado Inmobiliario y Cierres (DMIYC)',
+  description: 'Conoce la misión, arquitectura y metodología de Datos de Mercado Inmobiliario y Cierres (DMIYC), un proyecto independiente de análisis del mercado residencial madrileño.',
   alternates: { canonical: '/sobre-el-proyecto' },
 };
 
@@ -18,7 +18,7 @@ export default function AboutPage() {
           <p className="editorial-page__eyebrow">Sobre el proyecto</p>
           <h1>Una lectura objetiva y transparente del mercado de Madrid.</h1>
           <p className="editorial-page__lead">
-            <strong>Decide Madrid: Invierte Y Compra (DMIYC)</strong> es una plataforma analítica y de inteligencia territorial independiente concebida para erradicar las asimetrías de información que sufren los ciudadanos en el mercado inmobiliario madrileño. Integra series históricas oficiales, microdatos de transacciones consolidadas y modelización predictiva de machine learning para ofrecer una visión real de los 21 distritos y 131 barrios de la capital.
+            <strong>Datos de Mercado Inmobiliario y Cierres (DMIYC)</strong> es una plataforma analítica y de inteligencia territorial independiente concebida para erradicar las asimetrías de información que sufren los ciudadanos en el mercado inmobiliario madrileño. Integra series históricas oficiales, microdatos de transacciones consolidadas y modelización predictiva de machine learning para ofrecer una visión real de los 21 distritos y 131 barrios de la capital.
           </p>
 
           <section className="editorial-page__section">

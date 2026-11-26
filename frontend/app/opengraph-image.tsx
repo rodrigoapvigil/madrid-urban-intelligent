@@ -1,7 +1,7 @@
 import { ImageResponse } from 'next/og';
 
 export const runtime = 'edge';
-export const alt = 'Decide Madrid: Invierte Y Compra, precios de vivienda por barrio';
+export const alt = 'Datos de Mercado Inmobiliario y Cierres (DMIYC), precios de vivienda por barrio';
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
 
@@ -39,7 +39,7 @@ export default function OpenGraphImage() {
             backgroundColor: '#FF6B5B',
           }}
         />
-        <span>DECIDE MADRID: INVIERTE Y COMPRA (DMIYC)</span>
+        <span>DATOS DE MERCADO INMOBILIARIO Y CIERRES (DMIYC)</span>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>

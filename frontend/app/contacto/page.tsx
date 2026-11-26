@@ -6,7 +6,7 @@ import BackgroundAurora from '../../components/BackgroundAurora';
 import './contacto.css';
 
 export const metadata: Metadata = {
-  title: 'Contacto | Decide Madrid: Invierte Y Compra (DMIYC)',
+  title: 'Contacto | Datos de Mercado Inmobiliario y Cierres (DMIYC)',
   description: 'Contacta con DMIYC para colaboraciones, prensa, datos, metodología o sugerencias.',
   alternates: { canonical: '/contacto' },
 };

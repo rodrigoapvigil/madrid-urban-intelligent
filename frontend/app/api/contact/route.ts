@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
       message,
       ...(organization ? [`Organización: ${organization}`] : []),
       '',
-      'Origen: formulario de contacto de DMIYC (Decide Madrid: Invierte y Compra).',
+      'Origen: formulario de contacto de DMIYC (Datos de Mercado Inmobiliario y Cierres).',
     ].join('\n');
 
     const response = await fetch(endpointUrl, {
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         to: recipient,
-        fromName: 'DMIYC · Decide Madrid: Invierte y Compra',
+        fromName: 'DMIYC · Datos de Mercado Inmobiliario y Cierres',
         replyTo: email,
         subject,
         text,
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
         reason: contact.reason,
         message,
         privacyAccepted: true,
-        source: 'DMIYC — Decide Madrid: Invierte y Compra',
+        source: 'DMIYC — Datos de Mercado Inmobiliario y Cierres',
       }),
       signal: AbortSignal.timeout(10_000),
       cache: 'no-store',

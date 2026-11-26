@@ -91,13 +91,13 @@ export function SiteHeader({
         )}
         <header className={`mi-header site-header${appearance === 'aurora' ? ' site-header--aurora' : ''}${compactBrand ? ' site-header--compact-brand' : ''}${isScrolled ? ' is-scrolled' : ''}`} role="banner">
         {/* Brand: Logo + Title */}
-        <Link href="/" className="mi-brand site-brand" aria-label={compactBrand ? 'DMIYC, inicio' : 'DMIYC - Decide Madrid: Invierte Y Compra'}>
+        <Link href="/" className="mi-brand site-brand" aria-label={compactBrand ? 'DMIYC, inicio' : 'DMIYC - Datos de Mercado Inmobiliario y Cierres'}>
           <span className="mi-brand__mark">
             <Image src="/dmiyc-logo-glow-transparent.png" alt="DMIYC" width={40} height={40} priority unoptimized />
           </span>
           <span className="mi-brand__text">
             <strong className="mi-brand__acronym">DMIYC</strong>
-            {!compactBrand && !isScrolled && <small className="mi-brand__subtitle">DECIDE MADRID: INVIERTE Y COMPRA</small>}
+            {!compactBrand && !isScrolled && <small className="mi-brand__subtitle">DATOS DE MERCADO INMOBILIARIO Y CIERRES</small>}
           </span>
         </Link>
 
@@ -195,7 +195,7 @@ export function SiteHeader({
               </span>
               <span className="mi-brand__text">
                 <strong className="mi-brand__acronym">DMIYC</strong>
-                {!compactBrand && <small className="mi-brand__subtitle">DECIDE MADRID: INVIERTE Y COMPRA</small>}
+                {!compactBrand && <small className="mi-brand__subtitle">DATOS DE MERCADO INMOBILIARIO Y CIERRES</small>}
               </span>
             </Link>
 

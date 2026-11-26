@@ -16,22 +16,22 @@ const display = Anton({
 export const metadata: Metadata = {
   metadataBase: new URL('https://dmiyc.com'),
   title: {
-    default: 'Decide Madrid: Invierte y Compra | Precios por barrio',
-    template: '%s | Decide Madrid: Invierte Y Compra',
+    default: 'DMIYC · Datos de Mercado Inmobiliario y Cierres | Precios por barrio',
+    template: '%s | DMIYC · Datos de Mercado Inmobiliario y Cierres',
   },
   description: 'Consulta precios de cierre de alquiler, compra e inversión en los 131 barrios de Madrid y compara zonas con referencias estadísticas informativas.',
-  applicationName: 'Decide Madrid: Invierte Y Compra',
+  applicationName: 'Datos de Mercado Inmobiliario y Cierres (DMIYC)',
   icons: { icon: '/icon.png', shortcut: '/icon.png', apple: '/icon.png' },
   robots: { index: true, follow: true },
   openGraph: {
-    type: 'website', locale: 'es_ES', url: 'https://dmiyc.com/', siteName: 'Decide Madrid: Invierte Y Compra',
-    title: 'Decide Madrid: Invierte y Compra | Precios por barrio',
+    type: 'website', locale: 'es_ES', url: 'https://dmiyc.com/', siteName: 'Datos de Mercado Inmobiliario y Cierres (DMIYC)',
+    title: 'DMIYC · Datos de Mercado Inmobiliario y Cierres | Precios por barrio',
     description: 'Precios de cierre oficial y rentabilidad en los 131 barrios de Madrid. Negocia con datos reales, no ofertas infladas.',
-    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Decide Madrid: Invierte Y Compra, precios de vivienda por barrio' }],
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Datos de Mercado Inmobiliario y Cierres (DMIYC), precios de vivienda por barrio' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Decide Madrid: Invierte y Compra | Precios por barrio',
+    title: 'DMIYC · Datos de Mercado Inmobiliario y Cierres | Precios por barrio',
     description: 'Precios de cierre oficial y rentabilidad en 131 barrios de Madrid. Negocia con datos reales.',
     images: ['/opengraph-image'],
   },
@@ -57,7 +57,7 @@ export default function RootLayout({
         {children}
         <PrivacyNotice />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
-          '@context': 'https://schema.org', '@type': 'WebSite', name: 'Decide Madrid: Invierte Y Compra',
+          '@context': 'https://schema.org', '@type': 'WebSite', name: 'Datos de Mercado Inmobiliario y Cierres (DMIYC)',
           url: 'https://dmiyc.com/', inLanguage: 'es',
           description: 'Plataforma de consulta y comparación de precios de alquiler, compra y venta de vivienda por zonas de Madrid.',
         }).replace(/</g, '\\u003c') }} />

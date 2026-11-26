@@ -136,7 +136,7 @@ export default function LoadingScreen({
       <header className="dmiyc-ls__top">
         <div className="dmiyc-ls__brand">
           <Image src="/dmiyc-logo-glow-transparent.png" alt="" width={42} height={42} priority unoptimized />
-          <span className="dmiyc-ls__brand-copy"><b>DMIYC</b><span>DECIDE MADRID: INVIERTE Y COMPRA</span></span>
+          <span className="dmiyc-ls__brand-copy"><b>DMIYC</b><span>DATOS DE MERCADO INMOBILIARIO Y CIERRES</span></span>
         </div>
       </header>
 

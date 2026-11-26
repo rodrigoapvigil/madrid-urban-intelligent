@@ -3,7 +3,7 @@ import { SiteFooter, SiteHeader } from '../../components/SiteChrome';
 import '../editorial.css';
 
 export const metadata: Metadata = {
-  title: 'Política de Privacidad | Decide Madrid: Invierte Y Compra (DMIYC)',
+  title: 'Política de Privacidad | Datos de Mercado Inmobiliario y Cierres (DMIYC)',
   description: 'Información sobre el tratamiento de datos personales y el ejercicio de derechos en DMIYC.',
   alternates: { canonical: '/privacidad' },
 };
@@ -16,7 +16,7 @@ export default function PrivacyPage() {
         <div className="editorial-page__inner">
           <p className="editorial-page__eyebrow">Privacidad y protección de datos</p>
           <h1>Política de Privacidad</h1>
-          <p className="editorial-page__lead">Última actualización: <strong>9 de noviembre de 2026</strong>. Esta política explica qué datos puede tratar <strong>Decide Madrid: Invierte Y Compra (DMIYC)</strong>, un proyecto personal, gratuito e independiente del Ayuntamiento de Madrid.</p>
+          <p className="editorial-page__lead">Última actualización: <strong>9 de noviembre de 2026</strong>. Esta política explica qué datos puede tratar <strong>Datos de Mercado Inmobiliario y Cierres (DMIYC)</strong>, un proyecto personal, gratuito e independiente del Ayuntamiento de Madrid.</p>
 
           <section className="editorial-page__section">
             <h2>1. Responsable del tratamiento</h2>

@@ -284,7 +284,7 @@ export default function MadridLanding() {
             <MadridDataGlobe />
           </div>
           <div className="mi-wrap mi-closing__inner">
-            <p className="mi-kicker">Toma el control con Decide Madrid</p>
+            <p className="mi-kicker">Toma el control con DMIYC</p>
             <h2 id="mi-closing-title">Tu mayor decisión financiera<br/><span>merece datos comprobados.</span></h2>
             <p>Consulta las operaciones de cierre observadas en tu zona y compara precios con una referencia estadística informativa. No es una tasación ni asesoramiento inmobiliario.</p>
             <Link href="/madrid" className="mi-button mi-button--aurora">Entrar al cuadro de mando</Link>
