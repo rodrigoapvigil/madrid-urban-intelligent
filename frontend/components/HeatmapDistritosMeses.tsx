@@ -368,7 +368,7 @@ export const HeatmapDistritosMeses: React.FC<HeatmapDistritosMesesProps> = ({
 
                     // Normalización continua de la celda sobre el rango real
                     const norm = (val - effectiveMin) / (effectiveMax - effectiveMin || 1);
-                    const { bg, text, isBold } = getBlueHeatColor(norm, val, profileId, isMobile);
+                    const { bg, text, isBold } = getBlueHeatColor(norm, val, profileId, true);
 
                     const isEstimated = isEstimatedMonth(year, i);
                     const formatted = formatCellDisplay(val, profileId);

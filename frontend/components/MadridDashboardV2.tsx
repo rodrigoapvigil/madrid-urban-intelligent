@@ -722,6 +722,7 @@ const MadridDashboardV2: React.FC = () => {
   });
   const [rankingPreviousValues, setRankingPreviousValues] = useState<Record<string, number>>({});
   const [ventaRentM2, setVentaRentM2] = useState<number>(0);
+  const [invCompraM2, setInvCompraM2] = useState<number>(0);
   const [isRankingsLoading, setIsRankingsLoading] = useState(true);
   const [affordabilityData, setAffordabilityData] = useState<any[]>([]);
   const [seasonalTrend, setSeasonalTrend] = useState<any[]>([]);
@@ -1380,15 +1381,19 @@ const MadridDashboardV2: React.FC = () => {
   }, [selectedYear, selectedMonth, activeProfile.op, activeProfile.id, selectedZoneB, comparisonZoneB, filtersReady, rejectInvalidRentalSeries, reloadKeyB]);
 
   useEffect(() => {
-    if (!filtersReady || !selectedYear || !selectedMonth || activeProfile.id !== 'venta') return;
+    if (!filtersReady || !selectedYear || !selectedMonth) return;
+    if (activeProfile.id !== 'venta' && activeProfile.id !== 'inversion') return;
     let isCurrent = true;
-    apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=alquiler&district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
+    const opToFetch = activeProfile.id === 'venta' ? 'alquiler' : 'compra';
+    apiFetch(`/kpis?year=${selectedYear}&month=${selectedMonth}&op=${opToFetch}&district=${encodeURIComponent(selectedDistrict)}&barrio=${encodeURIComponent(selectedBarrio)}`)
       .then(r => (r.ok ? r.json() : null))
       .then(data => {
         if (!isCurrent || !data) return;
         const val = Number(data.precio_m2);
-        if (Number.isFinite(val) && val > 0 && val <= 100) {
+        if (activeProfile.id === 'venta' && Number.isFinite(val) && val > 0 && val <= 100) {
           setVentaRentM2(val);
+        } else if (activeProfile.id === 'inversion' && Number.isFinite(val) && val > 100) {
+          setInvCompraM2(val);
         }
       })
       .catch(() => {});
@@ -2447,8 +2452,8 @@ const MadridDashboardV2: React.FC = () => {
                     const idx = context.dataIndex;
                     const p = points[idx];
                     return [
-                      `• Rentabilidad Bruta: ${p.y.toFixed(2)}%`,
-                      `• Esfuerzo Censal: ${p.x.toFixed(1)}%`,
+                      `• Rentabilidad Bruta: ${p.y.toFixed(2).replace('.', ',')} %`,
+                      `• Índice de riesgo: ${p.x.toFixed(1).replace('.', ',')} (10=estable, 90=volátil)`,
                       p.isSelected ? '★ Zona actualmente seleccionada' : ''
                     ].filter(Boolean);
                   }
@@ -2457,11 +2462,11 @@ const MadridDashboardV2: React.FC = () => {
             },
             scales: {
               x: {
-                title: { display: true, text: 'Índice de esfuerzo censal / Riesgo (%)', color: 'rgba(230, 242, 248, 0.86)', font: { size: 10, weight: 'bold' } },
+                title: { display: true, text: 'Índice de riesgo (volatilidad de precios · 10–90)', color: 'rgba(230, 242, 248, 0.86)', font: { size: 10, weight: 'bold' } },
                 border: { color: 'rgba(255, 255, 255, 0.15)' },
                 ticks: {
                   color: 'rgba(230, 242, 248, 0.86)',
-                  callback: (val) => val + '%',
+                  callback: (val) => `${val}`,
                   font: { size: 9, weight: 'bold' }
                 },
                 grid: { color: 'rgba(255, 255, 255, 0.08)', lineWidth: 1 }
@@ -2908,7 +2913,9 @@ const MadridDashboardV2: React.FC = () => {
                     const rentaAnual = kpiData.renta_media || 0;
                     const tipo70Total = (isCompra || isVenta) && Number(kpiData.p_m2) > 0
                       ? Math.round(Number(kpiData.p_m2)) * VIVIENDA_TIPO_M2
-                      : (kpiData.p_vivienda || 0);
+                      : isInversion && invCompraM2 > 0
+                        ? Math.round(invCompraM2) * VIVIENDA_TIPO_M2
+                        : (kpiData.p_vivienda || 0);
                     const aniosRenta = rentaAnual > 0 ? tipo70Total / rentaAnual : 0;
                     const compraStatusText = aniosRenta <= 0 ? 'Sin datos' : aniosRenta < 5 ? 'Asequible' : aniosRenta < 8 ? 'Moderado' : 'Esfuerzo elevado';
                     const compraStatusColor = aniosRenta <= 0 ? '#baccd6' : aniosRenta < 5 ? '#34D399' : aniosRenta < 8 ? '#FBBF24' : '#F87171';
@@ -2952,7 +2959,7 @@ const MadridDashboardV2: React.FC = () => {
                     const secondaryLeftLabel = isAlquiler
                       ? 'Alquiler medio (70 m²)'
                       : isInversion
-                        ? 'Precio de inversión'
+                        ? 'Precio de inversión (70 m²)'
                         : 'Vivienda tipo (70 m²)';
                     const secondaryLeftUnit = isAlquiler ? '€/mes' : '€';
                     const marketStatus = `${kpiData.estado_mercado || 'Estable'}${kpiData.estado_mercado === 'Crecimiento' ? ' (+)' : kpiData.estado_mercado === 'Ajuste' ? ' (-)' : ''}`;
@@ -3589,8 +3596,8 @@ const MadridDashboardV2: React.FC = () => {
                             <div className="v2-sim-accordion-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             <ExpenseYieldSimulator
                               grossYield={Number(kpiData.p_m2) || 0.062}
-                              purchasePrice={Number(kpiData.p_vivienda) || 280000}
-                              monthlyRent={Number(kpiData.p_vivienda) && Number(kpiData.p_m2) ? Math.round((Number(kpiData.p_vivienda) * Number(kpiData.p_m2)) / 12) : 1450}
+                              purchasePrice={(invCompraM2 > 0 ? Math.round(invCompraM2) * VIVIENDA_TIPO_M2 : Number(kpiData.p_vivienda)) || 280000}
+                              monthlyRent={(invCompraM2 > 0 ? Math.round(invCompraM2) * VIVIENDA_TIPO_M2 : Number(kpiData.p_vivienda)) && Number(kpiData.p_m2) ? Math.round(((invCompraM2 > 0 ? Math.round(invCompraM2) * VIVIENDA_TIPO_M2 : Number(kpiData.p_vivienda)) * Number(kpiData.p_m2)) / 12) : 1450}
                               onNetYieldChange={(netY, isNet) => {
                                 setNetYieldValue(netY);
                                 setIsNetYieldActive(isNet);
@@ -3620,13 +3627,13 @@ const MadridDashboardV2: React.FC = () => {
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                   <span>Hipoteca Estimada:</span>
                                   <span style={{ fontWeight: '700', color: '#FFFFFF' }}>
-                                    {new Intl.NumberFormat('es-ES').format(Math.round((kpiData.p_vivienda || 0) * (ltvPercent / 100)))}€
+                                    {new Intl.NumberFormat('es-ES').format(Math.round(((invCompraM2 > 0 ? Math.round(invCompraM2) * VIVIENDA_TIPO_M2 : (kpiData.p_vivienda || 0))) * (ltvPercent / 100)))} €
                                   </span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                   <span>Aportación Comprador:</span>
                                   <span style={{ fontWeight: '700', color: '#FFFFFF' }}>
-                                    {new Intl.NumberFormat('es-ES').format(Math.round((kpiData.p_vivienda || 0) * ((100 - ltvPercent) / 100)))}€
+                                    {new Intl.NumberFormat('es-ES').format(Math.round(((invCompraM2 > 0 ? Math.round(invCompraM2) * VIVIENDA_TIPO_M2 : (kpiData.p_vivienda || 0))) * ((100 - ltvPercent) / 100)))} €
                                   </span>
                                 </div>
                               </div>
@@ -4310,13 +4317,11 @@ const MadridDashboardV2: React.FC = () => {
                         {isMobile ? 'Zonas destacadas (Riesgo vs. Retorno)' : 'Matriz Financiera de Riesgo vs. Retorno (4 Cuadrantes)'}
                       </h3>
                       <span style={{ fontSize: '12px', fontWeight: '500', color: '#BACCD6', marginBottom: isMobile ? '4px' : '8px' }}>
-                        Cruce de rentabilidad bruta anual frente al índice de volatilidad/riesgo de mercado (INE / Notarías)
+                        Cruce de rentabilidad bruta anual frente al índice de riesgo (volatilidad de precios)
                       </span>
-                      {isMobile && (
-                        <span style={{ fontSize: '12px', color: '#9fb4c7', marginBottom: '8px' }}>
-                          Orientativo, no es asesoramiento de inversión.
-                        </span>
-                      )}
+                      <span style={{ fontSize: '12px', color: '#9fb4c7', marginBottom: isMobile ? '4px' : '8px' }}>
+                        Relativo entre distritos de Madrid: 10 = distrito más estable, 90 = más volátil{isMobile ? ' · Orientativo, no es asesoramiento de inversión.' : ''}
+                      </span>
                       {isMobile ? (
                         (() => {
                           const valid = (Array.isArray(riskReturnData) ? riskReturnData : []).filter(d => Number(d.roi) > 0 && Number(d.risk) > 0);
@@ -4700,7 +4705,7 @@ const MadridDashboardV2: React.FC = () => {
                           {isMobile ? riskFormatted : volatilityVal}
                         </div>
                         <div className="v2-zone-kpi-sub">
-                          {isMobile ? 'Escala 0–100 · más alto = más riesgo' : 'Rango de estabilidad inmobiliaria proyectada'}
+                          Relativo entre distritos de Madrid: 10 = distrito más estable, 90 = más volátil
                         </div>
                       </div>
                     );
