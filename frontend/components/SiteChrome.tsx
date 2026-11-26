@@ -325,10 +325,10 @@ export function SiteHeader({
 
               <div className="mi-mobile-drawer__socials">
                 <a
-                  href="https://www.linkedin.com/in/rodrigoalonzopenavigil"
+                  href="https://www.linkedin.com/company/dmiyc"
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Perfil de LinkedIn de Rodrigo Alonso Peña Vigil"
+                  aria-label="Página de LinkedIn de DMIYC"
                   className="mi-mobile-drawer__social-btn"
                 >
                   <Linkedin size={20} />
@@ -377,10 +377,10 @@ export function SiteFooter() {
 
           <div className="auros-footer__socials">
             <a
-              href="https://www.linkedin.com/in/rodrigoalonzopenavigil"
+              href="https://www.linkedin.com/company/dmiyc"
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="Perfil de LinkedIn de Rodrigo Alonso Peña Vigil"
+              aria-label="Página de LinkedIn de DMIYC"
               className="auros-footer__social-btn"
             >
               <Linkedin size={18} />
