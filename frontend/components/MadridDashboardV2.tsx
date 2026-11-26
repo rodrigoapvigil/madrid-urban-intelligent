@@ -4454,36 +4454,38 @@ const MadridDashboardV2: React.FC = () => {
                 </div>
               </div>
 
-                  <StructuralDisparityBadge
-                    zoneAName={formatZoneOption(selectedZoneA)}
-                    zoneBName={formatZoneOption(selectedZoneB)}
-                    priceA={Number(kpiDataA.precio_m2) || 0}
-                    priceB={Number(kpiDataB.precio_m2) || 0}
-                    incomeA={Number(kpiDataA.renta_media) || undefined}
-                    incomeB={Number(kpiDataB.renta_media) || undefined}
-                    profileId={activeProfile.id}
-                    headerRight={!isMobile ? (
-                      <div className="v2-compare-view-switch-wrap">
-                        <span className="v2-compare-view-label">Vista:</span>
-                        <div className="v2-compare-view-switch" role="group" aria-label="Modo de visualización de gráficos">
-                          <button
-                            type="button"
-                            className={`v2-compare-view-btn ${compareGraphView === 'superpuesta' ? 'is-active' : ''}`}
-                            onClick={() => setCompareGraphView('superpuesta')}
-                          >
-                            Superpuesta (Recomendada)
-                          </button>
-                          <button
-                            type="button"
-                            className={`v2-compare-view-btn ${compareGraphView === 'paralela' ? 'is-active' : ''}`}
-                            onClick={() => setCompareGraphView('paralela')}
-                          >
-                            Lado a Lado
-                          </button>
+                  {!isMobile && (
+                    <StructuralDisparityBadge
+                      zoneAName={formatZoneOption(selectedZoneA)}
+                      zoneBName={formatZoneOption(selectedZoneB)}
+                      priceA={Number(kpiDataA.precio_m2) || 0}
+                      priceB={Number(kpiDataB.precio_m2) || 0}
+                      incomeA={Number(kpiDataA.renta_media) || undefined}
+                      incomeB={Number(kpiDataB.renta_media) || undefined}
+                      profileId={activeProfile.id}
+                      headerRight={
+                        <div className="v2-compare-view-switch-wrap">
+                          <span className="v2-compare-view-label">Vista:</span>
+                          <div className="v2-compare-view-switch" role="group" aria-label="Modo de visualización de gráficos">
+                            <button
+                              type="button"
+                              className={`v2-compare-view-btn ${compareGraphView === 'superpuesta' ? 'is-active' : ''}`}
+                              onClick={() => setCompareGraphView('superpuesta')}
+                            >
+                              Superpuesta (Recomendada)
+                            </button>
+                            <button
+                              type="button"
+                              className={`v2-compare-view-btn ${compareGraphView === 'paralela' ? 'is-active' : ''}`}
+                              onClick={() => setCompareGraphView('paralela')}
+                            >
+                              Lado a Lado
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ) : undefined}
-                  />
+                      }
+                    />
+                  )}
 
               {(() => {
                 const renderZoneKpiCard = (target: 'A' | 'B') => {
@@ -5100,6 +5102,58 @@ const MadridDashboardV2: React.FC = () => {
                             </div>
                           </div>
                         </div>
+                      );
+                    })()}
+
+                    {/* Frase comparativa móvil con renta del hogar (4 perfiles, sin bloque desplegable) */}
+                    {isMobile && comparisonAHasData && comparisonBHasData && (() => {
+                      const valA = Number(kpiDataA.precio_m2) || 0;
+                      const valB = Number(kpiDataB.precio_m2) || 0;
+                      if (valA <= 0 || valB <= 0) return null;
+                      const aIsHigher = valA >= valB;
+                      const minVal = Math.min(valA, valB);
+                      const maxVal = Math.max(valA, valB);
+                      const pctGap = minVal > 0 ? ((maxVal - minVal) / minVal) * 100 : 0;
+                      const higherName = aIsHigher ? formatZoneOption(selectedZoneA) : formatZoneOption(selectedZoneB);
+                      const lowerName = aIsHigher ? formatZoneOption(selectedZoneB) : formatZoneOption(selectedZoneA);
+                      const metricText = p.id === 'alquiler'
+                        ? 'alquiler por m²'
+                        : p.id === 'compra'
+                          ? 'precio de compra por m²'
+                          : p.id === 'venta'
+                            ? 'precio de venta por m²'
+                            : 'rentabilidad bruta';
+                      const adjText = p.id === 'inversion' ? 'rentable' : 'cara';
+
+                      if (pctGap < 10) {
+                        return (
+                          <p style={{ margin: '12px 2px 0', color: '#cfe0ee', fontSize: '13px', lineHeight: 1.5 }}>
+                            Las dos zonas tienen un nivel de {metricText} similar.
+                          </p>
+                        );
+                      }
+
+                      const incA = Number(kpiDataA.renta_media) || 0;
+                      const incB = Number(kpiDataB.renta_media) || 0;
+                      const incHigher = aIsHigher ? incA : incB;
+                      const incLower = aIsHigher ? incB : incA;
+                      const higherIsBarrio = aIsHigher ? comparisonZoneA.kind === 'barrio' : comparisonZoneB.kind === 'barrio';
+                      const lowerIsBarrio = aIsHigher ? comparisonZoneB.kind === 'barrio' : comparisonZoneA.kind === 'barrio';
+                      const pctLabel = Math.round(pctGap).toLocaleString('es-ES');
+
+                      let incomeClause = '';
+                      if (incHigher > 0 && incLower > 0) {
+                        const incDiffPct = Math.round((Math.abs(incHigher - incLower) / incLower) * 100).toLocaleString('es-ES');
+                        const incDir = incHigher >= incLower ? 'más' : 'menos';
+                        const higherNote = higherIsBarrio ? ' (renta del distrito)' : '';
+                        const lowerNote = lowerIsBarrio ? ' (renta del distrito)' : '';
+                        incomeClause = ` Los hogares de ${higherName} ingresan de media un ${incDiffPct} % ${incDir} (${formatGroupedIntEs(incHigher)} €${higherNote} frente a ${formatGroupedIntEs(incLower)} €${lowerNote} al año).`;
+                      }
+
+                      return (
+                        <p style={{ margin: '12px 2px 0', color: '#cfe0ee', fontSize: '13px', lineHeight: 1.5 }}>
+                          {higherName} es un {pctLabel} % más {adjText} que {lowerName} en {metricText}.{incomeClause}
+                        </p>
                       );
                     })()}
                   </div>
