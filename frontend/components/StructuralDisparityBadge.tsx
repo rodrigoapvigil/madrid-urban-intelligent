@@ -50,6 +50,8 @@ export const StructuralDisparityBadge: React.FC<StructuralDisparityBadgeProps> =
   // Only display if gap is > 20%
   if (diffPercent < 20) return renderFallbackRight();
 
+  const higherZone = priceA >= priceB ? zoneAName : zoneBName;
+  const lowerZone = priceA < priceB ? zoneAName : zoneBName;
   const hasIncomeA = typeof incomeA === 'number' && Number.isFinite(incomeA) && incomeA > 0;
   const hasIncomeB = typeof incomeB === 'number' && Number.isFinite(incomeB) && incomeB > 0;
 
@@ -85,7 +87,11 @@ export const StructuralDisparityBadge: React.FC<StructuralDisparityBadgeProps> =
           <div className="v2-disparity-header">
             <AlertCircle size={15} className="v2-disparity-alert-icon" />
             <div>
-              <strong>¿Por qué existe una diferencia del {diffPercent} % entre {zoneAName} y {zoneBName}?</strong>
+              <strong>
+                {profileId === 'inversion'
+                  ? `¿Por qué la rentabilidad de ${higherZone} es un ${diffPercent} % mayor que la de ${lowerZone}?`
+                  : `¿Por qué existe una diferencia del ${diffPercent} % entre ${zoneAName} y ${zoneBName}?`}
+              </strong>
               <p>
                 Parte de la diferencia puede explicarse por la renta de los hogares y por otros factores del entorno. Esta herramienta solo mide la renta.
               </p>

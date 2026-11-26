@@ -6183,3 +6183,20 @@ body.v2-fullscreen-open footer { display: none !important; }
 .v2-root[data-platform="mobile"] .v2-map-legend-labels > span {
   white-space: nowrap;
 }
+
+/* Prompt I1 móvil: Amortización apilada y simulador >= 12px */
+.v2-root[data-platform="mobile"] .v2-rent-effort-head--stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+.v2-root[data-platform="mobile"] .v2-rent-effort-head--stacked > strong {
+  font-size: clamp(16px, 4.4vw, 22px);
+  white-space: nowrap;
+}
+.v2-root[data-platform="mobile"] .v2-sim-accordion-body,
+.v2-root[data-platform="mobile"] .v2-sim-accordion-body label,
+.v2-root[data-platform="mobile"] .v2-sim-accordion-body span,
+.v2-root[data-platform="mobile"] .v2-sim-accordion-body button {
+  font-size: max(12px, 1em);
+}

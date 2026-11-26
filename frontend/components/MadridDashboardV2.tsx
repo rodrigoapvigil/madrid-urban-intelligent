@@ -3012,6 +3012,11 @@ const MadridDashboardV2: React.FC = () => {
                             )}
                             <span className="v2-rent-market">{marketStatus}</span>
                           </div>
+                          {isInversion && (
+                            <p style={{ margin: '8px 0 0', fontSize: '12px', color: '#9fb4c7', lineHeight: 1.4 }}>
+                              Orientativo, no es asesoramiento de inversión.
+                            </p>
+                          )}
                         </section>
                         <section className="v2-rent-secondary">
                           <div className="v2-rent-secondary-card">
@@ -3072,7 +3077,7 @@ const MadridDashboardV2: React.FC = () => {
 
                           {isInversion && (
                             <div className="v2-rent-secondary-card v2-rent-effort">
-                              <div className="v2-rent-effort-head">
+                              <div className="v2-rent-effort-head v2-rent-effort-head--stacked">
                                 <span className="v2-rent-eyebrow">Amortización</span>
                                 {isKpiFetching ? <span className="v2-kpi-shimmer v2-kpi-shimmer--chip" /> : <strong style={{ color: activeProfile.color }}>{amortizacionAnios > 0 ? `${amortizacionAnios.toFixed(1).replace('.', ',')} años` : '—'}</strong>}
                               </div>
@@ -4302,9 +4307,14 @@ const MadridDashboardV2: React.FC = () => {
                       <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>
                         {isMobile ? 'Zonas destacadas (Riesgo vs. Retorno)' : 'Matriz Financiera de Riesgo vs. Retorno (4 Cuadrantes)'}
                       </h3>
-                      <span style={{ fontSize: '12px', fontWeight: '500', color: '#BACCD6', marginBottom: '8px' }}>
-                        Cruce de rentabilidad bruta anual frente al índice de esfuerzo censal (INE / Notarías)
+                      <span style={{ fontSize: '12px', fontWeight: '500', color: '#BACCD6', marginBottom: isMobile ? '4px' : '8px' }}>
+                        Cruce de rentabilidad bruta anual frente al índice de volatilidad/riesgo de mercado (INE / Notarías)
                       </span>
+                      {isMobile && (
+                        <span style={{ fontSize: '12px', color: '#9fb4c7', marginBottom: '8px' }}>
+                          Orientativo, no es asesoramiento de inversión.
+                        </span>
+                      )}
                       {isMobile ? (
                         (() => {
                           const valid = (Array.isArray(riskReturnData) ? riskReturnData : []).filter(d => Number(d.roi) > 0 && Number(d.risk) > 0);
@@ -4330,7 +4340,9 @@ const MadridDashboardV2: React.FC = () => {
                                     <strong>{formatMadridName(item.name)}</strong>
                                     <span style={{ color }}>{Number(item.roi).toFixed(2).replace('.', ',')}% bruta</span>
                                   </div>
-                                  <small>{label} · Esfuerzo {Number(item.risk).toFixed(0)} %</small>
+                                  <small title="Índice normalizado 0–100 de volatilidad de precios entre barrios (más alto = más riesgo)">
+                                    {label} · Índice de riesgo {Number(item.risk).toFixed(0)}/100
+                                  </small>
                                 </div>
                               ))}
                             </div>
@@ -4643,6 +4655,18 @@ const MadridDashboardV2: React.FC = () => {
                         : (kpi.rentabilidad * 100).toFixed(2) + ' %')
                       : '—';
                     const volatilityVal = isA ? (volatilityZoneA || 'N/A') : (volatilityZoneB || 'N/A');
+                    const riskNumeric = Number(volatilityVal);
+                    const hasRiskNum = Number.isFinite(riskNumeric) && riskNumeric > 0;
+                    const riskFormatted = hasRiskNum
+                      ? `${riskNumeric.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} /100`
+                      : volatilityVal;
+                    const riskColor = !hasRiskNum
+                      ? '#FFFFFF'
+                      : riskNumeric <= 35
+                        ? '#3DDC97'
+                        : riskNumeric <= 65
+                          ? '#FBBF24'
+                          : '#F87171';
 
                     col1 = (
                       <div className="v2-zone-kpi-col v2-zone-kpi-col--left">
@@ -4654,18 +4678,27 @@ const MadridDashboardV2: React.FC = () => {
                         <div className="v2-zone-kpi-sub">
                           GRM: {grm} · Rent. Bruta: {grossYieldText}
                         </div>
+                        {isMobile && (
+                          <div style={{ fontSize: '12px', color: '#9fb4c7', marginTop: '4px', lineHeight: 1.35 }}>
+                            Neta = bruta menos 15 % de gastos estimados (IBI, comunidad, vacancia). Orientativo.
+                          </div>
+                        )}
                       </div>
                     );
 
                     col2 = (
                       <div className="v2-zone-kpi-col v2-zone-kpi-col--right">
                         <div className="v2-zone-kpi-label-row">
-                          <span className="v2-zone-kpi-label">VOLATILIDAD Y RIESGO</span>
+                          <span className="v2-zone-kpi-label">
+                            {isMobile ? 'ÍNDICE DE RIESGO (0-100)' : 'VOLATILIDAD Y RIESGO'}
+                          </span>
                           <InfoTooltip {...getComparisonKpiInfo('volatilidad', zoneName)} align="right" />
                         </div>
-                        <div className="v2-zone-kpi-value">{volatilityVal}</div>
+                        <div className="v2-zone-kpi-value" style={isMobile ? { color: riskColor } : undefined}>
+                          {isMobile ? riskFormatted : volatilityVal}
+                        </div>
                         <div className="v2-zone-kpi-sub">
-                          Rango de estabilidad inmobiliaria proyectada
+                          {isMobile ? 'Escala 0–100 · más alto = más riesgo' : 'Rango de estabilidad inmobiliaria proyectada'}
                         </div>
                       </div>
                     );

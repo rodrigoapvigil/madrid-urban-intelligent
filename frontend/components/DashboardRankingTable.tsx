@@ -167,7 +167,7 @@ export default function DashboardRankingTable({
             {isDemand
               ? 'Volumen y presión de compraventas notariales'
               : isInvestment
-                ? 'Rendimiento bruto y neto de mercado'
+                ? (isMobile ? 'Rentabilidad bruta anual' : 'Rendimiento bruto y neto de mercado')
                 : profileId === 'alquiler'
                   ? 'Precios oficiales y evolución temporal'
                   : 'Precios de transacción contrastados'}
@@ -349,7 +349,13 @@ export default function DashboardRankingTable({
                     : formatEuro(previous, 0)
                 : null;
               const investmentPct = rawVal > 1 ? rawVal : rawVal * 100;
-              const valueLabel = isDemand ? `${formatGroupedIntEs(rawVal)} trans.` : isInvestment ? `${formatNumber(investmentPct, 1)}%` : price;
+              const valueLabel = isDemand
+                ? `${formatGroupedIntEs(rawVal)} trans.`
+                : isInvestment
+                  ? (isMobile
+                    ? `${investmentPct.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} %`
+                    : `${formatNumber(investmentPct, 1)}%`)
+                  : price;
               const district = level === 'Barrios' ? districtForZone?.(item.name) : undefined;
               const selected = Boolean(highlightedZone && normalize(highlightedZone) === normalize(item.name));
               return (
