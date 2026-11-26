@@ -2182,10 +2182,48 @@ const MadridDashboardV2: React.FC = () => {
                       if (val === null || val === undefined) return null;
                       const isZoneA = context.datasetIndex < 2;
                       const source = isZoneA ? effA : effB;
-                      const point = source.find(item => item.mes === context.dataIndex + 1);
+                      const idx = context.dataIndex;
+                      const point = source.find(item => item.mes === idx + 1);
                       const isEstimate = context.datasetIndex % 2 === 1 || Boolean(point?.is_prediction);
-                      const formatted = new Intl.NumberFormat('es-ES', { minimumFractionDigits: comparisonMetric.decimals, maximumFractionDigits: comparisonMetric.decimals }).format(val);
-                      return `${isZoneA ? 'A' : 'B'} · ${isZoneA ? formatZoneOption(selectedZoneA) : formatZoneOption(selectedZoneB)} · ${isEstimate ? 'Est.' : 'Real'}: ${formatted} ${comparisonMetric.tooltipUnit}`;
+                      const zoneLabel = isZoneA ? formatZoneOption(selectedZoneA) : formatZoneOption(selectedZoneB);
+                      const decimals = isMobile && (activeProfile.id === 'compra' || activeProfile.id === 'venta') ? 0 : comparisonMetric.decimals;
+                      const fmtVal = (v: number) => new Intl.NumberFormat('es-ES', {
+                        minimumFractionDigits: decimals,
+                        maximumFractionDigits: decimals,
+                        useGrouping: 'always' as any,
+                      }).format(decimals === 0 ? Math.round(v) : v);
+
+                      if (!isMobile) {
+                        return `${isZoneA ? 'A' : 'B'} · ${zoneLabel} · ${isEstimate ? 'Est.' : 'Real'}: ${fmtVal(val)} ${comparisonMetric.tooltipUnit}`;
+                      }
+
+                      const lines: string[] = [
+                        `${isZoneA ? 'A' : 'B'} · ${zoneLabel} · ${isEstimate ? 'Est.' : 'Real'}: ${fmtVal(val)} ${comparisonMetric.tooltipUnit}`
+                      ];
+                      if (activeProfile.id !== 'inversion') {
+                        const total70 = Math.round(val * VIVIENDA_TIPO_M2);
+                        const unit70 = activeProfile.id === 'alquiler' ? '€/mes' : '€';
+                        lines.push(`  ~${formatGroupedIntEs(total70)} ${unit70} · 70 m²`);
+                      }
+                      const datasets = context.chart.data.datasets;
+                      const madridVal = datasets[4]?.data?.[idx];
+                      const prevIdx = idx - 1;
+                      const prevVal = prevIdx >= 0
+                        ? (isZoneA ? (datasets[0]?.data?.[prevIdx] ?? datasets[1]?.data?.[prevIdx]) : (datasets[2]?.data?.[prevIdx] ?? datasets[3]?.data?.[prevIdx]))
+                        : null;
+                      const parts: string[] = [];
+                      if (madridVal !== null && madridVal !== undefined && Number(madridVal) > 0) {
+                        const diffMad = ((Number(val) - Number(madridVal)) / Number(madridVal)) * 100;
+                        const signMad = diffMad > 0 ? '+' : diffMad < 0 ? '−' : '';
+                        parts.push(`vs. Madrid: ${signMad}${Math.abs(diffMad).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`);
+                      }
+                      if (prevVal !== null && prevVal !== undefined && Number(prevVal) > 0) {
+                        const diffPrev = ((Number(val) - Number(prevVal)) / Number(prevVal)) * 100;
+                        const signPrev = diffPrev > 0 ? '+' : diffPrev < 0 ? '−' : '';
+                        parts.push(`Mes ant.: ${signPrev}${Math.abs(diffPrev).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} %`);
+                      }
+                      if (parts.length > 0) lines.push(`  ${parts.join(' · ')}`);
+                      return lines;
                     },
                     footer: (items: any[]) => {
                       const index = items[0]?.dataIndex;
@@ -2193,11 +2231,34 @@ const MadridDashboardV2: React.FC = () => {
                       const datasets = items[0].chart.data.datasets;
                       const valueA = datasets[0]?.data[index] ?? datasets[1]?.data[index];
                       const valueB = datasets[2]?.data[index] ?? datasets[3]?.data[index];
-                      if (valueA === null || valueA === undefined || valueB === null || valueB === undefined || !Number(valueB)) return [];
-                      const difference = Number(valueA) - Number(valueB);
-                      const percent = difference / Number(valueB) * 100;
-                      const format = (value: number) => new Intl.NumberFormat('es-ES', { minimumFractionDigits: comparisonMetric.decimals, maximumFractionDigits: comparisonMetric.decimals }).format(value);
-                      return [`Dif. A–B: ${difference > 0 ? '+' : ''}${format(difference)} ${comparisonMetric.tooltipUnit} (${percent > 0 ? '+' : ''}${percent.toFixed(1)}%)`];
+                      const madridVal = datasets[4]?.data?.[index];
+                      const decimals = isMobile && (activeProfile.id === 'compra' || activeProfile.id === 'venta') ? 0 : comparisonMetric.decimals;
+                      const format = (value: number) => new Intl.NumberFormat('es-ES', {
+                        minimumFractionDigits: decimals,
+                        maximumFractionDigits: decimals,
+                        useGrouping: 'always' as any,
+                      }).format(decimals === 0 ? Math.round(value) : value);
+
+                      if (!isMobile) {
+                        if (valueA === null || valueA === undefined || valueB === null || valueB === undefined || !Number(valueB)) return [];
+                        const difference = Number(valueA) - Number(valueB);
+                        const percent = difference / Number(valueB) * 100;
+                        return [`Dif. A–B: ${difference > 0 ? '+' : ''}${format(difference)} ${comparisonMetric.tooltipUnit} (${percent > 0 ? '+' : ''}${percent.toFixed(1)}%)`];
+                      }
+
+                      const out: string[] = [];
+                      if (madridVal !== null && madridVal !== undefined && Number(madridVal) > 0) {
+                        out.push(`Media Madrid: ${format(Number(madridVal))} ${comparisonMetric.tooltipUnit}`);
+                      }
+                      if (valueA !== null && valueA !== undefined && valueB !== null && valueB !== undefined && Number(valueB) > 0) {
+                        const difference = Number(valueA) - Number(valueB);
+                        const percent = (difference / Number(valueB)) * 100;
+                        const sign = difference > 0 ? '+' : difference < 0 ? '−' : '';
+                        const pctSign = percent > 0 ? '+' : percent < 0 ? '−' : '';
+                        const pctStr = Math.abs(percent).toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+                        out.push(`Dif. A–B: ${sign}${format(Math.abs(difference))} ${comparisonMetric.tooltipUnit} (${pctSign}${pctStr} %)`);
+                      }
+                      return out;
                     }
                   }
                 }
